@@ -58,7 +58,7 @@ export const FareBreakdown: React.FC = () => {
     }
   };
 
-  const handleCompletePayment = () => {
+  const handleCompletePayment = async () => {
     if (!passengerInfo.fullName || !passengerInfo.email || !passengerInfo.phone) {
       alert('Please fill in all passenger details before proceeding.');
       return;
@@ -66,21 +66,12 @@ export const FareBreakdown: React.FC = () => {
 
     setIsProcessing(true);
 
-    setTimeout(() => {
-      const booking = createBooking(paymentMethod);
-      setIsProcessing(false);
+    const booking = await createBooking(paymentMethod, insuranceSelected);
+    setIsProcessing(false);
 
-      if (booking) {
-        // Trigger celebration confetti
-        try {
-          confetti({
-            particleCount: 120,
-            spread: 80,
-            origin: { y: 0.6 }
-          });
-        } catch (e) {}
-      }
-    }, 1500);
+    if (!booking) {
+      // Error is surfaced via the global error banner in App.tsx
+    }
   };
 
   return (

@@ -1,8 +1,19 @@
 import { create } from 'zustand';
-import type { BusRoute, Seat, Booking, PassengerDetails, BoardingPoint } from '../types/booking';
-import { MOCK_ROUTES, MOCK_BOOKINGS } from '../mockData/mockData';
+import type { BusRoute, BoardingPoint, Booking, PassengerDetails } from '../types/booking';
+import { routesApi, bookingsApi, seatsApi, validateApi } from '../services/api';
+import confetti from 'canvas-confetti';
 
-export type AppView = 
+// ─── Generate a persistent browser session ID for seat locking ────────────────
+function getSessionId(): string {
+  let id = sessionStorage.getItem('omnibus_session');
+  if (!id) {
+    id = `sess-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    sessionStorage.setItem('omnibus_session', id);
+  }
+  return id;
+}
+
+export type AppView =
   | 'passenger-search'
   | 'seat-selection'
   | 'checkout'
@@ -13,13 +24,21 @@ export type AppView =
   | 'admin-panel';
 
 interface BookingStore {
-  // Navigation & View
+  // Loading & errors
+  isLoading: boolean;
+  error: string | null;
+  setError: (msg: string | null) => void;
+
+  // Navigation
   currentView: AppView;
   setCurrentView: (view: AppView) => void;
 
   // Role switching
   userRole: 'passenger' | 'operator' | 'admin';
   setUserRole: (role: 'passenger' | 'operator' | 'admin') => void;
+
+  // Session ID (for seat locking)
+  sessionId: string;
 
   // Search criteria
   searchOrigin: string;
@@ -31,63 +50,62 @@ interface BookingStore {
   setSoloFemaleOnly: (val: boolean) => void;
   setBusTypeFilter: (val: string) => void;
 
-  // Bus Routes
+  // Bus routes (loaded from API)
   routes: BusRoute[];
+  loadRoutes: () => Promise<void>;
   selectedRoute: BusRoute | null;
   setSelectedRoute: (route: BusRoute | null) => void;
-  
-  // Seat Selection & Concurrency Lock Engine
+  addBusRoute: (newRoute: BusRoute) => void;
+
+  // Seat selection & concurrency
   selectedSeatIds: string[];
-  lockExpirySeconds: number; // Seconds remaining in 8-min lock
+  lockExpirySeconds: number;
   lockActive: boolean;
-  toggleSeatSelection: (seatId: string) => void;
+  toggleSeatSelection: (seatId: string) => Promise<void>;
   clearSeatSelection: () => void;
   tickLockTimer: () => void;
 
-  // Boarding & Drop selection
+  // Boarding / drop
   selectedBoardingPoint: BoardingPoint | null;
   selectedDropPoint: BoardingPoint | null;
   setSelectedBoardingPoint: (bp: BoardingPoint) => void;
   setSelectedDropPoint: (dp: BoardingPoint) => void;
 
-  // Passenger & Promo
+  // Passenger details & promo
   passengerInfo: PassengerDetails;
   setPassengerInfo: (info: Partial<PassengerDetails>) => void;
   appliedPromo: string;
-  discountRate: number; // e.g. 0.1 for 10%
+  discountRate: number;
   applyPromoCode: (code: string) => boolean;
 
-  // Bookings state
+  // Bookings
   bookings: Booking[];
+  loadBookings: () => Promise<void>;
   latestConfirmedBooking: Booking | null;
-  createBooking: (paymentMethod: 'card' | 'upi' | 'netbanking' | 'wallet') => Booking | null;
-  cancelBooking: (pnr: string) => void;
-  validateTicketByPNR: (pnr: string) => { success: boolean; booking?: Booking; message: string };
+  createBooking: (
+    paymentMethod: 'card' | 'upi' | 'netbanking' | 'wallet',
+    insuranceSelected: boolean,
+  ) => Promise<Booking | null>;
+  cancelBooking: (pnr: string) => Promise<void>;
+  validateTicketByPNR: (pnr: string) => Promise<{ success: boolean; booking?: any; message: string }>;
 
-  // Operator Actions
-  addBusRoute: (newRoute: BusRoute) => void;
-
-  // Tracking Target
+  // GPS tracking
   trackingRouteId: string | null;
   setTrackingRouteId: (id: string | null) => void;
 }
 
-// Initial LocalStorage lookup
-const getSavedBookings = (): Booking[] => {
-  try {
-    const saved = localStorage.getItem('omnibus_bookings');
-    return saved ? JSON.parse(saved) : MOCK_BOOKINGS;
-  } catch (e) {
-    return MOCK_BOOKINGS;
-  }
-};
-
 export const useBookingStore = create<BookingStore>((set, get) => ({
+  isLoading: false,
+  error: null,
+  setError: (msg) => set({ error: msg }),
+
   currentView: 'passenger-search',
   setCurrentView: (view) => set({ currentView: view }),
 
   userRole: 'passenger',
   setUserRole: (role) => set({ userRole: role }),
+
+  sessionId: getSessionId(),
 
   searchOrigin: 'New York, NY',
   searchDestination: 'Boston, MA',
@@ -95,61 +113,89 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   soloFemaleOnly: false,
   busTypeFilter: 'all',
 
-  setSearchCriteria: (origin, dest, date) => set({ searchOrigin: origin, searchDestination: dest, searchDate: date }),
+  setSearchCriteria: (origin, dest, date) =>
+    set({ searchOrigin: origin, searchDestination: dest, searchDate: date }),
   setSoloFemaleOnly: (val) => set({ soloFemaleOnly: val }),
   setBusTypeFilter: (val) => set({ busTypeFilter: val }),
 
-  routes: MOCK_ROUTES,
+  routes: [],
+  loadRoutes: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const routes = await routesApi.getAll();
+      set({ routes, isLoading: false });
+    } catch (err: any) {
+      set({ isLoading: false, error: `Failed to load routes: ${err.message}` });
+    }
+  },
   selectedRoute: null,
-  setSelectedRoute: (route) => {
+  setSelectedRoute: (route) =>
     set({
       selectedRoute: route,
       selectedSeatIds: [],
-      selectedBoardingPoint: route ? route.boardingPoints[0] : null,
-      selectedDropPoint: route ? route.dropPoints[0] : null,
-      lockExpirySeconds: 480, // 8 minutes TTL
-      lockActive: false
-    });
-  },
+      selectedBoardingPoint: route?.boardingPoints?.[0] ?? null,
+      selectedDropPoint: route?.dropPoints?.[0] ?? null,
+      lockExpirySeconds: 480,
+      lockActive: false,
+    }),
+  addBusRoute: (newRoute) =>
+    set((state) => ({ routes: [newRoute, ...state.routes] })),
 
   selectedSeatIds: [],
   lockExpirySeconds: 480,
   lockActive: false,
 
-  toggleSeatSelection: (seatId: string) => {
-    const { selectedSeatIds, selectedRoute } = get();
+  toggleSeatSelection: async (seatId: string) => {
+    const { selectedSeatIds, selectedRoute, sessionId } = get();
     if (!selectedRoute) return;
 
-    const seat = selectedRoute.seats.find(s => s.id === seatId);
+    const seat = selectedRoute.seats.find((s) => s.id === seatId);
     if (!seat || seat.status === 'booked') return;
 
     let newSelected: string[];
+
     if (selectedSeatIds.includes(seatId)) {
-      newSelected = selectedSeatIds.filter(id => id !== seatId);
+      // Deselect — unlock on backend
+      newSelected = selectedSeatIds.filter((id) => id !== seatId);
+      seatsApi.unlock({ seatIds: [seatId], sessionId }).catch(() => {});
     } else {
       if (selectedSeatIds.length >= 6) {
-        alert('You can select a maximum of 6 seats per booking.');
+        alert('Maximum 6 seats per booking.');
         return;
       }
+
+      // Try to acquire a server-side seat lock
+      try {
+        await seatsApi.lock({ seatIds: [seatId], routeId: selectedRoute.id, sessionId });
+      } catch (err: any) {
+        alert(err.message || 'This seat was just taken by another user. Please choose a different seat.');
+        return;
+      }
+
       newSelected = [...selectedSeatIds, seatId];
     }
 
     set({
       selectedSeatIds: newSelected,
       lockActive: newSelected.length > 0,
-      lockExpirySeconds: newSelected.length > 0 ? (get().lockExpirySeconds || 480) : 480
+      lockExpirySeconds: newSelected.length > 0 ? 480 : 480,
     });
   },
 
-  clearSeatSelection: () => set({ selectedSeatIds: [], lockActive: false, lockExpirySeconds: 480 }),
+  clearSeatSelection: () => {
+    const { selectedSeatIds, sessionId } = get();
+    if (selectedSeatIds.length > 0) {
+      seatsApi.unlock({ seatIds: selectedSeatIds, sessionId }).catch(() => {});
+    }
+    set({ selectedSeatIds: [], lockActive: false, lockExpirySeconds: 480 });
+  },
 
   tickLockTimer: () => {
     const { lockActive, lockExpirySeconds } = get();
     if (!lockActive) return;
-
     if (lockExpirySeconds <= 1) {
-      set({ selectedSeatIds: [], lockActive: false, lockExpirySeconds: 480 });
-      alert('Seat hold time expired! Please select your seats again.');
+      get().clearSeatSelection();
+      alert('Seat hold expired! Please re-select your seats.');
     } else {
       set({ lockExpirySeconds: lockExpirySeconds - 1 });
     }
@@ -166,183 +212,117 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     phone: '',
     gender: 'female',
     age: 26,
-    isSoloFemale: false
+    isSoloFemale: false,
   },
-  setPassengerInfo: (info) => set((state) => ({ passengerInfo: { ...state.passengerInfo, ...info } })),
+  setPassengerInfo: (info) =>
+    set((state) => ({ passengerInfo: { ...state.passengerInfo, ...info } })),
 
   appliedPromo: '',
   discountRate: 0,
   applyPromoCode: (code: string) => {
-    const cleanCode = code.trim().toUpperCase();
-    if (cleanCode === 'BUS2026') {
+    const clean = code.trim().toUpperCase();
+    if (clean === 'BUS2026') {
       set({ appliedPromo: 'BUS2026', discountRate: 0.15 });
       return true;
-    } else if (cleanCode === 'SAVE10') {
+    }
+    if (clean === 'SAVE10') {
       set({ appliedPromo: 'SAVE10', discountRate: 0.10 });
       return true;
     }
     return false;
   },
 
-  bookings: getSavedBookings(),
+  bookings: [],
+  loadBookings: async () => {
+    try {
+      const bookings = await bookingsApi.getAll();
+      set({ bookings });
+    } catch (err: any) {
+      console.error('Failed to load bookings:', err.message);
+    }
+  },
   latestConfirmedBooking: null,
 
-  createBooking: (paymentMethod) => {
-    const { 
-      selectedRoute, 
-      selectedSeatIds, 
-      selectedBoardingPoint, 
-      selectedDropPoint, 
-      passengerInfo, 
-      discountRate, 
-      appliedPromo,
-      routes,
-      bookings
+  createBooking: async (paymentMethod, insuranceSelected) => {
+    const {
+      selectedRoute, selectedSeatIds, selectedBoardingPoint, selectedDropPoint,
+      passengerInfo, appliedPromo, searchDate, sessionId,
     } = get();
 
     if (!selectedRoute || selectedSeatIds.length === 0 || !selectedBoardingPoint || !selectedDropPoint) {
       return null;
     }
 
-    const selectedSeats = selectedRoute.seats.filter(s => selectedSeatIds.includes(s.id));
-    const baseFare = selectedSeats.reduce((acc, s) => acc + s.price, 0);
-    const taxAmount = Number((baseFare * 0.10).toFixed(2));
-    const insuranceAmount = 1.50;
-    const discountAmount = Number((baseFare * discountRate).toFixed(2));
-    const totalFare = Number((baseFare + taxAmount + insuranceAmount - discountAmount).toFixed(2));
-
-    const pnr = `OMNI-${Math.floor(10000 + Math.random() * 90000)}`;
-    const bookingId = `BK-${Math.floor(100000 + Math.random() * 900000)}`;
-
-    const newBooking: Booking = {
-      id: bookingId,
-      pnr,
-      routeId: selectedRoute.id,
-      operatorName: selectedRoute.operatorName,
-      busNumber: selectedRoute.busNumber,
-      busType: selectedRoute.busType,
-      origin: selectedRoute.origin,
-      destination: selectedRoute.destination,
-      departureDate: get().searchDate || new Date().toISOString().split('T')[0],
-      departureTime: selectedRoute.departureTime,
-      boardingPoint: selectedBoardingPoint,
-      dropPoint: selectedDropPoint,
-      seats: selectedSeats,
-      passenger: passengerInfo,
-      baseFare,
-      taxAmount,
-      insuranceAmount,
-      discountAmount,
-      totalFare,
-      promoCodeApplied: appliedPromo || undefined,
-      paymentMethod,
-      paymentStatus: 'paid',
-      bookingStatus: 'confirmed',
-      qrCodeData: `PNR:${pnr}|PASS:${passengerInfo.fullName}|BUS:${selectedRoute.busNumber}|SEATS:${selectedSeatIds.join(',')}`,
-      createdAt: new Date().toLocaleString()
-    };
-
-    const updatedRoutes = routes.map(r => {
-      if (r.id === selectedRoute.id) {
-        const updatedSeats = r.seats.map(s => {
-          if (selectedSeatIds.includes(s.id)) {
-            return { ...s, status: 'booked' as const };
-          }
-          return s;
-        });
-        return {
-          ...r,
-          seats: updatedSeats,
-          availableSeatsCount: r.availableSeatsCount - selectedSeatIds.length
-        };
-      }
-      return r;
-    });
-
-    const updatedBookings = [newBooking, ...bookings];
+    set({ isLoading: true, error: null });
 
     try {
-      localStorage.setItem('omnibus_bookings', JSON.stringify(updatedBookings));
-    } catch (e) {
-      console.error(e);
+      const newBooking = await bookingsApi.create({
+        routeId: selectedRoute.id,
+        boardingPointId: selectedBoardingPoint.id,
+        dropPointId: selectedDropPoint.id,
+        seatIds: selectedSeatIds,
+        sessionId,
+        passenger: {
+          fullName: passengerInfo.fullName,
+          email: passengerInfo.email,
+          phone: passengerInfo.phone,
+          gender: passengerInfo.gender,
+          age: passengerInfo.age,
+        },
+        paymentMethod,
+        promoCode: appliedPromo || undefined,
+        insuranceSelected,
+        searchDate,
+      });
+
+      // Refresh routes so seat counts update
+      const updatedRoutes = await routesApi.getAll();
+
+      // Confetti
+      try { confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } }); } catch (_) {}
+
+      set({
+        routes: updatedRoutes,
+        bookings: [newBooking, ...get().bookings],
+        latestConfirmedBooking: newBooking,
+        selectedSeatIds: [],
+        lockActive: false,
+        isLoading: false,
+        currentView: 'ticket-confirmation',
+        appliedPromo: '',
+        discountRate: 0,
+      });
+
+      return newBooking;
+    } catch (err: any) {
+      set({ isLoading: false, error: err.message });
+      return null;
     }
-
-    set({
-      routes: updatedRoutes,
-      bookings: updatedBookings,
-      latestConfirmedBooking: newBooking,
-      selectedSeatIds: [],
-      lockActive: false,
-      currentView: 'ticket-confirmation'
-    });
-
-    return newBooking;
   },
 
-  cancelBooking: (pnr) => {
-    const { bookings, routes } = get();
-    const targetBooking = bookings.find(b => b.pnr === pnr);
-    if (!targetBooking) return;
-
-    const updatedBookings = bookings.map(b => {
-      if (b.pnr === pnr) {
-        return { ...b, bookingStatus: 'cancelled' as const, paymentStatus: 'refunded' as const };
-      }
-      return b;
-    });
-
-    const updatedRoutes = routes.map(r => {
-      if (r.id === targetBooking.routeId) {
-        const bookedSeatIds = targetBooking.seats.map(s => s.id);
-        const updatedSeats = r.seats.map(s => {
-          if (bookedSeatIds.includes(s.id)) {
-            return { ...s, status: 'available' as const };
-          }
-          return s;
-        });
-        return {
-          ...r,
-          seats: updatedSeats,
-          availableSeatsCount: r.availableSeatsCount + bookedSeatIds.length
-        };
-      }
-      return r;
-    });
-
+  cancelBooking: async (pnr: string) => {
     try {
-      localStorage.setItem('omnibus_bookings', JSON.stringify(updatedBookings));
-    } catch (e) {}
-
-    set({ bookings: updatedBookings, routes: updatedRoutes });
+      await bookingsApi.cancel(pnr);
+      // Refresh both bookings and routes
+      const [bookings, routes] = await Promise.all([bookingsApi.getAll(), routesApi.getAll()]);
+      set({ bookings, routes });
+    } catch (err: any) {
+      alert(`Cancel failed: ${err.message}`);
+    }
   },
 
-  validateTicketByPNR: (pnr) => {
-    const { bookings } = get();
-    const cleanPnr = pnr.trim().toUpperCase();
-    const booking = bookings.find(b => b.pnr.toUpperCase() === cleanPnr || b.qrCodeData.includes(cleanPnr));
-
-    if (!booking) {
-      return { success: false, message: 'Invalid PNR Code or QR scan! No matching booking found.' };
-    }
-
-    if (booking.bookingStatus === 'cancelled') {
-      return { success: false, booking, message: 'Ticket Cancelled! Refund has been processed.' };
-    }
-
-    if (booking.bookingStatus === 'boarded') {
-      return { success: true, booking, message: 'Passenger already scanned and boarded.' };
-    }
-
-    const updatedBookings = bookings.map(b => b.pnr === booking.pnr ? { ...b, bookingStatus: 'boarded' as const } : b);
+  validateTicketByPNR: async (pnr: string) => {
     try {
-      localStorage.setItem('omnibus_bookings', JSON.stringify(updatedBookings));
-    } catch (e) {}
-
-    set({ bookings: updatedBookings });
-    return { success: true, booking: { ...booking, bookingStatus: 'boarded' }, message: 'Ticket Validated Successfully! Passenger Approved for Boarding.' };
+      const result = await validateApi.validate(pnr);
+      // Refresh bookings to reflect boarded status
+      if (result.success) {
+        bookingsApi.getAll().then((bookings) => set({ bookings })).catch(() => {});
+      }
+      return result;
+    } catch (err: any) {
+      return { success: false, message: err.message };
+    }
   },
-
-  addBusRoute: (newRoute) => set((state) => ({ routes: [newRoute, ...state.routes] })),
 
   trackingRouteId: 'route-101',
   setTrackingRouteId: (id) => set({ trackingRouteId: id, currentView: 'live-tracking' }),

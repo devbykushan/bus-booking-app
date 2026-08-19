@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { QRScannerModal } from './QRScannerModal';
-import type { BusRoute } from '../../types/booking';
+import { routesApi } from '../../services/api';
 import { QrCode, Plus, Users, LayoutGrid, Download } from 'lucide-react';
 
 export const OperatorDashboard: React.FC = () => {
-  const { routes, bookings, addBusRoute } = useBookingStore();
+  const { routes, bookings, addBusRoute, loadRoutes } = useBookingStore();
 
   const [showScanner, setShowScanner] = useState(false);
   const [selectedRouteId, setSelectedRouteId] = useState<string>(routes[0]?.id || '');
@@ -19,50 +19,36 @@ export const OperatorDashboard: React.FC = () => {
   const [newPrice, setNewPrice] = useState(40);
   const [newBusType, setNewBusType] = useState<'AC Sleeper' | 'Luxury Volvo Multi-Axle' | 'Double Decker Sleeper'>('AC Sleeper');
 
-  const selectedRoute = routes.find(r => r.id === selectedRouteId) || routes[0];
-  const manifestBookings = bookings.filter(b => b.routeId === selectedRoute.id);
+  const selectedRoute = routes.find(r => r.id === selectedRouteId) || routes[0] || null;
+  const manifestBookings = bookings.filter(b => b.routeId === selectedRoute?.id);
 
-  const handleCreateRoute = (e: React.FormEvent) => {
+  const handleCreateRoute = async (e: React.FormEvent) => {
     e.preventDefault();
     const newId = `route-${Date.now()}`;
-    const createdRoute: BusRoute = {
-      id: newId,
-      operatorId: 'op-custom',
-      operatorName: newOperatorName,
-      operatorRating: 4.9,
-      busNumber: newBusNumber,
-      busType: newBusType,
-      origin: newOrigin,
-      destination: newDestination,
-      departureTime: newDepTime,
-      arrivalTime: '03:30 PM',
-      duration: '5h 30m',
-      priceStarting: newPrice,
-      availableSeatsCount: 30,
-      totalSeatsCount: 36,
-      hasUpperDeck: newBusType.includes('Double') || newBusType.includes('Sleeper'),
-      amenities: ['Wi-Fi', 'Power Outlet', 'Live GPS'],
-      boardingPoints: [
-        { id: 'bp-new', name: `${newOrigin} Main Station`, time: newDepTime, landmark: 'Platform 1', lat: 40.7128, lng: -74.0060 }
-      ],
-      dropPoints: [
-        { id: 'dp-new', name: `${newDestination} Terminal`, time: '03:30 PM', landmark: 'Gate B', lat: 38.9072, lng: -77.0369 }
-      ],
-      gpsLocation: {
-        lat: 40.7128,
-        lng: -74.0060,
-        speedKmH: 0,
-        currentStopName: 'Origin Terminal',
-        nextStopName: 'En Route',
-        etaMinutes: 330,
-        lastUpdated: 'Just now'
-      },
-      seats: selectedRoute.seats.map(s => ({ ...s, status: 'available' }))
-    };
-
-    addBusRoute(createdRoute);
-    setShowSeatBuilder(false);
-    alert(`Bus Route ${newBusNumber} successfully deployed to live fleet!`);
+    try {
+      await routesApi.create({
+        id: newId,
+        operatorId: 'op-custom',
+        operatorName: newOperatorName,
+        operatorRating: 4.9,
+        busNumber: newBusNumber,
+        busType: newBusType,
+        origin: newOrigin,
+        destination: newDestination,
+        departureTime: newDepTime,
+        arrivalTime: '03:30 PM',
+        duration: '5h 30m',
+        priceStarting: newPrice,
+        hasUpperDeck: newBusType.includes('Double') || newBusType.includes('Sleeper'),
+        amenities: ['Wi-Fi', 'Power Outlet', 'Live GPS'],
+      });
+      // Refresh routes from backend
+      await loadRoutes();
+      setShowSeatBuilder(false);
+      alert(`Bus Route ${newBusNumber} successfully deployed to live fleet!`);
+    } catch (err: any) {
+      alert(`Failed to deploy route: ${err.message}`);
+    }
   };
 
   return (
@@ -179,7 +165,7 @@ export const OperatorDashboard: React.FC = () => {
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Users className="w-5 h-5 text-indigo-400" /> Passenger Trip Manifest
               </h3>
-              <p className="text-xs text-slate-400">{selectedRoute.busNumber} • {selectedRoute.origin} → {selectedRoute.destination}</p>
+              <p className="text-xs text-slate-400">{selectedRoute?.busNumber} • {selectedRoute?.origin} → {selectedRoute?.destination}</p>
             </div>
             <button
               onClick={() => alert('Downloading Passenger Manifest CSV...')}

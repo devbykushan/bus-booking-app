@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:all": "npx -y concurrently -k -n BACKEND,FRONTEND -c cyan,magenta \"cd backend && npm run dev\" \"vite\"",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"

@@ -13,25 +13,28 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ onClose }) => {
   const [scanResult, setScanResult] = useState<{ success: boolean; booking?: any; message: string } | null>(null);
   const [isScanning, setIsScanning] = useState(false);
 
-  const handleValidate = (pnrToTest: string) => {
+  const handleValidate = async (pnrToTest: string) => {
+    if (!pnrToTest.trim()) return;
     setIsScanning(true);
+    setScanResult(null);
 
-    setTimeout(() => {
-      const result = validateTicketByPNR(pnrToTest);
-      setScanResult(result);
-      setIsScanning(false);
+    // Simulate a brief camera scanning delay
+    await new Promise(r => setTimeout(r, 800));
 
-      // Play audio beep sound effect if supported
-      try {
-        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        osc.type = result.success ? 'sine' : 'sawtooth';
-        osc.frequency.setValueAtTime(result.success ? 880 : 300, audioCtx.currentTime);
-        osc.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.2);
-      } catch (e) {}
-    }, 800);
+    const result = await validateTicketByPNR(pnrToTest.trim());
+    setScanResult(result);
+    setIsScanning(false);
+
+    // Audio beep
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      osc.type = result.success ? 'sine' : 'sawtooth';
+      osc.frequency.setValueAtTime(result.success ? 880 : 300, audioCtx.currentTime);
+      osc.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.2);
+    } catch (_) {}
   };
 
   const handleSimulateSampleScan = () => {
@@ -123,10 +126,11 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ onClose }) => {
 
             {scanResult.booking && (
               <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800 space-y-1 text-slate-300">
-                <p><strong>Passenger:</strong> {scanResult.booking.passenger.fullName} ({scanResult.booking.passenger.phone})</p>
-                <p><strong>Seats:</strong> {scanResult.booking.seats.map((s: any) => s.number).join(', ')}</p>
-                <p><strong>Route:</strong> {scanResult.booking.origin} → {scanResult.booking.destination}</p>
-                <p><strong>Boarding Status:</strong> <span className="text-emerald-400 font-bold uppercase">{scanResult.booking.bookingStatus}</span></p>
+                <p><strong>Passenger:</strong> {scanResult.booking.passenger?.fullName} ({scanResult.booking.passenger?.phone})</p>
+                <p><strong>Seats:</strong> {(scanResult.booking.seats as any[])?.map((s: any) => s.number || s).join(', ') || scanResult.booking.seatIds?.join(', ')}</p>
+                <p><strong>Route:</strong> {scanResult.booking.route || `${scanResult.booking.origin} → ${scanResult.booking.destination}`}</p>
+                <p><strong>Boarding:</strong> {scanResult.booking.boardingPoint}</p>
+                <p><strong>Status:</strong> <span className="text-emerald-400 font-bold uppercase">{scanResult.booking.bookingStatus}</span></p>
               </div>
             )}
           </div>
