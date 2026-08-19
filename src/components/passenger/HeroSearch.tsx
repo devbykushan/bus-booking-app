@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { MapPin, Calendar, ArrowRightLeft, Search, Shield, Filter, Sparkles } from 'lucide-react';
 
-const CITIES = ['New York, NY', 'Boston, MA', 'Los Angeles, CA', 'San Francisco, CA', 'Chicago, IL', 'Detroit, MI'];
+const CITIES = ['Monaragala', 'Colombo', 'Wellawaya', 'Ratnapura', 'Kandy', 'Galle', 'Matara', 'Jaffna'];
 
 export const HeroSearch: React.FC = () => {
   const { 
@@ -34,19 +34,19 @@ export const HeroSearch: React.FC = () => {
   return (
     <div className="relative pt-6 pb-10">
       {/* Background ambient glow effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 via-indigo-500/10 to-pink-500/10 blur-3xl -z-10 rounded-3xl pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-blue-600/10 blur-3xl -z-10 rounded-3xl pointer-events-none" />
 
       {/* Hero Header */}
       <div className="text-center max-w-3xl mx-auto mb-8 space-y-3 px-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-300 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5 text-teal-400" />
-          <span>Real-Time Concurrency & Dynamic 2D Seat Layout</span>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-semibold">
+          <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+          <span>Dewmina Super Line • Monaragala ↔ Colombo Daily Express</span>
         </div>
         <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
-          Book Your Bus Seats in <span className="bg-gradient-to-r from-teal-400 via-indigo-400 to-pink-400 bg-clip-text text-transparent">Real Time</span>
+          Book <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-sky-300 bg-clip-text text-transparent">Monaragala to Colombo</span> Bus Seats
         </h1>
         <p className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto">
-          Interactive seat maps, instant 8-minute Redis seat lock, live GPS bus tracking, and women-friendly seat reservations.
+          Beyond the Journey: The Journey of Faith. Live 2D seat map, instant 8-minute seat lock, live GPS tracking, and instant QR tickets.
         </p>
       </div>
 

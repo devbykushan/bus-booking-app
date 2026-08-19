@@ -32,10 +32,10 @@ export const Footer: React.FC = () => {
         <div>
           <h4 className="text-white font-semibold text-sm mb-3">Popular Bus Routes</h4>
           <ul className="space-y-2 text-xs">
-            <li className="hover:text-teal-300 transition-colors cursor-pointer">New York → Boston (AC Sleeper)</li>
-            <li className="hover:text-teal-300 transition-colors cursor-pointer">Los Angeles → San Francisco (Volvo)</li>
-            <li className="hover:text-teal-300 transition-colors cursor-pointer">Chicago → Detroit (Double Decker)</li>
-            <li className="hover:text-teal-300 transition-colors cursor-pointer">London → Manchester (Express)</li>
+            <li className="hover:text-blue-300 transition-colors cursor-pointer">Monaragala → Colombo (Dewmina Express)</li>
+            <li className="hover:text-blue-300 transition-colors cursor-pointer">Colombo → Monaragala (Night Super)</li>
+            <li className="hover:text-blue-300 transition-colors cursor-pointer">Monaragala → Kandy (Air Bus)</li>
+            <li className="hover:text-blue-300 transition-colors cursor-pointer">Wellawaya → Colombo (Highway)</li>
           </ul>
         </div>
 

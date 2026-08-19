@@ -107,8 +107,8 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
 
   sessionId: getSessionId(),
 
-  searchOrigin: 'New York, NY',
-  searchDestination: 'Boston, MA',
+  searchOrigin: 'Monaragala',
+  searchDestination: 'Colombo',
   searchDate: new Date().toISOString().split('T')[0],
   soloFemaleOnly: false,
   busTypeFilter: 'all',
