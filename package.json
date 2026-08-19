@@ -1,39 +1,14 @@
 {
-  "name": "bus-booking-app",
+  "name": "dewmina-superline-app",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "1.0.0",
+  "description": "Dewmina Super Line — Monaragala to Colombo Bus Booking Platform",
   "scripts": {
-    "dev": "./node_modules/.bin/vite",
-    "dev:backend": "cd backend && ./node_modules/.bin/ts-node-dev --respawn --transpile-only src/index.ts",
-    "dev:all": "npx -y concurrently -k -n BACKEND,FRONTEND -c cyan,magenta \"cd backend && ./node_modules/.bin/ts-node-dev --respawn --transpile-only src/index.ts\" \"./node_modules/.bin/vite\"",
-    "build": "./node_modules/.bin/tsc -b && ./node_modules/.bin/vite build",
-    "lint": "oxlint",
-    "preview": "./node_modules/.bin/vite preview"
-  },
-  "dependencies": {
-    "canvas-confetti": "^1.9.4",
-    "leaflet": "^1.9.4",
-    "lucide-react": "^1.32.0",
-    "qrcode.react": "^4.2.0",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "react-leaflet": "^5.0.0",
-    "zustand": "^5.0.15"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.3",
-    "@types/canvas-confetti": "^1.9.0",
-    "@types/leaflet": "^1.9.22",
-    "@types/node": "^24.13.3",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
-    "@vitejs/plugin-react": "^6.0.4",
-    "autoprefixer": "^10.5.4",
-    "oxlint": "^1.75.0",
-    "postcss": "^8.5.26",
-    "tailwindcss": "^4.3.3",
-    "typescript": "~6.0.2",
-    "vite": "^8.2.1"
+    "dev": "npx -y concurrently -k -n BACKEND,FRONTEND -c cyan,magenta \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "build": "npm --prefix frontend run build && npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "build:backend": "npm --prefix backend run build"
   }
 }
