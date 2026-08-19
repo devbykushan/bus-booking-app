@@ -98,12 +98,24 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           {activeTab === 'fleet' && (
-            <button
-              onClick={() => setShowScanner(true)}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
-            >
-              <QrCode className="w-4 h-4" /> Conductor Ticket Validator
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  const target = routes.find(r => r.id === selectedRouteId) || routes[0];
+                  if (target) setCustomizeRoute(target);
+                }}
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
+              >
+                <SlidersHorizontal className="w-4 h-4" /> Customize Seat Layout
+              </button>
+
+              <button
+                onClick={() => setShowScanner(true)}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
+              >
+                <QrCode className="w-4 h-4" /> Conductor Ticket Validator
+              </button>
+            </div>
           )}
         </div>
       </div>

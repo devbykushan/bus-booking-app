@@ -134,12 +134,7 @@ export const SeatMap: React.FC = () => {
               <div className="w-5 h-5 rounded-md seat-booked" />
               <span className="text-slate-600">Booked</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-md seat-female flex items-center justify-center">
-                <Shield className="w-3 h-3 text-pink-500" />
-              </div>
-              <span className="text-slate-600">Women Only</span>
-            </div>
+
           </div>
 
           <div className="relative bg-slate-50 rounded-3xl p-6 border-2 border-slate-200 space-y-6">

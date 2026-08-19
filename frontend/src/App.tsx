@@ -101,7 +101,7 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-blue-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-blue-500 selection:text-white overflow-x-hidden">
       <Navbar />
 
       {/* Global API error banner */}
@@ -121,37 +121,41 @@ export function App() {
         ) : (
           <div key={currentView} className="animate-fade-in-up">
             {currentView === 'passenger-search' && (
-              <div className="space-y-8 pb-16">
+              <div className="pb-16">
                 <HeroSearch />
 
-                <StatsSection />
+                <div className="bg-slate-50 py-10">
+                  <StatsSection />
+                </div>
 
-                <div className="max-w-5xl mx-auto px-4 space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                    <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                      <Bus className="w-5 h-5 text-blue-500 animate-bus-drive" />
-                      <span>Available Bus Schedules ({filteredRoutes.length})</span>
-                    </h2>
-                    <span className="text-xs text-slate-400 font-mono">
-                      Showing results for {searchOrigin} → {searchDestination}
-                    </span>
+                <div className="bg-slate-50 pb-10">
+                  <div className="max-w-5xl mx-auto px-4 space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                      <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <Bus className="w-5 h-5 text-blue-500 animate-bus-drive" />
+                        <span>Available Bus Schedules ({filteredRoutes.length})</span>
+                      </h2>
+                      <span className="text-xs text-slate-400 font-mono">
+                        Showing results for {searchOrigin} → {searchDestination}
+                      </span>
+                    </div>
+
+                    {filteredRoutes.length === 0 ? (
+                      <div className="glass-panel p-12 rounded-3xl text-center border border-slate-200 space-y-3">
+                        <AlertCircle className="w-10 h-10 text-amber-400 mx-auto" />
+                        <p className="text-slate-600 font-semibold text-sm">No buses matched your filters.</p>
+                        <p className="text-xs text-slate-400">Try resetting the Bus Category filter or solo female option.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {filteredRoutes.map((route, idx) => (
+                          <div key={route.id} style={{ animationDelay: `${idx * 0.08}s` }} className="animate-fade-in-up">
+                            <BusCard route={route as any} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-
-                  {filteredRoutes.length === 0 ? (
-                    <div className="glass-panel p-12 rounded-3xl text-center border border-slate-200 space-y-3">
-                      <AlertCircle className="w-10 h-10 text-amber-400 mx-auto" />
-                      <p className="text-slate-600 font-semibold text-sm">No buses matched your filters.</p>
-                      <p className="text-xs text-slate-400">Try resetting the Bus Category filter or solo female option.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {filteredRoutes.map((route, idx) => (
-                        <div key={route.id} style={{ animationDelay: `${idx * 0.08}s` }} className="animate-fade-in-up">
-                          <BusCard route={route as any} />
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
                 <ServicesSection />
