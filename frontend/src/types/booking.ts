@@ -1,4 +1,11 @@
-export type BusCategory = 'AC Seater' | 'AC Sleeper' | 'Non-AC Seater' | 'Luxury Volvo Multi-Axle' | 'Double Decker Sleeper';
+export type BusCategory = 
+  | 'Lanka Ashok Leyland (57 Seats 3*2)'
+  | 'Lanka Ashok Leyland (57 Seats 2*2)'
+  | 'AC Seater' 
+  | 'AC Sleeper' 
+  | 'Non-AC Seater' 
+  | 'Luxury Volvo Multi-Axle' 
+  | 'Double Decker Sleeper';
 
 export type SeatStatus = 'available' | 'selected' | 'booked' | 'locked';
 
@@ -97,8 +104,16 @@ export interface Booking {
   createdAt: string;
 }
 
+export interface UserAccount {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: 'passenger' | 'admin';
+}
+
 export interface UserRole {
-  role: 'passenger' | 'operator' | 'admin';
+  role: 'passenger' | 'admin';
 }
 
 export interface AnalyticsSummary {

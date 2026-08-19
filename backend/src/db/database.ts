@@ -113,8 +113,96 @@ function buildSeats(
   hasUpperDeck: boolean
 ): { id: string; routeId: string; number: string; deck: string; row: number; col: number; price: number; status: string; isSleeper: number; isFemaleOnly: number }[] {
   const seats: ReturnType<typeof buildSeats> = [];
+  const basePrice = busType.includes('Sleeper') ? 2800 : 1800;
+
+  // 1. Lanka Ashok Leyland 57-Seat 3*2 Model (Classic Sri Lanka Leyland Intercity)
+  if (busType.includes('3*2') || busType.includes('Leyland')) {
+    const totalRows = 11;
+    // Rows 1..11: 3 seats on Left (cols 1,2,3), Aisle (col 4), 2 seats on Right (cols 5,6) -> 5 seats * 11 = 55 seats
+    for (let r = 1; r <= totalRows; r++) {
+      const cols = [1, 2, 3, 5, 6];
+      for (const c of cols) {
+        const isFemaleOnly = (r === 2 || r === 3) && (c === 1 || c === 2 || c === 3) ? 1 : 0;
+        const seatLetter = String.fromCharCode(64 + (c > 4 ? c - 1 : c));
+        const seatNum = `${r}${seatLetter}`;
+        const isBooked = (r === 1 && c === 1) || (r === 3 && c === 5) || (r === 6 && c === 2) ? 'booked' : 'available';
+
+        seats.push({
+          id: `${routeId}-${seatNum}`,
+          routeId,
+          number: seatNum,
+          deck: 'lower',
+          row: r,
+          col: c,
+          price: basePrice,
+          status: isBooked,
+          isSleeper: 0,
+          isFemaleOnly,
+        });
+      }
+    }
+    // Row 12 (Back Row): 2 additional seats to reach 57 seats total
+    for (const c of [1, 2]) {
+      const seatNum = `12${String.fromCharCode(64 + c)}`;
+      seats.push({
+        id: `${routeId}-${seatNum}`,
+        routeId,
+        number: seatNum,
+        deck: 'lower',
+        row: 12,
+        col: c,
+        price: basePrice,
+        status: 'available',
+        isSleeper: 0,
+        isFemaleOnly: 0,
+      });
+    }
+    return seats;
+  }
+
+  // 2. Lanka Ashok Leyland 57-Seat 2*2 Model
+  if (busType.includes('2*2')) {
+    const totalRows = 14;
+    // Rows 1..14: 2 seats Left (cols 1,2), Aisle (col 3), 2 seats Right (cols 4,5) -> 4 * 14 = 56 seats
+    for (let r = 1; r <= totalRows; r++) {
+      for (const c of [1, 2, 4, 5]) {
+        const isFemaleOnly = (r === 2 || r === 3) && (c === 1 || c === 2) ? 1 : 0;
+        const seatLetter = String.fromCharCode(64 + (c > 3 ? c - 1 : c));
+        const seatNum = `${r}${seatLetter}`;
+        const isBooked = (r === 1 && c === 1) || (r === 4 && c === 4) ? 'booked' : 'available';
+
+        seats.push({
+          id: `${routeId}-${seatNum}`,
+          routeId,
+          number: seatNum,
+          deck: 'lower',
+          row: r,
+          col: c,
+          price: basePrice,
+          status: isBooked,
+          isSleeper: 0,
+          isFemaleOnly,
+        });
+      }
+    }
+    // Row 15: 1 seat to complete 57 seats
+    seats.push({
+      id: `${routeId}-15A`,
+      routeId,
+      number: '15A',
+      deck: 'lower',
+      row: 15,
+      col: 1,
+      price: basePrice,
+      status: 'available',
+      isSleeper: 0,
+      isFemaleOnly: 0,
+    });
+    return seats;
+  }
+
+  // 3. Default Sleeper or Volvo Multi-Axle layouts
   const totalRows = busType.includes('Sleeper') ? 6 : 10;
-  const basePrice = busType.includes('Sleeper') ? 30 : 25;
 
   for (const deck of hasUpperDeck ? ['lower', 'upper'] : ['lower']) {
     for (let r = 1; r <= totalRows; r++) {
@@ -124,7 +212,6 @@ function buildSeats(
         const isFemaleOnly = isLower && (r === 2 || r === 3) && (c === 1 || c === 2) ? 1 : 0;
         const prefix = deck === 'lower' ? 'L' : 'U';
         const seatNum = `${prefix}${r}${String.fromCharCode(64 + c)}`;
-        // Pre-book a couple of seats for realism
         const isBooked =
           (deck === 'lower' && r === 1 && c === 1) ||
           (deck === 'lower' && r === 4 && c === 2) ||
@@ -139,7 +226,7 @@ function buildSeats(
           deck,
           row: r,
           col: c,
-          price: deck === 'upper' ? basePrice + 5 : basePrice,
+          price: deck === 'upper' ? basePrice + 400 : basePrice,
           status: isBooked,
           isSleeper: busType.includes('Sleeper') ? 1 : 0,
           isFemaleOnly,
@@ -175,7 +262,7 @@ function seedData(): void {
       departureTime: '06:30 AM',
       arrivalTime: '12:30 PM',
       duration: '6h 00m',
-      priceStarting: 28,
+      priceStarting: 2800,
       hasUpperDeck: 0,
       amenities: JSON.stringify(['AC', 'Reclining Seats', 'Charging Ports', 'Live GPS Tracking', 'Water Bottle', 'Music']),
       gpsLat: 6.8722,
@@ -197,7 +284,7 @@ function seedData(): void {
       departureTime: '09:30 PM',
       arrivalTime: '03:30 AM',
       duration: '6h 00m',
-      priceStarting: 30,
+      priceStarting: 3000,
       hasUpperDeck: 1,
       amenities: JSON.stringify(['AC Sleeper', 'Blanket', 'Charging Ports', 'Live GPS Tracking', 'Night Reading Lamp']),
       gpsLat: 6.9271,
@@ -219,7 +306,7 @@ function seedData(): void {
       departureTime: '01:30 PM',
       arrivalTime: '07:30 PM',
       duration: '6h 00m',
-      priceStarting: 32,
+      priceStarting: 3200,
       hasUpperDeck: 1,
       amenities: JSON.stringify(['AC', 'Panoramic Roof', 'Live GPS Tracking', 'Wi-Fi', 'Reclining Sleeper']),
       gpsLat: 6.7410,
@@ -302,11 +389,11 @@ function seedData(): void {
       passengerPhone: '0711433520',
       passengerGender: 'male',
       passengerAge: 28,
-      baseFare: 28.00,
-      taxAmount: 2.80,
-      insuranceAmount: 1.50,
-      discountAmount: 4.20,
-      totalFare: 28.10,
+      baseFare: 2800.00,
+      taxAmount: 280.00,
+      insuranceAmount: 150.00,
+      discountAmount: 420.00,
+      totalFare: 2810.00,
       promoCodeApplied: 'BUS2026',
       paymentMethod: 'card',
       paymentStatus: 'paid',

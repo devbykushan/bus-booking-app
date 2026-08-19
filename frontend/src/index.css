@@ -3,93 +3,232 @@
 
 @layer base {
   body {
-    background-color: #020617;
-    color: #f8fafc;
+    background-color: #f1f5f9;
+    color: #1e293b;
     min-height: 100vh;
     font-family: ui-sans-serif, system-ui, sans-serif;
+    overflow-x: hidden;
   }
 }
 
-/* Glassmorphism custom styling */
+/* ─── ANIMATION KEYFRAMES ─────────────────────────────────────────────────────── */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  70% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes seatPop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.18) rotate(-3deg);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes busDrive {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-4px) rotate(-0.5deg);
+  }
+  50% {
+    transform: translateY(-1px) rotate(0.5deg);
+  }
+  75% {
+    transform: translateY(-3px) rotate(-0.3deg);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+}
+
+@keyframes radarPing {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes floatSoft {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* ─── ANIMATION UTILITY CLASSES ─────────────────────────────────────────────── */
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pop-in {
+  animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.animate-bus-drive {
+  animation: busDrive 3.5s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+.animate-radar-ping {
+  animation: radarPing 1.8s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+.animate-float {
+  animation: floatSoft 4s ease-in-out infinite;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ─── UI CARD & GLASS STYLING ────────────────────────────────────────────────── */
+
 .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.6);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.25s ease-in-out;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  border-color: rgba(20, 184, 166, 0.4);
-  box-shadow: 0 10px 30px -10px rgba(20, 184, 166, 0.2);
+  transform: translateY(-4px);
+  border-color: #93c5fd;
+  box-shadow: 0 12px 24px -4px rgba(59, 130, 246, 0.12);
 }
 
-/* Custom Seat Styling & Animations */
+/* ─── SEAT INTERACTIVE ANIMATIONS ───────────────────────────────────────────── */
+
 .seat-available {
-  background-color: #1e293b;
-  border: 2px solid rgba(16, 185, 129, 0.6);
-  color: #34d399;
+  background-color: #f0fdf4;
+  border: 2px solid #86efac;
+  color: #16a34a;
   cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .seat-available:hover {
-  background-color: #10b981;
-  color: #020617;
-  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+  background-color: #22c55e;
+  color: #ffffff;
+  border-color: #16a34a;
+  transform: scale(1.12);
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.35);
 }
 
 .seat-selected {
-  background-color: #4f46e5;
-  border: 2px solid #a5b4fc;
+  background-color: #2563eb;
+  border: 2px solid #93c5fd;
   color: #ffffff;
-  box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.5);
-  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+  animation: seatPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   font-weight: 700;
   cursor: pointer;
 }
 
 .seat-booked {
-  background-color: rgba(30, 41, 59, 0.6);
-  border: 2px solid #334155;
-  color: #64748b;
+  background-color: #f1f5f9;
+  border: 2px solid #cbd5e1;
+  color: #94a3b8;
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.65;
+  transition: all 0.2s ease;
 }
 
 .seat-female {
-  background-color: rgba(131, 24, 67, 0.7);
-  border: 2px solid rgba(236, 72, 153, 0.8);
-  color: #fbcfe8;
+  background-color: #fdf2f8;
+  border: 2px solid #f9a8d4;
+  color: #db2777;
   cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .seat-female:hover {
   background-color: #ec4899;
   color: #ffffff;
-  box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.4);
+  border-color: #db2777;
+  transform: scale(1.12);
+  box-shadow: 0 6px 16px rgba(236, 72, 153, 0.35);
 }
 
-/* Custom Scrollbars */
+/* ─── CUSTOM SCROLLBARS ──────────────────────────────────────────────────────── */
+
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 4px;
+  background: #cbd5e1;
+  border-radius: 6px;
+  transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #0d9488;
+  background: #2563eb;
 }

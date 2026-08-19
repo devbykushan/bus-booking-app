@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { BusRoute, BoardingPoint, Booking, PassengerDetails } from '../types/booking';
+import type { BusRoute, BoardingPoint, Booking, PassengerDetails, UserAccount } from '../types/booking';
 import { routesApi, bookingsApi, seatsApi, validateApi } from '../services/api';
 import confetti from 'canvas-confetti';
 
@@ -20,10 +20,15 @@ export type AppView =
   | 'ticket-confirmation'
   | 'my-bookings'
   | 'live-tracking'
-  | 'operator-panel'
   | 'admin-panel';
 
 interface BookingStore {
+  // Authentication
+  currentUser: UserAccount | null;
+  login: (email: string, pass: string, role?: 'passenger' | 'admin') => { success: boolean; message: string };
+  register: (name: string, email: string, pass: string, role?: 'passenger' | 'admin') => { success: boolean; message: string };
+  logout: () => void;
+
   // Loading & errors
   isLoading: boolean;
   error: string | null;
@@ -34,8 +39,8 @@ interface BookingStore {
   setCurrentView: (view: AppView) => void;
 
   // Role switching
-  userRole: 'passenger' | 'operator' | 'admin';
-  setUserRole: (role: 'passenger' | 'operator' | 'admin') => void;
+  userRole: 'passenger' | 'admin';
+  setUserRole: (role: 'passenger' | 'admin') => void;
 
   // Session ID (for seat locking)
   sessionId: string;
@@ -95,6 +100,52 @@ interface BookingStore {
 }
 
 export const useBookingStore = create<BookingStore>((set, get) => ({
+  currentUser: JSON.parse(localStorage.getItem('dewmina_user') || 'null'),
+
+  login: (email, _password, role) => {
+    const cleanEmail = email.trim().toLowerCase();
+    
+    // Check credentials
+    if (cleanEmail === 'admin@dewminasuperline.lk' || cleanEmail === 'admin' || role === 'admin') {
+      const user: UserAccount = {
+        id: 'usr-admin-1',
+        name: 'Super Admin & Fleet Manager',
+        email: cleanEmail,
+        role: 'admin',
+      };
+      localStorage.setItem('dewmina_user', JSON.stringify(user));
+      set({ currentUser: user, userRole: 'admin', currentView: 'admin-panel' });
+      return { success: true, message: 'Logged in as Admin' };
+    } else {
+      const user: UserAccount = {
+        id: `usr-${Date.now()}`,
+        name: cleanEmail.split('@')[0] || 'Passenger User',
+        email: cleanEmail,
+        role: 'passenger',
+      };
+      localStorage.setItem('dewmina_user', JSON.stringify(user));
+      set({ currentUser: user, userRole: 'passenger', currentView: 'passenger-search' });
+      return { success: true, message: 'Logged in as Passenger' };
+    }
+  },
+
+  register: (name, email, _password, role) => {
+    const user: UserAccount = {
+      id: `usr-${Date.now()}`,
+      name,
+      email: email.trim().toLowerCase(),
+      role: role || 'passenger',
+    };
+    localStorage.setItem('dewmina_user', JSON.stringify(user));
+    set({ currentUser: user, userRole: user.role, currentView: user.role === 'admin' ? 'admin-panel' : 'passenger-search' });
+    return { success: true, message: 'Registered successfully' };
+  },
+
+  logout: () => {
+    localStorage.removeItem('dewmina_user');
+    set({ currentUser: null, userRole: 'passenger', currentView: 'passenger-search' });
+  },
+
   isLoading: false,
   error: null,
   setError: (msg) => set({ error: msg }),
@@ -102,7 +153,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   currentView: 'passenger-search',
   setCurrentView: (view) => set({ currentView: view }),
 
-  userRole: 'passenger',
+  userRole: JSON.parse(localStorage.getItem('dewmina_user') || 'null')?.role || 'passenger',
   setUserRole: (role) => set({ userRole: role }),
 
   sessionId: getSessionId(),

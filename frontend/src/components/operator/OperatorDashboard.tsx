@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { QRScannerModal } from './QRScannerModal';
+import { SeatLayoutCustomizerModal } from '../admin/SeatLayoutCustomizerModal';
 import { routesApi } from '../../services/api';
-import { QrCode, Plus, Users, LayoutGrid, Download } from 'lucide-react';
+import type { BusRoute } from '../../types/booking';
+import { QrCode, Plus, Users, LayoutGrid, Download, SlidersHorizontal } from 'lucide-react';
 
 export const OperatorDashboard: React.FC = () => {
   const { routes, bookings, loadRoutes } = useBookingStore();
@@ -10,14 +12,15 @@ export const OperatorDashboard: React.FC = () => {
   const [showScanner, setShowScanner] = useState(false);
   const [selectedRouteId, setSelectedRouteId] = useState<string>(routes[0]?.id || '');
   const [showSeatBuilder, setShowSeatBuilder] = useState(false);
+  const [customizeRouteModal, setCustomizeRouteModal] = useState<BusRoute | null>(null);
 
-  const [newOperatorName, setNewOperatorName] = useState('OmniExpress Lines');
-  const [newBusNumber, setNewBusNumber] = useState('OMNI-7070');
-  const [newOrigin, setNewOrigin] = useState('New York, NY');
-  const [newDestination, setNewDestination] = useState('Washington, DC');
+  const [newOperatorName, setNewOperatorName] = useState('Dewmina Super Line');
+  const [newBusNumber, setNewBusNumber] = useState('ND-8899 (Lanka Ashok Leyland)');
+  const [newOrigin, setNewOrigin] = useState('Monaragala');
+  const [newDestination, setNewDestination] = useState('Colombo');
   const [newDepTime] = useState('10:00 AM');
-  const [newPrice, setNewPrice] = useState(40);
-  const [newBusType, setNewBusType] = useState<'AC Sleeper' | 'Luxury Volvo Multi-Axle' | 'Double Decker Sleeper'>('AC Sleeper');
+  const [newPrice, setNewPrice] = useState(1800);
+  const [newBusType, setNewBusType] = useState<any>('Lanka Ashok Leyland (57 Seats 3*2)');
 
   const selectedRoute = routes.find(r => r.id === selectedRouteId) || routes[0] || null;
   const manifestBookings = bookings.filter(b => b.routeId === selectedRoute?.id);
@@ -40,9 +43,8 @@ export const OperatorDashboard: React.FC = () => {
         duration: '5h 30m',
         priceStarting: newPrice,
         hasUpperDeck: newBusType.includes('Double') || newBusType.includes('Sleeper'),
-        amenities: ['Wi-Fi', 'Power Outlet', 'Live GPS'],
+        amenities: ['Wi-Fi', 'AC', 'Live GPS'],
       });
-      // Refresh routes from backend
       await loadRoutes();
       setShowSeatBuilder(false);
       alert(`Bus Route ${newBusNumber} successfully deployed to live fleet!`);
@@ -53,76 +55,78 @@ export const OperatorDashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold text-white tracking-tight">Bus Operator Dashboard</h2>
-            <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs font-semibold">
+            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Bus Operator Dashboard</h2>
+            <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200 text-xs font-semibold">
               Fleet Admin
             </span>
           </div>
-          <p className="text-xs text-slate-400">Manage bus schedules, customize seat grid layouts, and scan passenger QR tickets.</p>
+          <p className="text-xs text-slate-500">Manage bus schedules, customize 57-seat Leyland grid layouts, and scan passenger QR tickets.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={() => setShowScanner(true)}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-indigo-600 hover:from-teal-400 hover:to-indigo-500 text-white font-bold text-xs shadow-lg flex items-center gap-2"
+            className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-2"
           >
             <QrCode className="w-4 h-4" /> Conductor Ticket Validator
           </button>
 
           <button
             onClick={() => setShowSeatBuilder(!showSeatBuilder)}
-            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 flex items-center gap-2"
+            className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-sm flex items-center gap-2"
           >
-            <Plus className="w-4 h-4 text-teal-400" /> Deploy New Bus / Route
+            <Plus className="w-4 h-4 text-blue-600" /> Deploy New Bus / Route
           </button>
         </div>
       </div>
 
       {showSeatBuilder && (
-        <form onSubmit={handleCreateRoute} className="glass-panel p-6 rounded-3xl border border-teal-500/40 space-y-4">
-          <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-2">
-            <LayoutGrid className="w-5 h-5 text-teal-400" /> Route & Visual Seat Layout Designer
+        <form onSubmit={handleCreateRoute} className="bg-white p-6 rounded-3xl border border-blue-200 shadow-sm space-y-4">
+          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-2">
+            <LayoutGrid className="w-5 h-5 text-blue-600" /> Route & Visual Seat Layout Designer
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
             <div>
-              <label className="block text-slate-400 mb-1">Operator Name</label>
-              <input type="text" value={newOperatorName} onChange={e => setNewOperatorName(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white" />
+              <label className="block text-slate-600 mb-1">Operator Name</label>
+              <input type="text" value={newOperatorName} onChange={e => setNewOperatorName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
             </div>
             <div>
-              <label className="block text-slate-400 mb-1">Bus Reg. Number</label>
-              <input type="text" value={newBusNumber} onChange={e => setNewBusNumber(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white" />
+              <label className="block text-slate-600 mb-1">Bus Reg. Number</label>
+              <input type="text" value={newBusNumber} onChange={e => setNewBusNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
             </div>
             <div>
-              <label className="block text-slate-400 mb-1">Bus Type Category</label>
-              <select value={newBusType} onChange={(e: any) => setNewBusType(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white">
-                <option value="AC Sleeper">AC Sleeper</option>
-                <option value="Luxury Volvo Multi-Axle">Luxury Volvo Multi-Axle</option>
-                <option value="Double Decker Sleeper">Double Decker Sleeper</option>
+              <label className="block text-slate-600 mb-1 font-bold text-blue-600">Bus Model & Seating</label>
+              <select value={newBusType} onChange={(e: any) => setNewBusType(e.target.value)} className="w-full bg-slate-50 border border-blue-300 rounded-xl p-2.5 text-slate-800 font-bold">
+                <option value="Lanka Ashok Leyland (57 Seats 3*2)">🚌 Lanka Ashok Leyland (57 Seats 3*2)</option>
+                <option value="Lanka Ashok Leyland (57 Seats 2*2)">🚌 Lanka Ashok Leyland (57 Seats 2*2)</option>
+                <option value="AC Sleeper">🛋️ AC Sleeper (36 Seats)</option>
+                <option value="Luxury Volvo Multi-Axle">🚍 Luxury Volvo Multi-Axle (40 Seats)</option>
+                <option value="Double Decker Sleeper">🚌 Double Decker Sleeper (48 Seats)</option>
               </select>
             </div>
             <div>
-              <label className="block text-slate-400 mb-1">Origin City</label>
-              <input type="text" value={newOrigin} onChange={e => setNewOrigin(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white" />
+              <label className="block text-slate-600 mb-1">Origin City</label>
+              <input type="text" value={newOrigin} onChange={e => setNewOrigin(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
             </div>
             <div>
-              <label className="block text-slate-400 mb-1">Destination City</label>
-              <input type="text" value={newDestination} onChange={e => setNewDestination(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white" />
+              <label className="block text-slate-600 mb-1">Destination City</label>
+              <input type="text" value={newDestination} onChange={e => setNewDestination(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
             </div>
             <div>
-              <label className="block text-slate-400 mb-1">Base Price ($)</label>
-              <input type="number" value={newPrice} onChange={e => setNewPrice(Number(e.target.value))} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white" />
+              <label className="block text-slate-600 mb-1">Base Price (LKR)</label>
+              <input type="number" value={newPrice} onChange={e => setNewPrice(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
             </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={() => setShowSeatBuilder(false)} className="px-4 py-2 bg-slate-800 text-slate-300 font-bold rounded-xl text-xs">
+            <button type="button" onClick={() => setShowSeatBuilder(false)} className="px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs">
               Cancel
             </button>
-            <button type="submit" className="px-6 py-2 bg-teal-500 text-slate-950 font-bold rounded-xl text-xs">
+            <button type="submit" className="px-6 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs shadow-sm">
               Deploy Bus to Live Fleet
             </button>
           </div>
@@ -131,9 +135,9 @@ export const OperatorDashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-5 space-y-4">
-          <h3 className="text-base font-bold text-white flex items-center justify-between">
+          <h3 className="text-base font-bold text-slate-800 flex items-center justify-between">
             <span>Active Bus Fleet ({routes.length})</span>
-            <span className="text-xs text-slate-400">Click to view passenger manifest</span>
+            <span className="text-xs text-slate-400">Click route to manage layout</span>
           </h3>
 
           <div className="space-y-3">
@@ -141,49 +145,61 @@ export const OperatorDashboard: React.FC = () => {
               <div
                 key={r.id}
                 onClick={() => setSelectedRouteId(r.id)}
-                className={`glass-card p-4 rounded-2xl border cursor-pointer transition-all ${
-                  selectedRouteId === r.id ? 'border-teal-500 bg-teal-500/10' : 'border-slate-800 hover:border-slate-700'
+                className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                  selectedRouteId === r.id ? 'border-blue-500 bg-blue-50' : 'bg-white border-slate-200 hover:border-slate-300'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-bold text-white text-sm">{r.busNumber}</h4>
-                    <p className="text-xs text-teal-400">{r.origin} → {r.destination}</p>
+                    <h4 className="font-bold text-slate-800 text-sm">{r.busNumber}</h4>
+                    <p className="text-xs text-blue-600">{r.origin} → {r.destination}</p>
+                    <p className="text-[11px] text-slate-500 font-mono mt-0.5">{r.busType}</p>
                   </div>
-                  <span className="px-2 py-1 rounded bg-slate-900 text-slate-300 text-xs font-mono">
-                    {r.availableSeatsCount} / {r.totalSeatsCount} Available
-                  </span>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs font-mono font-bold">
+                      {r.availableSeatsCount} / {r.totalSeatsCount || r.seats?.length} Seats
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCustomizeRouteModal(r);
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-sm"
+                    >
+                      <SlidersHorizontal className="w-3 h-3" /> Customize Layout
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="lg:col-span-7 glass-panel p-6 rounded-3xl border border-slate-800 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
             <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Users className="w-5 h-5 text-indigo-400" /> Passenger Trip Manifest
+              <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                <Users className="w-5 h-5 text-blue-600" /> Passenger Trip Manifest
               </h3>
-              <p className="text-xs text-slate-400">{selectedRoute?.busNumber} • {selectedRoute?.origin} → {selectedRoute?.destination}</p>
+              <p className="text-xs text-slate-500">{selectedRoute?.busNumber} • {selectedRoute?.origin} → {selectedRoute?.destination}</p>
             </div>
             <button
               onClick={() => alert('Downloading Passenger Manifest CSV...')}
-              className="px-3 py-1.5 rounded-xl bg-slate-800 text-teal-300 border border-slate-700 text-xs font-bold flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-xl bg-slate-50 text-blue-600 border border-slate-200 text-xs font-bold flex items-center gap-1.5"
             >
               <Download className="w-3.5 h-3.5" /> CSV Export
             </button>
           </div>
 
           {manifestBookings.length === 0 ? (
-            <div className="text-center py-8 text-slate-500 text-xs">
+            <div className="text-center py-8 text-slate-400 text-xs">
               No confirmed passengers booked for this route yet.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400">
+                  <tr className="border-b border-slate-200 text-slate-400">
                     <th className="py-2.5 px-3">PNR</th>
                     <th className="py-2.5 px-3">Passenger</th>
                     <th className="py-2.5 px-3">Seats</th>
@@ -191,21 +207,21 @@ export const OperatorDashboard: React.FC = () => {
                     <th className="py-2.5 px-3">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                <tbody className="divide-y divide-slate-100 text-slate-700">
                   {manifestBookings.map(b => (
-                    <tr key={b.id} className="hover:bg-slate-900/40">
-                      <td className="py-2.5 px-3 font-mono font-bold text-teal-400">{b.pnr}</td>
+                    <tr key={b.id} className="hover:bg-slate-50">
+                      <td className="py-2.5 px-3 font-mono font-bold text-blue-600">{b.pnr}</td>
                       <td className="py-2.5 px-3">
-                        <div className="font-semibold text-white">{b.passenger.fullName}</div>
+                        <div className="font-semibold text-slate-800">{b.passenger.fullName}</div>
                         <div className="text-[10px] text-slate-400">{b.passenger.phone}</div>
                       </td>
-                      <td className="py-2.5 px-3 font-bold font-mono text-indigo-300">
+                      <td className="py-2.5 px-3 font-bold font-mono text-indigo-600">
                         {b.seats.map(s => s.number).join(', ')}
                       </td>
                       <td className="py-2.5 px-3">{b.boardingPoint.name}</td>
                       <td className="py-2.5 px-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                          b.bookingStatus === 'boarded' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-emerald-500/20 text-emerald-300'
+                          b.bookingStatus === 'boarded' ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'
                         }`}>
                           {b.bookingStatus}
                         </span>
@@ -220,6 +236,13 @@ export const OperatorDashboard: React.FC = () => {
       </div>
 
       {showScanner && <QRScannerModal onClose={() => setShowScanner(false)} />}
+
+      {customizeRouteModal && (
+        <SeatLayoutCustomizerModal
+          route={customizeRouteModal}
+          onClose={() => setCustomizeRouteModal(null)}
+        />
+      )}
     </div>
   );
 };
