@@ -1,6 +1,6 @@
 import React from 'react';
 import { useBookingStore } from '../../store/bookingStore';
-import { Bus, MapPin, Ticket, ShieldCheck, UserCheck, LayoutDashboard, Clock } from 'lucide-react';
+import { Bus, MapPin, Ticket, Clock } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { 
@@ -28,19 +28,19 @@ export const Navbar: React.FC = () => {
           onClick={() => setCurrentView('passenger-search')}
           className="flex items-center gap-3 cursor-pointer group"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-teal-500/20 group-hover:scale-105 transition-transform">
-            <Bus className="w-6 h-6 text-white" />
-          </div>
+          {/* Real Company Logo */}
+          <img
+            src="/dewmina-logo.png"
+            alt="Dewmina Super Line Logo"
+            className="h-12 w-auto object-contain group-hover:scale-105 transition-transform drop-shadow-lg"
+          />
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-teal-300 bg-clip-text text-transparent">
-                OmniBus
-              </span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 font-semibold border border-teal-500/30">
-                PRO
+              <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-300 via-blue-100 to-white bg-clip-text text-transparent">
+                Dewmina Super Line
               </span>
             </div>
-            <p className="text-[10px] text-slate-400 font-medium">Smart Seat Booking & Live Fleet Platform</p>
+            <p className="text-[10px] text-slate-400 font-medium italic">Beyond the Journey: The Journey of Faith</p>
           </div>
         </div>
 
@@ -61,7 +61,7 @@ export const Navbar: React.FC = () => {
             onClick={() => setCurrentView('passenger-search')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
               currentView === 'passenger-search' || currentView === 'seat-selection'
-                ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
+                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
                 : 'text-slate-300 hover:text-white hover:bg-slate-800'
             }`}
           >
@@ -73,11 +73,11 @@ export const Navbar: React.FC = () => {
             onClick={() => setCurrentView('live-tracking')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
               currentView === 'live-tracking'
-                ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
+                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
                 : 'text-slate-300 hover:text-white hover:bg-slate-800'
             }`}
           >
-            <MapPin className="w-4 h-4 text-teal-400 animate-bounce" />
+            <MapPin className="w-4 h-4 text-blue-400 animate-bounce" />
             <span>Live GPS Tracker</span>
           </button>
 
@@ -85,7 +85,7 @@ export const Navbar: React.FC = () => {
             onClick={() => setCurrentView('my-bookings')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
               currentView === 'my-bookings'
-                ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
+                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
                 : 'text-slate-300 hover:text-white hover:bg-slate-800'
             }`}
           >
@@ -98,7 +98,7 @@ export const Navbar: React.FC = () => {
             <button
               onClick={() => { setUserRole('passenger'); setCurrentView('passenger-search'); }}
               className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
-                userRole === 'passenger' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
+                userRole === 'passenger' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               Passenger
@@ -106,7 +106,7 @@ export const Navbar: React.FC = () => {
             <button
               onClick={() => { setUserRole('operator'); setCurrentView('operator-panel'); }}
               className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
-                userRole === 'operator' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
+                userRole === 'operator' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               Operator
@@ -114,7 +114,7 @@ export const Navbar: React.FC = () => {
             <button
               onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); }}
               className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
-                userRole === 'admin' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
+                userRole === 'admin' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               Admin

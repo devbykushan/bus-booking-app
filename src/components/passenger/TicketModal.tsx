@@ -168,7 +168,7 @@ export const TicketModal: React.FC = () => {
               <MessageSquare className="w-5 h-5 text-emerald-400" /> WhatsApp & SMS Ticket Sent
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed bg-slate-900 p-3 rounded-xl border border-slate-800 font-mono">
-              📲 <strong>OmniBus Alert:</strong> Hi {booking.passenger.fullName}, your booking for {booking.origin} → {booking.destination} on {booking.departureDate} is CONFIRMED. PNR: {booking.pnr}, Seats: {booking.seats.map(s => s.number).join(', ')}. Track bus live: https://omnibus.app/track/{booking.routeId}
+              📲 <strong>Dewmina Super Line:</strong> Hi {booking.passenger.fullName}, your booking for {booking.origin} → {booking.destination} on {booking.departureDate} is CONFIRMED. PNR: {booking.pnr}, Seats: {booking.seats.map(s => s.number).join(', ')}. Track bus live: https://dewminasuperline.lk/track/{booking.routeId}
             </p>
             <button
               onClick={() => setShowSMSModal(false)}

@@ -93,7 +93,7 @@ export function App() {
           <Bus className="absolute inset-0 m-auto w-7 h-7 text-teal-400" />
         </div>
         <div className="text-center space-y-1">
-          <p className="font-bold text-white text-lg">Loading OmniBus…</p>
+          <p className="font-bold text-white text-lg">Loading Dewmina Super Line…</p>
           <p className="text-slate-400 text-sm">Connecting to API server</p>
         </div>
       </div>

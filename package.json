@@ -4,12 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "dev:backend": "cd backend && npm run dev",
-    "dev:all": "npx -y concurrently -k -n BACKEND,FRONTEND -c cyan,magenta \"cd backend && npm run dev\" \"vite\"",
-    "build": "tsc -b && vite build",
+    "dev": "./node_modules/.bin/vite",
+    "dev:backend": "cd backend && ./node_modules/.bin/ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev:all": "npx -y concurrently -k -n BACKEND,FRONTEND -c cyan,magenta \"cd backend && ./node_modules/.bin/ts-node-dev --respawn --transpile-only src/index.ts\" \"./node_modules/.bin/vite\"",
+    "build": "./node_modules/.bin/tsc -b && ./node_modules/.bin/vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "./node_modules/.bin/vite preview"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

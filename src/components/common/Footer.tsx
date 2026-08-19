@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bus, ShieldCheck, Heart, Lock, PhoneCall, QrCode } from 'lucide-react';
+import { ShieldCheck, Heart, Lock, PhoneCall, QrCode } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
@@ -8,14 +8,19 @@ export const Footer: React.FC = () => {
         
         {/* Brand Column */}
         <div className="space-y-4 md:col-span-1">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-teal-500 flex items-center justify-center text-slate-950 font-bold">
-              <Bus className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-lg font-bold text-white tracking-tight">OmniBus Platform</span>
+          <div className="flex items-center gap-3">
+            <img
+              src="/dewmina-logo.png"
+              alt="Dewmina Super Line"
+              className="h-14 w-auto object-contain drop-shadow-lg"
+            />
+          </div>
+          <div>
+            <p className="text-base font-bold text-white">Dewmina Super Line</p>
+            <p className="text-xs text-blue-400 italic mb-2">Beyond the Journey: The Journey of Faith</p>
           </div>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Next-generation bus seat booking platform featuring real-time seat lock concurrency, live GPS bus tracking, and instant QR boarding pass validation.
+            Sri Lanka's trusted bus booking platform featuring real-time seat lock concurrency, live GPS bus tracking, and instant QR boarding pass validation.
           </p>
           <div className="flex items-center gap-2 text-pink-400 text-xs font-semibold bg-pink-950/40 border border-pink-500/30 p-2 rounded-lg">
             <Heart className="w-4 h-4 text-pink-500 fill-pink-500 animate-pulse" />
@@ -62,7 +67,7 @@ export const Footer: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 lg:px-8 border-t border-slate-900 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-        <p>© 2026 OmniBus Inc. All rights reserved. Powered by React & Tailwind.</p>
+        <p>© 2026 Dewmina Super Line. All rights reserved. | 📞 0711433520 | ✉️ dewminasuperline@gmail.com</p>
         <div className="flex items-center gap-6">
           <a href="#" className="hover:text-slate-300">Privacy Policy</a>
           <a href="#" className="hover:text-slate-300">Terms of Service</a>
