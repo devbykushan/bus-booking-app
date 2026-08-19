@@ -1,7 +1,7 @@
 import React from 'react';
 import type { BusRoute } from '../../types/booking';
 import { useBookingStore } from '../../store/bookingStore';
-import { Star, Clock, Wifi, Zap, MapPin, ShieldCheck, Armchair, ChevronRight } from 'lucide-react';
+import { Star, Clock, Wifi, Zap, MapPin, Armchair, ChevronRight } from 'lucide-react';
 
 interface BusCardProps {
   route: BusRoute;

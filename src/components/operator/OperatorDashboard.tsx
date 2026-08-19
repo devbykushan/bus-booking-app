@@ -5,7 +5,7 @@ import { routesApi } from '../../services/api';
 import { QrCode, Plus, Users, LayoutGrid, Download } from 'lucide-react';
 
 export const OperatorDashboard: React.FC = () => {
-  const { routes, bookings, addBusRoute, loadRoutes } = useBookingStore();
+  const { routes, bookings, loadRoutes } = useBookingStore();
 
   const [showScanner, setShowScanner] = useState(false);
   const [selectedRouteId, setSelectedRouteId] = useState<string>(routes[0]?.id || '');
@@ -15,7 +15,7 @@ export const OperatorDashboard: React.FC = () => {
   const [newBusNumber, setNewBusNumber] = useState('OMNI-7070');
   const [newOrigin, setNewOrigin] = useState('New York, NY');
   const [newDestination, setNewDestination] = useState('Washington, DC');
-  const [newDepTime, setNewDepTime] = useState('10:00 AM');
+  const [newDepTime] = useState('10:00 AM');
   const [newPrice, setNewPrice] = useState(40);
   const [newBusType, setNewBusType] = useState<'AC Sleeper' | 'Luxury Volvo Multi-Axle' | 'Double Decker Sleeper'>('AC Sleeper');
 

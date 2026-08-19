@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { QRCodeSVG } from 'qrcode.react';
-import { CheckCircle2, Download, Printer, MapPin, Share2, MessageSquare, Phone, Bus, Clock, Calendar } from 'lucide-react';
+import { CheckCircle2, Printer, MapPin, MessageSquare, Bus, Clock, Calendar } from 'lucide-react';
 
 export const TicketModal: React.FC = () => {
   const { latestConfirmedBooking, setCurrentView, setTrackingRouteId } = useBookingStore();

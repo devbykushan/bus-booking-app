@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
-import { Bus, MapPin, Navigation, Clock, Gauge, ArrowLeft, ExternalLink } from 'lucide-react';
+import { MapPin, Navigation, Clock, Gauge, ArrowLeft, ExternalLink } from 'lucide-react';
 
 // Custom pulsing bus marker icon for Leaflet map
 const busIcon = L.divIcon({

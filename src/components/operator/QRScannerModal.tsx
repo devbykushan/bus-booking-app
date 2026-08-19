@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
-import { QrCode, Camera, CheckCircle2, XCircle, Search, UserCheck, Bus, ShieldCheck } from 'lucide-react';
+import { QrCode, Camera, CheckCircle2, XCircle } from 'lucide-react';
 
 interface QRScannerModalProps {
   onClose: () => void;

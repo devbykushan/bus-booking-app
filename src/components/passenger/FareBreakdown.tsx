@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
-import confetti from 'canvas-confetti';
-import { ArrowLeft, CreditCard, Shield, CheckCircle, Ticket, Lock, Sparkles, Tag, AlertCircle } from 'lucide-react';
+import { ArrowLeft, CreditCard, CheckCircle, Lock, Sparkles, Tag } from 'lucide-react';
 
 export const FareBreakdown: React.FC = () => {
   const { 
     selectedRoute, 
     selectedSeatIds, 
-    selectedBoardingPoint, 
-    selectedDropPoint,
     passengerInfo,
     setPassengerInfo,
     appliedPromo,

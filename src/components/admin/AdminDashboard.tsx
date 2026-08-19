@@ -1,6 +1,6 @@
 import React from 'react';
 import { useBookingStore } from '../../store/bookingStore';
-import { TrendingUp, Users, DollarSign, Bus, Shield, Award, BarChart2, PieChart } from 'lucide-react';
+import { TrendingUp, Users, DollarSign, Bus, Shield, Award, BarChart2 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
   const { bookings, routes } = useBookingStore();

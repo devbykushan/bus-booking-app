@@ -1,9 +1,9 @@
 import React from 'react';
 import { useBookingStore } from '../../store/bookingStore';
-import { Ticket, MapPin, XCircle, ArrowRight, Calendar, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Ticket, MapPin, XCircle } from 'lucide-react';
 
 export const UserBookings: React.FC = () => {
-  const { bookings, cancelBooking, setCurrentView, setTrackingRouteId, setSelectedRoute } = useBookingStore();
+  const { bookings, cancelBooking, setCurrentView, setTrackingRouteId } = useBookingStore();
 
   const handleTrack = (routeId: string) => {
     setTrackingRouteId(routeId);
