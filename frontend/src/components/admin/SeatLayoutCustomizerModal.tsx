@@ -234,17 +234,6 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
     setSeats(prev => prev.map(s => ({ ...s, price })));
   };
 
-  const bulkReserveFemaleRows = () => {
-    setSeats(prev =>
-      prev.map(s => {
-        if (s.row === 2 || s.row === 3) {
-          return { ...s, isFemaleOnly: true };
-        }
-        return s;
-      })
-    );
-  };
-
   const bulkMakeAllAvailable = () => {
     setSeats(prev => prev.map(s => ({ ...s, status: 'available' })));
   };
@@ -408,13 +397,6 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
             <Settings2 className="w-4 h-4 text-blue-600" /> Admin Quick Tools:
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={bulkReserveFemaleRows}
-              className="px-3 py-1.5 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-700 font-bold text-[11px] flex items-center gap-1"
-            >
-              <Shield className="w-3.5 h-3.5" /> Reserve Rows 2 & 3 (Female)
-            </button>
             <button
               type="button"
               onClick={bulkMakeAllAvailable}

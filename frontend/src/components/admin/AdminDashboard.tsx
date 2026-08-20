@@ -71,7 +71,7 @@ export const AdminDashboard: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
       
       {/* Super Admin & Fleet Manager Header */}
-      <div className="border-b border-slate-200 pb-6">
+      <div className="border-b border-slate-200 pb-6 animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Super Admin & Fleet Management Portal</h2>
@@ -84,7 +84,7 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row items-start gap-8">
-        <aside className="w-full lg:w-72 shrink-0 bg-white rounded-3xl border border-slate-200 shadow-sm p-4 space-y-4 lg:sticky lg:top-24">
+        <aside className="w-full lg:w-72 shrink-0 bg-white rounded-3xl border border-slate-200 shadow-sm p-4 space-y-4 lg:sticky lg:top-24 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
           <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2">Admin Navigation</div>
           <div className="flex flex-col gap-2">
             <button
@@ -127,7 +127,7 @@ export const AdminDashboard: React.FC = () => {
           )}
         </aside>
 
-        <main className="min-w-0 flex-1 w-full">
+        <main className="min-w-0 flex-1 w-full animate-fade-in-up" style={{ animationDelay: '0.25s' }}>
 
       {/* ─── TAB 1: FLEET & ROUTE OPERATIONS (Operator + Admin features) ─── */}
       {activeTab === 'fleet' && (
@@ -146,7 +146,7 @@ export const AdminDashboard: React.FC = () => {
 
           {/* New Bus Deployment Form */}
           {showSeatBuilder && (
-            <form onSubmit={handleCreateRoute} className="bg-white p-6 rounded-3xl border border-blue-200 shadow-sm space-y-4">
+            <form onSubmit={handleCreateRoute} className="bg-white p-6 rounded-3xl border border-blue-200 shadow-sm space-y-4 animate-pop-in">
               <h3 className="text-base font-bold text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-2">
                 <LayoutGrid className="w-5 h-5 text-blue-600" /> Route & Visual Seat Layout Designer
               </h3>
