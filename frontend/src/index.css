@@ -52,10 +52,16 @@
 }
 
 @keyframes nav3dLogoFloat {
-  0%, 100% { transform: perspective(600px) translateZ(0px) rotateY(0deg); }
-  25%      { transform: perspective(600px) translateZ(8px) rotateY(2deg); }
-  50%      { transform: perspective(600px) translateZ(12px) rotateY(0deg); }
-  75%      { transform: perspective(600px) translateZ(6px) rotateY(-2deg); }
+  0%, 100% { transform: perspective(700px) translateZ(0px) rotateY(-3deg) rotateX(1deg); }
+  25%      { transform: perspective(700px) translateZ(14px) rotateY(4deg) rotateX(-2deg); }
+  50%      { transform: perspective(700px) translateZ(20px) rotateY(0deg) rotateX(2deg); }
+  75%      { transform: perspective(700px) translateZ(10px) rotateY(-4deg) rotateX(-1deg); }
+}
+
+@keyframes nav3dLogoShine {
+  0%, 35% { transform: translateX(-140%) skewX(-18deg); opacity: 0; }
+  50% { opacity: 0.8; }
+  65%, 100% { transform: translateX(180%) skewX(-18deg); opacity: 0; }
 }
 
 @keyframes nav3dShine {
@@ -208,6 +214,38 @@
   position: relative;
   animation: nav3dLogoFloat 6s ease-in-out infinite;
   transform-style: preserve-3d;
+  isolation: isolate;
+  filter: drop-shadow(0 12px 8px rgba(0, 0, 0, 0.28));
+}
+
+.nav3d-logo-depth,
+.nav3d-logo-shine {
+  position: absolute;
+  inset: 4px 0 0 4px;
+  pointer-events: none;
+}
+
+.nav3d-logo-depth {
+  z-index: -1;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.65), rgba(8, 12, 30, 0.9));
+  transform: translateZ(-8px) skewY(-2deg);
+  filter: blur(2px);
+}
+
+.nav3d-logo-shine {
+  z-index: 2;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.nav3d-logo-shine::after {
+  content: '';
+  position: absolute;
+  inset: -30% auto -30% -35%;
+  width: 28%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  animation: nav3dLogoShine 6s ease-in-out infinite;
 }
 
 .nav3d-logo-glow {

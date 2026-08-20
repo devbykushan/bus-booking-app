@@ -86,6 +86,18 @@ export const Navbar: React.FC = () => {
 
   const isActive = (activeOn: string[]) => activeOn.includes(currentView);
 
+  const handleNavItemClick = (view: string) => {
+    const requiresAuth = view === 'live-tracking' || view === 'my-bookings';
+    if (requiresAuth && !currentUser) {
+      setMobileOpen(false);
+      setShowAuthModal(true);
+      return;
+    }
+
+    setCurrentView(view as any);
+    setMobileOpen(false);
+  };
+
   return (
     <>
       <div className="nav3d-perspective sticky top-0 z-40">
@@ -124,7 +136,8 @@ export const Navbar: React.FC = () => {
                     alt="Dewmina Super Line"
                     className="h-11 md:h-14 w-auto object-contain transition-transform duration-500"
                   />
-                  {/* 3D glow ring behind logo */}
+                  <div className="nav3d-logo-depth" />
+                  <div className="nav3d-logo-shine" />
                   <div className="nav3d-logo-glow" />
                 </div>
               </div>
@@ -137,7 +150,7 @@ export const Navbar: React.FC = () => {
                   return (
                     <button
                       key={item.key}
-                      onClick={() => setCurrentView(item.key as any)}
+                      onClick={() => handleNavItemClick(item.key)}
                       className={`nav3d-link group ${active ? 'nav3d-link-active' : 'nav3d-link-inactive'}`}
                       style={{ animationDelay: `${idx * 0.1}s` }}
                     >
@@ -329,7 +342,7 @@ export const Navbar: React.FC = () => {
                 return (
                   <button
                     key={item.key}
-                    onClick={() => { setCurrentView(item.key as any); setMobileOpen(false); }}
+                    onClick={() => handleNavItemClick(item.key)}
                     className={`nav3d-mobile-item ${active ? 'nav3d-mobile-active' : ''}`}
                     style={{ animationDelay: `${idx * 0.05}s` }}
                   >
