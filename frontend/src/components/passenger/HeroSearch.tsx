@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import {
   MapPin, Calendar, ArrowRightLeft, Search,
-  Shield, Filter, Sparkles, Clock, Star
+  Shield, Filter, Sparkles, Clock, Star, UserRound
 } from 'lucide-react';
 
 const CITIES = [
@@ -33,8 +33,11 @@ export const HeroSearch: React.FC = () => {
     searchDestination,
     searchDate,
     busTypeFilter,
+    currentUser,
     setSearchCriteria,
     setBusTypeFilter,
+    setCurrentView,
+    setShowAuthModal,
     t,
   } = useBookingStore();
 
@@ -51,6 +54,14 @@ export const HeroSearch: React.FC = () => {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSearchCriteria(origin, destination, date);
+  };
+
+  const handleAccountClick = () => {
+    if (currentUser) {
+      setCurrentView('my-bookings');
+    } else {
+      setShowAuthModal(true);
+    }
   };
 
   return (
@@ -278,6 +289,18 @@ export const HeroSearch: React.FC = () => {
                   <option value="Double Decker Sleeper" className="text-slate-900">Double Decker</option>
                 </select>
               </div>
+
+              <button
+                type="button"
+                onClick={handleAccountClick}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl
+                           border border-white/20 bg-white/10 text-white/85 text-xs font-bold
+                           backdrop-blur-sm hover:bg-white/20 hover:border-white/35
+                           transition-all duration-300 hover:scale-105 active:scale-95"
+              >
+                <UserRound className="w-4 h-4 text-blue-200" />
+                Passenger Profile
+              </button>
 
               {/* Search CTA with ripple */}
               <button
