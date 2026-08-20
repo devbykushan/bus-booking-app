@@ -32,10 +32,8 @@ export const HeroSearch: React.FC = () => {
     searchOrigin,
     searchDestination,
     searchDate,
-    soloFemaleOnly,
     busTypeFilter,
     setSearchCriteria,
-    setSoloFemaleOnly,
     setBusTypeFilter,
     t,
   } = useBookingStore();
@@ -262,20 +260,6 @@ export const HeroSearch: React.FC = () => {
 
             {/* Filters + Submit */}
             <div className="relative flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-white/20">
-
-              <button
-                type="button"
-                onClick={() => setSoloFemaleOnly(!soloFemaleOnly)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-bold
-                            transition-all duration-300 hover:scale-105 active:scale-95 ${soloFemaleOnly
-                    ? 'bg-pink-500/25 border-pink-400/50 text-pink-200 backdrop-blur-sm shadow-lg shadow-pink-900/20'
-                    : 'bg-white/10 border-white/20 text-white/80 hover:bg-white/20 backdrop-blur-sm'
-                  }`}
-              >
-                <Shield className={`w-4 h-4 ${soloFemaleOnly ? 'text-pink-300' : 'text-white/60'}`} />
-                {t('soloFemaleSeatsOnly')}
-                {soloFemaleOnly && <span className="w-2 h-2 rounded-full bg-pink-400 animate-ping" />}
-              </button>
 
               <div className="flex items-center gap-2 text-xs bg-white/10 backdrop-blur-sm
                               border border-white/20 px-3.5 py-2.5 rounded-2xl text-white/80

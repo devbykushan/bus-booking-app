@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import type { Seat, DeckType } from '../../types/booking';
-import { ArrowLeft, Shield, Clock, Check, Armchair, ChevronRight, Lock } from 'lucide-react';
+import { ArrowLeft, Clock, Check, Armchair, ChevronRight, Lock } from 'lucide-react';
 
 export const SeatMap: React.FC = () => {
   const { 
@@ -122,7 +122,7 @@ export const SeatMap: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs">
+            <div className="grid grid-cols-3 gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-md seat-available border-emerald-500" />
               <span className="text-slate-600">{t('available')}</span>
@@ -134,12 +134,6 @@ export const SeatMap: React.FC = () => {
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-md seat-booked" />
               <span className="text-slate-600">{t('booked')}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-5.5 h-6 rounded-xl flex items-center justify-center bg-pink-50 border border-pink-200 text-pink-500">
-                <Shield className="w-3.5 h-3.5" />
-              </div>
-              <span className="text-slate-600">{t('femaleOnly')}</span>
             </div>
           </div>
 
@@ -176,12 +170,10 @@ export const SeatMap: React.FC = () => {
                       {leftSeats.map(seat => {
                         const isSelected = selectedSeatIds.includes(seat.id);
                         const isBooked = seat.status === 'booked';
-                        const isFemale = seat.isFemaleOnly;
 
                         let styleClass = 'seat-available';
                         if (isBooked) styleClass = 'seat-booked';
                         else if (isSelected) styleClass = 'seat-selected';
-                        else if (isFemale) styleClass = 'seat-female';
 
                         return (
                           <button
@@ -193,8 +185,6 @@ export const SeatMap: React.FC = () => {
                             <span className="text-[10px] opacity-80">{seat.number}</span>
                             {isSelected ? (
                               <Check className="w-4 h-4 text-white" />
-                            ) : isFemale ? (
-                              <Shield className="w-3.5 h-3.5 text-pink-500" />
                             ) : (
                               <span className="text-[9px] font-mono">Rs.{seat.price}</span>
                             )}
@@ -211,12 +201,10 @@ export const SeatMap: React.FC = () => {
                       {rightSeats.map(seat => {
                         const isSelected = selectedSeatIds.includes(seat.id);
                         const isBooked = seat.status === 'booked';
-                        const isFemale = seat.isFemaleOnly;
 
                         let styleClass = 'seat-available';
                         if (isBooked) styleClass = 'seat-booked';
                         else if (isSelected) styleClass = 'seat-selected';
-                        else if (isFemale) styleClass = 'seat-female';
 
                         return (
                           <button
@@ -228,8 +216,6 @@ export const SeatMap: React.FC = () => {
                             <span className="text-[10px] opacity-80">{seat.number}</span>
                             {isSelected ? (
                               <Check className="w-4 h-4 text-white" />
-                            ) : isFemale ? (
-                              <Shield className="w-3.5 h-3.5 text-pink-500" />
                             ) : (
                               <span className="text-[9px] font-mono">Rs.{seat.price}</span>
                             )}

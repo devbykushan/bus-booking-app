@@ -21,7 +21,6 @@ export function App() {
     searchOrigin,
     searchDestination,
     busTypeFilter,
-    soloFemaleOnly,
     isLoading,
     error,
     loadRoutes,
@@ -49,12 +48,6 @@ export function App() {
   // Filter routes based on active search criteria
   const filteredRoutes = routes.filter(route => {
     if (busTypeFilter !== 'all' && route.busType !== busTypeFilter) return false;
-    if (soloFemaleOnly) {
-      const hasFemaleSeats = route.seats?.some(
-        (s: any) => s.isFemaleOnly && s.status === 'available'
-      );
-      if (!hasFemaleSeats) return false;
-    }
     return true;
   });
 
@@ -144,7 +137,7 @@ export function App() {
                       <div className="glass-panel p-12 rounded-3xl text-center border border-slate-200 space-y-3">
                         <AlertCircle className="w-10 h-10 text-amber-400 mx-auto" />
                         <p className="text-slate-600 font-semibold text-sm">No buses matched your filters.</p>
-                        <p className="text-xs text-slate-400">Try resetting the Bus Category filter or solo female option.</p>
+                        <p className="text-xs text-slate-400">Try resetting the Bus Category filter.</p>
                       </div>
                     ) : (
                       <div className="space-y-4">

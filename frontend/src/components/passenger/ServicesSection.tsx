@@ -31,7 +31,7 @@ export const ServicesSection: React.FC = () => {
       icon: <Shield className="w-6 h-6 text-pink-600" />,
       title: 'Safe & Secure Travel',
       description:
-        'Equipped with live GPS tracking, emergency exits, CCTV monitoring, and dedicated Solo Female seat reservations.',
+        'Equipped with live GPS tracking, emergency exits, and CCTV monitoring.',
       badge: 'Women-Friendly',
       badgeColor: 'bg-pink-50 text-pink-600 border-pink-200',
     },
