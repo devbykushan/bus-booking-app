@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import type { BusRoute, BoardingPoint, Booking, PassengerDetails, UserAccount } from '../types/booking';
 import { routesApi, bookingsApi, seatsApi, validateApi } from '../services/api';
 import confetti from 'canvas-confetti';
+import { translations } from './translations';
+import type { Language, TranslationKey } from './translations';
+
 
 // ─── Generate a persistent browser session ID for seat locking ────────────────
 function getSessionId(): string {
@@ -99,6 +102,11 @@ interface BookingStore {
   // GPS tracking
   trackingRouteId: string | null;
   setTrackingRouteId: (id: string | null) => void;
+
+  // Localization
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: TranslationKey | string) => string;
 }
 
 export const useBookingStore = create<BookingStore>((set, get) => ({
@@ -385,4 +393,17 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
 
   trackingRouteId: 'route-101',
   setTrackingRouteId: (id) => set({ trackingRouteId: id, currentView: 'live-tracking' }),
+
+  // Localization Implementation
+  language: (localStorage.getItem('dewmina_lang') as Language) || 'english',
+  setLanguage: (lang) => {
+    localStorage.setItem('dewmina_lang', lang);
+    set({ language: lang });
+  },
+  t: (key) => {
+    const lang = get().language;
+    const dict = translations[lang] || translations.english;
+    // Fallback if the key doesn't exist in translation dictionary
+    return (dict as any)[key] || key;
+  },
 }));

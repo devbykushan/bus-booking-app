@@ -8,7 +8,7 @@ interface BusCardProps {
 }
 
 export const BusCard: React.FC<BusCardProps> = ({ route }) => {
-  const { setSelectedRoute, setCurrentView, setTrackingRouteId, setShowAuthModal } = useBookingStore();
+  const { setSelectedRoute, setCurrentView, setTrackingRouteId, setShowAuthModal, t } = useBookingStore();
 
   const handleSelectSeats = () => {
     const token = localStorage.getItem('auth_token');
@@ -49,7 +49,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route }) => {
             </span>
             {route.hasUpperDeck && (
               <span className="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100 font-medium flex items-center gap-1">
-                <Armchair className="w-3.5 h-3.5" /> Double Deck (Upper & Lower)
+                <Armchair className="w-3.5 h-3.5" /> {t('upperLowerDeck')}
               </span>
             )}
           </div>
@@ -69,7 +69,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route }) => {
         <div className="flex items-center justify-between lg:justify-center gap-6 px-4 py-3 bg-slate-50 rounded-xl border border-slate-200">
           <div className="text-center">
             <p className="text-base font-bold text-slate-800">{route.departureTime}</p>
-            <p className="text-xs text-slate-500 font-medium">{route.origin.split(',')[0]}</p>
+            <p className="text-xs text-slate-500 font-medium">{t(route.origin.split(',')[0])}</p>
           </div>
 
           <div className="flex flex-col items-center gap-1 px-3">
@@ -80,24 +80,24 @@ export const BusCard: React.FC<BusCardProps> = ({ route }) => {
               <div className="w-2 h-2 rounded-full bg-blue-500 absolute -top-0.75 left-0" />
               <div className="w-2 h-2 rounded-full bg-indigo-500 absolute -top-0.75 right-0" />
             </div>
-            <span className="text-[10px] text-blue-600 font-semibold">Direct Route</span>
+            <span className="text-[10px] text-blue-600 font-semibold">{t('directRoute')}</span>
           </div>
 
           <div className="text-center">
             <p className="text-base font-bold text-slate-800">{route.arrivalTime}</p>
-            <p className="text-xs text-slate-500 font-medium">{route.destination.split(',')[0]}</p>
+            <p className="text-xs text-slate-500 font-medium">{t(route.destination.split(',')[0])}</p>
           </div>
         </div>
 
         <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between gap-4 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100">
           <div className="text-left lg:text-right">
-            <span className="text-xs text-slate-400">Starting from</span>
+            <span className="text-xs text-slate-400">{t('startingFrom')}</span>
             <p className="text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
               LKR {route.priceStarting.toLocaleString()}
             </p>
             <p className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              {route.availableSeatsCount} seats left
+              {route.availableSeatsCount} {t('seatsLeft')}
             </p>
           </div>
 
@@ -114,7 +114,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route }) => {
               onClick={handleSelectSeats}
               className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm flex items-center gap-1.5 transition-all transform active:scale-95 cursor-pointer"
             >
-              <span>View Seats</span>
+              <span>{t('viewSeats')}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>

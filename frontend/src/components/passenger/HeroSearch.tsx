@@ -37,6 +37,7 @@ export const HeroSearch: React.FC = () => {
     setSearchCriteria,
     setSoloFemaleOnly,
     setBusTypeFilter,
+    t,
   } = useBookingStore();
 
   const [origin, setOrigin] = useState(searchOrigin);
@@ -124,12 +125,12 @@ export const HeroSearch: React.FC = () => {
                            text-white/90 text-xs font-bold tracking-wider uppercase
                            shadow-lg shadow-blue-900/20">
             <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            Sri Lanka&apos;s #1 Real-Time Bus Booking
+            {t('heroBadge')}
             {/* Live badge with beacon rings */}
             <span className="relative inline-flex items-center">
               <span className="absolute inset-0 rounded-full bg-blue-500 animate-beacon" />
               <span className="relative px-2 py-0.5 rounded-full bg-blue-500 text-white text-[10px] font-extrabold uppercase tracking-widest">
-                Live
+                {t('heroLive')}
               </span>
             </span>
           </span>
@@ -138,8 +139,7 @@ export const HeroSearch: React.FC = () => {
         {/* Main headline */}
         <div className="space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white leading-tight tracking-tight drop-shadow-2xl">
-            Book Premium Seats
-
+            {t('heroTitle')}
           </h1>
 
           {/* Dewmina Super Line branding with shimmer */}
@@ -153,7 +153,7 @@ export const HeroSearch: React.FC = () => {
 
           <p className="text-white/65 text-sm md:text-base max-w-2xl mx-auto font-medium leading-relaxed animate-fade-in-up"
             style={{ animationDelay: '0.35s' }}>
-            Interactive seat maps · 8-minute seat lock · Live GPS tracking · Female-reserved protection
+            {t('heroSub')}
           </p>
         </div>
 
@@ -164,7 +164,7 @@ export const HeroSearch: React.FC = () => {
         >
           {[
             { icon: <Shield className="w-3.5 h-3.5 text-green-400" />, label: 'SSL Secured Payments' },
-            { icon: <Clock className="w-3.5 h-3.5 text-amber-400" />, label: '8-Min Seat Lock' },
+            { icon: <Clock className="w-3.5 h-3.5 text-amber-400" />, label: t('seatsLocked') },
             { icon: <Star className="w-3.5 h-3.5 text-yellow-400" />, label: '4.9★ Rated Service' },
           ].map(({ icon, label }, i) => (
             <span
@@ -203,14 +203,14 @@ export const HeroSearch: React.FC = () => {
                               hover:shadow-blue-200/40 hover:shadow-md">
                 <label className="text-[11px] font-bold uppercase tracking-wider text-blue-600 flex items-center gap-1.5 mb-1">
                   <MapPin className="w-3.5 h-3.5" />
-                  From
+                  {t('from')}
                 </label>
                 <select
                   value={origin}
                   onChange={(e) => setOrigin(e.target.value)}
                   className="w-full bg-transparent text-slate-900 font-extrabold text-base focus:outline-none cursor-pointer"
                 >
-                  {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  {CITIES.map(c => <option key={c} value={c}>{t(c)}</option>)}
                 </select>
               </div>
 
@@ -235,14 +235,14 @@ export const HeroSearch: React.FC = () => {
                               hover:shadow-indigo-200/40 hover:shadow-md">
                 <label className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5 mb-1">
                   <MapPin className="w-3.5 h-3.5" />
-                  To
+                  {t('to')}
                 </label>
                 <select
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
                   className="w-full bg-transparent text-slate-900 font-extrabold text-base focus:outline-none cursor-pointer"
                 >
-                  {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  {CITIES.map(c => <option key={c} value={c}>{t(c)}</option>)}
                 </select>
               </div>
 
@@ -253,7 +253,7 @@ export const HeroSearch: React.FC = () => {
                               hover:shadow-amber-200/40 hover:shadow-md">
                 <label className="text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5 mb-1">
                   <Calendar className="w-3.5 h-3.5" />
-                  Journey Date
+                  {t('journeyDate')}
                 </label>
                 <input
                   type="date"
@@ -277,7 +277,7 @@ export const HeroSearch: React.FC = () => {
                   }`}
               >
                 <Shield className={`w-4 h-4 ${soloFemaleOnly ? 'text-pink-300' : 'text-white/60'}`} />
-                Solo Female Seats Only
+                {t('soloFemaleSeatsOnly')}
                 {soloFemaleOnly && <span className="w-2 h-2 rounded-full bg-pink-400 animate-ping" />}
               </button>
 
@@ -285,13 +285,13 @@ export const HeroSearch: React.FC = () => {
                               border border-white/20 px-3.5 py-2.5 rounded-2xl text-white/80
                               hover:bg-white/15 transition-all duration-300">
                 <Filter className="w-3.5 h-3.5 text-white/60" />
-                <span className="text-white/70 font-semibold">Bus Class:</span>
+                <span className="text-white/70 font-semibold">{t('busClass')}:</span>
                 <select
                   value={busTypeFilter}
                   onChange={(e) => setBusTypeFilter(e.target.value)}
                   className="bg-transparent text-white font-bold focus:outline-none cursor-pointer"
                 >
-                  <option value="all" className="text-slate-900">All Classes</option>
+                  <option value="all" className="text-slate-900">{t('allClasses')}</option>
                   <option value="Lanka Ashok Leyland" className="text-slate-900">Ashok Leyland 57</option>
                   <option value="AC Sleeper" className="text-slate-900">AC Sleeper</option>
                   <option value="Luxury Volvo Multi-Axle" className="text-slate-900">Volvo Multi-Axle</option>
@@ -312,7 +312,7 @@ export const HeroSearch: React.FC = () => {
                            relative overflow-hidden"
               >
                 <Search className="w-4 h-4 relative z-10" />
-                <span className="relative z-10">Search Buses</span>
+                <span className="relative z-10">{t('searchBuses')}</span>
                 {/* Animated shine sweep on hover */}
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent
                                  -translate-x-full hover:translate-x-full transition-transform duration-700 ease-in-out" />
@@ -320,8 +320,6 @@ export const HeroSearch: React.FC = () => {
             </div>
           </form>
         </div>
-
-
 
       </div>
     </div>

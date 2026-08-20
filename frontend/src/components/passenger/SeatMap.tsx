@@ -11,7 +11,8 @@ export const SeatMap: React.FC = () => {
     setCurrentView,
     lockActive,
     lockExpirySeconds,
-    tickLockTimer
+    tickLockTimer,
+    t
   } = useBookingStore();
 
   const [activeDeck, setActiveDeck] = useState<DeckType>('lower');
@@ -31,12 +32,12 @@ export const SeatMap: React.FC = () => {
   if (!selectedRoute) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-500">No bus selected. Please search and pick a route.</p>
+        <p className="text-slate-500">{t('noRecentTicket')}</p>
         <button
           onClick={() => setCurrentView('passenger-search')}
           className="mt-4 px-4 py-2 bg-blue-600 text-white font-bold rounded-xl"
         >
-          Back to Search
+          {t('backToSearch')}
         </button>
       </div>
     );
@@ -66,13 +67,13 @@ export const SeatMap: React.FC = () => {
           onClick={() => setCurrentView('passenger-search')}
           className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors text-sm font-medium"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Search Results
+          <ArrowLeft className="w-4 h-4" /> {t('backToSearch')}
         </button>
 
         <div className="text-left sm:text-right">
           <h2 className="text-xl font-bold text-slate-800 tracking-tight">{selectedRoute.operatorName}</h2>
           <p className="text-xs text-blue-600 font-medium">
-            {selectedRoute.origin} → {selectedRoute.destination} ({selectedRoute.departureTime})
+            {t(selectedRoute.origin.split(',')[0])} → {t(selectedRoute.destination.split(',')[0])} ({selectedRoute.departureTime})
           </p>
         </div>
       </div>
@@ -84,15 +85,15 @@ export const SeatMap: React.FC = () => {
               <Lock className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-sm font-bold text-amber-800">Temporary Seat Hold (Concurrency Control Active)</p>
+              <p className="text-sm font-bold text-amber-800">{t('temporarySeatHold')}</p>
               <p className="text-xs text-amber-700">
-                Your selected seats ({selectedSeatIds.join(', ')}) are reserved exclusively for you.
+                {t('seatsLocked')}: {selectedSeatIds.join(', ')}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-amber-200">
             <Clock className="w-4 h-4 text-amber-600 animate-spin" />
-            <span className="text-xs text-slate-500 font-medium">Expires in:</span>
+            <span className="text-xs text-slate-500 font-medium">{t('seatHoldExpires')}</span>
             <span className="text-base font-mono font-extrabold text-amber-700">{formatTimer(lockExpirySeconds)}</span>
           </div>
         </div>
@@ -108,7 +109,7 @@ export const SeatMap: React.FC = () => {
                   activeDeck === 'lower' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                <Armchair className="w-4 h-4" /> Lower Deck
+                <Armchair className="w-4 h-4" /> {t('lowerDeck')}
               </button>
               <button
                 onClick={() => setActiveDeck('upper')}
@@ -116,7 +117,7 @@ export const SeatMap: React.FC = () => {
                   activeDeck === 'upper' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                <Armchair className="w-4 h-4" /> Upper Deck
+                <Armchair className="w-4 h-4" /> {t('upperDeck')}
               </button>
             </div>
           )}
@@ -124,24 +125,29 @@ export const SeatMap: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-md seat-available border-emerald-500" />
-              <span className="text-slate-600">Available</span>
+              <span className="text-slate-600">{t('available')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-md seat-selected" />
-              <span className="text-slate-600">Selected</span>
+              <span className="text-slate-600">{t('selected')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-md seat-booked" />
-              <span className="text-slate-600">Booked</span>
+              <span className="text-slate-600">{t('booked')}</span>
             </div>
-
+            <div className="flex items-center gap-2">
+              <div className="w-5.5 h-6 rounded-xl flex items-center justify-center bg-pink-50 border border-pink-200 text-pink-500">
+                <Shield className="w-3.5 h-3.5" />
+              </div>
+              <span className="text-slate-600">{t('femaleOnly')}</span>
+            </div>
           </div>
 
           <div className="relative bg-slate-50 rounded-3xl p-6 border-2 border-slate-200 space-y-6">
             <div className="flex flex-wrap items-center justify-between border-b border-slate-200 pb-4 gap-2">
               <div>
                 <span className="text-xs uppercase font-extrabold tracking-widest text-slate-500 block">
-                  Front of Bus ({activeDeck.toUpperCase()} DECK)
+                  {t('frontOfBus')} ({activeDeck === 'lower' ? t('lowerDeck').toUpperCase() : t('upperDeck').toUpperCase()})
                 </span>
                 <span className="text-[11px] font-semibold text-blue-600">
                   {selectedRoute.busType.includes('3*2') || selectedRoute.busType.includes('Leyland')
@@ -152,7 +158,7 @@ export const SeatMap: React.FC = () => {
                 </span>
               </div>
               <div className="flex items-center gap-2 text-slate-700 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm font-semibold text-xs">
-                <span>🚘 Driver Seat (Lanka Ashok Leyland)</span>
+                <span>🚘 {t('driverSeat')}</span>
               </div>
             </div>
 
@@ -237,31 +243,31 @@ export const SeatMap: React.FC = () => {
             </div>
 
             <div className="border-t border-slate-200 pt-3 text-center text-xs text-slate-400 font-mono uppercase tracking-widest">
-              Rear Engine & Emergency Exit (Lanka Ashok Leyland)
+              {t('rearEngine')}
             </div>
           </div>
         </div>
 
         <div className="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
           <h3 className="text-lg font-bold text-slate-800 tracking-tight border-b border-slate-200 pb-3">
-            Booking Summary
+            {t('bookingSummary')}
           </h3>
 
           <div className="space-y-3">
             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Selected Seats ({selectedSeatIds.length})
+              {t('selectedSeats')} ({selectedSeatIds.length})
             </label>
 
             {selectedSeatIds.length === 0 ? (
               <div className="bg-slate-50 rounded-2xl p-6 text-center border border-dashed border-slate-200">
                 <Armchair className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                <p className="text-xs text-slate-500">Click on any green or pink seat on the map to select.</p>
+                <p className="text-xs text-slate-500">Click on any seat on the map to select.</p>
               </div>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {selectedSeatsList.map(s => (
                   <div key={s.id} className="flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1.5 rounded-xl text-xs font-bold">
-                    <span>Seat {s.number} ({s.deck} deck)</span>
+                    <span>Seat {s.number} ({s.deck === 'lower' ? t('lowerDeck') : t('upperDeck')})</span>
                     <span className="text-blue-900 font-mono">LKR {s.price.toLocaleString()}</span>
                     <button onClick={() => toggleSeatSelection(s.id)} className="hover:text-red-500">×</button>
                   </div>
@@ -272,7 +278,7 @@ export const SeatMap: React.FC = () => {
 
           <div className="space-y-2">
             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Select Boarding Point
+              {t('selectBoardingPoint')}
             </label>
             <select
               className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl p-3 text-xs focus:outline-none focus:border-blue-500"
@@ -291,15 +297,15 @@ export const SeatMap: React.FC = () => {
 
           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs">
             <div className="flex justify-between text-slate-600">
-              <span>Base Seat Fare ({selectedSeatIds.length}x)</span>
+              <span>{t('baseSeatFare')} ({selectedSeatIds.length}x)</span>
               <span className="font-mono text-slate-800">LKR {totalPrice.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-slate-600">
-              <span>Service Tax (10%)</span>
+              <span>{t('serviceTax')}</span>
               <span className="font-mono text-slate-800">LKR {(totalPrice * 0.10).toLocaleString()}</span>
             </div>
             <div className="border-t border-slate-200 pt-2 flex justify-between text-sm font-bold text-slate-800">
-              <span>Subtotal</span>
+              <span>{t('subtotal')}</span>
               <span className="font-mono text-blue-600">LKR {(totalPrice * 1.10).toLocaleString()}</span>
             </div>
           </div>
@@ -313,7 +319,7 @@ export const SeatMap: React.FC = () => {
                 : 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-200'
             }`}
           >
-            <span>Continue to Passenger Details</span>
+            <span>{t('proceedToPayment')}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>

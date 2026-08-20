@@ -12,7 +12,8 @@ export const FareBreakdown: React.FC = () => {
     discountRate,
     applyPromoCode,
     createBooking,
-    setCurrentView
+    setCurrentView,
+    t
   } = useBookingStore();
 
   const [promoInput, setPromoInput] = useState('');
@@ -25,12 +26,12 @@ export const FareBreakdown: React.FC = () => {
   if (!selectedRoute || selectedSeatIds.length === 0) {
     return (
       <div className="text-center py-16 space-y-4">
-        <p className="text-slate-500 text-base">Your cart is empty. Please choose seats first.</p>
+        <p className="text-slate-500 text-base">{t('noRecentTicket')}</p>
         <button
           onClick={() => setCurrentView('passenger-search')}
           className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl"
         >
-          Browse Buses
+          {t('backToSearch')}
         </button>
       </div>
     );
@@ -80,9 +81,9 @@ export const FareBreakdown: React.FC = () => {
           onClick={() => setCurrentView('seat-selection')}
           className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors text-sm font-medium"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Seat Map
+          <ArrowLeft className="w-4 h-4" /> {t('backToSearch')}
         </button>
-        <h2 className="text-xl font-bold text-slate-800 tracking-tight">Checkout & Passenger Details</h2>
+        <h2 className="text-xl font-bold text-slate-800 tracking-tight">{t('primaryPassenger')}</h2>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -94,12 +95,12 @@ export const FareBreakdown: React.FC = () => {
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
             <div className="flex items-center gap-2 text-slate-800 font-bold text-base border-b border-slate-200 pb-3">
               <CheckCircle className="w-5 h-5 text-blue-600" />
-              <span>Primary Passenger Information</span>
+              <span>{t('primaryPassenger')}</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div>
-                <label className="block text-slate-600 mb-1 font-medium">Full Name (Matching ID)</label>
+                <label className="block text-slate-600 mb-1 font-medium">{t('fullNameLabel')}</label>
                 <input
                   type="text"
                   placeholder="e.g. Sarah Jenkins"
@@ -110,7 +111,7 @@ export const FareBreakdown: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-slate-600 mb-1 font-medium">Email Address (For E-Ticket)</label>
+                <label className="block text-slate-600 mb-1 font-medium">{t('emailLabel')}</label>
                 <input
                   type="email"
                   placeholder="sarah@example.com"
@@ -121,7 +122,7 @@ export const FareBreakdown: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-slate-600 mb-1 font-medium">Mobile Phone (SMS Alerts)</label>
+                <label className="block text-slate-600 mb-1 font-medium">{t('phoneLabel')}</label>
                 <input
                   type="tel"
                   placeholder="+94 77 123 4567"
@@ -132,15 +133,15 @@ export const FareBreakdown: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-slate-600 mb-1 font-medium">Gender & Age</label>
+                <label className="block text-slate-600 mb-1 font-medium">{t('genderAgeLabel')}</label>
                 <div className="flex gap-2">
                   <select
                     value={passengerInfo.gender}
                     onChange={(e: any) => setPassengerInfo({ gender: e.target.value })}
                     className="w-1/2 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl p-3 focus:outline-none focus:border-blue-500"
                   >
-                    <option value="female">Female</option>
-                    <option value="male">Male</option>
+                    <option value="female">{t('female')}</option>
+                    <option value="male">{t('male')}</option>
                     <option value="other">Other</option>
                   </select>
                   <input
@@ -159,7 +160,7 @@ export const FareBreakdown: React.FC = () => {
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
             <div className="flex items-center gap-2 text-slate-800 font-bold text-base border-b border-slate-200 pb-3">
               <CreditCard className="w-5 h-5 text-indigo-600" />
-              <span>Select Payment Method</span>
+              <span>{t('selectPayment')}</span>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
@@ -224,23 +225,23 @@ export const FareBreakdown: React.FC = () => {
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
             
             <h3 className="text-base font-bold text-slate-800 tracking-tight border-b border-slate-200 pb-3 flex items-center justify-between">
-              <span>Fare Breakdown</span>
+              <span>{t('bookingSummary')}</span>
               <span className="text-xs text-blue-600 font-mono font-normal">
-                {selectedSeats.length} seat(s)
+                {selectedSeats.length} {t('seatsLocked')}
               </span>
             </h3>
 
             {/* Trip Details Summary */}
             <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-xs space-y-1">
               <p className="font-bold text-slate-800">{selectedRoute.operatorName}</p>
-              <p className="text-slate-600">{selectedRoute.origin} → {selectedRoute.destination}</p>
+              <p className="text-slate-600">{t(selectedRoute.origin.split(',')[0])} → {t(selectedRoute.destination.split(',')[0])}</p>
               <p className="text-blue-600 font-mono">Seats: {selectedSeatIds.join(', ')}</p>
             </div>
 
             {/* Promo Code Input */}
             <form onSubmit={handleApplyPromo} className="space-y-2">
               <label className="text-xs font-semibold text-slate-600 flex items-center gap-1">
-                <Tag className="w-3.5 h-3.5 text-amber-500" /> Apply Promo Code
+                <Tag className="w-3.5 h-3.5 text-amber-500" /> {t('applyPromo')}
               </label>
               <div className="flex gap-2">
                 <input
@@ -270,20 +271,20 @@ export const FareBreakdown: React.FC = () => {
                 className="mt-0.5 rounded text-blue-600 focus:ring-0"
               />
               <div>
-                <span className="font-bold text-slate-800">Add Travel Insurance Protection (+LKR 150)</span>
-                <p className="text-[11px] text-slate-500">Covers trip delays, baggage loss & medical emergencies.</p>
+                <span className="font-bold text-slate-800">{t('addInsurance')}</span>
+                <p className="text-[11px] text-slate-500">{t('insuranceSubtitle')}</p>
               </div>
             </label>
 
             {/* Itemized Price Table */}
             <div className="space-y-2 text-xs border-t border-slate-200 pt-4">
               <div className="flex justify-between text-slate-600">
-                <span>Base Seats Fare</span>
+                <span>{t('baseSeatFare')}</span>
                 <span className="font-mono text-slate-800">LKR {baseFare.toLocaleString()}</span>
               </div>
 
               <div className="flex justify-between text-slate-600">
-                <span>Service Taxes & Fees (10%)</span>
+                <span>{t('serviceTax')}</span>
                 <span className="font-mono text-slate-800">LKR {taxAmount.toLocaleString()}</span>
               </div>
 
@@ -296,13 +297,13 @@ export const FareBreakdown: React.FC = () => {
 
               {discountAmount > 0 && (
                 <div className="flex justify-between text-emerald-600 font-semibold">
-                  <span>Promo Discount ({appliedPromo})</span>
+                  <span>{t('insurancePromoDiscount')} ({appliedPromo})</span>
                   <span className="font-mono">-LKR {discountAmount.toLocaleString()}</span>
                 </div>
               )}
 
               <div className="border-t border-slate-200 pt-3 flex justify-between items-center text-base font-extrabold text-slate-800">
-                <span>Total Payable</span>
+                <span>{t('totalPayable')}</span>
                 <span className="text-2xl font-mono text-blue-600">LKR {finalTotal.toLocaleString()}</span>
               </div>
             </div>
@@ -316,12 +317,12 @@ export const FareBreakdown: React.FC = () => {
               {isProcessing ? (
                 <>
                   <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                  <span>Processing Payment via Bank Gateways...</span>
+                  <span>Processing Payment...</span>
                 </>
               ) : (
                 <>
                   <Lock className="w-4 h-4" />
-                  <span>Pay LKR {finalTotal.toLocaleString()} & Generate E-Ticket</span>
+                  <span>{t('securePaymentText')} (LKR {finalTotal.toLocaleString()})</span>
                 </>
               )}
             </button>

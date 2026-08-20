@@ -12,197 +12,503 @@
   }
 }
 
-/* ─── PREMIUM NAVBAR ──────────────────────────────────────────────────────────── */
+/* ─── 3D ANIMATED NAVBAR ──────────────────────────────────────────────────────── */
 
-@keyframes navGradientFlow {
+/* Keyframes */
+@keyframes nav3dGradientFlow {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
-@keyframes navPulseDot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.5; transform: scale(0.7); }
+@keyframes nav3dOrbFloat1 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33%      { transform: translate3d(40px, -20px, 30px) scale(1.2); }
+  66%      { transform: translate3d(-20px, 15px, -10px) scale(0.9); }
 }
 
-@keyframes navLockPulse {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50%      { opacity: 0; transform: scale(1.8); }
+@keyframes nav3dOrbFloat2 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.1); }
+  33%      { transform: translate3d(-30px, 25px, 20px) scale(0.85); }
+  66%      { transform: translate3d(50px, -10px, -20px) scale(1.15); }
 }
 
-@keyframes navSigninGlow {
-  0%, 100% { opacity: 0; }
-  50%      { opacity: 1; }
+@keyframes nav3dOrbFloat3 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.9); }
+  50%      { transform: translate3d(20px, -30px, 40px) scale(1.3); }
 }
 
-.navbar-root {
-  /* Dark glass base */
+@keyframes nav3dPulseBar {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px 2px rgba(59, 130, 246, 0.6); }
+  50%      { opacity: 0.7; box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.3); }
+}
+
+@keyframes nav3dIconBounce {
+  0%   { transform: perspective(200px) rotateY(0deg) scale(1); }
+  25%  { transform: perspective(200px) rotateY(15deg) scale(1.1); }
+  50%  { transform: perspective(200px) rotateY(0deg) scale(1.05); }
+  75%  { transform: perspective(200px) rotateY(-10deg) scale(1.1); }
+  100% { transform: perspective(200px) rotateY(0deg) scale(1); }
+}
+
+@keyframes nav3dLogoFloat {
+  0%, 100% { transform: perspective(600px) translateZ(0px) rotateY(0deg); }
+  25%      { transform: perspective(600px) translateZ(8px) rotateY(2deg); }
+  50%      { transform: perspective(600px) translateZ(12px) rotateY(0deg); }
+  75%      { transform: perspective(600px) translateZ(6px) rotateY(-2deg); }
+}
+
+@keyframes nav3dShine {
+  0%   { left: -100%; }
+  100% { left: 200%; }
+}
+
+@keyframes nav3dSparkle {
+  0%, 100% { transform: rotate(0deg) scale(1); opacity: 0.7; }
+  50%      { transform: rotate(180deg) scale(1.3); opacity: 1; }
+}
+
+@keyframes nav3dRingExpand {
+  0%   { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes nav3dAvatarSpin {
+  0%   { transform: perspective(300px) rotateY(0deg); }
+  100% { transform: perspective(300px) rotateY(360deg); }
+}
+
+@keyframes nav3dDropIn {
+  0%   { opacity: 0; transform: perspective(800px) rotateX(-15deg) translateY(-10px) scale(0.95); }
+  100% { opacity: 1; transform: perspective(800px) rotateX(0deg) translateY(0) scale(1); }
+}
+
+@keyframes nav3dMobileSlide {
+  0%   { opacity: 0; transform: perspective(600px) rotateX(-5deg) translateY(-8px); }
+  100% { opacity: 1; transform: perspective(600px) rotateX(0deg) translateY(0); }
+}
+
+@keyframes nav3dHamburgerFlip {
+  0%   { transform: perspective(200px) rotateY(0deg); }
+  50%  { transform: perspective(200px) rotateY(90deg); }
+  100% { transform: perspective(200px) rotateY(0deg); }
+}
+
+/* ── Perspective Container ── */
+.nav3d-perspective {
+  perspective: 1200px;
+  perspective-origin: 50% 0%;
+}
+
+/* ── Main navbar ── */
+.nav3d-root {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  position: relative;
+  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out, box-shadow 0.5s ease;
   background: linear-gradient(
     135deg,
-    rgba(15, 23, 42, 0.97) 0%,
-    rgba(30, 27, 75, 0.95) 50%,
-    rgba(15, 23, 42, 0.97) 100%
+    rgba(8, 12, 30, 0.98) 0%,
+    rgba(20, 18, 60, 0.96) 40%,
+    rgba(10, 25, 55, 0.97) 100%
   );
-  backdrop-filter: blur(20px) saturate(1.6);
-  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
 }
 
-.navbar-scrolled {
+.nav3d-scrolled {
   box-shadow:
-    0 8px 32px -4px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    0 12px 40px -6px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.navbar-top {
+.nav3d-top {
   box-shadow:
-    0 4px 24px -2px rgba(0, 0, 0, 0.3);
+    0 4px 28px -2px rgba(0, 0, 0, 0.4),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.03);
 }
 
-/* Animated gradient line at top */
-.navbar-gradient-line {
+/* ── Animated gradient top line ── */
+.nav3d-gradient-line {
   height: 3px;
   background: linear-gradient(
     90deg,
-    #3b82f6,
-    #8b5cf6,
-    #ec4899,
-    #f59e0b,
-    #10b981,
-    #3b82f6
+    #3b82f6, #8b5cf6, #ec4899, #f59e0b, #10b981, #06b6d4, #3b82f6
   );
-  background-size: 300% 100%;
-  animation: navGradientFlow 6s linear infinite;
+  background-size: 400% 100%;
+  animation: nav3dGradientFlow 5s linear infinite;
+  transform: translateZ(2px);
 }
 
-/* Nav link base */
-.navbar-link-active {
-  background: rgba(59, 130, 246, 0.12);
-  color: #93c5fd;
-  border: 1px solid rgba(59, 130, 246, 0.2);
-}
-
-.navbar-link-inactive {
-  color: #94a3b8;
-  border: 1px solid transparent;
-}
-
-.navbar-link-inactive:hover {
-  color: #e2e8f0;
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.08);
-  transform: translateY(-1px);
-}
-
-/* Active indicator dot */
-.navbar-active-dot {
+/* ── Background depth layers ── */
+.nav3d-bg-layer {
   position: absolute;
-  bottom: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6px;
-  height: 6px;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateZ(-20px);
+}
+
+.nav3d-orb {
+  position: absolute;
   border-radius: 50%;
-  background: #3b82f6;
-  box-shadow: 0 0 10px 2px rgba(59, 130, 246, 0.5);
-  animation: navPulseDot 2s ease-in-out infinite;
+  filter: blur(40px);
+  opacity: 0.15;
 }
 
-.navbar-active-dot-purple {
-  background: #8b5cf6;
-  box-shadow: 0 0 10px 2px rgba(139, 92, 246, 0.5);
+.nav3d-orb-1 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, #3b82f6, transparent 70%);
+  top: -80px;
+  left: 10%;
+  animation: nav3dOrbFloat1 8s ease-in-out infinite;
 }
 
-/* Admin button states */
-.navbar-admin-active {
-  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+.nav3d-orb-2 {
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, #8b5cf6, transparent 70%);
+  top: -60px;
+  right: 20%;
+  animation: nav3dOrbFloat2 10s ease-in-out infinite;
+}
+
+.nav3d-orb-3 {
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, #06b6d4, transparent 70%);
+  top: -70px;
+  left: 50%;
+  animation: nav3dOrbFloat3 12s ease-in-out infinite;
+}
+
+/* Mouse-following spotlight */
+.nav3d-spotlight {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.08), transparent 60%);
+  top: calc(var(--mouse-y) - 150px);
+  left: calc(var(--mouse-x) - 150px);
+  transition: top 0.3s ease-out, left 0.3s ease-out;
+  pointer-events: none;
+}
+
+/* ── Logo with 3D float ── */
+.nav3d-logo-wrapper {
+  position: relative;
+  animation: nav3dLogoFloat 6s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+.nav3d-logo-glow {
+  position: absolute;
+  inset: -8px;
+  border-radius: 16px;
+  background: radial-gradient(ellipse, rgba(59, 130, 246, 0.2), transparent 70%);
+  transform: translateZ(-5px);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.nav3d-brand:hover .nav3d-logo-glow {
+  opacity: 1;
+}
+
+.nav3d-brand:hover img {
+  transform: perspective(400px) rotateY(-5deg) scale(1.08);
+}
+
+/* ── 3D Nav Links ── */
+.nav3d-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav3d-link-active {
+  background: rgba(59, 130, 246, 0.1);
+  color: #93c5fd;
+  border-color: rgba(59, 130, 246, 0.2);
+  transform: perspective(500px) translateZ(6px);
+  box-shadow:
+    0 4px 16px -4px rgba(59, 130, 246, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.nav3d-link-inactive {
+  color: #94a3b8;
+}
+
+.nav3d-link-inactive:hover {
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
+  transform: perspective(500px) translateZ(8px) rotateX(-2deg);
+  box-shadow: 0 6px 20px -6px rgba(0, 0, 0, 0.3);
+}
+
+/* ── 3D Icon Cube ── */
+.nav3d-icon-cube {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transform-style: preserve-3d;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #64748b;
+}
+
+.nav3d-icon-active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(6, 182, 212, 0.2));
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  animation: nav3dIconBounce 3s ease-in-out infinite;
+  box-shadow: 0 2px 10px -2px rgba(59, 130, 246, 0.4);
+}
+
+.nav3d-link:hover .nav3d-icon-cube:not(.nav3d-icon-active) {
+  transform: perspective(200px) rotateY(15deg) scale(1.1);
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.25);
+  color: #60a5fa;
+}
+
+.nav3d-icon-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+}
+
+/* ── Active bar with reflection ── */
+.nav3d-active-bar {
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  animation: nav3dPulseBar 2.5s ease-in-out infinite;
+  transform: translateZ(4px);
+}
+
+.nav3d-bar-purple {
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+}
+
+.nav3d-active-reflection {
+  position: absolute;
+  bottom: -8px;
+  left: 20%;
+  right: 20%;
+  height: 8px;
+  border-radius: 0 0 50% 50%;
+  background: linear-gradient(to bottom, rgba(59, 130, 246, 0.15), transparent);
+  transform: translateZ(2px) scaleY(-1);
+  opacity: 0.5;
+  filter: blur(4px);
+}
+
+/* ── Hover shine sweep ── */
+.nav3d-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.06),
+    transparent
+  );
+  transform: skewX(-20deg);
+  pointer-events: none;
+  transition: none;
+}
+
+.nav3d-link:hover .nav3d-shine {
+  animation: nav3dShine 0.6s ease forwards;
+}
+
+/* ── Admin button ── */
+.nav3d-admin-active {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(139, 92, 246, 0.2));
   color: white;
-  border: 1px solid rgba(139, 92, 246, 0.4);
-  box-shadow: 0 4px 16px -2px rgba(139, 92, 246, 0.35);
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow:
+    0 4px 20px -4px rgba(139, 92, 246, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transform: perspective(500px) translateZ(6px);
 }
 
-.navbar-admin-inactive {
-  background: rgba(139, 92, 246, 0.1);
+.nav3d-admin-inactive {
+  background: rgba(139, 92, 246, 0.08);
   color: #c4b5fd;
-  border: 1px solid rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.12);
 }
 
-.navbar-admin-inactive:hover {
-  background: rgba(139, 92, 246, 0.2);
+.nav3d-admin-inactive:hover {
+  background: rgba(139, 92, 246, 0.15);
   color: #ddd6fe;
-  border-color: rgba(139, 92, 246, 0.3);
+  border-color: rgba(139, 92, 246, 0.25);
+  transform: perspective(500px) translateZ(8px) rotateX(-2deg);
 }
 
-/* Seat lock countdown pill */
-.navbar-seat-lock {
+.nav3d-icon-admin-active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(168, 85, 247, 0.3));
+  border-color: rgba(139, 92, 246, 0.4);
+  color: #c4b5fd;
+  animation: nav3dIconBounce 3s ease-in-out infinite;
+  box-shadow: 0 2px 10px -2px rgba(139, 92, 246, 0.4);
+}
+
+/* ── Seat lock pill ── */
+.nav3d-seat-lock {
   position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
   border-radius: 9999px;
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
   overflow: hidden;
+  transform: perspective(400px) translateZ(4px);
 }
 
-.navbar-seat-lock-pulse {
+.nav3d-lock-ring {
   position: absolute;
-  inset: 0;
+  inset: -2px;
   border-radius: 9999px;
-  border: 2px solid rgba(245, 158, 11, 0.4);
-  animation: navLockPulse 2s ease-out infinite;
+  border: 2px solid rgba(245, 158, 11, 0.3);
+  animation: nav3dRingExpand 2s ease-out infinite;
   pointer-events: none;
 }
 
-/* Profile button */
-.navbar-profile-btn {
+.nav3d-lock-ring-2 {
+  animation-delay: 1s;
+}
+
+/* ── 3D Language button ── */
+.nav3d-lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+  color: #cbd5e1;
+}
+
+.nav3d-lang-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  transform: perspective(400px) translateZ(4px);
+}
+
+/* ── 3D Profile button ── */
+.nav3d-profile-btn {
   padding: 6px 12px;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.04);
-  transition: all 0.25s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
 }
 
-.navbar-profile-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+.nav3d-profile-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.15);
+  transform: perspective(400px) translateZ(4px);
 }
 
-/* Avatar circle */
-.navbar-avatar {
-  width: 32px;
-  height: 32px;
+/* ── 3D Avatar ── */
+.nav3d-avatar {
+  position: relative;
+  width: 34px;
+  height: 34px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+  background-size: 200% 200%;
+  animation: nav3dGradientFlow 4s ease infinite;
   display: flex;
   align-items: center;
   justify-content: center;
+  transform-style: preserve-3d;
+  transition: transform 0.4s ease;
+}
+
+.nav3d-profile-btn:hover .nav3d-avatar {
+  animation: nav3dAvatarSpin 0.8s ease forwards;
+}
+
+.nav3d-avatar-text {
   color: white;
   font-weight: 800;
   font-size: 14px;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 2;
 }
 
-/* Profile dropdown */
-.navbar-profile-dropdown {
+.nav3d-avatar-ring {
   position: absolute;
-  top: calc(100% + 8px);
+  inset: -3px;
+  border-radius: 12px;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  animation: nav3dRingExpand 3s ease-out infinite;
+  pointer-events: none;
+}
+
+/* ── 3D Dropdown ── */
+.nav3d-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
   right: 0;
   width: 220px;
-  background: rgba(15, 23, 42, 0.98);
-  backdrop-filter: blur(20px);
+  background: rgba(10, 15, 35, 0.98);
+  backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   box-shadow:
-    0 20px 40px -8px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+    0 24px 48px -12px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 0 30px -6px rgba(59, 130, 246, 0.1);
   overflow: hidden;
   z-index: 50;
+  animation: nav3dDropIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top right;
 }
 
-.navbar-dropdown-item {
+.nav3d-dropdown-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -212,68 +518,155 @@
   font-weight: 500;
   color: #cbd5e1;
   transition: all 0.2s ease;
+  transform-style: preserve-3d;
 }
 
-.navbar-dropdown-item:hover {
+.nav3d-dropdown-item:hover {
   background: rgba(255, 255, 255, 0.06);
   color: white;
+  transform: perspective(300px) translateZ(3px);
 }
 
-/* Sign-in button with glow */
-.navbar-signin-btn {
+.nav3d-dropdown-danger {
+  color: #f87171;
+}
+
+.nav3d-dropdown-danger:hover {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ── 3D Sign-in button ── */
+.nav3d-signin {
   position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 22px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
   color: white;
-  font-weight: 700;
   font-size: 13px;
   border: 1px solid rgba(59, 130, 246, 0.3);
-  box-shadow: 0 4px 20px -4px rgba(37, 99, 235, 0.4);
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.navbar-signin-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px -4px rgba(37, 99, 235, 0.5);
-  background: linear-gradient(135deg, #1d4ed8, #2563eb);
-}
-
-.navbar-signin-glow {
+.nav3d-signin-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.15) 50%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  animation: navSigninGlow 3s ease-in-out infinite;
+  background: linear-gradient(135deg, #1d4ed8, #2563eb, #3b82f6);
+  background-size: 200% 200%;
+  animation: nav3dGradientFlow 4s ease infinite;
+  z-index: 0;
+}
+
+.nav3d-signin:hover {
+  transform: perspective(500px) translateZ(10px) rotateX(-3deg);
+  box-shadow:
+    0 10px 30px -6px rgba(37, 99, 235, 0.5),
+    0 0 20px -4px rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.nav3d-signin-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transform: skewX(-20deg);
+  z-index: 1;
   pointer-events: none;
 }
 
-/* Mobile menu */
-.navbar-mobile-menu {
-  overflow: hidden;
-  background: rgba(15, 23, 42, 0.98);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+.nav3d-signin:hover .nav3d-signin-shine {
+  animation: nav3dShine 0.7s ease forwards;
 }
 
-.navbar-mobile-open {
+.nav3d-sparkle {
+  animation: nav3dSparkle 2s ease-in-out infinite;
+}
+
+/* ── 3D Hamburger ── */
+.nav3d-hamburger {
+  padding: 8px;
+  border-radius: 12px;
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  transition: all 0.3s ease;
+  transform-style: preserve-3d;
+}
+
+.nav3d-hamburger:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  transform: perspective(200px) translateZ(4px);
+}
+
+.nav3d-hamburger-inner {
+  transition: transform 0.4s ease;
+}
+
+.nav3d-hamburger-open {
+  animation: nav3dHamburgerFlip 0.4s ease forwards;
+}
+
+/* ── 3D Mobile Menu ── */
+.nav3d-mobile {
+  overflow: hidden;
+  background: rgba(8, 12, 30, 0.98);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  transform-style: preserve-3d;
+}
+
+.nav3d-mobile-open {
   max-height: 400px;
   opacity: 1;
+  animation: nav3dMobileSlide 0.4s ease forwards;
 }
 
-.navbar-mobile-closed {
+.nav3d-mobile-closed {
   max-height: 0;
   opacity: 0;
 }
+
+.nav3d-mobile-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #94a3b8;
+  transition: all 0.3s ease;
+  transform-style: preserve-3d;
+}
+
+.nav3d-mobile-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  transform: perspective(500px) translateZ(4px);
+}
+
+.nav3d-mobile-active {
+  background: rgba(59, 130, 246, 0.1);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.nav3d-mobile-admin-active {
+  background: rgba(139, 92, 246, 0.1);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+
 
 /* ─── ANIMATION KEYFRAMES ─────────────────────────────────────────────────────── */
 

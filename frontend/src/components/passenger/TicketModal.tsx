@@ -4,15 +4,15 @@ import { QRCodeSVG } from 'qrcode.react';
 import { CheckCircle2, Printer, MapPin, MessageSquare, Bus, Clock, Calendar } from 'lucide-react';
 
 export const TicketModal: React.FC = () => {
-  const { latestConfirmedBooking, setCurrentView, setTrackingRouteId } = useBookingStore();
+  const { latestConfirmedBooking, setCurrentView, setTrackingRouteId, t } = useBookingStore();
   const [showSMSModal, setShowSMSModal] = useState(false);
 
   if (!latestConfirmedBooking) {
     return (
       <div className="text-center py-16">
-        <p className="text-slate-500">No recent ticket found.</p>
+        <p className="text-slate-500">{t('noRecentTicket')}</p>
         <button onClick={() => setCurrentView('passenger-search')} className="mt-4 px-4 py-2 bg-blue-600 text-white font-bold rounded-xl">
-          Back to Search
+          {t('backToSearch')}
         </button>
       </div>
     );
@@ -32,12 +32,12 @@ export const TicketModal: React.FC = () => {
         <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
           <CheckCircle2 className="w-8 h-8" />
         </div>
-        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">Booking Confirmed!</h2>
+        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">{t('bookingSuccessful')}</h2>
         <p className="text-slate-600 text-sm max-w-xl mx-auto">
           Your bus seat reservation is locked and confirmed. We’ve sent your E-Ticket to <strong className="text-slate-800">{booking.passenger.email}</strong>.
         </p>
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-emerald-200 text-emerald-700 font-mono font-bold text-sm">
-          <span>PNR CODE: {booking.pnr}</span>
+          <span>{t('pnrCode')} {booking.pnr}</span>
         </div>
       </div>
 
@@ -57,7 +57,7 @@ export const TicketModal: React.FC = () => {
           </div>
 
           <div className="text-right">
-            <span className="text-xs text-slate-400 uppercase tracking-widest block">Status</span>
+            <span className="text-xs text-slate-400 uppercase tracking-widest block">{t('status')}</span>
             <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs font-bold uppercase">
               {booking.bookingStatus} & Paid
             </span>
@@ -68,14 +68,14 @@ export const TicketModal: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200 text-xs">
           
           <div className="space-y-1">
-            <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">Origin & Boarding Point</span>
-            <p className="text-base font-bold text-slate-800">{booking.origin}</p>
+            <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">{t('from')} & {t('selectBoardingPoint')}</span>
+            <p className="text-base font-bold text-slate-800">{t(booking.origin.split(',')[0])}</p>
             <p className="text-blue-600 font-medium">{booking.boardingPoint.name}</p>
             <p className="text-slate-500 text-[11px]">{booking.boardingPoint.landmark} ({booking.boardingPoint.time})</p>
           </div>
 
           <div className="space-y-1 text-center md:border-x border-slate-200 md:px-4">
-            <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">Departure Date & Time</span>
+            <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">{t('departureDate')}</span>
             <p className="text-base font-bold text-slate-800 flex items-center justify-center gap-1">
               <Calendar className="w-4 h-4 text-amber-500" /> {booking.departureDate}
             </p>
@@ -85,8 +85,8 @@ export const TicketModal: React.FC = () => {
           </div>
 
           <div className="space-y-1 md:text-right">
-            <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">Destination & Drop Point</span>
-            <p className="text-base font-bold text-slate-800">{booking.destination}</p>
+            <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">{t('destinationDrop')}</span>
+            <p className="text-base font-bold text-slate-800">{t(booking.destination.split(',')[0])}</p>
             <p className="text-indigo-600 font-medium">{booking.dropPoint.name}</p>
           </div>
 
@@ -99,23 +99,23 @@ export const TicketModal: React.FC = () => {
           <div className="md:col-span-8 space-y-4 text-xs">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div>
-                <span className="text-slate-400 block font-medium">Passenger Name</span>
+                <span className="text-slate-400 block font-medium">{t('passengerName')}</span>
                 <span className="text-sm font-bold text-slate-800">{booking.passenger.fullName}</span>
               </div>
               <div>
-                <span className="text-slate-400 block font-medium">Reserved Seats</span>
+                <span className="text-slate-400 block font-medium">{t('selectedSeats')}</span>
                 <span className="text-sm font-extrabold text-blue-600 font-mono">
                   {booking.seats.map(s => s.number).join(', ')}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 block font-medium">Total Paid Amount</span>
+                <span className="text-slate-400 block font-medium">{t('totalPaid')}</span>
                 <span className="text-sm font-extrabold text-slate-800 font-mono">LKR {booking.totalFare.toLocaleString()}</span>
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-[11px] leading-relaxed">
-              💡 <strong>Boarding Instructions:</strong> Please present this E-Ticket or PNR code with a valid photo ID at the boarding gate. Conductor will scan the QR code before boarding.
+              💡 <strong>{t('boardingInstructions')}</strong> Please present this E-Ticket or PNR code with a valid photo ID at the boarding gate. Conductor will scan the QR code before boarding.
             </div>
           </div>
 
@@ -138,14 +138,14 @@ export const TicketModal: React.FC = () => {
           onClick={handlePrint}
           className="px-6 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm border border-slate-200 flex items-center gap-2 transition-all shadow-sm"
         >
-          <Printer className="w-4 h-4" /> Print / Save Ticket PDF
+          <Printer className="w-4 h-4" /> {t('printTicket')}
         </button>
 
         <button
           onClick={() => setShowSMSModal(true)}
           className="px-6 py-3 rounded-xl bg-white hover:bg-slate-50 text-blue-600 font-bold text-sm border border-slate-200 flex items-center gap-2 transition-all shadow-sm"
         >
-          <MessageSquare className="w-4 h-4 text-blue-500" /> Send WhatsApp / SMS Alert
+          <MessageSquare className="w-4 h-4 text-blue-500" /> {t('sendAlert')}
         </button>
 
         <button
@@ -155,7 +155,7 @@ export const TicketModal: React.FC = () => {
           }}
           className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm flex items-center gap-2 transition-all"
         >
-          <MapPin className="w-4 h-4 text-white" /> Track Bus Live Location
+          <MapPin className="w-4 h-4 text-white" /> {t('trackBus')}
         </button>
 
       </div>
@@ -165,7 +165,7 @@ export const TicketModal: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white p-6 rounded-3xl max-w-md w-full border border-slate-200 space-y-4 shadow-xl">
             <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-emerald-600" /> WhatsApp & SMS Ticket Sent
+              <MessageSquare className="w-5 h-5 text-emerald-600" /> {t('smsAlertTitle')}
             </h3>
             <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200 font-mono">
               📲 <strong>Dewmina Super Line:</strong> Hi {booking.passenger.fullName}, your booking for {booking.origin} → {booking.destination} on {booking.departureDate} is CONFIRMED. PNR: {booking.pnr}, Seats: {booking.seats.map(s => s.number).join(', ')}. Track bus live: https://dewminasuperline.lk/track/{booking.routeId}
@@ -174,7 +174,7 @@ export const TicketModal: React.FC = () => {
               onClick={() => setShowSMSModal(false)}
               className="w-full py-2.5 bg-blue-600 text-white font-bold rounded-xl text-xs"
             >
-              Close Alert
+              {t('closeAlert')}
             </button>
           </div>
         </div>
