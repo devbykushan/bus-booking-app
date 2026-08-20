@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { AuthModal } from './AuthModal';
-import { Bus, MapPin, Ticket, Clock, ShieldCheck, User, LogOut, LogIn } from 'lucide-react';
+import { Bus, MapPin, Ticket, Clock, ShieldCheck, User, LogOut, LogIn, Menu, X, ChevronDown } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { 
@@ -18,125 +18,235 @@ export const Navbar: React.FC = () => {
     setShowAuthModal
   } = useBookingStore();
 
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  // Track scroll for navbar style change
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   const formatTimer = (secs: number) => {
     const mins = Math.floor(secs / 60);
     const s = secs % 60;
     return `${mins}:${s < 10 ? '0' : ''}${s}`;
   };
 
+  const navItems = [
+    { key: 'passenger-search', label: 'Find Buses', icon: Bus, activeOn: ['passenger-search', 'seat-selection'] },
+    { key: 'live-tracking', label: 'Live GPS', icon: MapPin, activeOn: ['live-tracking'] },
+    { key: 'my-bookings', label: 'My Tickets', icon: Ticket, activeOn: ['my-bookings'] },
+  ];
+
+  const isActive = (activeOn: string[]) => activeOn.includes(currentView);
+
   return (
     <>
-      <nav className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm px-4 lg:px-8 py-3 transition-all">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          
-          {/* Brand Logo */}
-          <div 
-            onClick={() => setCurrentView('passenger-search')}
-            className="flex items-center gap-3 cursor-pointer group"
-          >
-            <img
-              src="/dewmina-logo.png"
-              alt="Dewmina Super Line Logo"
-              className="h-14 md:h-16 w-auto object-contain group-hover:scale-105 transition-transform"
-            />
-          </div>
+      <nav
+        className={`navbar-root sticky top-0 z-40 transition-all duration-500 ${
+          scrolled
+            ? 'navbar-scrolled'
+            : 'navbar-top'
+        }`}
+      >
+        {/* Animated gradient line at top */}
+        <div className="navbar-gradient-line" />
 
-          {/* Real-time Seat Hold Bar if active */}
-          {lockActive && selectedSeatIds.length > 0 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium animate-pulse">
-              <Clock className="w-4 h-4 text-amber-500" />
-              <span>Seats Locked ({selectedSeatIds.join(', ')}):</span>
-              <span className="font-mono font-bold text-amber-600">{formatTimer(lockExpirySeconds)}</span>
-            </div>
-          )}
-
-          {/* Navigation Links & User Authentication */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm font-medium">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-[72px]">
             
-            <button
-              onClick={() => setCurrentView('passenger-search')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-                currentView === 'passenger-search' || currentView === 'seat-selection'
-                  ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
-              }`}
+            {/* ── Brand ── */}
+            <div
+              onClick={() => { setCurrentView('passenger-search'); setMobileOpen(false); }}
+              className="navbar-brand group cursor-pointer flex items-center gap-3"
             >
-              <Bus className="w-4 h-4" />
-              <span>Find Buses</span>
-            </button>
+              <img
+                src="/dewmina-logo.png"
+                alt="Dewmina Super Line"
+                className="h-11 md:h-14 w-auto object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_2px_8px_rgba(37,99,235,0.25)]"
+              />
+            </div>
 
-            <button
-              onClick={() => setCurrentView('live-tracking')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-                currentView === 'live-tracking'
-                  ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
-              }`}
-            >
-              <MapPin className="w-4 h-4 text-blue-500" />
-              <span>Live GPS Tracker</span>
-            </button>
+            {/* ── Desktop Nav ── */}
+            <div className="hidden md:flex items-center gap-1.5">
+              {navItems.map(item => {
+                const Icon = item.icon;
+                const active = isActive(item.activeOn);
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => setCurrentView(item.key as any)}
+                    className={`navbar-link group relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                      active
+                        ? 'navbar-link-active'
+                        : 'navbar-link-inactive'
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 transition-all duration-300 ${
+                      active ? 'text-blue-400' : 'text-slate-400 group-hover:text-blue-400'
+                    }`} />
+                    <span>{item.label}</span>
+                    {active && <span className="navbar-active-dot" />}
+                  </button>
+                );
+              })}
 
-            <button
-              onClick={() => setCurrentView('my-bookings')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-                currentView === 'my-bookings'
-                  ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
-              }`}
-            >
-              <Ticket className="w-4 h-4" />
-              <span>My Tickets</span>
-            </button>
+              {/* Admin tab */}
+              {(userRole === 'admin' || currentUser?.role === 'admin') && (
+                <button
+                  onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); }}
+                  className={`navbar-link group relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
+                    currentView === 'admin-panel'
+                      ? 'navbar-admin-active'
+                      : 'navbar-admin-inactive'
+                  }`}
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Admin Portal</span>
+                  {currentView === 'admin-panel' && <span className="navbar-active-dot navbar-active-dot-purple" />}
+                </button>
+              )}
+            </div>
 
-            {/* Admin Portal Tab (Available when logged in as admin or role set to admin) */}
-            {(userRole === 'admin' || currentUser?.role === 'admin') && (
-              <button
-                onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); }}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-bold transition-all ${
-                  currentView === 'admin-panel'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200'
-                }`}
-              >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Admin & Fleet Portal</span>
-              </button>
-            )}
+            {/* ── Right side: Seat Lock + Auth ── */}
+            <div className="flex items-center gap-3">
 
-            {/* User Account Login / Profile Status */}
-            {currentUser ? (
-              <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-                <div className="flex items-center gap-2 bg-slate-100 px-3 py-1 rounded-xl text-xs">
-                  <User className="w-4 h-4 text-blue-600" />
-                  <span className="font-bold text-slate-800 truncate max-w-[120px]">{currentUser.name}</span>
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-mono font-bold ${
-                    currentUser.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-blue-100 text-blue-700'
-                  }`}>
-                    {currentUser.role}
+              {/* Seat hold countdown */}
+              {lockActive && selectedSeatIds.length > 0 && (
+                <div className="navbar-seat-lock">
+                  <div className="navbar-seat-lock-pulse" />
+                  <Clock className="w-3.5 h-3.5 text-amber-300" />
+                  <span className="text-amber-100 text-xs font-medium hidden sm:inline">
+                    {selectedSeatIds.length} seat{selectedSeatIds.length > 1 ? 's' : ''} held
+                  </span>
+                  <span className="font-mono font-black text-amber-300 text-sm tabular-nums">
+                    {formatTimer(lockExpirySeconds)}
                   </span>
                 </div>
+              )}
 
+              {/* Auth / Profile */}
+              {currentUser ? (
+                <div className="relative" ref={profileRef}>
+                  <button
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="navbar-profile-btn group flex items-center gap-2"
+                  >
+                    <div className="navbar-avatar">
+                      {currentUser.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="hidden sm:flex flex-col items-start">
+                      <span className="text-xs font-bold text-white leading-none truncate max-w-[100px]">
+                        {currentUser.name}
+                      </span>
+                      <span className={`text-[10px] font-mono uppercase leading-tight ${
+                        currentUser.role === 'admin' ? 'text-purple-300' : 'text-blue-300'
+                      }`}>
+                        {currentUser.role}
+                      </span>
+                    </div>
+                    <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Profile Dropdown */}
+                  {profileOpen && (
+                    <div className="navbar-profile-dropdown animate-pop-in">
+                      <div className="px-4 py-3 border-b border-slate-700/50">
+                        <p className="text-sm font-bold text-white">{currentUser.name}</p>
+                        <p className="text-xs text-slate-400">{currentUser.phone || currentUser.role}</p>
+                      </div>
+                      <div className="py-1">
+                        <button
+                          onClick={() => { setCurrentView('my-bookings'); setProfileOpen(false); }}
+                          className="navbar-dropdown-item"
+                        >
+                          <Ticket className="w-4 h-4" />
+                          My Tickets
+                        </button>
+                        <button
+                          onClick={() => { logout(); setProfileOpen(false); }}
+                          className="navbar-dropdown-item text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
                 <button
-                  onClick={logout}
-                  className="p-1.5 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors"
-                  title="Sign Out"
+                  onClick={() => setShowAuthModal(true)}
+                  className="navbar-signin-btn group"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <span className="navbar-signin-glow" />
+                  <LogIn className="w-4 h-4 relative z-10" />
+                  <span className="relative z-10 hidden sm:inline">Sign In</span>
                 </button>
-              </div>
-            ) : (
+              )}
+
+              {/* Mobile hamburger */}
               <button
-                onClick={() => setShowAuthModal(true)}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-all"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                className="md:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
               >
-                <LogIn className="w-4 h-4" />
-                <span>Sign In / Admin Login</span>
+                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
-            )}
+            </div>
 
           </div>
+        </div>
 
+        {/* ── Mobile Menu ── */}
+        <div className={`md:hidden navbar-mobile-menu ${mobileOpen ? 'navbar-mobile-open' : 'navbar-mobile-closed'}`}>
+          <div className="px-4 py-3 space-y-1">
+            {navItems.map(item => {
+              const Icon = item.icon;
+              const active = isActive(item.activeOn);
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => { setCurrentView(item.key as any); setMobileOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                    active
+                      ? 'bg-blue-500/15 text-blue-300'
+                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 ${active ? 'text-blue-400' : 'text-slate-500'}`} />
+                  {item.label}
+                </button>
+              );
+            })}
+            {(userRole === 'admin' || currentUser?.role === 'admin') && (
+              <button
+                onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); setMobileOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                  currentView === 'admin-panel'
+                    ? 'bg-purple-500/15 text-purple-300'
+                    : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                }`}
+              >
+                <ShieldCheck className="w-5 h-5" />
+                Admin Portal
+              </button>
+            )}
+          </div>
         </div>
       </nav>
 
