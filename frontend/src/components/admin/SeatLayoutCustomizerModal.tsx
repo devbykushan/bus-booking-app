@@ -627,18 +627,6 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                 <div className="space-y-2 pt-1 border-t border-slate-200">
                   <label className="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200 cursor-pointer">
                     <span className="font-semibold text-slate-700 flex items-center gap-1.5">
-                      <Shield className="w-4 h-4 text-pink-600" /> Solo Female Reserved
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={!!selectedSeat.isFemaleOnly}
-                      onChange={(e) => updateSelectedSeatProperty('isFemaleOnly', e.target.checked)}
-                      className="w-4 h-4 accent-pink-600 rounded"
-                    />
-                  </label>
-
-                  <label className="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200 cursor-pointer">
-                    <span className="font-semibold text-slate-700 flex items-center gap-1.5">
                       <Bus className="w-4 h-4 text-purple-600" /> Sleeper Berth Type
                     </span>
                     <input

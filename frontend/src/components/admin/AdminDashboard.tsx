@@ -23,7 +23,9 @@ export const AdminDashboard: React.FC = () => {
   const [newBusNumber, setNewBusNumber] = useState('ND-8899 (Lanka Ashok Leyland)');
   const [newOrigin, setNewOrigin] = useState('Monaragala');
   const [newDestination, setNewDestination] = useState('Colombo');
-  const [newDepTime] = useState('10:00 AM');
+  const [newDepTime, setNewDepTime] = useState('10:00 AM');
+  const [newArrivalTime, setNewArrivalTime] = useState('03:30 PM');
+  const [newDuration, setNewDuration] = useState('5h 30m');
   const [newPrice, setNewPrice] = useState(1800);
   const [newBusType, setNewBusType] = useState<any>('Lanka Ashok Leyland (57 Seats 3*2)');
 
@@ -47,8 +49,8 @@ export const AdminDashboard: React.FC = () => {
         origin: newOrigin,
         destination: newDestination,
         departureTime: newDepTime,
-        arrivalTime: '03:30 PM',
-        duration: '5h 30m',
+        arrivalTime: newArrivalTime,
+        duration: newDuration,
         priceStarting: newPrice,
         hasUpperDeck: newBusType.includes('Double') || newBusType.includes('Sleeper'),
         amenities: ['Wi-Fi', 'AC', 'Live GPS'],
@@ -65,7 +67,7 @@ export const AdminDashboard: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
       
       {/* Super Admin & Fleet Manager Header */}
-      <div className="border-b border-slate-200 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="border-b border-slate-200 pb-6">
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Super Admin & Fleet Management Portal</h2>
@@ -76,21 +78,24 @@ export const AdminDashboard: React.FC = () => {
           <p className="text-xs text-slate-500">Manage 57-seat Leyland bus schedules, seat layouts, conductor QR tickets, and platform revenue.</p>
         </div>
 
-        {/* Tab Switcher & Quick Actions */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex p-1 rounded-2xl bg-slate-100 border border-slate-200 text-xs font-bold">
+      </div>
+
+      <div className="flex flex-col lg:flex-row items-start gap-8">
+        <aside className="w-full lg:w-72 shrink-0 bg-white rounded-3xl border border-slate-200 shadow-sm p-4 space-y-4 lg:sticky lg:top-24">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2">Admin Navigation</div>
+          <div className="flex flex-col gap-2">
             <button
               onClick={() => setActiveTab('fleet')}
-              className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
-                activeTab === 'fleet' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-800'
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left ${
+                activeTab === 'fleet' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
               <Bus className="w-4 h-4" /> Fleet & Route Operations
             </button>
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
-                activeTab === 'analytics' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-800'
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left ${
+                activeTab === 'analytics' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
               <BarChart2 className="w-4 h-4" /> Revenue & Analytics
@@ -98,27 +103,28 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           {activeTab === 'fleet' && (
-            <div className="flex items-center gap-2">
+            <div className="border-t border-slate-200 pt-4 space-y-2">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2 pb-1">Quick Actions</div>
               <button
                 onClick={() => {
                   const target = routes.find(r => r.id === selectedRouteId) || routes[0];
                   if (target) setCustomizeRoute(target);
                 }}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
+                className="w-full px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left"
               >
                 <SlidersHorizontal className="w-4 h-4" /> Customize Seat Layout
               </button>
-
               <button
                 onClick={() => setShowScanner(true)}
-                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
+                className="w-full px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left"
               >
                 <QrCode className="w-4 h-4" /> Conductor Ticket Validator
               </button>
             </div>
           )}
-        </div>
-      </div>
+        </aside>
+
+        <main className="min-w-0 flex-1 w-full">
 
       {/* ─── TAB 1: FLEET & ROUTE OPERATIONS (Operator + Admin features) ─── */}
       {activeTab === 'fleet' && (
@@ -168,6 +174,18 @@ export const AdminDashboard: React.FC = () => {
                 <div>
                   <label className="block text-slate-600 mb-1">Destination City</label>
                   <input type="text" value={newDestination} onChange={e => setNewDestination(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
+                </div>
+                <div>
+                  <label className="block text-slate-600 mb-1">Departure Time</label>
+                  <input type="text" value={newDepTime} onChange={e => setNewDepTime(e.target.value)} placeholder="10:00 AM" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
+                </div>
+                <div>
+                  <label className="block text-slate-600 mb-1">Arrival Time</label>
+                  <input type="text" value={newArrivalTime} onChange={e => setNewArrivalTime(e.target.value)} placeholder="03:30 PM" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
+                </div>
+                <div>
+                  <label className="block text-slate-600 mb-1">Journey Duration</label>
+                  <input type="text" value={newDuration} onChange={e => setNewDuration(e.target.value)} placeholder="5h 30m" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
                 </div>
                 <div>
                   <label className="block text-slate-600 mb-1">Base Price (LKR)</label>
@@ -427,6 +445,9 @@ export const AdminDashboard: React.FC = () => {
 
         </div>
       )}
+
+        </main>
+      </div>
 
       {/* Modals */}
       {showScanner && <QRScannerModal onClose={() => setShowScanner(false)} />}
