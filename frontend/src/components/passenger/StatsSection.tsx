@@ -108,13 +108,17 @@ const StatCard: React.FC<{ stat: StatItem; isVisible: boolean }> = ({ stat, isVi
 
   return (
     <div
-      className={`bg-white p-5 rounded-2xl border ${stat.borderColor} ${stat.bgColor} flex flex-col items-center text-center space-y-2 hover:scale-[1.02] transition-all duration-300 shadow-sm`}
+      className={`stat-card-hover bg-white p-5 rounded-2xl border ${stat.borderColor} ${stat.bgColor}
+                  flex flex-col items-center text-center space-y-2 shadow-sm cursor-default`}
     >
-      <div className={`p-3 rounded-xl ${stat.bgColor} border ${stat.borderColor}`}>
+      <div className={`p-3 rounded-xl ${stat.bgColor} border ${stat.borderColor} transition-transform duration-300 group-hover:rotate-6`}>
         {stat.icon}
       </div>
       <div className="space-y-0.5">
-        <h4 className={`text-2xl md:text-3xl font-extrabold font-mono tracking-tight ${stat.color}`}>
+        <h4
+          className={`text-2xl md:text-3xl font-extrabold font-mono tracking-tight ${stat.color}`}
+          style={{ animation: isVisible ? 'numberTick 0.4s ease-out forwards' : 'none' }}
+        >
           {count.toLocaleString()}{stat.suffix}
         </h4>
         <p className="text-xs text-slate-500 font-medium">{stat.label}</p>

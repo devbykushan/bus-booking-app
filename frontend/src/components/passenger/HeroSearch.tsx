@@ -11,6 +11,22 @@ const CITIES = [
   'Ratnapura', 'Matara',
 ];
 
+// Particle config: position (%), size, delay, duration
+const PARTICLES = [
+  { left: '8%',  size: 4,  delay: '0s',   dur: '6s'  },
+  { left: '18%', size: 3,  delay: '1.2s', dur: '8s'  },
+  { left: '30%', size: 5,  delay: '2.4s', dur: '5s'  },
+  { left: '42%', size: 2,  delay: '0.6s', dur: '9s'  },
+  { left: '55%', size: 4,  delay: '3.1s', dur: '7s'  },
+  { left: '65%', size: 3,  delay: '1.8s', dur: '6s'  },
+  { left: '75%', size: 5,  delay: '0.9s', dur: '8s'  },
+  { left: '85%', size: 2,  delay: '2.7s', dur: '5s'  },
+  { left: '93%', size: 3,  delay: '4s',   dur: '7s'  },
+  { left: '23%', size: 6,  delay: '1.5s', dur: '10s' },
+  { left: '70%', size: 4,  delay: '3.6s', dur: '6s'  },
+  { left: '48%', size: 2,  delay: '5s',   dur: '9s'  },
+];
+
 export const HeroSearch: React.FC = () => {
   const {
     searchOrigin,
@@ -39,101 +55,155 @@ export const HeroSearch: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-[92vh] flex flex-col justify-center overflow-hidden">
+    <div className="relative min-h-[95vh] flex flex-col justify-center overflow-hidden">
 
-      {/* ── Full-bleed Hero Background ───────────────────────────────────── */}
-      <div className="absolute inset-0 z-0">
+      {/* ── Ken Burns Hero Background ──────────────────────────────────── */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <img
           src="/yutong-hero.jpg"
           alt="Yutong C12 Pro Luxury Express Bus"
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover object-center animate-ken-burns"
         />
-        {/* Multi-layer gradient overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/80" />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-950/60 via-transparent to-indigo-950/50" />
-        {/* Subtle animated shimmer */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(59,130,246,0.15)_0%,_transparent_60%)]" />
+        {/* Layered overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/35 to-black/85" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-950/55 via-transparent to-indigo-950/45" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_20%,rgba(59,130,246,0.12)_0%,transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_80%,rgba(99,102,241,0.10)_0%,transparent_55%)]" />
       </div>
 
-      {/* ── Floating Badge ───────────────────────────────────────────────── */}
-      <div className="relative z-10 flex flex-col items-center text-center px-4 pt-24 pb-12 space-y-8">
+      {/* ── Floating Particles ─────────────────────────────────────────── */}
+      <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
+        {PARTICLES.map((p, i) => (
+          <div
+            key={i}
+            className="absolute bottom-0 rounded-full bg-blue-300/40 animate-particle"
+            style={{
+              left: p.left,
+              width:  p.size,
+              height: p.size,
+              // CSS custom properties for the animation
+              ['--dur' as string]:   p.dur,
+              ['--delay' as string]: p.delay,
+            }}
+          />
+        ))}
+      </div>
 
-        <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full
-                           bg-white/10 backdrop-blur-md border border-white/20
+      {/* ── Animated Bus Streak at bottom ──────────────────────────────── */}
+      <div className="absolute bottom-24 left-0 z-[2] pointer-events-none">
+        <div
+          className="animate-bus-streak flex items-center gap-1 opacity-30"
+          style={{ animationDelay: '3s' }}
+        >
+          {/* Simplified bus silhouette using emoji+text */}
+          <span className="text-3xl" role="img" aria-label="bus">🚌</span>
+          {/* Motion blur trail */}
+          <div className="h-1 w-20 bg-gradient-to-r from-blue-400/60 to-transparent rounded-full" />
+        </div>
+      </div>
+
+      {/* ── Animated Road Lines ────────────────────────────────────────── */}
+      <div className="absolute bottom-16 left-0 right-0 z-[2] pointer-events-none overflow-hidden h-1 opacity-20">
+        <div className="flex gap-8 animate-road" style={{ width: '200%' }}>
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div key={i} className="h-full w-16 bg-white/60 rounded-full flex-shrink-0" />
+          ))}
+        </div>
+      </div>
+
+      {/* ── Hero Content ───────────────────────────────────────────────── */}
+      <div className="relative z-10 flex flex-col items-center text-center px-4 pt-24 pb-14 space-y-8">
+
+        {/* Badge */}
+        <div
+          className="animate-fade-in-up animate-badge-float"
+          style={{ animationDelay: '0.1s' }}
+        >
+          <span className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full
+                           bg-white/10 backdrop-blur-md border border-white/25
                            text-white/90 text-xs font-bold tracking-wider uppercase
                            shadow-lg shadow-blue-900/20">
             <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
             Sri Lanka&apos;s #1 Real-Time Bus Booking
-            <span className="px-2 py-0.5 rounded-full bg-blue-500 text-white text-[10px] font-extrabold uppercase tracking-widest animate-pulse">
-              Live
+            {/* Live badge with beacon rings */}
+            <span className="relative inline-flex items-center">
+              <span className="absolute inset-0 rounded-full bg-blue-500 animate-beacon" />
+              <span className="relative px-2 py-0.5 rounded-full bg-blue-500 text-white text-[10px] font-extrabold uppercase tracking-widest">
+                Live
+              </span>
             </span>
           </span>
         </div>
 
-        {/* ── Main Headline ─────────────────────────────────────────────── */}
-        <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+        {/* Main headline */}
+        <div className="space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white leading-tight tracking-tight drop-shadow-2xl">
             Book Premium Seats
             <br />
-            <span className="bg-gradient-to-r from-blue-300 via-sky-200 to-indigo-300 bg-clip-text text-transparent">
+            <span className="animate-gradient-text">
               In Real-Time
             </span>
           </h1>
 
-          {/* Dewmina Super Line branding accent */}
+          {/* Dewmina Super Line branding with shimmer */}
           <div className="flex items-center justify-center gap-3">
             <div className="h-px w-16 bg-gradient-to-r from-transparent to-blue-400/60" />
-            <span className="text-blue-200/90 text-sm md:text-base font-semibold tracking-[0.2em] uppercase">
+            <span className="animate-shimmer-text text-sm md:text-base font-bold tracking-[0.22em] uppercase">
               Dewmina Super Line
             </span>
             <div className="h-px w-16 bg-gradient-to-l from-transparent to-blue-400/60" />
           </div>
 
-          <p className="text-white/70 text-sm md:text-base max-w-2xl mx-auto font-medium leading-relaxed">
+          <p className="text-white/65 text-sm md:text-base max-w-2xl mx-auto font-medium leading-relaxed animate-fade-in-up"
+             style={{ animationDelay: '0.35s' }}>
             Interactive seat maps · 8-minute seat lock · Live GPS tracking · Female-reserved protection
           </p>
         </div>
 
-        {/* ── Trust Badges ─────────────────────────────────────────────── */}
+        {/* Trust badges */}
         <div
           className="flex flex-wrap justify-center gap-3 text-xs font-semibold animate-fade-in-up"
-          style={{ animationDelay: '0.3s' }}
+          style={{ animationDelay: '0.4s' }}
         >
           {[
             { icon: <Shield className="w-3.5 h-3.5 text-green-400" />, label: 'SSL Secured Payments' },
-            { icon: <Clock className="w-3.5 h-3.5 text-amber-400" />,  label: '8-Min Seat Lock' },
-            { icon: <Star  className="w-3.5 h-3.5 text-yellow-400" />, label: '4.9★ Rated Service' },
-          ].map(({ icon, label }) => (
+            { icon: <Clock  className="w-3.5 h-3.5 text-amber-400" />, label: '8-Min Seat Lock' },
+            { icon: <Star   className="w-3.5 h-3.5 text-yellow-400" />, label: '4.9★ Rated Service' },
+          ].map(({ icon, label }, i) => (
             <span
               key={label}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full
-                         bg-white/10 backdrop-blur-sm border border-white/15 text-white/80"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full
+                         bg-white/10 backdrop-blur-sm border border-white/15 text-white/80
+                         hover:bg-white/20 hover:border-white/30 transition-all duration-300
+                         hover:scale-105 cursor-default"
+              style={{ animationDelay: `${0.5 + i * 0.1}s` }}
             >
               {icon} {label}
             </span>
           ))}
         </div>
 
-        {/* ── Main Glass Search Card ────────────────────────────────────── */}
+        {/* ── Glass Search Card with Glow Border ───────────────────────── */}
         <div
           className="w-full max-w-4xl animate-fade-in-up"
-          style={{ animationDelay: '0.4s' }}
+          style={{ animationDelay: '0.5s' }}
         >
           <form
             onSubmit={handleSearchSubmit}
-            className="relative bg-white/10 backdrop-blur-xl border border-white/20
-                       rounded-3xl shadow-2xl shadow-black/30 p-6 md:p-8 space-y-5"
+            className="relative bg-white/10 backdrop-blur-xl border border-white/25
+                       rounded-3xl shadow-2xl shadow-black/30 p-6 md:p-8 space-y-5
+                       animate-border-glow"
           >
-            {/* Inner glow */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+            {/* Inner highlight */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/8 via-transparent to-white/3 pointer-events-none" />
 
             <div className="relative grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
 
               {/* Origin */}
-              <div className="md:col-span-4 group relative bg-white/90 backdrop-blur rounded-2xl p-4
+              <div className="md:col-span-4 relative bg-white/90 backdrop-blur rounded-2xl p-4
                               border border-white/50 focus-within:border-blue-400 focus-within:ring-4
-                              focus-within:ring-blue-400/20 transition-all shadow-sm">
+                              focus-within:ring-blue-400/20 transition-all duration-300 shadow-sm
+                              hover:shadow-blue-200/40 hover:shadow-md">
                 <label className="text-[11px] font-bold uppercase tracking-wider text-blue-600 flex items-center gap-1.5 mb-1">
                   <MapPin className="w-3.5 h-3.5" />
                   From
@@ -154,17 +224,18 @@ export const HeroSearch: React.FC = () => {
                   onClick={handleSwap}
                   title="Swap"
                   className="p-3 rounded-2xl bg-white/90 hover:bg-blue-50 border border-white/50
-                             text-slate-600 hover:text-blue-600 shadow-sm transition-all
-                             hover:rotate-180 hover:scale-110 active:scale-95"
+                             text-slate-600 hover:text-blue-600 shadow-sm
+                             transition-all duration-300 hover:rotate-180 hover:scale-110 active:scale-95"
                 >
                   <ArrowRightLeft className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Destination */}
-              <div className="md:col-span-4 group relative bg-white/90 backdrop-blur rounded-2xl p-4
+              <div className="md:col-span-4 relative bg-white/90 backdrop-blur rounded-2xl p-4
                               border border-white/50 focus-within:border-indigo-400 focus-within:ring-4
-                              focus-within:ring-indigo-400/20 transition-all shadow-sm">
+                              focus-within:ring-indigo-400/20 transition-all duration-300 shadow-sm
+                              hover:shadow-indigo-200/40 hover:shadow-md">
                 <label className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5 mb-1">
                   <MapPin className="w-3.5 h-3.5" />
                   To
@@ -179,9 +250,10 @@ export const HeroSearch: React.FC = () => {
               </div>
 
               {/* Date */}
-              <div className="md:col-span-3 group relative bg-white/90 backdrop-blur rounded-2xl p-4
+              <div className="md:col-span-3 relative bg-white/90 backdrop-blur rounded-2xl p-4
                               border border-white/50 focus-within:border-amber-400 focus-within:ring-4
-                              focus-within:ring-amber-400/20 transition-all shadow-sm">
+                              focus-within:ring-amber-400/20 transition-all duration-300 shadow-sm
+                              hover:shadow-amber-200/40 hover:shadow-md">
                 <label className="text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5 mb-1">
                   <Calendar className="w-3.5 h-3.5" />
                   Journey Date
@@ -195,16 +267,16 @@ export const HeroSearch: React.FC = () => {
               </div>
             </div>
 
-            {/* Filters + Submit Row */}
+            {/* Filters + Submit */}
             <div className="relative flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-white/20">
 
-              {/* Female-only filter */}
               <button
                 type="button"
                 onClick={() => setSoloFemaleOnly(!soloFemaleOnly)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs font-bold transition-all ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-bold
+                            transition-all duration-300 hover:scale-105 active:scale-95 ${
                   soloFemaleOnly
-                    ? 'bg-pink-500/20 border-pink-400/50 text-pink-200 backdrop-blur-sm'
+                    ? 'bg-pink-500/25 border-pink-400/50 text-pink-200 backdrop-blur-sm shadow-lg shadow-pink-900/20'
                     : 'bg-white/10 border-white/20 text-white/80 hover:bg-white/20 backdrop-blur-sm'
                 }`}
               >
@@ -213,8 +285,9 @@ export const HeroSearch: React.FC = () => {
                 {soloFemaleOnly && <span className="w-2 h-2 rounded-full bg-pink-400 animate-ping" />}
               </button>
 
-              {/* Bus class filter */}
-              <div className="flex items-center gap-2 text-xs bg-white/10 backdrop-blur-sm border border-white/20 px-3.5 py-2 rounded-2xl text-white/80">
+              <div className="flex items-center gap-2 text-xs bg-white/10 backdrop-blur-sm
+                              border border-white/20 px-3.5 py-2.5 rounded-2xl text-white/80
+                              hover:bg-white/15 transition-all duration-300">
                 <Filter className="w-3.5 h-3.5 text-white/60" />
                 <span className="text-white/70 font-semibold">Bus Class:</span>
                 <select
@@ -230,29 +303,34 @@ export const HeroSearch: React.FC = () => {
                 </select>
               </div>
 
-              {/* Search CTA */}
+              {/* Search CTA with ripple */}
               <button
                 type="submit"
-                className="w-full md:w-auto flex items-center justify-center gap-2.5
+                className="ripple-effect w-full md:w-auto flex items-center justify-center gap-2.5
                            px-10 py-3.5 rounded-2xl font-extrabold text-sm text-white
                            bg-gradient-to-r from-blue-500 to-indigo-600
                            hover:from-blue-400 hover:to-indigo-500
                            shadow-xl shadow-blue-700/40
-                           transform hover:scale-[1.03] active:scale-95
-                           transition-all duration-200 cursor-pointer"
+                           transform hover:scale-[1.05] active:scale-95
+                           transition-all duration-200 cursor-pointer
+                           relative overflow-hidden"
               >
-                <Search className="w-4.5 h-4.5" />
-                Search Buses
+                <Search className="w-4 h-4 relative z-10" />
+                <span className="relative z-10">Search Buses</span>
+                {/* Animated shine sweep on hover */}
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent
+                                 -translate-x-full hover:translate-x-full transition-transform duration-700 ease-in-out" />
               </button>
             </div>
           </form>
         </div>
 
-        {/* ── Scroll hint ──────────────────────────────────────────────── */}
-        <div className="animate-bounce opacity-60 mt-2">
-          <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center pt-2">
+        {/* Scroll hint */}
+        <div className="animate-bounce opacity-50 mt-2" style={{ animationDelay: '1s' }}>
+          <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center pt-2 mx-auto">
             <div className="w-1.5 h-3 bg-white/60 rounded-full animate-pulse" />
           </div>
+          <p className="text-white/40 text-[10px] mt-1 tracking-widest uppercase">Scroll</p>
         </div>
 
       </div>

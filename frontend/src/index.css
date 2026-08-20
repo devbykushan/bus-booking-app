@@ -279,3 +279,205 @@
   background: #2563eb;
 }
 
+/* ─── HERO ANIMATIONS ────────────────────────────────────────────────────────── */
+
+/* Ken Burns slow zoom on hero background */
+@keyframes kenBurns {
+  0%   { transform: scale(1)    translateX(0%)   translateY(0%); }
+  33%  { transform: scale(1.06) translateX(-1%)  translateY(-0.5%); }
+  66%  { transform: scale(1.04) translateX(1%)   translateY(0.5%); }
+  100% { transform: scale(1)    translateX(0%)   translateY(0%); }
+}
+
+/* Bus driving in from left across hero footer */
+@keyframes busDriveIn {
+  0%   { transform: translateX(-120%); opacity: 0; }
+  8%   { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateX(110vw); opacity: 0; }
+}
+
+/* Particle floating upward & fading */
+@keyframes particleRise {
+  0%   { transform: translateY(0)   scale(1);   opacity: 0.7; }
+  80%  { opacity: 0.4; }
+  100% { transform: translateY(-180px) scale(0.4); opacity: 0; }
+}
+
+/* Horizontal shimmer sweep on text / borders */
+@keyframes shimmerSweep {
+  0%   { background-position: -300% center; }
+  100% { background-position: 300% center; }
+}
+
+/* Gradient border spin */
+@keyframes borderSpin {
+  0%   { --angle: 0deg; }
+  100% { --angle: 360deg; }
+}
+
+/* Pulsing ring beacon */
+@keyframes beaconRing {
+  0%   { transform: scale(0.85); opacity: 1; }
+  100% { transform: scale(2.2);  opacity: 0; }
+}
+
+/* Gentle sway left-right */
+@keyframes sway {
+  0%, 100% { transform: rotate(-1.5deg); }
+  50%       { transform: rotate(1.5deg);  }
+}
+
+/* Road line rush (hero bottom stripe) */
+@keyframes roadLines {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Typewriter cursor blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Number count-up subtle tick */
+@keyframes numberTick {
+  0%   { transform: translateY(4px); opacity: 0; }
+  100% { transform: translateY(0);   opacity: 1; }
+}
+
+/* Wave ripple on search button */
+@keyframes ripple {
+  0%   { transform: scale(0); opacity: 0.6; }
+  100% { transform: scale(4); opacity: 0;   }
+}
+
+/* Seat sparkle on selection */
+@keyframes seatSparkle {
+  0%   { box-shadow: 0 0 0  0px rgba(37, 99, 235, 0.7); }
+  50%  { box-shadow: 0 0 18px 6px rgba(37, 99, 235, 0.3); }
+  100% { box-shadow: 0 0 0  0px rgba(37, 99, 235, 0);   }
+}
+
+/* Floating badge wobble */
+@keyframes badgeWobble {
+  0%, 100% { transform: translateY(0) rotate(-0.5deg); }
+  50%       { transform: translateY(-4px) rotate(0.5deg); }
+}
+
+/* Gradient text flow */
+@keyframes gradientFlow {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+
+/* ─── ANIMATION UTILITY CLASSES ──────────────────────────────────────────────── */
+
+/* Hero background Ken Burns */
+.animate-ken-burns {
+  animation: kenBurns 20s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Bus streaking across bottom */
+.animate-bus-streak {
+  animation: busDriveIn 18s linear infinite;
+  will-change: transform;
+}
+
+/* Floating particle */
+.animate-particle {
+  animation: particleRise var(--dur, 5s) ease-in infinite;
+  animation-delay: var(--delay, 0s);
+  will-change: transform, opacity;
+}
+
+/* Shimmer sweep text gradient */
+.animate-shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #93c5fd 0%,
+    #e0f2fe 20%,
+    #ffffff 40%,
+    #e0f2fe 60%,
+    #93c5fd 100%
+  );
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerSweep 4s linear infinite;
+}
+
+/* Beacon / live indicator rings */
+.animate-beacon {
+  animation: beaconRing 1.6s ease-out infinite;
+}
+
+/* Badge wobble float */
+.animate-badge-float {
+  animation: badgeWobble 3s ease-in-out infinite;
+}
+
+/* Road lines streak */
+.animate-road {
+  animation: roadLines 2s linear infinite;
+}
+
+/* Cursor blink */
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* Seat sparkle on selected */
+.seat-selected {
+  animation: seatPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+             seatSparkle 1.2s ease-out 0.3s;
+}
+
+/* Flowing gradient text (hero subtitle) */
+.animate-gradient-text {
+  background: linear-gradient(
+    270deg,
+    #7dd3fc, #38bdf8, #93c5fd, #bfdbfe, #7dd3fc
+  );
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientFlow 5s ease infinite;
+}
+
+/* Ripple button press effect — add class programmatically */
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-effect::after {
+  content: '';
+  position: absolute;
+  inset: 50% 50%;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  animation: ripple 0.6s ease-out forwards;
+}
+
+/* Stats card hover lift with glow */
+.stat-card-hover {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              box-shadow 0.3s ease;
+}
+.stat-card-hover:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 20px 40px -12px rgba(37, 99, 235, 0.18);
+}
+
+/* Glowing border pulse on search card */
+@keyframes borderGlow {
+  0%, 100% { box-shadow: 0 0 0   0px rgba(59, 130, 246, 0.0); }
+  50%       { box-shadow: 0 0 30px 4px rgba(59, 130, 246, 0.25); }
+}
+.animate-border-glow {
+  animation: borderGlow 3s ease-in-out infinite;
+}
