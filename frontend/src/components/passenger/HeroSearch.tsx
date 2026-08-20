@@ -151,10 +151,6 @@ export const HeroSearch: React.FC = () => {
             <div className="h-px w-16 bg-gradient-to-l from-transparent to-blue-400/60" />
           </div>
 
-          <p className="text-white/65 text-sm md:text-base max-w-2xl mx-auto font-medium leading-relaxed animate-fade-in-up"
-            style={{ animationDelay: '0.35s' }}>
-            {t('heroSub')}
-          </p>
         </div>
 
         {/* Trust badges */}
