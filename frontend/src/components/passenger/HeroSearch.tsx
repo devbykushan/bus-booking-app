@@ -13,18 +13,18 @@ const CITIES = [
 
 // Particle config: position (%), size, delay, duration
 const PARTICLES = [
-  { left: '8%',  size: 4,  delay: '0s',   dur: '6s'  },
-  { left: '18%', size: 3,  delay: '1.2s', dur: '8s'  },
-  { left: '30%', size: 5,  delay: '2.4s', dur: '5s'  },
-  { left: '42%', size: 2,  delay: '0.6s', dur: '9s'  },
-  { left: '55%', size: 4,  delay: '3.1s', dur: '7s'  },
-  { left: '65%', size: 3,  delay: '1.8s', dur: '6s'  },
-  { left: '75%', size: 5,  delay: '0.9s', dur: '8s'  },
-  { left: '85%', size: 2,  delay: '2.7s', dur: '5s'  },
-  { left: '93%', size: 3,  delay: '4s',   dur: '7s'  },
-  { left: '23%', size: 6,  delay: '1.5s', dur: '10s' },
-  { left: '70%', size: 4,  delay: '3.6s', dur: '6s'  },
-  { left: '48%', size: 2,  delay: '5s',   dur: '9s'  },
+  { left: '8%', size: 4, delay: '0s', dur: '6s' },
+  { left: '18%', size: 3, delay: '1.2s', dur: '8s' },
+  { left: '30%', size: 5, delay: '2.4s', dur: '5s' },
+  { left: '42%', size: 2, delay: '0.6s', dur: '9s' },
+  { left: '55%', size: 4, delay: '3.1s', dur: '7s' },
+  { left: '65%', size: 3, delay: '1.8s', dur: '6s' },
+  { left: '75%', size: 5, delay: '0.9s', dur: '8s' },
+  { left: '85%', size: 2, delay: '2.7s', dur: '5s' },
+  { left: '93%', size: 3, delay: '4s', dur: '7s' },
+  { left: '23%', size: 6, delay: '1.5s', dur: '10s' },
+  { left: '70%', size: 4, delay: '3.6s', dur: '6s' },
+  { left: '48%', size: 2, delay: '5s', dur: '9s' },
 ];
 
 export const HeroSearch: React.FC = () => {
@@ -79,10 +79,10 @@ export const HeroSearch: React.FC = () => {
             className="absolute bottom-0 rounded-full bg-blue-300/40 animate-particle"
             style={{
               left: p.left,
-              width:  p.size,
+              width: p.size,
               height: p.size,
               // CSS custom properties for the animation
-              ['--dur' as string]:   p.dur,
+              ['--dur' as string]: p.dur,
               ['--delay' as string]: p.delay,
             }}
           />
@@ -139,10 +139,7 @@ export const HeroSearch: React.FC = () => {
         <div className="space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white leading-tight tracking-tight drop-shadow-2xl">
             Book Premium Seats
-            <br />
-            <span className="animate-gradient-text">
-              In Real-Time
-            </span>
+
           </h1>
 
           {/* Dewmina Super Line branding with shimmer */}
@@ -155,7 +152,7 @@ export const HeroSearch: React.FC = () => {
           </div>
 
           <p className="text-white/65 text-sm md:text-base max-w-2xl mx-auto font-medium leading-relaxed animate-fade-in-up"
-             style={{ animationDelay: '0.35s' }}>
+            style={{ animationDelay: '0.35s' }}>
             Interactive seat maps · 8-minute seat lock · Live GPS tracking · Female-reserved protection
           </p>
         </div>
@@ -167,8 +164,8 @@ export const HeroSearch: React.FC = () => {
         >
           {[
             { icon: <Shield className="w-3.5 h-3.5 text-green-400" />, label: 'SSL Secured Payments' },
-            { icon: <Clock  className="w-3.5 h-3.5 text-amber-400" />, label: '8-Min Seat Lock' },
-            { icon: <Star   className="w-3.5 h-3.5 text-yellow-400" />, label: '4.9★ Rated Service' },
+            { icon: <Clock className="w-3.5 h-3.5 text-amber-400" />, label: '8-Min Seat Lock' },
+            { icon: <Star className="w-3.5 h-3.5 text-yellow-400" />, label: '4.9★ Rated Service' },
           ].map(({ icon, label }, i) => (
             <span
               key={label}
@@ -274,11 +271,10 @@ export const HeroSearch: React.FC = () => {
                 type="button"
                 onClick={() => setSoloFemaleOnly(!soloFemaleOnly)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-bold
-                            transition-all duration-300 hover:scale-105 active:scale-95 ${
-                  soloFemaleOnly
+                            transition-all duration-300 hover:scale-105 active:scale-95 ${soloFemaleOnly
                     ? 'bg-pink-500/25 border-pink-400/50 text-pink-200 backdrop-blur-sm shadow-lg shadow-pink-900/20'
                     : 'bg-white/10 border-white/20 text-white/80 hover:bg-white/20 backdrop-blur-sm'
-                }`}
+                  }`}
               >
                 <Shield className={`w-4 h-4 ${soloFemaleOnly ? 'text-pink-300' : 'text-white/60'}`} />
                 Solo Female Seats Only
