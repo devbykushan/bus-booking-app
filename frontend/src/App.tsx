@@ -108,7 +108,7 @@ export function App() {
 
       <main className="flex-1 transition-all duration-300">
         {currentView === 'admin-panel' ? (
-          <div key="admin" className="animate-fade-in-up">
+          <div key="admin">
             <AdminDashboard />
           </div>
         ) : (
