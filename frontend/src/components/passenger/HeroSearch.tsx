@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import {
   MapPin, Calendar, ArrowRightLeft, Search,
-  Shield, Filter, Sparkles, Clock, Star, UserRound
+  Shield, Filter, Clock, Star, UserRound
 } from 'lucide-react';
 
 const CITIES = [
@@ -123,27 +123,6 @@ export const HeroSearch: React.FC = () => {
 
       {/* ── Hero Content ───────────────────────────────────────────────── */}
       <div className="relative z-10 flex flex-col items-center text-center px-4 pt-24 pb-14 space-y-8">
-
-        {/* Badge */}
-        <div
-          className="animate-fade-in-up animate-badge-float"
-          style={{ animationDelay: '0.1s' }}
-        >
-          <span className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full
-                           bg-white/10 backdrop-blur-md border border-white/25
-                           text-white/90 text-xs font-bold tracking-wider uppercase
-                           shadow-lg shadow-blue-900/20">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            {t('heroBadge')}
-            {/* Live badge with beacon rings */}
-            <span className="relative inline-flex items-center">
-              <span className="absolute inset-0 rounded-full bg-blue-500 animate-beacon" />
-              <span className="relative px-2 py-0.5 rounded-full bg-blue-500 text-white text-[10px] font-extrabold uppercase tracking-widest">
-                {t('heroLive')}
-              </span>
-            </span>
-          </span>
-        </div>
 
         {/* Main headline */}
         <div className="space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
