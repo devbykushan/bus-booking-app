@@ -28,6 +28,7 @@ export const AdminDashboard: React.FC = () => {
   const [newDuration, setNewDuration] = useState('5h 30m');
   const [newPrice, setNewPrice] = useState(1800);
   const [newBusType, setNewBusType] = useState<any>('Lanka Ashok Leyland (57 Seats 3*2)');
+  const [customBusType, setCustomBusType] = useState('Custom Bus Layout');
 
   const selectedRoute = routes.find(r => r.id === selectedRouteId) || routes[0] || null;
   const manifestBookings = bookings.filter(b => b.routeId === selectedRoute?.id);
@@ -38,6 +39,9 @@ export const AdminDashboard: React.FC = () => {
   const handleCreateRoute = async (e: React.FormEvent) => {
     e.preventDefault();
     const newId = `route-${Date.now()}`;
+    const selectedBusType = newBusType === '__custom__' ? customBusType.trim() : newBusType;
+    if (!selectedBusType) return;
+
     try {
       await routesApi.create({
         id: newId,
@@ -45,14 +49,14 @@ export const AdminDashboard: React.FC = () => {
         operatorName: newOperatorName,
         operatorRating: 4.9,
         busNumber: newBusNumber,
-        busType: newBusType,
+        busType: selectedBusType,
         origin: newOrigin,
         destination: newDestination,
         departureTime: newDepTime,
         arrivalTime: newArrivalTime,
         duration: newDuration,
         priceStarting: newPrice,
-        hasUpperDeck: newBusType.includes('Double') || newBusType.includes('Sleeper'),
+        hasUpperDeck: selectedBusType.includes('Double') || selectedBusType.includes('Sleeper'),
         amenities: ['Wi-Fi', 'AC', 'Live GPS'],
       });
       await loadRoutes();
@@ -75,7 +79,6 @@ export const AdminDashboard: React.FC = () => {
               <ShieldCheck className="w-3.5 h-3.5" /> Fleet & Admin Command
             </span>
           </div>
-          <p className="text-xs text-slate-500">Manage 57-seat Leyland bus schedules, seat layouts, conductor QR tickets, and platform revenue.</p>
         </div>
 
       </div>
@@ -165,7 +168,18 @@ export const AdminDashboard: React.FC = () => {
                     <option value="AC Sleeper">🛋️ AC Sleeper (36 Seats)</option>
                     <option value="Luxury Volvo Multi-Axle">🚍 Luxury Volvo Multi-Axle (40 Seats)</option>
                     <option value="Double Decker Sleeper">🚌 Double Decker Sleeper (48 Seats)</option>
+                    <option value="__custom__">⚙️ Custom Bus Model</option>
                   </select>
+                  {newBusType === '__custom__' && (
+                    <input
+                      type="text"
+                      value={customBusType}
+                      onChange={e => setCustomBusType(e.target.value)}
+                      placeholder="Enter custom bus model"
+                      className="w-full mt-2 bg-white border border-blue-300 rounded-xl p-2.5 text-slate-800 font-semibold"
+                      required
+                    />
+                  )}
                 </div>
                 <div>
                   <label className="block text-slate-600 mb-1">Origin City</label>
