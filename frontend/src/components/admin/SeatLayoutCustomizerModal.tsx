@@ -354,21 +354,6 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
 
             <button
               type="button"
-              onClick={() => applyPreset('Luxury Volvo Multi-Axle', 2800)}
-              className={`p-3 rounded-2xl border text-left text-xs transition-all ${
-                busType.includes('Volvo')
-                  ? 'bg-amber-50 border-amber-500 text-amber-700 shadow-sm ring-2 ring-amber-500/20'
-                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <div className="font-bold flex items-center gap-1.5 text-slate-800 text-[11px]">
-                <Bus className="w-4 h-4 text-amber-600 flex-shrink-0" /> Volvo Multi-Axle
-              </div>
-              <p className="text-[10px] text-amber-600 font-mono mt-1 font-semibold">40 Seats (2*2 Luxury)</p>
-            </button>
-
-            <button
-              type="button"
               onClick={() => applyPreset('AC Sleeper', 3200)}
               className={`p-3 rounded-2xl border text-left text-xs transition-all ${
                 busType === 'AC Sleeper'
@@ -382,20 +367,6 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               <p className="text-[10px] text-purple-600 font-mono mt-1 font-semibold">36 Berths (2 Decks)</p>
             </button>
 
-            <button
-              type="button"
-              onClick={() => applyPreset('Double Decker Sleeper', 3500)}
-              className={`p-3 rounded-2xl border text-left text-xs transition-all ${
-                busType === 'Double Decker Sleeper'
-                  ? 'bg-rose-50 border-rose-500 text-rose-700 shadow-sm ring-2 ring-rose-500/20'
-                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <div className="font-bold flex items-center gap-1.5 text-slate-800 text-[11px]">
-                <Bus className="w-4 h-4 text-rose-600 flex-shrink-0" /> Double Decker
-              </div>
-              <p className="text-[10px] text-rose-600 font-mono mt-1 font-semibold">48 Berths (Double Deck)</p>
-            </button>
           </div>
         </div>
 
