@@ -28,6 +28,8 @@ interface BookingStore {
   login: (email: string, pass: string, role?: 'passenger' | 'admin') => { success: boolean; message: string };
   register: (name: string, email: string, pass: string, role?: 'passenger' | 'admin') => { success: boolean; message: string };
   logout: () => void;
+  showAuthModal: boolean;
+  setShowAuthModal: (val: boolean) => void;
 
   // Loading & errors
   isLoading: boolean;
@@ -101,6 +103,8 @@ interface BookingStore {
 
 export const useBookingStore = create<BookingStore>((set, get) => ({
   currentUser: JSON.parse(localStorage.getItem('dewmina_user') || 'null'),
+  showAuthModal: false,
+  setShowAuthModal: (val) => set({ showAuthModal: val }),
 
   login: (email, _password, role) => {
     const cleanEmail = email.trim().toLowerCase();
@@ -114,7 +118,8 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         role: 'admin',
       };
       localStorage.setItem('dewmina_user', JSON.stringify(user));
-      set({ currentUser: user, userRole: 'admin', currentView: 'admin-panel' });
+      localStorage.setItem('auth_token', `token-admin-${Date.now()}`);
+      set({ currentUser: user, userRole: 'admin', currentView: 'admin-panel', showAuthModal: false });
       return { success: true, message: 'Logged in as Admin' };
     } else {
       const user: UserAccount = {
@@ -124,7 +129,8 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         role: 'passenger',
       };
       localStorage.setItem('dewmina_user', JSON.stringify(user));
-      set({ currentUser: user, userRole: 'passenger', currentView: 'passenger-search' });
+      localStorage.setItem('auth_token', `token-passenger-${Date.now()}`);
+      set({ currentUser: user, userRole: 'passenger', currentView: 'passenger-search', showAuthModal: false });
       return { success: true, message: 'Logged in as Passenger' };
     }
   },
@@ -137,12 +143,14 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
       role: role || 'passenger',
     };
     localStorage.setItem('dewmina_user', JSON.stringify(user));
-    set({ currentUser: user, userRole: user.role, currentView: user.role === 'admin' ? 'admin-panel' : 'passenger-search' });
+    localStorage.setItem('auth_token', `token-register-${Date.now()}`);
+    set({ currentUser: user, userRole: user.role, currentView: user.role === 'admin' ? 'admin-panel' : 'passenger-search', showAuthModal: false });
     return { success: true, message: 'Registered successfully' };
   },
 
   logout: () => {
     localStorage.removeItem('dewmina_user');
+    localStorage.removeItem('auth_token');
     set({ currentUser: null, userRole: 'passenger', currentView: 'passenger-search' });
   },
 

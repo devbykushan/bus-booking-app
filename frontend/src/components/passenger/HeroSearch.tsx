@@ -325,13 +325,7 @@ export const HeroSearch: React.FC = () => {
           </form>
         </div>
 
-        {/* Scroll hint */}
-        <div className="animate-bounce opacity-50 mt-2" style={{ animationDelay: '1s' }}>
-          <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center pt-2 mx-auto">
-            <div className="w-1.5 h-3 bg-white/60 rounded-full animate-pulse" />
-          </div>
-          <p className="text-white/40 text-[10px] mt-1 tracking-widest uppercase">Scroll</p>
-        </div>
+
 
       </div>
     </div>

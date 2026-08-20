@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { AuthModal } from './AuthModal';
 import { Bus, MapPin, Ticket, Clock, ShieldCheck, User, LogOut, LogIn } from 'lucide-react';
@@ -13,10 +13,10 @@ export const Navbar: React.FC = () => {
     logout,
     lockActive, 
     lockExpirySeconds,
-    selectedSeatIds 
+    selectedSeatIds,
+    showAuthModal,
+    setShowAuthModal
   } = useBookingStore();
-
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const formatTimer = (secs: number) => {
     const mins = Math.floor(secs / 60);

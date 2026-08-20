@@ -8,9 +8,15 @@ interface BusCardProps {
 }
 
 export const BusCard: React.FC<BusCardProps> = ({ route }) => {
-  const { setSelectedRoute, setCurrentView, setTrackingRouteId } = useBookingStore();
+  const { setSelectedRoute, setCurrentView, setTrackingRouteId, setShowAuthModal } = useBookingStore();
 
   const handleSelectSeats = () => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      // User is not logged in, trigger the login modal
+      setShowAuthModal(true);
+      return;
+    }
     setSelectedRoute(route);
     setCurrentView('seat-selection');
   };
