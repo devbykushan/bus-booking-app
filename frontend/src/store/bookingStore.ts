@@ -29,7 +29,7 @@ interface BookingStore {
   // Authentication
   currentUser: UserAccount | null;
   login: (email: string, pass: string, role?: 'passenger' | 'admin') => { success: boolean; message: string };
-  register: (name: string, email: string, pass: string, role?: 'passenger' | 'admin') => { success: boolean; message: string };
+  register: (name: string, email: string, pass: string, role?: 'passenger' | 'admin', phone?: string) => { success: boolean; message: string };
   logout: () => void;
   showAuthModal: boolean;
   setShowAuthModal: (val: boolean) => void;
@@ -143,11 +143,12 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     }
   },
 
-  register: (name, email, _password, role) => {
+  register: (name, email, _password, role, phone) => {
     const user: UserAccount = {
       id: `usr-${Date.now()}`,
       name,
       email: email.trim().toLowerCase(),
+      phone,
       role: role || 'passenger',
     };
     localStorage.setItem('dewmina_user', JSON.stringify(user));

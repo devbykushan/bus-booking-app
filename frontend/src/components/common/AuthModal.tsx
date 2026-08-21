@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
-import { LogIn, UserCheck, ShieldCheck, X, Mail, Lock, User, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { LogIn, UserCheck, ShieldCheck, X, Mail, Lock, User, Phone, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 interface AuthModalProps {
   onClose: () => void;
@@ -14,17 +14,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [shakeError, setShakeError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   // Real-time validation touched states
   const [nameTouched, setNameTouched] = useState(false);
+  const [phoneTouched, setPhoneTouched] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
 
   // Refs for auto-focus on validation failure
   const nameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
@@ -32,11 +35,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const isEmailValid = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
   const isPasswordValid = (val: string) => val.length >= 6;
   const isNameValid = (val: string) => val.trim().length >= 3;
+  const isPhoneValid = (val: string) => /^(?:0|\+94)7\d{8}$/.test(val.replace(/[\s-]/g, ''));
+  const normalizedPhone = phone.replace(/[\s-]/g, '').replace(/^0/, '+94');
 
   const handleRoleChange = (newRole: 'passenger' | 'admin') => {
     setRole(newRole);
     setErrorMsg('');
     setNameTouched(false);
+    setPhoneTouched(false);
     setEmailTouched(false);
     setPasswordTouched(false);
   };
@@ -48,6 +54,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
 
     // Mark all fields as touched
     setNameTouched(true);
+    setPhoneTouched(mode === 'register' && role === 'passenger');
     setEmailTouched(true);
     setPasswordTouched(true);
 
@@ -56,6 +63,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
       setShakeError(true);
       setErrorMsg('Full name must be at least 3 characters.');
       nameRef.current?.focus();
+      return;
+    }
+
+    if (mode === 'register' && role === 'passenger' && !isPhoneValid(phone)) {
+      setShakeError(true);
+      setErrorMsg('Enter a valid Sri Lankan mobile number (07XXXXXXXX).');
+      phoneRef.current?.focus();
       return;
     }
 
@@ -82,7 +96,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
         setShakeError(true);
       }
     } else {
-      const res = register(name, email, password, role);
+      const res = register(name, email, password, role, role === 'passenger' ? normalizedPhone : undefined);
       if (res.success) {
         onClose();
       } else {
@@ -187,7 +201,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
 
             {/* Full Name (register only) */}
             {mode === 'register' && (
-              <div>
+              <div className="animate-fade-in-up" style={{ animationDelay: '80ms' }}>
                 <label className="block text-slate-600 mb-1.5 font-semibold">Full Name</label>
                 <div className={inputRingClass(nameTouched, isNameValid(name), shakeError && !isNameValid(name))}>
                   <User className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(nameTouched, isNameValid(name))}`} />
@@ -215,8 +229,39 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
               </div>
             )}
 
+            {/* Mobile Number (passenger registration only) */}
+            {mode === 'register' && role === 'passenger' && (
+              <div className="animate-fade-in-up" style={{ animationDelay: '140ms' }}>
+                <label className="block text-slate-600 mb-1.5 font-semibold">Mobile Number</label>
+                <div className={inputRingClass(phoneTouched, isPhoneValid(phone), shakeError && !isPhoneValid(phone))}>
+                  <Phone className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(phoneTouched, isPhoneValid(phone))}`} />
+                  <input
+                    ref={phoneRef}
+                    type="tel"
+                    inputMode="tel"
+                    placeholder="07XXXXXXXX"
+                    value={phone}
+                    onBlur={() => setPhoneTouched(true)}
+                    onChange={(e) => { setPhone(e.target.value); if (!phoneTouched) setPhoneTouched(true); }}
+                    className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400"
+                    required
+                  />
+                  {phoneTouched && (
+                    isPhoneValid(phone)
+                      ? <span className="text-emerald-500 font-bold ml-1 text-sm animate-fade-in-up">✓</span>
+                      : <AlertCircle className="w-4 h-4 text-rose-500 ml-1 animate-fade-in-up" />
+                  )}
+                </div>
+                {phoneTouched && !isPhoneValid(phone) && (
+                  <div className="mt-1 text-[10px] text-rose-500 font-semibold animate-fade-in-up pl-1">
+                    Use 07XXXXXXXX or +947XXXXXXXX.
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Email */}
-            <div>
+            <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '200ms' : '80ms' }}>
               <label className="block text-slate-600 mb-1.5 font-semibold">Email Address</label>
               <div className={inputRingClass(emailTouched, isEmailValid(email), shakeError && !isEmailValid(email))}>
                 <Mail className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(emailTouched, isEmailValid(email))}`} />
@@ -244,7 +289,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             </div>
 
             {/* Password */}
-            <div>
+            <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '260ms' : '140ms' }}>
               <label className="block text-slate-600 mb-1.5 font-semibold">Password</label>
               <div className={inputRingClass(passwordTouched, isPasswordValid(password), shakeError && !isPasswordValid(password))}>
                 <Lock className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(passwordTouched, isPasswordValid(password))}`} />
@@ -290,6 +335,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 setMode(mode === 'login' ? 'register' : 'login');
                 setErrorMsg('');
                 setNameTouched(false);
+                setPhoneTouched(false);
                 setEmailTouched(false);
                 setPasswordTouched(false);
               }}
