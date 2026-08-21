@@ -18,6 +18,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const [errorMsg, setErrorMsg] = useState('');
   const [shakeError, setShakeError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Real-time validation touched states
   const [nameTouched, setNameTouched] = useState(false);
@@ -47,8 +48,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     setPasswordTouched(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setErrorMsg('');
     setShakeError(false);
 
@@ -87,22 +89,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
       return;
     }
 
-    if (mode === 'login') {
-      const res = login(email, password, role);
-      if (res.success) {
-        onClose();
+    setIsSubmitting(true);
+    try {
+      if (mode === 'login') {
+        const res = await login(email, password, role);
+        if (res.success) {
+          onClose();
+        } else {
+          setErrorMsg(res.message);
+          setShakeError(true);
+        }
       } else {
-        setErrorMsg(res.message);
-        setShakeError(true);
+        const res = await register(name, email, password, role, role === 'passenger' ? normalizedPhone : undefined);
+        if (res.success) {
+          onClose();
+        } else {
+          setErrorMsg(res.message);
+          setShakeError(true);
+        }
       }
-    } else {
-      const res = register(name, email, password, role, role === 'passenger' ? normalizedPhone : undefined);
-      if (res.success) {
-        onClose();
-      } else {
-        setErrorMsg(res.message);
-        setShakeError(true);
-      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'An unexpected error occurred.');
+      setShakeError(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -321,9 +331,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
 
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              disabled={isSubmitting}
+              className={`w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 ${
+                isSubmitting ? 'opacity-70 cursor-wait' : ''
+              }`}
             >
-              {mode === 'login' ? `Sign In as ${role === 'admin' ? 'Admin' : 'Passenger'}` : 'Register Account'}
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                  </svg>
+                  Processing...
+                </>
+              ) : mode === 'login' ? (
+                `Sign In as ${role === 'admin' ? 'Admin' : 'Passenger'}`
+              ) : (
+                'Register Account'
+              )}
             </button>
           </form>
 

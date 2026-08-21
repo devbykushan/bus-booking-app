@@ -98,8 +98,35 @@ export const validateApi = {
     apiFetch('/validate-ticket', { method: 'POST', body: JSON.stringify({ pnr }) }),
 };
 
+// ─── Authentication API ───────────────────────────────────────────────────────
+
+export const authApi = {
+  /** Register a new user account against Neon PostgreSQL */
+  register: (payload: {
+    name: string;
+    email: string;
+    password: string;
+    role?: 'passenger' | 'admin';
+    phone?: string;
+  }): Promise<{ success: boolean; message: string; token: string; user: any }> =>
+    apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
+
+  /** Log in to an existing account */
+  login: (payload: {
+    email: string;
+    password: string;
+    role?: 'passenger' | 'admin';
+  }): Promise<{ success: boolean; message: string; token: string; user: any }> =>
+    apiFetch('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
+
+  /** Get authenticated user profile */
+  getMe: (token: string): Promise<{ user: any }> =>
+    apiFetch('/auth/me', { headers: { Authorization: `Bearer ${token}` } }),
+};
+
 // ─── Health Check ─────────────────────────────────────────────────────────────
 
 export const healthApi = {
   ping: (): Promise<{ status: string; timestamp: string }> => apiFetch('/health'),
 };
+

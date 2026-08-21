@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { BusRoute, BoardingPoint, Booking, PassengerDetails, UserAccount } from '../types/booking';
-import { routesApi, bookingsApi, seatsApi, validateApi } from '../services/api';
+import { routesApi, bookingsApi, seatsApi, validateApi, authApi } from '../services/api';
 import confetti from 'canvas-confetti';
 import { translations } from './translations';
 import type { Language, TranslationKey } from './translations';
@@ -28,8 +28,8 @@ export type AppView =
 interface BookingStore {
   // Authentication
   currentUser: UserAccount | null;
-  login: (email: string, pass: string, role?: 'passenger' | 'admin') => { success: boolean; message: string };
-  register: (name: string, email: string, pass: string, role?: 'passenger' | 'admin', phone?: string) => { success: boolean; message: string };
+  login: (email: string, pass: string, role?: 'passenger' | 'admin') => Promise<{ success: boolean; message: string }>;
+  register: (name: string, email: string, pass: string, role?: 'passenger' | 'admin', phone?: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   showAuthModal: boolean;
   setShowAuthModal: (val: boolean) => void;
@@ -114,47 +114,58 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   showAuthModal: false,
   setShowAuthModal: (val) => set({ showAuthModal: val }),
 
-  login: (email, _password, role) => {
-    const cleanEmail = email.trim().toLowerCase();
-    
-    // Check credentials
-    if (cleanEmail === 'admin@dewminasuperline.lk' || cleanEmail === 'admin' || role === 'admin') {
-      const user: UserAccount = {
-        id: 'usr-admin-1',
-        name: 'Super Admin & Fleet Manager',
-        email: cleanEmail,
-        role: 'admin',
-      };
-      localStorage.setItem('dewmina_user', JSON.stringify(user));
-      localStorage.setItem('auth_token', `token-admin-${Date.now()}`);
-      set({ currentUser: user, userRole: 'admin', currentView: 'admin-panel', showAuthModal: false });
-      return { success: true, message: 'Logged in as Admin' };
-    } else {
-      const user: UserAccount = {
-        id: `usr-${Date.now()}`,
-        name: cleanEmail.split('@')[0] || 'Passenger User',
-        email: cleanEmail,
-        role: 'passenger',
-      };
-      localStorage.setItem('dewmina_user', JSON.stringify(user));
-      localStorage.setItem('auth_token', `token-passenger-${Date.now()}`);
-      set({ currentUser: user, userRole: 'passenger', currentView: 'passenger-search', showAuthModal: false });
-      return { success: true, message: 'Logged in as Passenger' };
+  login: async (email, password, role) => {
+    try {
+      const res = await authApi.login({ email, password, role });
+      if (res.success && res.user) {
+        const user: UserAccount = {
+          id: res.user.id,
+          name: res.user.name,
+          email: res.user.email,
+          role: res.user.role,
+          phone: res.user.phone,
+        };
+        localStorage.setItem('dewmina_user', JSON.stringify(user));
+        localStorage.setItem('auth_token', res.token);
+        set({
+          currentUser: user,
+          userRole: user.role as any,
+          currentView: user.role === 'admin' ? 'admin-panel' : 'passenger-search',
+          showAuthModal: false,
+        });
+        return { success: true, message: res.message || 'Logged in successfully' };
+      }
+      return { success: false, message: res.message || 'Login failed' };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Authentication error occurred' };
     }
   },
 
-  register: (name, email, _password, role, phone) => {
-    const user: UserAccount = {
-      id: `usr-${Date.now()}`,
-      name,
-      email: email.trim().toLowerCase(),
-      phone,
-      role: role || 'passenger',
-    };
-    localStorage.setItem('dewmina_user', JSON.stringify(user));
-    localStorage.setItem('auth_token', `token-register-${Date.now()}`);
-    set({ currentUser: user, userRole: user.role, currentView: user.role === 'admin' ? 'admin-panel' : 'passenger-search', showAuthModal: false });
-    return { success: true, message: 'Registered successfully' };
+  register: async (name, email, password, role, phone) => {
+    try {
+      const res = await authApi.register({ name, email, password, role, phone });
+      if (res.success && res.user) {
+        const user: UserAccount = {
+          id: res.user.id,
+          name: res.user.name,
+          email: res.user.email,
+          role: res.user.role,
+          phone: res.user.phone,
+        };
+        localStorage.setItem('dewmina_user', JSON.stringify(user));
+        localStorage.setItem('auth_token', res.token);
+        set({
+          currentUser: user,
+          userRole: user.role as any,
+          currentView: user.role === 'admin' ? 'admin-panel' : 'passenger-search',
+          showAuthModal: false,
+        });
+        return { success: true, message: res.message || 'Registration successful' };
+      }
+      return { success: false, message: res.message || 'Registration failed' };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Registration error occurred' };
+    }
   },
 
   logout: () => {

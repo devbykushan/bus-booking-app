@@ -1,10 +1,11 @@
 import express from 'express';
 import cors from 'cors';
-import { getDb } from './db/database';
+import { initDb } from './db/database';
 import { routesRouter } from './routes/routesRouter';
 import { bookingsRouter } from './routes/bookingsRouter';
 import { seatsRouter } from './routes/seatsRouter';
 import { validateRouter } from './routes/validateRouter';
+import { authRouter } from './routes/authRouter';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -18,9 +19,12 @@ app.use(cors({
 app.use(express.json());
 
 // ─── Initialize database on startup ──────────────────────────────────────────
-getDb();
+initDb().catch((err) => {
+  console.error('Failed to initialize Neon PostgreSQL database:', err);
+});
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
+app.use('/api/auth', authRouter);
 app.use('/api/routes', routesRouter);
 app.use('/api/bookings', bookingsRouter);
 app.use('/api/seats', seatsRouter);
@@ -31,7 +35,7 @@ app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    database: 'SQLite (omnibus.db)',
+    database: 'Neon Serverless PostgreSQL (ap-southeast-1)',
     version: '1.0.0',
   });
 });
@@ -45,7 +49,7 @@ app.use((_req, res) => {
 app.listen(PORT, () => {
   console.log(`\n🚌 OmniBus API Server running on http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🗄️  Database: SQLite (omnibus.db)\n`);
+  console.log(`🗄️  Database: Neon Serverless PostgreSQL\n`);
 });
 
 export default app;
