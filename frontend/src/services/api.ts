@@ -34,6 +34,10 @@ export const routesApi = {
   /** Add a new bus route (Operator feature) */
   create: (routeData: any): Promise<any> =>
     apiFetch('/routes', { method: 'POST', body: JSON.stringify(routeData) }),
+
+  /** Remove all seats from a route while keeping its schedule available */
+  deleteLayout: (id: string): Promise<any> =>
+    apiFetch(`/routes/${id}/layout`, { method: 'DELETE' }),
 };
 
 // ─── Bookings API ─────────────────────────────────────────────────────────────

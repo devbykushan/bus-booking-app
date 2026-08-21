@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
+import { routesApi } from '../../services/api';
 import type { BusRoute, Seat, BusCategory, DeckType, SeatStatus } from '../../types/booking';
 import { 
   LayoutGrid, Save, X, Shield, Bus, RefreshCw, Plus, Trash2, Edit3, 
@@ -22,6 +23,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
   const [activeDeck, setActiveDeck] = useState<DeckType>('lower');
   const [selectedSeatId, setSelectedSeatId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [showAddSeatModal, setShowAddSeatModal] = useState(false);
 
   // New Seat Form State
@@ -300,6 +302,22 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
     } catch (err: any) {
       setIsSaving(false);
       alert(`Error saving layout: ${err.message}`);
+    }
+  };
+
+  const handleDeleteLayout = async () => {
+    if (!confirm(`Delete the entire seat layout for ${route.busNumber}? This cannot be undone.`)) return;
+
+    setIsDeleting(true);
+    try {
+      await routesApi.deleteLayout(route.id);
+      await loadRoutes();
+      alert(`Seat layout deleted for ${route.busNumber}.`);
+      onClose();
+    } catch (err: any) {
+      alert(`Error deleting layout: ${err.message}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -723,6 +741,15 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleDeleteLayout}
+              disabled={isDeleting || isSaving}
+              className="px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs flex items-center gap-2 border border-rose-200 disabled:opacity-60"
+            >
+              {isDeleting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+              <span>{isDeleting ? 'Deleting Layout...' : 'Delete Layout'}</span>
+            </button>
             <button
               type="button"
               onClick={onClose}

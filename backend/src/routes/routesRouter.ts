@@ -312,3 +312,30 @@ routesRouter.put('/:id/layout', (req: Request, res: Response) => {
     res.status(400).json({ error: err.message });
   }
 });
+
+// ─── DELETE /api/routes/:id/layout — Admin Remove Seat Layout ───────────────
+routesRouter.delete('/:id/layout', (req: Request, res: Response) => {
+  const db = getDb();
+  const { id } = req.params;
+
+  try {
+    const route = db.prepare('SELECT id FROM routes WHERE id = ?').get(id);
+    if (!route) {
+      res.status(404).json({ error: 'Route not found' });
+      return;
+    }
+
+    db.transaction(() => {
+      const seatIds = db.prepare('SELECT id FROM seats WHERE routeId = ?').all(id) as { id: string }[];
+      db.prepare('DELETE FROM seats WHERE routeId = ?').run(id);
+
+      for (const { id: seatId } of seatIds) {
+        seatLocks.delete(seatId);
+      }
+    })();
+
+    res.json({ success: true, message: 'Seat layout deleted successfully.' });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+});
