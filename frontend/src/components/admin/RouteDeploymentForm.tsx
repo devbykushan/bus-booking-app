@@ -29,12 +29,20 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Sri Lanka Bus License Plate format validation helper
-  // e.g. "ND-8899", "WP ND-8899", "WP-ND-8899", "62-1234", "NA-1234", "ND-8899 (Lanka Ashok Leyland)"
+  // Strictly max 4 digits in number portion, e.g. "ND-8899", "WP ND-8899", "62-1234"
   const isValidBusRegNumber = (val: string): boolean => {
     const trimmed = val.trim();
-    if (trimmed.length < 5) return false;
-    const platePattern = /^(([A-Za-z]{1,3}|[0-9]{2,3})\s*[- ]\s*[0-9]{3,4}|(WP|CP|SP|NP|EP|NW|NC|UP|SG)[- ]([A-Za-z]{2,3}|[0-9]{2,3})[- ][0-9]{3,4})(\s*\([^)]+\))?$/i;
-    const generalPattern = /^[A-Za-z0-9\s\-]+[- ]\d{3,4}(\s*\([^)]+\))?$/i;
+    if (trimmed.length < 4) return false;
+    // Count total trailing/license digits - must be between 1 and 4
+    const digitsMatch = trimmed.match(/\d+/g);
+    if (!digitsMatch) return false;
+    
+    // Check if the primary number sequence exceeds 4 digits
+    const lastDigits = digitsMatch[digitsMatch.length - 1];
+    if (lastDigits && lastDigits.length > 4) return false;
+
+    const platePattern = /^(([A-Za-z]{1,3}|[0-9]{2,3})\s*[- ]\s*[0-9]{1,4}|(WP|CP|SP|NP|EP|NW|NC|UP|SG)[- ]([A-Za-z]{2,3}|[0-9]{2,3})[- ][0-9]{1,4})$/i;
+    const generalPattern = /^[A-Za-z0-9\s\-]+[- ]\d{1,4}$/i;
     return platePattern.test(trimmed) || generalPattern.test(trimmed);
   };
 
@@ -49,12 +57,16 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
       errs.operatorName = 'Operator name must be at least 2 characters.';
     }
 
-    // 2. Bus Reg. Number
+    // 2. Bus Reg. Number (Strictly max 4 numbers)
     const trimmedBusNum = busNumber.trim();
+    const numPartMatch = trimmedBusNum.split('-')[1]?.replace(/\D/g, '');
+
     if (!trimmedBusNum) {
       errs.busNumber = 'Bus registration number is required (e.g., ND-8899).';
-    } else if (trimmedBusNum.length < 5 || !isValidBusRegNumber(trimmedBusNum)) {
-      errs.busNumber = 'Invalid format. Use Sri Lankan plate (e.g., ND-8899 or WP ND-8899).';
+    } else if (numPartMatch && numPartMatch.length > 4) {
+      errs.busNumber = 'Bus registration number cannot exceed 4 digits (e.g., ND-8899).';
+    } else if (trimmedBusNum.length < 4 || !isValidBusRegNumber(trimmedBusNum)) {
+      errs.busNumber = 'Invalid format. Max 4 digits allowed (e.g., ND-8899 or WP ND-8899).';
     } else if (routes.some(r => r.busNumber.trim().toLowerCase() === trimmedBusNum.toLowerCase())) {
       errs.busNumber = `Bus ${trimmedBusNum} is already active in the fleet.`;
     }
@@ -221,15 +233,32 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
             type="text"
             value={busNumber}
             onChange={e => {
-              // Auto-uppercase prefix before bracket or dash
-              let val = e.target.value;
-              if (!val.includes('(')) {
-                val = val.toUpperCase();
+              let val = e.target.value.toUpperCase();
+              
+              // If there's a dash (e.g. ND-3333), prevent typing more than 4 digits after the dash
+              const parts = val.split('-');
+              if (parts.length >= 2) {
+                const prefix = parts[0];
+                const rest = parts.slice(1).join('');
+                const digits = rest.replace(/\D/g, '').slice(0, 4);
+                val = `${prefix}-${digits}`;
+              } else {
+                // If no dash yet, prevent typing more than 4 numbers anywhere
+                let digitCount = 0;
+                val = val.split('').filter(ch => {
+                  if (/\d/.test(ch)) {
+                    digitCount++;
+                    return digitCount <= 4;
+                  }
+                  return true;
+                }).join('');
               }
+
               setBusNumber(val);
               if (errors.busNumber) setErrors(prev => ({ ...prev, busNumber: '' }));
             }}
             placeholder="e.g. ND-8899 or WP ND-8899"
+            maxLength={12}
             className={`w-full rounded-xl p-2.5 font-semibold text-slate-800 border transition-all ${
               errors.busNumber
                 ? 'bg-rose-50/50 border-rose-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-200'

@@ -147,10 +147,15 @@ routesRouter.post('/', async (req: Request, res: Response) => {
     return;
   }
   const trimmedBusNum = busNumber.trim();
-  const platePattern = /^(([A-Za-z]{1,3}|[0-9]{2,3})\s*[- ]\s*[0-9]{3,4}|(WP|CP|SP|NP|EP|NW|NC|UP|SG)[- ]([A-Za-z]{2,3}|[0-9]{2,3})[- ][0-9]{3,4})(\s*\([^)]+\))?$/i;
-  const generalPattern = /^[A-Za-z0-9\s\-]+[- ]\d{3,4}(\s*\([^)]+\))?$/i;
-  if (trimmedBusNum.length < 5 || (!platePattern.test(trimmedBusNum) && !generalPattern.test(trimmedBusNum))) {
-    res.status(400).json({ error: 'Valid Sri Lankan bus registration number is required (e.g., ND-8899, WP ND-8899, or ND-8899 (Bus Name)).' });
+  const numPart = trimmedBusNum.split('-')[1]?.replace(/\D/g, '');
+  if (numPart && numPart.length > 4) {
+    res.status(400).json({ error: 'Bus registration number cannot exceed 4 digits (e.g., ND-8899 or WP ND-8899).' });
+    return;
+  }
+  const platePattern = /^(([A-Za-z]{1,3}|[0-9]{2,3})\s*[- ]\s*[0-9]{1,4}|(WP|CP|SP|NP|EP|NW|NC|UP|SG)[- ]([A-Za-z]{2,3}|[0-9]{2,3})[- ][0-9]{1,4})$/i;
+  const generalPattern = /^[A-Za-z0-9\s\-]+[- ]\d{1,4}$/i;
+  if (trimmedBusNum.length < 4 || (!platePattern.test(trimmedBusNum) && !generalPattern.test(trimmedBusNum))) {
+    res.status(400).json({ error: 'Valid Sri Lankan bus registration number is required (e.g., ND-8899 or WP ND-8899, max 4 digits).' });
     return;
   }
   if (!busType || typeof busType !== 'string' || !busType.trim()) {
