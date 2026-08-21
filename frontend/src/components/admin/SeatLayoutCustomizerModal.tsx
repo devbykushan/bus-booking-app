@@ -609,8 +609,8 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
           </div>
 
           {/* Right Seat Inspector Panel */}
-          <div className="lg:col-span-4 bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-4">
-            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between border-b border-slate-200 pb-2">
+          <div className="lg:col-span-4 h-full min-h-[560px] bg-gradient-to-b from-slate-50 to-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm animate-inspector-in">
+            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between border-b border-slate-200 pb-3 animate-fade-in-up">
               <span className="flex items-center gap-1.5">
                 <Edit3 className="w-4 h-4 text-blue-600" /> Seat Property Inspector
               </span>
@@ -620,7 +620,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
             </h4>
 
             {selectedSeat ? (
-              <div className="space-y-3 text-xs">
+              <div className="flex flex-1 flex-col space-y-3 text-xs animate-fade-in-up" key={selectedSeat.id}>
                 <div>
                   <label className="block text-slate-600 font-semibold mb-1">Seat Label / Number</label>
                   <input
@@ -698,9 +698,16 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                     <Trash2 className="w-4 h-4" /> Remove Seat from Layout
                   </button>
                 </div>
+
+                <div className="mt-auto rounded-xl border border-blue-100 bg-blue-50/70 p-3 text-[11px] text-blue-800">
+                  <p className="font-bold">Layout guidance</p>
+                  <p className="mt-1 leading-relaxed text-blue-700/80">
+                    Changes apply to this seat only. Use row and column positions to fine-tune its placement in the bus grid.
+                  </p>
+                </div>
               </div>
             ) : (
-              <div className="text-center py-12 text-slate-400 text-xs space-y-2">
+              <div className="flex flex-1 flex-col items-center justify-center text-center py-12 text-slate-400 text-xs space-y-2 animate-fade-in-up">
                 <Sliders className="w-8 h-8 mx-auto text-slate-300" />
                 <p>Click any seat on the grid to inspect and edit its properties individually.</p>
               </div>
