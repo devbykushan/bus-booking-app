@@ -109,23 +109,34 @@ export const BookingGuideSection: React.FC = () => {
           })}
         </div>
 
-        {/* Bottom CTA Action Bar */}
-        <div className="p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
-          <div className="space-y-1 text-center sm:text-left">
-            <h4 className="text-base font-extrabold flex items-center justify-center sm:justify-start gap-2">
-              <Zap className="w-4 h-4 text-amber-400" /> Ready to Experience First-Class Travel?
+        {/* Bottom CTA Action Bar - Light Glassmorphism with Smooth Animation */}
+        <div className="relative overflow-hidden p-6 sm:p-7 rounded-2xl backdrop-blur-xl bg-gradient-to-r from-blue-50/90 via-white/85 to-indigo-50/90 border border-white/90 shadow-lg shadow-blue-900/5 flex flex-col sm:flex-row items-center justify-between gap-5 transition-all duration-300 hover:shadow-xl hover:border-blue-200">
+          
+          {/* Animated Background Light Beam */}
+          <div className="absolute -top-12 -left-12 w-48 h-48 bg-gradient-to-br from-blue-400/20 to-cyan-300/10 rounded-full blur-2xl pointer-events-none animate-pulse" />
+          <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-gradient-to-tl from-indigo-400/20 to-pink-300/10 rounded-full blur-2xl pointer-events-none animate-pulse" />
+
+          {/* Animated Top Shimmer Line */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent animate-gradient-flow" />
+
+          <div className="relative z-10 space-y-1.5 text-center sm:text-left">
+            <h4 className="text-base font-black text-slate-900 flex items-center justify-center sm:justify-start gap-2">
+              <span className="p-1.5 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shadow-xs">
+                <Zap className="w-4 h-4 fill-amber-500 text-amber-500 animate-bounce" />
+              </span>
+              <span>Ready to Experience First-Class Travel?</span>
             </h4>
-            <p className="text-xs text-blue-200 font-medium">
+            <p className="text-xs text-slate-600 font-medium leading-relaxed">
               Browse live schedules between Monaragala, Colombo, Kandy, Galle, and more with instant seat selection.
             </p>
           </div>
 
           <button
             onClick={goToSearchSchedules}
-            className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-lg flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 flex-shrink-0"
+            className="relative z-10 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-md shadow-blue-600/25 flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 flex-shrink-0 group"
           >
             <span>Search & Book Buses</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
 

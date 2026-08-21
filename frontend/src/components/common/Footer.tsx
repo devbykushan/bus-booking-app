@@ -1,78 +1,297 @@
 import React from 'react';
-import { ShieldCheck, Heart, Lock, PhoneCall, QrCode } from 'lucide-react';
+import { useBookingStore } from '../../store/bookingStore';
+import { 
+  Heart, PhoneCall, Bus, Mail, 
+  ChevronRight, Navigation, CheckCircle2
+} from 'lucide-react';
 
 export const Footer: React.FC = () => {
+  const { goToSearchSchedules, setSearchCriteria, setCurrentView } = useBookingStore();
+
+  const handleRouteClick = (origin: string, dest: string) => {
+    setSearchCriteria(origin, dest, new Date().toISOString().split('T')[0]);
+    goToSearchSchedules();
+  };
+
   return (
-    <footer className="border-t border-slate-200 bg-white text-slate-500 text-sm mt-20 pt-12 pb-8">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-        
-        {/* Brand Column */}
-        <div className="space-y-4 md:col-span-1">
-          <div className="flex items-center gap-3">
-            <img
-              src="/dewmina-logo.png"
-              alt="Dewmina Super Line"
-              className="h-12 w-auto object-contain"
-            />
+    <footer className="relative bg-gradient-to-b from-slate-50 via-white to-blue-50/40 text-slate-600 text-sm mt-20 overflow-hidden border-t border-slate-200 select-none shadow-inner">
+      
+      {/* ── Spotless High-Res Coach Background with Gentle Movement ── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
+        <img
+          src="/yutong-hero.jpg"
+          alt="Dewmina Super Line Coach"
+          className="w-full h-full object-cover object-right md:object-[85%_center] opacity-[0.08] filter blur-[0.5px] scale-105 animate-ken-burns"
+        />
+        {/* Soft daylight gradient overlay for clean contrast */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-slate-50/60" />
+
+        {/* Ambient Floating Pastel Glow Blobs */}
+        <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-300/15 rounded-full blur-3xl animate-blob-1" />
+        <div className="absolute -bottom-20 right-1/3 w-96 h-96 bg-indigo-300/15 rounded-full blur-3xl animate-blob-2" />
+      </div>
+
+      {/* ── Top Radiant Glowing Shimmer Bar ── */}
+      <div className="relative h-[2px] w-full bg-gradient-to-r from-blue-500 via-indigo-500 via-pink-400 to-emerald-400 bg-[length:300%_100%] animate-gradient-flow" />
+
+      {/* ── Subtle Highway Bus Streak Lane Animation ── */}
+      <div className="relative w-full h-5 overflow-hidden border-b border-slate-200/60 bg-blue-50/30 backdrop-blur-xs">
+        <div className="absolute inset-0 flex items-center">
+          {/* Moving Dashed Road Center Line */}
+          <div className="w-full flex gap-6 animate-road opacity-30">
+            {Array.from({ length: 40 }).map((_, i) => (
+              <div key={i} className="h-0.5 w-8 bg-blue-400 rounded-full flex-shrink-0" />
+            ))}
           </div>
-          <div>
-            <p className="text-base font-bold text-slate-800">Dewmina Super Line</p>
-            <p className="text-xs text-blue-600 italic mb-2">Beyond the Journey: The Journey of Faith</p>
+        </div>
+
+        {/* Gliding Bus Icon Streak */}
+        <div className="absolute top-0.5 left-0 flex items-center gap-1.5 animate-bus-streak pointer-events-none opacity-80">
+          <span className="text-[11px]">🚌</span>
+          <div className="h-0.5 w-20 bg-gradient-to-r from-blue-500 to-transparent rounded-full shadow-[0_0_8px_#3b82f6]" />
+        </div>
+      </div>
+
+      {/* ── Main Footer Grid Container ── */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 pt-14 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 mb-14">
+          
+          {/* 1. Brand Column (4.2 Cols) */}
+          <div className="lg:col-span-4 space-y-5">
+            <div 
+              onClick={goToSearchSchedules}
+              className="group cursor-pointer inline-flex items-center gap-3.5"
+            >
+              <div className="p-2 rounded-2xl bg-white border border-slate-200 group-hover:border-blue-400 group-hover:shadow-md transition-all duration-300 shadow-sm transform group-hover:scale-105">
+                <img
+                  src="/dewmina-logo.png"
+                  alt="Dewmina Super Line"
+                  className="h-10 w-auto object-contain transition-transform duration-300"
+                />
+              </div>
+              <div>
+                <p className="text-lg font-black text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">
+                  Dewmina Super Line
+                </p>
+                <p className="text-xs text-blue-600 font-medium italic">
+                  Beyond the Journey: The Journey of Faith
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed max-w-sm">
+              Sri Lanka’s premier digital passenger transit network. Experience guaranteed seat reservations with real-time locking, contactless QR boarding passes, and precision live GPS fleet telemetry.
+            </p>
+
+            {/* Verification & Trust Pills with Hover Scale */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-700 bg-white border border-slate-200 px-3.5 py-1.5 rounded-full max-w-fit shadow-xs hover:border-emerald-300 hover:shadow-sm hover:scale-105 transition-all cursor-default">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 animate-pulse" />
+                <span>NTC Registered & Highway Route Permit Operator</span>
+              </div>
+
+              <div className="flex items-center gap-2 text-[11px] font-semibold text-pink-700 bg-pink-50 border border-pink-200 px-3.5 py-1.5 rounded-full max-w-fit shadow-xs hover:border-pink-300 hover:shadow-sm hover:scale-105 transition-all cursor-default">
+                <Heart className="w-3.5 h-3.5 text-pink-500 fill-pink-500/20 flex-shrink-0 animate-pulse" />
+                <span>100% Female Traveler Safety & Dedicated Seating</span>
+              </div>
+            </div>
           </div>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Sri Lanka's trusted bus booking platform featuring real-time seat lock concurrency, live GPS bus tracking, and instant QR boarding pass validation.
+
+          {/* 2. Passenger Services (2.8 Cols) */}
+          <div className="lg:col-span-3 space-y-4">
+            <h4 className="text-slate-900 font-bold text-sm tracking-wide flex items-center gap-2">
+              <Navigation className="w-4 h-4 text-blue-600 animate-pulse" /> Passenger Services
+            </h4>
+            <ul className="space-y-2.5 text-xs text-slate-600">
+              {[
+                { label: 'Search Bus Schedules & Fares', action: goToSearchSchedules },
+                { label: 'Live GPS Coach Tracking', action: () => setCurrentView('live-tracking') },
+                { label: 'My Tickets & Boarding Passes', action: () => setCurrentView('my-bookings') },
+                { label: 'Solo Female Seat Reservation', action: goToSearchSchedules },
+                { label: 'Ticket Cancellation & Refunds', action: () => setCurrentView('my-bookings') },
+              ].map((item, idx) => (
+                <li key={idx}>
+                  <button
+                    onClick={item.action}
+                    className="hover:text-blue-600 flex items-center gap-1.5 transition-colors group"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-transform" />
+                    <span>{item.label}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* 3. Popular Routes (2.5 Cols) */}
+          <div className="lg:col-span-2 space-y-4">
+            <h4 className="text-slate-900 font-bold text-sm tracking-wide flex items-center gap-2">
+              <Bus className="w-4 h-4 text-blue-600 animate-pulse" /> Popular Routes
+            </h4>
+            <ul className="space-y-2.5 text-xs text-slate-600">
+              {[
+                { origin: 'Monaragala', dest: 'Colombo', label: 'Monaragala → Colombo' },
+                { origin: 'Colombo', dest: 'Monaragala', label: 'Colombo → Monaragala' },
+                { origin: 'Monaragala', dest: 'Kandy', label: 'Monaragala → Kandy' },
+                { origin: 'Wellawaya', dest: 'Colombo', label: 'Wellawaya → Colombo' },
+                { origin: 'Colombo', dest: 'Galle', label: 'Colombo → Galle' },
+              ].map((r, idx) => (
+                <li key={idx}>
+                  <button
+                    onClick={() => handleRouteClick(r.origin, r.dest)}
+                    className="hover:text-blue-600 flex items-center gap-1.5 transition-colors group text-left"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                    <span className="truncate">{r.label}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* 4. Support Helpline, Our App & Follow Us (3 Cols) */}
+          <div className="lg:col-span-3 space-y-5">
+            <div>
+              <h4 className="text-slate-900 font-bold text-sm tracking-wide mb-3 flex items-center gap-2">
+                <PhoneCall className="w-4 h-4 text-emerald-600 animate-pulse" /> 24/7 Conductor Helpline
+              </h4>
+              <div className="space-y-2">
+                <a
+                  href="tel:0711433520"
+                  className="flex items-center gap-3 p-2.5 rounded-2xl bg-white hover:bg-emerald-50/40 border border-slate-200 hover:border-emerald-300 text-slate-800 transition-all duration-300 shadow-xs hover:shadow-md hover:-translate-y-0.5 group"
+                >
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
+                    <PhoneCall className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold font-mono text-slate-900 group-hover:text-emerald-700 transition-colors">071 143 3520</p>
+                    <p className="text-[10px] text-slate-500">Main Dispatch Desk (24/7)</p>
+                  </div>
+                </a>
+
+                <a
+                  href="mailto:dewminasuperline@gmail.com"
+                  className="flex items-center gap-3 p-2.5 rounded-2xl bg-white hover:bg-blue-50/40 border border-slate-200 hover:border-blue-300 text-slate-800 transition-all duration-300 shadow-xs hover:shadow-md hover:-translate-y-0.5 group"
+                >
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">dewminasuperline@gmail.com</p>
+                    <p className="text-[10px] text-slate-500">Online Inquiries & Support</p>
+                  </div>
+                </a>
+              </div>
+            </div>
+
+            {/* Our App Section with Hover Elevation */}
+            <div className="pt-1">
+              <h5 className="text-slate-900 font-bold text-xs uppercase tracking-wider mb-1.5">OUR APP</h5>
+              <p className="text-[11px] text-slate-600 mb-3 leading-relaxed">
+                Book Your Bus Seats Anytime, Anywhere – Download Our App Now!
+              </p>
+              <div className="flex flex-col sm:flex-row lg:flex-col gap-2">
+                {/* Google Play */}
+                <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group max-w-[200px]">
+                  <svg className="w-4 h-4 flex-shrink-0 text-amber-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3.609 1.814L13.792 12 3.61 22.186a1.996 1.996 0 0 1-.61-.39 2.016 2.016 0 0 1-.5-.996V3.2a2.016 2.016 0 0 1 .5-.996c.16-.16.38-.3.609-.39zM15.207 13.414l2.121 2.121-12.728 7.348 10.607-9.469zm0-2.828L4.6 1.117l12.728 7.348-2.121 2.121zm1.414 1.414l3.535 2.04c.884.51.884 1.34 0 1.85l-3.535 2.04-1.414-1.414 1.414-4.516z"/>
+                  </svg>
+                  <div className="leading-tight">
+                    <p className="text-[8px] uppercase tracking-wider text-slate-300 font-medium">Download on the</p>
+                    <p className="text-[11px] font-bold text-white group-hover:text-blue-300">Google Play</p>
+                  </div>
+                </div>
+
+                {/* App Store (Soon) */}
+                <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-400/80 text-white cursor-not-allowed shadow-xs max-w-[200px]">
+                  <svg className="w-4 h-4 flex-shrink-0 text-slate-100" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.75 1.04-1.8 0.92-2.85-.9.04-1.98.6-2.62 1.35-.57.65-1.06 1.71-.93 2.74 1.01.08 2.02-.49 2.63-1.24z"/>
+                  </svg>
+                  <div className="leading-tight">
+                    <p className="text-[8px] uppercase tracking-wider text-slate-100 font-medium">Soon on</p>
+                    <p className="text-[11px] font-bold text-slate-100">App Store</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Follow Us Section with Scale & Hover Lift */}
+            <div className="space-y-2 pt-1">
+              <h5 className="text-slate-900 font-bold text-xs uppercase tracking-wider">FOLLOW US</h5>
+              <div className="flex items-center gap-2.5">
+                {/* Facebook */}
+                <a
+                  href="https://facebook.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Follow Dewmina Super Line on Facebook"
+                  className="w-9 h-9 rounded-xl bg-white hover:bg-[#1877F2] text-slate-600 hover:text-white border border-slate-200 hover:border-[#1877F2] flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 shadow-xs hover:shadow-md"
+                >
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                </a>
+
+                {/* Instagram */}
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Follow Dewmina Super Line on Instagram"
+                  className="w-9 h-9 rounded-xl bg-white hover:bg-gradient-to-tr hover:from-[#f09433] hover:via-[#dc2743] hover:to-[#bc1888] text-slate-600 hover:text-white border border-slate-200 hover:border-pink-500 flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 shadow-xs hover:shadow-md"
+                >
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.13-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                  </svg>
+                </a>
+
+                {/* WhatsApp */}
+                <a
+                  href="https://wa.me/94711433520"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Chat with Dewmina Super Line on WhatsApp"
+                  className="w-9 h-9 rounded-xl bg-white hover:bg-[#25D366] text-slate-600 hover:text-white border border-slate-200 hover:border-[#25D366] flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 shadow-xs hover:shadow-md"
+                >
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.301-.15-1.781-.879-2.057-.98-.276-.1-.476-.15-.676.15s-.776.98-.952 1.18c-.176.2-.351.226-.652.075s-1.269-.468-2.417-1.493c-.894-.799-1.497-1.786-1.673-2.087s-.019-.464.132-.614c.135-.135.301-.351.451-.527s.2-.301.301-.502c.1-.2.05-.376-.025-.526s-.677-1.631-.927-2.233c-.244-.587-.492-.507-.677-.517l-.577-.01c-.2 0-.526.075-.802.376s-1.053 1.028-1.053 2.507 1.078 2.908 1.228 3.109c.15.2 2.122 3.24 5.141 4.544.718.31 1.279.495 1.716.634.721.23 1.378.197 1.897.12.578-.087 1.781-.728 2.032-1.431.25-.703.25-1.305.175-1.431-.075-.125-.275-.2-.576-.351zm-5.467 7.604c-2.179 0-4.218-.621-5.962-1.698l-.427-.26-4.437 1.164 1.185-4.323-.279-.444c-1.185-1.884-1.812-4.067-1.812-6.307 0-6.685 5.439-12.124 12.124-12.124 3.24 0 6.287 1.261 8.578 3.553 2.292 2.291 3.554 5.338 3.554 8.579 0 6.686-5.439 12.124-12.124 12.124zm9.431-21.555c-2.52-2.52-5.87-3.909-9.431-3.909-7.346 0-13.324 5.978-13.324 13.324 0 2.348.613 4.639 1.776 6.666l-1.888 6.897 7.057-1.851c1.947 1.062 4.148 1.621 6.379 1.621 7.346 0 13.324-5.978 13.324-13.324 0-3.561-1.389-6.911-3.909-9.431z"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            {/* Supported Payment Gateways */}
+            <div className="pt-1">
+              <p className="text-[11px] text-slate-500 mb-1.5 font-medium">Supported Payment Gateways</p>
+              <div className="flex items-center gap-2 text-[10px] font-mono text-slate-700">
+                <span className="px-2 py-0.5 rounded bg-white border border-slate-200 shadow-xs font-semibold hover:scale-105 transition-transform cursor-default">VISA</span>
+                <span className="px-2 py-0.5 rounded bg-white border border-slate-200 shadow-xs font-semibold hover:scale-105 transition-transform cursor-default">MasterCard</span>
+                <span className="px-2 py-0.5 rounded bg-white border border-slate-200 shadow-xs font-semibold hover:scale-105 transition-transform cursor-default">LankaQR</span>
+                <span className="px-2 py-0.5 rounded bg-white border border-slate-200 shadow-xs font-semibold hover:scale-105 transition-transform cursor-default">Cash</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* ── Bottom Bar ── */}
+        <div className="border-t border-slate-200 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+          <p className="text-center sm:text-left">
+            © 2026 <strong className="text-slate-800 font-bold">Dewmina Super Line (Pvt) Ltd</strong>. All rights reserved.
           </p>
-          <div className="flex items-center gap-2 text-pink-600 text-xs font-semibold bg-pink-50 border border-pink-200 p-2 rounded-lg">
-            <Heart className="w-4 h-4 text-pink-500 fill-pink-500" />
-            <span>100% Female Traveler Safety Guarantee</span>
-          </div>
-        </div>
 
-        {/* Popular Routes */}
-        <div>
-          <h4 className="text-slate-800 font-semibold text-sm mb-3">Popular Bus Routes</h4>
-          <ul className="space-y-2 text-xs">
-            <li className="hover:text-blue-600 transition-colors cursor-pointer">Monaragala → Colombo (Dewmina Express)</li>
-            <li className="hover:text-blue-600 transition-colors cursor-pointer">Colombo → Monaragala (Night Super)</li>
-            <li className="hover:text-blue-600 transition-colors cursor-pointer">Monaragala → Kandy (Air Bus)</li>
-            <li className="hover:text-blue-600 transition-colors cursor-pointer">Wellawaya → Colombo (Highway)</li>
-          </ul>
-        </div>
-
-        {/* Features & USPs */}
-        <div>
-          <h4 className="text-slate-800 font-semibold text-sm mb-3">Platform Highlights</h4>
-          <ul className="space-y-2 text-xs">
-            <li className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-blue-500" /> Seat Lock Concurrency (8m)</li>
-            <li className="flex items-center gap-1.5"><QrCode className="w-3.5 h-3.5 text-indigo-500" /> Smart QR Boarding Pass</li>
-            <li className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-pink-500" /> Women-Friendly Reserved Seats</li>
-            <li className="flex items-center gap-1.5"><PhoneCall className="w-3.5 h-3.5 text-amber-500" /> 24/7 Conductor Helpline</li>
-          </ul>
-        </div>
-
-        {/* Security & Payment Badges */}
-        <div>
-          <h4 className="text-slate-800 font-semibold text-sm mb-3">Secure Checkout</h4>
-          <p className="text-xs text-slate-500 mb-3">
-            Protected by 256-bit SSL encryption. ACID compliant database transactions prevent double booking.
-          </p>
-          <div className="flex flex-wrap gap-2 text-[11px] font-mono text-slate-600">
-            <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">VISA</span>
-            <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">MasterCard</span>
-            <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">LKR Cash</span>
+          <div className="flex items-center gap-6 text-slate-600 text-xs font-medium">
+            <button onClick={goToSearchSchedules} className="hover:text-blue-600 transition-colors">Book Buses</button>
+            <button onClick={() => setCurrentView('live-tracking')} className="hover:text-blue-600 transition-colors">Live GPS</button>
+            <button onClick={() => setCurrentView('my-bookings')} className="hover:text-blue-600 transition-colors">My Tickets</button>
+            <button onClick={() => setCurrentView('admin-panel')} className="hover:text-blue-600 transition-colors">Operator Portal</button>
           </div>
         </div>
 
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 border-t border-slate-200 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-slate-400 gap-4">
-        <p>© 2026 Dewmina Super Line. All rights reserved. | 📞 0711433520 | ✉️ dewminasuperline@gmail.com</p>
-        <div className="flex items-center gap-6">
-          <a href="#" className="hover:text-slate-600">Privacy Policy</a>
-          <a href="#" className="hover:text-slate-600">Terms of Service</a>
-          <a href="#" className="hover:text-slate-600">Operator Portal</a>
-        </div>
-      </div>
     </footer>
   );
 };

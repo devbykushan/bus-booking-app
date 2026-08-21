@@ -1197,3 +1197,22 @@
 .animate-border-glow {
   animation: borderGlow 3s ease-in-out infinite;
 }
+
+@keyframes gradientFlowAnim {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-gradient-flow {
+  animation: gradientFlowAnim 6s ease infinite;
+}
+
+@keyframes kenBurnsAnim {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06) translate(-1%, -1%); }
+  100% { transform: scale(1); }
+}
+.animate-ken-burns {
+  animation: kenBurnsAnim 25s ease-in-out infinite alternate;
+}
+
