@@ -1,12 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { lockSeats, unlockSeats, isSeatAvailable, getLockRemainingSeconds } from '../locks/seatLocks';
-import { getDb } from '../db/database';
+import { getPool } from '../db/database';
 
 export const seatsRouter = Router();
 
 // ─── POST /api/seats/lock ─────────────────────────────────────────────────────
 // Body: { seatIds: string[], routeId: string, sessionId: string }
-seatsRouter.post('/lock', (req: Request, res: Response) => {
+seatsRouter.post('/lock', async (req: Request, res: Response) => {
   const { seatIds, routeId, sessionId } = req.body as {
     seatIds: string[];
     routeId: string;
@@ -18,43 +18,49 @@ seatsRouter.post('/lock', (req: Request, res: Response) => {
     return;
   }
 
-  const db = getDb();
+  const pool = getPool();
 
-  // Check all seats are available or already locked by this session
-  const conflicts: string[] = [];
-  for (const seatId of seatIds) {
-    const row = db.prepare("SELECT status FROM seats WHERE id = ?").get(seatId) as any;
-    if (!row) {
-      conflicts.push(`${seatId} (not found)`);
-      continue;
-    }
-    if (row.status === 'booked') {
-      conflicts.push(`${seatId} (already booked)`);
-      continue;
-    }
-    if (!isSeatAvailable(seatId, sessionId)) {
-      conflicts.push(`${seatId} (locked by another user)`);
-    }
-  }
+  try {
+    // Check all seats are available or already locked by this session
+    const conflicts: string[] = [];
+    for (const seatId of seatIds) {
+      const rowRes = await pool.query('SELECT status FROM seats WHERE "id" = $1', [seatId]);
+      const row = rowRes.rows[0];
 
-  if (conflicts.length > 0) {
-    res.status(409).json({
-      error: 'Some seats are not available.',
-      conflicts,
+      if (!row) {
+        conflicts.push(`${seatId} (not found)`);
+        continue;
+      }
+      if (row.status === 'booked') {
+        conflicts.push(`${seatId} (already booked)`);
+        continue;
+      }
+      if (!isSeatAvailable(seatId, sessionId)) {
+        conflicts.push(`${seatId} (locked by another user)`);
+      }
+    }
+
+    if (conflicts.length > 0) {
+      res.status(409).json({
+        error: 'Some seats are not available.',
+        conflicts,
+      });
+      return;
+    }
+
+    lockSeats(seatIds, routeId, sessionId);
+
+    const remaining = getLockRemainingSeconds(seatIds[0]);
+
+    res.json({
+      success: true,
+      lockedSeatIds: seatIds,
+      lockExpiresInSeconds: remaining,
+      message: `${seatIds.length} seat(s) locked for 8 minutes.`,
     });
-    return;
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
-
-  lockSeats(seatIds, routeId, sessionId);
-
-  const remaining = getLockRemainingSeconds(seatIds[0]);
-
-  res.json({
-    success: true,
-    lockedSeatIds: seatIds,
-    lockExpiresInSeconds: remaining,
-    message: `${seatIds.length} seat(s) locked for 8 minutes.`,
-  });
 });
 
 // ─── POST /api/seats/unlock ───────────────────────────────────────────────────

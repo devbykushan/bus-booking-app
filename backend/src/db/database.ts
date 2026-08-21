@@ -1,113 +1,185 @@
-import Database from 'better-sqlite3';
+import { Pool } from 'pg';
+import dotenv from 'dotenv';
 import path from 'path';
+import crypto from 'crypto';
 
-// Store database file in backend root
-const DB_PATH = path.join(__dirname, '../../omnibus.db');
+// Load environment variables from backend/.env or root .env
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config();
 
-let db: Database.Database;
+const connectionString = process.env.DATABASE_URL;
 
-export function getDb(): Database.Database {
-  if (!db) {
-    db = new Database(DB_PATH);
-    db.pragma('journal_mode = WAL');
-    db.pragma('foreign_keys = ON');
-    initializeSchema();
-    seedData();
+let pool: Pool;
+
+export function getPool(): Pool {
+  if (!pool) {
+    if (!connectionString) {
+      throw new Error('DATABASE_URL is not defined in environment variables.');
+    }
+    pool = new Pool({
+      connectionString,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+      max: 10,
+      idleTimeoutMillis: 10000,
+      connectionTimeoutMillis: 30000,
+      keepAlive: true,
+    });
+
+    pool.on('error', (err) => {
+      // Idle client disconnected by Neon serverless compute suspend - ignore safely
+      console.warn('Neon PostgreSQL idle client warning:', err.message);
+    });
   }
-  return db;
+  return pool;
 }
 
-function initializeSchema(): void {
-  const database = db;
+/**
+ * Resilient query helper that automatically retries once if a serverless connection was suspended
+ */
+export async function dbQuery(text: string, params?: any[]) {
+  const p = getPool();
+  try {
+    return await p.query(text, params);
+  } catch (err: any) {
+    if (err && err.message && (err.message.includes('Connection terminated') || err.message.includes('closed') || err.message.includes('timeout'))) {
+      console.warn('Re-executing query after Neon compute resume...');
+      return await p.query(text, params);
+    }
+    throw err;
+  }
+}
 
-  database.exec(`
+
+// ─── Password Hashing & Verification (PBKDF2 with salt) ────────────────────────
+
+export function hashPassword(password: string): string {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+  return `${salt}:${hash}`;
+}
+
+export function verifyPassword(password: string, combinedHash: string): boolean {
+  if (!combinedHash || !combinedHash.includes(':')) return false;
+  const [salt, originalHash] = combinedHash.split(':');
+  if (!salt || !originalHash) return false;
+  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+  try {
+    return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(originalHash, 'hex'));
+  } catch {
+    return false;
+  }
+}
+
+export async function initDb(): Promise<void> {
+  const p = getPool();
+  await initializeSchema(p);
+  await seedData(p);
+  await seedUsers(p);
+}
+
+export async function initializeSchema(p: Pool): Promise<void> {
+  await p.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      "id" TEXT PRIMARY KEY,
+      "name" TEXT NOT NULL,
+      "email" TEXT UNIQUE NOT NULL,
+      "password" TEXT NOT NULL,
+      "role" TEXT NOT NULL DEFAULT 'passenger',
+      "phone" TEXT,
+      "createdAt" TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users(LOWER("email"));
+
     CREATE TABLE IF NOT EXISTS routes (
-      id TEXT PRIMARY KEY,
-      operatorId TEXT NOT NULL,
-      operatorName TEXT NOT NULL,
-      operatorRating REAL NOT NULL DEFAULT 4.8,
-      busNumber TEXT NOT NULL,
-      busType TEXT NOT NULL,
-      origin TEXT NOT NULL,
-      destination TEXT NOT NULL,
-      departureTime TEXT NOT NULL,
-      arrivalTime TEXT NOT NULL,
-      duration TEXT NOT NULL,
-      priceStarting REAL NOT NULL,
-      hasUpperDeck INTEGER NOT NULL DEFAULT 0,
-      amenities TEXT NOT NULL DEFAULT '[]',
-      gpsLat REAL NOT NULL DEFAULT 0,
-      gpsLng REAL NOT NULL DEFAULT 0,
-      gpsSpeedKmH INTEGER NOT NULL DEFAULT 0,
-      gpsCurrentStop TEXT NOT NULL DEFAULT '',
-      gpsNextStop TEXT NOT NULL DEFAULT '',
-      gpsEtaMinutes INTEGER NOT NULL DEFAULT 0
+      "id" TEXT PRIMARY KEY,
+      "operatorId" TEXT NOT NULL,
+      "operatorName" TEXT NOT NULL,
+      "operatorRating" DOUBLE PRECISION NOT NULL DEFAULT 4.8,
+      "busNumber" TEXT NOT NULL,
+      "busType" TEXT NOT NULL,
+      "origin" TEXT NOT NULL,
+      "destination" TEXT NOT NULL,
+      "departureTime" TEXT NOT NULL,
+      "arrivalTime" TEXT NOT NULL,
+      "duration" TEXT NOT NULL,
+      "priceStarting" DOUBLE PRECISION NOT NULL,
+      "hasUpperDeck" INTEGER NOT NULL DEFAULT 0,
+      "amenities" TEXT NOT NULL DEFAULT '[]',
+      "gpsLat" DOUBLE PRECISION NOT NULL DEFAULT 0,
+      "gpsLng" DOUBLE PRECISION NOT NULL DEFAULT 0,
+      "gpsSpeedKmH" INTEGER NOT NULL DEFAULT 0,
+      "gpsCurrentStop" TEXT NOT NULL DEFAULT '',
+      "gpsNextStop" TEXT NOT NULL DEFAULT '',
+      "gpsEtaMinutes" INTEGER NOT NULL DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS seats (
-      id TEXT PRIMARY KEY,
-      routeId TEXT NOT NULL,
-      number TEXT NOT NULL,
-      deck TEXT NOT NULL DEFAULT 'lower',
-      row INTEGER NOT NULL,
-      col INTEGER NOT NULL,
-      price REAL NOT NULL,
-      status TEXT NOT NULL DEFAULT 'available',
-      isSleeper INTEGER NOT NULL DEFAULT 0,
-      isFemaleOnly INTEGER NOT NULL DEFAULT 0,
-      FOREIGN KEY (routeId) REFERENCES routes(id) ON DELETE CASCADE
+      "id" TEXT PRIMARY KEY,
+      "routeId" TEXT NOT NULL,
+      "number" TEXT NOT NULL,
+      "deck" TEXT NOT NULL DEFAULT 'lower',
+      "row" INTEGER NOT NULL,
+      "col" INTEGER NOT NULL,
+      "price" DOUBLE PRECISION NOT NULL,
+      "status" TEXT NOT NULL DEFAULT 'available',
+      "isSleeper" INTEGER NOT NULL DEFAULT 0,
+      "isFemaleOnly" INTEGER NOT NULL DEFAULT 0,
+      FOREIGN KEY ("routeId") REFERENCES routes("id") ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS boarding_points (
-      id TEXT PRIMARY KEY,
-      routeId TEXT NOT NULL,
-      type TEXT NOT NULL DEFAULT 'boarding',
-      name TEXT NOT NULL,
-      time TEXT NOT NULL,
-      landmark TEXT NOT NULL DEFAULT '',
-      lat REAL NOT NULL DEFAULT 0,
-      lng REAL NOT NULL DEFAULT 0,
-      FOREIGN KEY (routeId) REFERENCES routes(id) ON DELETE CASCADE
+      "id" TEXT PRIMARY KEY,
+      "routeId" TEXT NOT NULL,
+      "type" TEXT NOT NULL DEFAULT 'boarding',
+      "name" TEXT NOT NULL,
+      "time" TEXT NOT NULL,
+      "landmark" TEXT NOT NULL DEFAULT '',
+      "lat" DOUBLE PRECISION NOT NULL DEFAULT 0,
+      "lng" DOUBLE PRECISION NOT NULL DEFAULT 0,
+      FOREIGN KEY ("routeId") REFERENCES routes("id") ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS bookings (
-      id TEXT PRIMARY KEY,
-      pnr TEXT UNIQUE NOT NULL,
-      routeId TEXT NOT NULL,
-      operatorName TEXT NOT NULL,
-      busNumber TEXT NOT NULL,
-      busType TEXT NOT NULL,
-      origin TEXT NOT NULL,
-      destination TEXT NOT NULL,
-      departureDate TEXT NOT NULL,
-      departureTime TEXT NOT NULL,
-      boardingPointId TEXT NOT NULL,
-      dropPointId TEXT NOT NULL,
-      seatIds TEXT NOT NULL DEFAULT '[]',
-      passengerName TEXT NOT NULL,
-      passengerEmail TEXT NOT NULL,
-      passengerPhone TEXT NOT NULL,
-      passengerGender TEXT NOT NULL DEFAULT 'other',
-      passengerAge INTEGER NOT NULL DEFAULT 0,
-      baseFare REAL NOT NULL,
-      taxAmount REAL NOT NULL,
-      insuranceAmount REAL NOT NULL DEFAULT 0,
-      discountAmount REAL NOT NULL DEFAULT 0,
-      totalFare REAL NOT NULL,
-      promoCodeApplied TEXT,
-      paymentMethod TEXT NOT NULL DEFAULT 'card',
-      paymentStatus TEXT NOT NULL DEFAULT 'paid',
-      bookingStatus TEXT NOT NULL DEFAULT 'confirmed',
-      qrCodeData TEXT NOT NULL,
-      createdAt TEXT NOT NULL,
-      FOREIGN KEY (routeId) REFERENCES routes(id)
+      "id" TEXT PRIMARY KEY,
+      "pnr" TEXT UNIQUE NOT NULL,
+      "routeId" TEXT NOT NULL,
+      "operatorName" TEXT NOT NULL,
+      "busNumber" TEXT NOT NULL,
+      "busType" TEXT NOT NULL,
+      "origin" TEXT NOT NULL,
+      "destination" TEXT NOT NULL,
+      "departureDate" TEXT NOT NULL,
+      "departureTime" TEXT NOT NULL,
+      "boardingPointId" TEXT NOT NULL,
+      "dropPointId" TEXT NOT NULL,
+      "seatIds" TEXT NOT NULL DEFAULT '[]',
+      "passengerName" TEXT NOT NULL,
+      "passengerEmail" TEXT NOT NULL,
+      "passengerPhone" TEXT NOT NULL,
+      "passengerGender" TEXT NOT NULL DEFAULT 'other',
+      "passengerAge" INTEGER NOT NULL DEFAULT 0,
+      "baseFare" DOUBLE PRECISION NOT NULL,
+      "taxAmount" DOUBLE PRECISION NOT NULL,
+      "insuranceAmount" DOUBLE PRECISION NOT NULL DEFAULT 0,
+      "discountAmount" DOUBLE PRECISION NOT NULL DEFAULT 0,
+      "totalFare" DOUBLE PRECISION NOT NULL,
+      "promoCodeApplied" TEXT,
+      "paymentMethod" TEXT NOT NULL DEFAULT 'card',
+      "paymentStatus" TEXT NOT NULL DEFAULT 'paid',
+      "bookingStatus" TEXT NOT NULL DEFAULT 'confirmed',
+      "qrCodeData" TEXT NOT NULL,
+      "createdAt" TEXT NOT NULL,
+      FOREIGN KEY ("routeId") REFERENCES routes("id")
     );
   `);
 }
 
 // ─── Seat generator helper ────────────────────────────────────────────────────
 
-function buildSeats(
+export function buildSeats(
   routeId: string,
   busType: string,
   hasUpperDeck: boolean
@@ -162,7 +234,6 @@ function buildSeats(
   // 1. Lanka Ashok Leyland 57-Seat 3*2 Model (Classic Sri Lanka Leyland Intercity)
   if (busType.includes('3*2') || busType.includes('Leyland')) {
     const totalRows = 11;
-    // Rows 1..11: 3 seats on Left (cols 1,2,3), Aisle (col 4), 2 seats on Right (cols 5,6) -> 5 seats * 11 = 55 seats
     for (let r = 1; r <= totalRows; r++) {
       const cols = [1, 2, 3, 5, 6];
       for (const c of cols) {
@@ -185,7 +256,6 @@ function buildSeats(
         });
       }
     }
-    // Row 12 (Back Row): 2 additional seats to reach 57 seats total
     for (const c of [1, 2]) {
       const seatNum = `12${String.fromCharCode(64 + c)}`;
       seats.push({
@@ -207,7 +277,6 @@ function buildSeats(
   // 2. Lanka Ashok Leyland 57-Seat 2*2 Model
   if (busType.includes('2*2')) {
     const totalRows = 14;
-    // Rows 1..14: 2 seats Left (cols 1,2), Aisle (col 3), 2 seats Right (cols 4,5) -> 4 * 14 = 56 seats
     for (let r = 1; r <= totalRows; r++) {
       for (const c of [1, 2, 4, 5]) {
         const isFemaleOnly = (r === 2 || r === 3) && (c === 1 || c === 2) ? 1 : 0;
@@ -229,7 +298,6 @@ function buildSeats(
         });
       }
     }
-    // Row 15: 1 seat to complete 57 seats
     seats.push({
       id: `${routeId}-15A`,
       routeId,
@@ -284,14 +352,12 @@ function buildSeats(
 
 // ─── Seed data ────────────────────────────────────────────────────────────────
 
-function seedData(): void {
-  const database = db;
-
-  // Only seed if routes table is empty
-  const count = (database.prepare('SELECT COUNT(*) as c FROM routes').get() as { c: number }).c;
+export async function seedData(p: Pool): Promise<void> {
+  const countRes = await p.query('SELECT COUNT(*) as c FROM routes');
+  const count = parseInt(countRes.rows[0].c, 10);
   if (count > 0) return;
 
-  console.log('🌱 Seeding Dewmina Super Line routes into database...');
+  console.log('🌱 Seeding Dewmina Super Line routes into Neon PostgreSQL database...');
 
   const routes = [
     {
@@ -362,37 +428,48 @@ function seedData(): void {
     },
   ];
 
-  const insertRoute = database.prepare(`
-    INSERT INTO routes (id, operatorId, operatorName, operatorRating, busNumber, busType,
-      origin, destination, departureTime, arrivalTime, duration, priceStarting,
-      hasUpperDeck, amenities, gpsLat, gpsLng, gpsSpeedKmH, gpsCurrentStop, gpsNextStop, gpsEtaMinutes)
-    VALUES (@id, @operatorId, @operatorName, @operatorRating, @busNumber, @busType,
-      @origin, @destination, @departureTime, @arrivalTime, @duration, @priceStarting,
-      @hasUpperDeck, @amenities, @gpsLat, @gpsLng, @gpsSpeedKmH, @gpsCurrentStop, @gpsNextStop, @gpsEtaMinutes)
-  `);
+  const client = await p.connect();
+  try {
+    await client.query('BEGIN');
 
-  const insertSeat = database.prepare(`
-    INSERT INTO seats (id, routeId, number, deck, row, col, price, status, isSleeper, isFemaleOnly)
-    VALUES (@id, @routeId, @number, @deck, @row, @col, @price, @status, @isSleeper, @isFemaleOnly)
-  `);
-
-  const insertBoardingPoint = database.prepare(`
-    INSERT INTO boarding_points (id, routeId, type, name, time, landmark, lat, lng)
-    VALUES (@id, @routeId, @type, @name, @time, @landmark, @lat, @lng)
-  `);
-
-  const seedAll = database.transaction(() => {
     for (const route of routes) {
-      insertRoute.run(route);
-
-      // Insert seats
-      const seats = buildSeats(route.id, route.busType, route.hasUpperDeck === 1);
-      for (const seat of seats) {
-        insertSeat.run(seat);
-      }
+      await client.query(`
+        INSERT INTO routes (
+          "id", "operatorId", "operatorName", "operatorRating", "busNumber", "busType",
+          "origin", "destination", "departureTime", "arrivalTime", "duration", "priceStarting",
+          "hasUpperDeck", "amenities", "gpsLat", "gpsLng", "gpsSpeedKmH", "gpsCurrentStop", "gpsNextStop", "gpsEtaMinutes"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+        ON CONFLICT ("id") DO NOTHING
+      `, [
+        route.id, route.operatorId, route.operatorName, route.operatorRating, route.busNumber, route.busType,
+        route.origin, route.destination, route.departureTime, route.arrivalTime, route.duration, route.priceStarting,
+        route.hasUpperDeck, route.amenities, route.gpsLat, route.gpsLng, route.gpsSpeedKmH, route.gpsCurrentStop,
+        route.gpsNextStop, route.gpsEtaMinutes,
+      ]);
     }
 
-    // Boarding & drop points for Monaragala <-> Colombo
+    const allSeats: any[] = [];
+    for (const route of routes) {
+      allSeats.push(...buildSeats(route.id, route.busType, route.hasUpperDeck === 1));
+    }
+
+    if (allSeats.length > 0) {
+      const seatValues: any[] = [];
+      const valueStrings: string[] = [];
+      let paramIdx = 1;
+      for (const s of allSeats) {
+        valueStrings.push(`($${paramIdx}, $${paramIdx+1}, $${paramIdx+2}, $${paramIdx+3}, $${paramIdx+4}, $${paramIdx+5}, $${paramIdx+6}, $${paramIdx+7}, $${paramIdx+8}, $${paramIdx+9})`);
+        seatValues.push(s.id, s.routeId, s.number, s.deck, s.row, s.col, s.price, s.status, s.isSleeper, s.isFemaleOnly);
+        paramIdx += 10;
+      }
+      await client.query(`
+        INSERT INTO seats (
+          "id", "routeId", "number", "deck", "row", "col", "price", "status", "isSleeper", "isFemaleOnly"
+        ) VALUES ${valueStrings.join(', ')}
+        ON CONFLICT ("id") DO NOTHING
+      `, seatValues);
+    }
+
     const boardingPoints = [
       { id: 'bp-101-1', routeId: 'route-101', type: 'boarding', name: 'Monaragala Main Bus Station', time: '06:30 AM', landmark: 'Platform 1', lat: 6.8722, lng: 81.3507 },
       { id: 'bp-101-2', routeId: 'route-101', type: 'boarding', name: 'Wellawaya Town Clock Tower', time: '07:15 AM', landmark: 'Main Junction', lat: 6.7410, lng: 81.1020 },
@@ -409,8 +486,21 @@ function seedData(): void {
       { id: 'dp-103-1', routeId: 'route-103', type: 'drop', name: 'Colombo Fort Central Bus Stand', time: '07:30 PM', landmark: 'Main Entrance', lat: 6.9344, lng: 79.8530 },
     ];
 
-    for (const bp of boardingPoints) {
-      insertBoardingPoint.run(bp);
+    if (boardingPoints.length > 0) {
+      const bpValues: any[] = [];
+      const bpStrings: string[] = [];
+      let bpIdx = 1;
+      for (const bp of boardingPoints) {
+        bpStrings.push(`($${bpIdx}, $${bpIdx+1}, $${bpIdx+2}, $${bpIdx+3}, $${bpIdx+4}, $${bpIdx+5}, $${bpIdx+6}, $${bpIdx+7})`);
+        bpValues.push(bp.id, bp.routeId, bp.type, bp.name, bp.time, bp.landmark, bp.lat, bp.lng);
+        bpIdx += 8;
+      }
+      await client.query(`
+        INSERT INTO boarding_points (
+          "id", "routeId", "type", "name", "time", "landmark", "lat", "lng"
+        ) VALUES ${bpStrings.join(', ')}
+        ON CONFLICT ("id") DO NOTHING
+      `, bpValues);
     }
 
     // Seed one demo booking
@@ -446,23 +536,72 @@ function seedData(): void {
       createdAt: new Date().toISOString(),
     };
 
-    database.prepare(`
-      INSERT INTO bookings (id, pnr, routeId, operatorName, busNumber, busType, origin, destination,
-        departureDate, departureTime, boardingPointId, dropPointId, seatIds, passengerName,
-        passengerEmail, passengerPhone, passengerGender, passengerAge, baseFare, taxAmount,
-        insuranceAmount, discountAmount, totalFare, promoCodeApplied, paymentMethod, paymentStatus,
-        bookingStatus, qrCodeData, createdAt)
-      VALUES (@id, @pnr, @routeId, @operatorName, @busNumber, @busType, @origin, @destination,
-        @departureDate, @departureTime, @boardingPointId, @dropPointId, @seatIds, @passengerName,
-        @passengerEmail, @passengerPhone, @passengerGender, @passengerAge, @baseFare, @taxAmount,
-        @insuranceAmount, @discountAmount, @totalFare, @promoCodeApplied, @paymentMethod, @paymentStatus,
-        @bookingStatus, @qrCodeData, @createdAt)
-    `).run(demoBooking);
+    await client.query(`
+      INSERT INTO bookings (
+        "id", "pnr", "routeId", "operatorName", "busNumber", "busType", "origin", "destination",
+        "departureDate", "departureTime", "boardingPointId", "dropPointId", "seatIds", "passengerName",
+        "passengerEmail", "passengerPhone", "passengerGender", "passengerAge", "baseFare", "taxAmount",
+        "insuranceAmount", "discountAmount", "totalFare", "promoCodeApplied", "paymentMethod", "paymentStatus",
+        "bookingStatus", "qrCodeData", "createdAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29)
+      ON CONFLICT ("id") DO NOTHING
+    `, [
+      demoBooking.id, demoBooking.pnr, demoBooking.routeId, demoBooking.operatorName, demoBooking.busNumber, demoBooking.busType,
+      demoBooking.origin, demoBooking.destination, demoBooking.departureDate, demoBooking.departureTime, demoBooking.boardingPointId,
+      demoBooking.dropPointId, demoBooking.seatIds, demoBooking.passengerName, demoBooking.passengerEmail, demoBooking.passengerPhone,
+      demoBooking.passengerGender, demoBooking.passengerAge, demoBooking.baseFare, demoBooking.taxAmount, demoBooking.insuranceAmount,
+      demoBooking.discountAmount, demoBooking.totalFare, demoBooking.promoCodeApplied, demoBooking.paymentMethod, demoBooking.paymentStatus,
+      demoBooking.bookingStatus, demoBooking.qrCodeData, demoBooking.createdAt,
+    ]);
 
-    // Mark L2A as booked in seats table
-    database.prepare("UPDATE seats SET status = 'booked' WHERE id = 'route-101-L2A'").run();
-  });
+    await client.query("UPDATE seats SET \"status\" = 'booked' WHERE \"id\" = 'route-101-L2A'");
 
-  seedAll();
-  console.log('✅ Dewmina Super Line database seeded successfully.');
+    await client.query('COMMIT');
+    console.log('✅ Dewmina Super Line Neon PostgreSQL database seeded successfully.');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Failed to seed PostgreSQL database:', err);
+    throw err;
+  } finally {
+    client.release();
+  }
 }
+
+export async function seedUsers(p: Pool): Promise<void> {
+  const countRes = await p.query('SELECT COUNT(*) as c FROM users');
+  const count = parseInt(countRes.rows[0].c, 10);
+  if (count > 0) return;
+
+  console.log('🌱 Seeding initial admin and demo passenger accounts...');
+
+  const initialUsers = [
+    {
+      id: 'usr-admin-1',
+      name: 'Super Admin & Fleet Manager',
+      email: 'admin@dewminasuperline.lk',
+      password: hashPassword('Admin@123'),
+      role: 'admin',
+      phone: '+94771234567',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: 'usr-passenger-1',
+      name: 'Kushan Perera',
+      email: 'kushan@example.com',
+      password: hashPassword('Passenger@123'),
+      role: 'passenger',
+      phone: '+94711433520',
+      createdAt: new Date().toISOString(),
+    },
+  ];
+
+  for (const u of initialUsers) {
+    await p.query(`
+      INSERT INTO users ("id", "name", "email", "password", "role", "phone", "createdAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      ON CONFLICT ("email") DO NOTHING
+    `, [u.id, u.name, u.email.toLowerCase(), u.password, u.role, u.phone, u.createdAt]);
+  }
+  console.log('✅ Initial users seeded successfully.');
+}
+
