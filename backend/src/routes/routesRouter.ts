@@ -361,3 +361,31 @@ routesRouter.delete('/:id/layout', async (req: Request, res: Response) => {
     client.release();
   }
 });
+
+// ─── DELETE /api/routes/:id — Admin Delete Route Entirely ────────────────────
+routesRouter.delete('/:id', async (req: Request, res: Response) => {
+  const pool = getPool();
+  const { id } = req.params;
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const seatsRes = await client.query('SELECT "id" FROM seats WHERE "routeId" = $1', [id]);
+    for (const { id: seatId } of seatsRes.rows) {
+      seatLocks.delete(seatId);
+    }
+
+    await client.query('DELETE FROM seats WHERE "routeId" = $1', [id]);
+    await client.query('DELETE FROM boarding_points WHERE "routeId" = $1', [id]);
+    await client.query('DELETE FROM routes WHERE "id" = $1', [id]);
+
+    await client.query('COMMIT');
+    res.json({ success: true, message: 'Route deleted successfully.' });
+  } catch (err: any) {
+    await client.query('ROLLBACK');
+    res.status(400).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});

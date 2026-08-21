@@ -123,7 +123,7 @@ export function App() {
                   <StatsSection />
                 </div>
 
-                <div className="bg-slate-50 pb-10">
+                <div id="available-schedules" className="bg-slate-50 pb-10 scroll-mt-24">
                   <div className="max-w-5xl mx-auto px-4 space-y-4">
                     <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                       <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">

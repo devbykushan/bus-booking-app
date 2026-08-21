@@ -24,6 +24,8 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
   const [selectedSeatId, setSelectedSeatId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [feedbackMsg, setFeedbackMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showAddSeatModal, setShowAddSeatModal] = useState(false);
 
   // New Seat Form State
@@ -279,6 +281,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
 
   const handleSaveLayout = async () => {
     setIsSaving(true);
+    setFeedbackMsg(null);
     try {
       const res = await fetch(`/api/routes/${route.id}/layout`, {
         method: 'PUT',
@@ -293,29 +296,44 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
         }),
       });
 
-      if (!res.ok) throw new Error('Failed to update seat layout on server');
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({ error: 'Failed to update seat layout' }));
+        throw new Error(errJson.error || 'Failed to update seat layout on server');
+      }
 
       await loadRoutes();
-      setIsSaving(false);
-      alert(`Seat layout saved & deployed for ${route.busNumber}! (${seats.length} seats active)`);
-      onClose();
+      setFeedbackMsg({ type: 'success', text: `Seat layout deployed for ${route.busNumber}! (${seats.length} seats active)` });
+      setTimeout(() => {
+        onClose();
+      }, 800);
     } catch (err: any) {
+      setFeedbackMsg({ type: 'error', text: `Error saving layout: ${err.message}` });
+    } finally {
       setIsSaving(false);
-      alert(`Error saving layout: ${err.message}`);
     }
   };
 
   const handleDeleteLayout = async () => {
-    if (!confirm(`Delete the entire seat layout for ${route.busNumber}? This cannot be undone.`)) return;
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      setTimeout(() => setConfirmDelete(false), 4000);
+      return;
+    }
 
     setIsDeleting(true);
+    setConfirmDelete(false);
+    setFeedbackMsg(null);
     try {
       await routesApi.deleteLayout(route.id);
+      setSeats([]);
+      setSelectedSeatId(null);
       await loadRoutes();
-      alert(`Seat layout deleted for ${route.busNumber}.`);
-      onClose();
+      setFeedbackMsg({ type: 'success', text: `Seat layout deleted for ${route.busNumber}.` });
+      setTimeout(() => {
+        onClose();
+      }, 800);
     } catch (err: any) {
-      alert(`Error deleting layout: ${err.message}`);
+      setFeedbackMsg({ type: 'error', text: `Error deleting layout: ${err.message}` });
     } finally {
       setIsDeleting(false);
     }
@@ -351,10 +369,23 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               {route.operatorName} • <strong className="text-slate-700">{route.busNumber}</strong> ({route.origin} → {route.destination})
             </p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* In-Modal Feedback Banner */}
+        {feedbackMsg && (
+          <div className={`p-3 rounded-2xl text-xs font-bold flex items-center gap-2 animate-fade-in-up ${
+            feedbackMsg.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+          }`}>
+            <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+            <span>{feedbackMsg.text}</span>
+          </div>
+        )}
 
         {/* Bus Model & Seating Presets Selection */}
         <div className="space-y-2">
@@ -745,10 +776,24 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               type="button"
               onClick={handleDeleteLayout}
               disabled={isDeleting || isSaving}
-              className="px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs flex items-center gap-2 border border-rose-200 disabled:opacity-60"
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition-all duration-200 ${
+                confirmDelete
+                  ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-700 shadow-md ring-2 ring-rose-400'
+                  : 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200'
+              } disabled:opacity-60`}
             >
-              {isDeleting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-              <span>{isDeleting ? 'Deleting Layout...' : 'Delete Layout'}</span>
+              {isDeleting ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <Trash2 className="w-4 h-4" />
+              )}
+              <span>
+                {isDeleting
+                  ? 'Deleting Layout...'
+                  : confirmDelete
+                  ? 'Confirm Delete Layout?'
+                  : 'Delete Layout'}
+              </span>
             </button>
             <button
               type="button"
