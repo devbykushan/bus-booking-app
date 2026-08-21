@@ -30,7 +30,6 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
   const [newSeatDeck, setNewSeatDeck] = useState<DeckType>('lower');
   const [newSeatRow, setNewSeatRow] = useState(1);
   const [newSeatCol, setNewSeatCol] = useState(1);
-  const [newSeatIsFemale, setNewSeatIsFemale] = useState(false);
   const [newSeatIsSleeper, setNewSeatIsSleeper] = useState(false);
 
   // Filter selected seat object
@@ -47,7 +46,45 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
 
     const newSeats: Seat[] = [];
 
-    if (type.includes('3*2') || type.includes('Leyland')) {
+    if (type.includes('54 Seats 3*2')) {
+      // Ashok Leyland 54 seats: 10 rows of 5 plus 4 rear seats.
+      for (let r = 1; r <= 10; r++) {
+        [1, 2, 3, 5, 6].forEach((c) => {
+          const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+          newSeats.push({ id: `${route.id}-${seatNum}`, number: seatNum, deck: 'lower', row: r, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 3 });
+        });
+      }
+      [1, 2, 3, 5].forEach((c) => {
+        const seatNum = `11${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+        newSeats.push({ id: `${route.id}-${seatNum}`, number: seatNum, deck: 'lower', row: 12, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: false });
+      });
+    } else if (type.includes('54 Seats')) {
+      // Ashok Leyland 54 seats: 13 rows of 4 plus 2 rear seats.
+      for (let r = 1; r <= 13; r++) {
+        [1, 2, 4, 5].forEach((c) => {
+          const seatNum = `${r}${String.fromCharCode(64 + (c > 3 ? c - 1 : c))}`;
+          newSeats.push({ id: `${route.id}-${seatNum}`, number: seatNum, deck: 'lower', row: r, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 2 });
+        });
+      }
+      [1, 2].forEach((c) => {
+        const seatNum = `14${String.fromCharCode(64 + c)}`;
+        newSeats.push({ id: `${route.id}-${seatNum}`, number: seatNum, deck: 'lower', row: 14, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: false });
+      });
+    } else if (type.includes('Yutong')) {
+      // Yutong 2*2 layouts: 12 rows of 4, with 3 extra rear seats for 51.
+      for (let r = 1; r <= 12; r++) {
+        [1, 2, 4, 5].forEach((c) => {
+          const seatNum = `Y${r}${String.fromCharCode(64 + (c > 3 ? c - 1 : c))}`;
+          newSeats.push({ id: `${route.id}-${seatNum}`, number: seatNum, deck: 'lower', row: r, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 2 });
+        });
+      }
+      if (type.includes('51 Seats')) {
+        [1, 2, 3].forEach((c) => {
+          const seatNum = `Y13${String.fromCharCode(64 + c)}`;
+          newSeats.push({ id: `${route.id}-${seatNum}`, number: seatNum, deck: 'lower', row: 13, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: false });
+        });
+      }
+    } else if (type.includes('3*2') || type.includes('Leyland')) {
       // Lanka Ashok Leyland 57 Seats 3*2
       const totalRows = 11;
       for (let r = 1; r <= totalRows; r++) {
@@ -218,7 +255,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
       col: Number(newSeatCol),
       price: Number(newSeatPrice),
       status: 'available',
-      isFemaleOnly: newSeatIsFemale,
+      isFemaleOnly: false,
       isSleeper: newSeatIsSleeper,
     };
 
@@ -313,7 +350,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
             <button
               type="button"
-              onClick={() => applyPreset('Lanka Ashok Leyland (57 Seats 3*2)', 1800)}
+              onClick={() => applyPreset('Ashok Leyland (54 Seats 3*2)', 1800)}
               className={`p-3 rounded-2xl border text-left text-xs transition-all ${
                 busType.includes('3*2')
                   ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-sm ring-2 ring-blue-500/20'
@@ -323,12 +360,12 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               <div className="font-bold flex items-center gap-1.5 text-slate-800 text-[11px]">
                 <Bus className="w-4 h-4 text-blue-600 flex-shrink-0" /> Ashok Leyland
               </div>
-              <p className="text-[10px] text-blue-600 font-mono mt-1 font-semibold">57 Seats (3*2 Express)</p>
+                <p className="text-[10px] text-blue-600 font-mono mt-1 font-semibold">54 Seats (3*2 Express)</p>
             </button>
 
             <button
               type="button"
-              onClick={() => applyPreset('Lanka Ashok Leyland (57 Seats 2*2)', 1800)}
+              onClick={() => applyPreset('Ashok Leyland (54 Seats 2*2)', 1800)}
               className={`p-3 rounded-2xl border text-left text-xs transition-all ${
                 busType.includes('2*2') && !busType.includes('Volvo')
                   ? 'bg-indigo-50 border-indigo-500 text-indigo-700 shadow-sm ring-2 ring-indigo-500/20'
@@ -338,23 +375,38 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               <div className="font-bold flex items-center gap-1.5 text-slate-800 text-[11px]">
                 <Bus className="w-4 h-4 text-indigo-600 flex-shrink-0" /> Ashok Leyland
               </div>
-              <p className="text-[10px] text-indigo-600 font-mono mt-1 font-semibold">57 Seats (2*2 Air Bus)</p>
+                <p className="text-[10px] text-indigo-600 font-mono mt-1 font-semibold">54 Seats (2*2 Air Bus)</p>
             </button>
 
-            <button
-              type="button"
-              onClick={() => applyPreset('AC Sleeper', 3200)}
-              className={`p-3 rounded-2xl border text-left text-xs transition-all ${
-                busType === 'AC Sleeper'
-                  ? 'bg-purple-50 border-purple-500 text-purple-700 shadow-sm ring-2 ring-purple-500/20'
-                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <div className="font-bold flex items-center gap-1.5 text-slate-800 text-[11px]">
-                <Bus className="w-4 h-4 text-purple-600 flex-shrink-0" /> AC Sleeper
-              </div>
-              <p className="text-[10px] text-purple-600 font-mono mt-1 font-semibold">36 Berths (2 Decks)</p>
-            </button>
+              <button
+                type="button"
+                onClick={() => applyPreset('Yutong (48 Seats 2*2)', 2200)}
+                className={`p-3 rounded-2xl border text-left text-xs transition-all ${
+                  busType === 'Yutong (48 Seats 2*2)'
+                    ? 'bg-cyan-50 border-cyan-500 text-cyan-700 shadow-sm ring-2 ring-cyan-500/20'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <div className="font-bold flex items-center gap-1.5 text-slate-800 text-[11px]">
+                  <Bus className="w-4 h-4 text-cyan-600 flex-shrink-0" /> Yutong
+                </div>
+                <p className="text-[10px] text-cyan-600 font-mono mt-1 font-semibold">48 Seats (2*2 Coach)</p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => applyPreset('Yutong (51 Seats 2*2)', 2200)}
+                className={`p-3 rounded-2xl border text-left text-xs transition-all ${
+                  busType === 'Yutong (51 Seats 2*2)'
+                    ? 'bg-teal-50 border-teal-500 text-teal-700 shadow-sm ring-2 ring-teal-500/20'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <div className="font-bold flex items-center gap-1.5 text-slate-800 text-[11px]">
+                  <Bus className="w-4 h-4 text-teal-600 flex-shrink-0" /> Yutong
+                </div>
+                <p className="text-[10px] text-teal-600 font-mono mt-1 font-semibold">51 Seats (2*2 Coach)</p>
+              </button>
 
           </div>
         </div>
@@ -386,7 +438,6 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
 
           <div className="flex flex-wrap items-center gap-4 text-slate-600 text-[11px]">
             <span>Total Seats: <strong className="text-blue-600 font-mono text-xs">{seats.length}</strong></span>
-            <span>Solo Female Reserved: <strong className="text-pink-600 font-mono text-xs">{seats.filter(s => s.isFemaleOnly).length}</strong></span>
             <span>Blocked / Reserved: <strong className="text-slate-800 font-mono text-xs">{seats.filter(s => s.status === 'booked').length}</strong></span>
           </div>
         </div>
@@ -547,9 +598,6 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
             <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 pt-1">
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-300" /> Available
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-pink-100 border border-pink-300" /> Solo Female Reserved
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded bg-slate-200 border border-slate-300" /> Admin Blocked / Booked
@@ -768,18 +816,6 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               </div>
 
               <div className="col-span-2 space-y-2 pt-1 border-t border-slate-200">
-                <label className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
-                  <span className="font-semibold text-slate-700 flex items-center gap-1.5">
-                    <Shield className="w-4 h-4 text-pink-600" /> Solo Female Reserved
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={newSeatIsFemale}
-                    onChange={e => setNewSeatIsFemale(e.target.checked)}
-                    className="w-4 h-4 accent-pink-600 rounded"
-                  />
-                </label>
-
                 <label className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
                   <span className="font-semibold text-slate-700 flex items-center gap-1.5">
                     <Bus className="w-4 h-4 text-purple-600" /> Sleeper Berth Type

@@ -262,10 +262,8 @@ export const HeroSearch: React.FC = () => {
                   className="bg-transparent text-white font-bold focus:outline-none cursor-pointer"
                 >
                   <option value="all" className="text-slate-900">{t('allClasses')}</option>
-                  <option value="Lanka Ashok Leyland" className="text-slate-900">Ashok Leyland 57</option>
-                  <option value="AC Sleeper" className="text-slate-900">AC Sleeper</option>
-                  <option value="Luxury Volvo Multi-Axle" className="text-slate-900">Volvo Multi-Axle</option>
-                  <option value="Double Decker Sleeper" className="text-slate-900">Double Decker</option>
+                  <option value="Ashok Leyland" className="text-slate-900">Ashok Leyland 54</option>
+                  <option value="Yutong" className="text-slate-900">Yutong 48 / 51</option>
                 </select>
               </div>
 

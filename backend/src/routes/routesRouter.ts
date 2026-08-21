@@ -153,7 +153,42 @@ routesRouter.post('/', (req: Request, res: Response) => {
         const totalRows = busType.includes('3*2') || busType.includes('Leyland') ? 11 : busType.includes('2*2') ? 14 : 10;
         seatsToInsert = [];
 
-        if (busType.includes('3*2') || busType.includes('Leyland')) {
+        if (busType.includes('Ashok Leyland (54 Seats 3*2')) {
+          for (let r = 1; r <= 10; r++) {
+            for (const c of [1, 2, 3, 5, 6]) {
+              const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+              seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: r, col: c, price: priceStarting || 1800, status: 'available', isSleeper: 0, isFemaleOnly: (r === 2 || r === 3) && c <= 3 ? 1 : 0 });
+            }
+          }
+          for (const c of [1, 2, 3, 5]) {
+            const seatNum = `11${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+            seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: 12, col: c, price: priceStarting || 1800, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
+          }
+        } else if (busType.includes('Ashok Leyland (54 Seats')) {
+          for (let r = 1; r <= 13; r++) {
+            for (const c of [1, 2, 4, 5]) {
+              const seatNum = `${r}${String.fromCharCode(64 + (c > 3 ? c - 1 : c))}`;
+              seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: r, col: c, price: priceStarting || 1800, status: 'available', isSleeper: 0, isFemaleOnly: (r === 2 || r === 3) && c <= 2 ? 1 : 0 });
+            }
+          }
+          for (const c of [1, 2]) {
+            const seatNum = `14${String.fromCharCode(64 + c)}`;
+            seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: 14, col: c, price: priceStarting || 1800, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
+          }
+        } else if (busType.includes('Yutong')) {
+          for (let r = 1; r <= 12; r++) {
+            for (const c of [1, 2, 4, 5]) {
+              const seatNum = `Y${r}${String.fromCharCode(64 + (c > 3 ? c - 1 : c))}`;
+              seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: r, col: c, price: priceStarting || 1800, status: 'available', isSleeper: 0, isFemaleOnly: (r === 2 || r === 3) && c <= 2 ? 1 : 0 });
+            }
+          }
+          if (busType.includes('51 Seats')) {
+            for (const c of [1, 2, 3]) {
+              const seatNum = `Y13${String.fromCharCode(64 + c)}`;
+              seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: 13, col: c, price: priceStarting || 1800, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
+            }
+          }
+        } else if (busType.includes('3*2') || busType.includes('Leyland')) {
           for (let r = 1; r <= totalRows; r++) {
             for (const c of [1, 2, 3, 5, 6]) {
               const seatLetter = String.fromCharCode(64 + (c > 4 ? c - 1 : c));

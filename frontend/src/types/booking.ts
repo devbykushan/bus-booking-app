@@ -1,4 +1,8 @@
 export type BusCategory = 
+  | 'Ashok Leyland (54 Seats 3*2)'
+  | 'Ashok Leyland (54 Seats 2*2)'
+  | 'Yutong (48 Seats 2*2)'
+  | 'Yutong (51 Seats 2*2)'
   | 'Lanka Ashok Leyland (57 Seats 3*2)'
   | 'Lanka Ashok Leyland (57 Seats 2*2)'
   | 'AC Seater' 

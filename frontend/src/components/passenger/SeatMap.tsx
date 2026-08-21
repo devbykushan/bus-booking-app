@@ -144,7 +144,13 @@ export const SeatMap: React.FC = () => {
                   {t('frontOfBus')} ({activeDeck === 'lower' ? t('lowerDeck').toUpperCase() : t('upperDeck').toUpperCase()})
                 </span>
                 <span className="text-[11px] font-semibold text-blue-600">
-                  {selectedRoute.busType.includes('3*2') || selectedRoute.busType.includes('Leyland')
+                  {selectedRoute.busType.includes('54 Seats 3*2')
+                    ? '🚌 Ashok Leyland 54 Seats (3*2 Seating Layout)'
+                    : selectedRoute.busType.includes('54 Seats')
+                    ? '🚌 Ashok Leyland 54 Seats (2*2 Seating Layout)'
+                    : selectedRoute.busType.includes('Yutong')
+                    ? `🚌 ${selectedRoute.busType} Layout`
+                    : selectedRoute.busType.includes('3*2') || selectedRoute.busType.includes('Leyland')
                     ? '🚌 Lanka Ashok Leyland 57 Seats (3*2 Seating Layout)'
                     : selectedRoute.busType.includes('2*2')
                     ? '🚌 Lanka Ashok Leyland 57 Seats (2*2 Seating Layout)'

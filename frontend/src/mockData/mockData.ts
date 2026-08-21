@@ -4,7 +4,54 @@ const generateSeats = (busType: string, hasUpperDeck: boolean = false): Seat[] =
   const seats: Seat[] = [];
   const basePrice = busType.includes('Sleeper') ? 2800 : 1800;
 
-  // 1. Lanka Ashok Leyland 57-Seat 3*2 Model (Classic Sri Lanka Leyland Intercity)
+  // Ashok Leyland 54-seat 3*2 layout.
+  if (busType.includes('Ashok Leyland (54 Seats 3*2')) {
+    for (let r = 1; r <= 10; r++) {
+      [1, 2, 3, 5, 6].forEach((c) => {
+        const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+        seats.push({ id: seatNum, number: seatNum, deck: 'lower', row: r, col: c, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 3 });
+      });
+    }
+    [1, 2, 3, 5].forEach((c) => {
+      const seatNum = `11${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+      seats.push({ id: seatNum, number: seatNum, deck: 'lower', row: 12, col: c, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: false });
+    });
+    return seats;
+  }
+
+  // Ashok Leyland 54-seat 2*2 layout.
+  if (busType.includes('Ashok Leyland (54 Seats')) {
+    for (let r = 1; r <= 13; r++) {
+      [1, 2, 4, 5].forEach((c) => {
+        const seatNum = `${r}${String.fromCharCode(64 + (c > 3 ? c - 1 : c))}`;
+        seats.push({ id: seatNum, number: seatNum, deck: 'lower', row: r, col: c, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 2 });
+      });
+    }
+    [1, 2].forEach((c) => {
+      const seatNum = `14${String.fromCharCode(64 + c)}`;
+      seats.push({ id: seatNum, number: seatNum, deck: 'lower', row: 14, col: c, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: false });
+    });
+    return seats;
+  }
+
+  // Yutong 48- or 51-seat 2*2 layout.
+  if (busType.includes('Yutong')) {
+    for (let r = 1; r <= 12; r++) {
+      [1, 2, 4, 5].forEach((c) => {
+        const seatNum = `Y${r}${String.fromCharCode(64 + (c > 3 ? c - 1 : c))}`;
+        seats.push({ id: seatNum, number: seatNum, deck: 'lower', row: r, col: c, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 2 });
+      });
+    }
+    if (busType.includes('51 Seats')) {
+      [1, 2, 3].forEach((c) => {
+        const seatNum = `Y13${String.fromCharCode(64 + c)}`;
+        seats.push({ id: seatNum, number: seatNum, deck: 'lower', row: 13, col: c, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: false });
+      });
+    }
+    return seats;
+  }
+
+  // Legacy Lanka Ashok Leyland 57-seat 3*2 model.
   if (busType.includes('3*2') || busType.includes('Leyland')) {
     const totalRows = 11;
     for (let r = 1; r <= totalRows; r++) {

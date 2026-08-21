@@ -20,7 +20,7 @@ export const OperatorDashboard: React.FC = () => {
   const [newDestination, setNewDestination] = useState('Colombo');
   const [newDepTime] = useState('10:00 AM');
   const [newPrice, setNewPrice] = useState(1800);
-  const [newBusType, setNewBusType] = useState<any>('Lanka Ashok Leyland (57 Seats 3*2)');
+  const [newBusType, setNewBusType] = useState<any>('Ashok Leyland (54 Seats 3*2)');
 
   const selectedRoute = routes.find(r => r.id === selectedRouteId) || routes[0] || null;
   const manifestBookings = bookings.filter(b => b.routeId === selectedRoute?.id);
@@ -101,11 +101,10 @@ export const OperatorDashboard: React.FC = () => {
             <div>
               <label className="block text-slate-600 mb-1 font-bold text-blue-600">Bus Model & Seating</label>
               <select value={newBusType} onChange={(e: any) => setNewBusType(e.target.value)} className="w-full bg-slate-50 border border-blue-300 rounded-xl p-2.5 text-slate-800 font-bold">
-                <option value="Lanka Ashok Leyland (57 Seats 3*2)">🚌 Lanka Ashok Leyland (57 Seats 3*2)</option>
-                <option value="Lanka Ashok Leyland (57 Seats 2*2)">🚌 Lanka Ashok Leyland (57 Seats 2*2)</option>
-                <option value="AC Sleeper">🛋️ AC Sleeper (36 Seats)</option>
-                <option value="Luxury Volvo Multi-Axle">🚍 Luxury Volvo Multi-Axle (40 Seats)</option>
-                <option value="Double Decker Sleeper">🚌 Double Decker Sleeper (48 Seats)</option>
+                <option value="Ashok Leyland (54 Seats 3*2)">🚌 Ashok Leyland (54 Seats 3*2)</option>
+                <option value="Ashok Leyland (54 Seats 2*2)">🚌 Ashok Leyland (54 Seats 2*2)</option>
+                <option value="Yutong (48 Seats 2*2)">🚌 Yutong (48 Seats 2*2)</option>
+                <option value="Yutong (51 Seats 2*2)">🚌 Yutong (51 Seats 2*2)</option>
               </select>
             </div>
             <div>
