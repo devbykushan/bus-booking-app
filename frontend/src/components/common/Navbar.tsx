@@ -7,6 +7,7 @@ export const Navbar: React.FC = () => {
   const { 
     currentView, 
     setCurrentView, 
+    goToSearchSchedules,
     currentUser,
     userRole, 
     setUserRole, 
@@ -58,8 +59,8 @@ export const Navbar: React.FC = () => {
     const rect = navRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
-    const tiltX = (y - 0.5) * 4;  // subtle vertical tilt
-    const tiltY = (x - 0.5) * -2; // subtle horizontal tilt
+    const tiltX = (y - 0.5) * -10;
+    const tiltY = (x - 0.5) * 10;
     navRef.current.style.setProperty('--tilt-x', `${tiltX}deg`);
     navRef.current.style.setProperty('--tilt-y', `${tiltY}deg`);
     navRef.current.style.setProperty('--mouse-x', `${x * 100}%`);
@@ -91,6 +92,12 @@ export const Navbar: React.FC = () => {
     if (requiresAuth && !currentUser) {
       setMobileOpen(false);
       setShowAuthModal(true);
+      return;
+    }
+
+    if (view === 'passenger-search') {
+      goToSearchSchedules();
+      setMobileOpen(false);
       return;
     }
 
@@ -127,7 +134,7 @@ export const Navbar: React.FC = () => {
               
               {/* ── Brand with 3D float ── */}
               <div
-                onClick={() => { setCurrentView('passenger-search'); setMobileOpen(false); }}
+                onClick={() => { goToSearchSchedules(); setMobileOpen(false); }}
                 className="nav3d-brand group cursor-pointer flex items-center gap-3"
               >
                 <div className="nav3d-logo-wrapper">

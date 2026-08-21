@@ -13,6 +13,7 @@ export const FareBreakdown: React.FC = () => {
     applyPromoCode,
     createBooking,
     setCurrentView,
+    goToSearchSchedules,
     t
   } = useBookingStore();
 
@@ -28,7 +29,7 @@ export const FareBreakdown: React.FC = () => {
       <div className="text-center py-16 space-y-4">
         <p className="text-slate-500 text-base">{t('noRecentTicket')}</p>
         <button
-          onClick={() => setCurrentView('passenger-search')}
+          onClick={goToSearchSchedules}
           className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl"
         >
           {t('backToSearch')}
@@ -76,13 +77,22 @@ export const FareBreakdown: React.FC = () => {
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
       
       {/* Back Button & Header */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-        <button
-          onClick={() => setCurrentView('seat-selection')}
-          className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors text-sm font-medium"
-        >
-          <ArrowLeft className="w-4 h-4" /> {t('backToSearch')}
-        </button>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={goToSearchSchedules}
+            className="inline-flex items-center gap-1.5 text-slate-500 hover:text-blue-600 transition-colors text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> {t('backToSearch')}
+          </button>
+          <span className="text-slate-300">/</span>
+          <button
+            onClick={() => setCurrentView('seat-selection')}
+            className="inline-flex items-center gap-1.5 text-slate-600 hover:text-blue-600 transition-colors text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200"
+          >
+            Change Seats
+          </button>
+        </div>
         <h2 className="text-xl font-bold text-slate-800 tracking-tight">{t('primaryPassenger')}</h2>
       </div>
 

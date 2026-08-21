@@ -13,10 +13,9 @@ interface RouteDetailsModalProps {
 
 export const RouteDetailsModal: React.FC<RouteDetailsModalProps> = ({ route, onClose, onBookNow }) => {
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-in-up">
       <div 
-        className="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 shadow-2xl flex flex-col overflow-hidden"
-        style={{ maxHeight: '85vh', height: '100%' }}
+        className="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 shadow-2xl flex flex-col overflow-hidden max-h-[85vh] my-auto animate-pop-in"
       >
         
         {/* Header */}
@@ -28,14 +27,14 @@ export const RouteDetailsModal: React.FC<RouteDetailsModalProps> = ({ route, onC
               </span>
               <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-xs font-bold">
                 <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                <span>{route.operatorRating || 4.9}</span>
+                <span>{route.operatorRating ? Number(route.operatorRating).toFixed(1) : '4.9'}</span>
               </div>
             </div>
             <h3 className="text-xl font-black mt-2 tracking-tight">
               {route.origin} → {route.destination}
             </h3>
             <p className="text-xs text-blue-200 mt-0.5 font-medium">
-              {route.operatorName} • <strong className="text-white">{route.busNumber}</strong> ({route.busType})
+              {route.operatorName} • <strong className="text-white">{route.busNumber}</strong> • {route.busType}
             </p>
           </div>
 
@@ -49,8 +48,7 @@ export const RouteDetailsModal: React.FC<RouteDetailsModalProps> = ({ route, onC
 
         {/* Content Body */}
         <div 
-          className="p-5 sm:p-6 space-y-6 overflow-y-auto flex-1 text-slate-700"
-          style={{ minHeight: 0 }}
+          className="p-5 sm:p-6 space-y-6 overflow-y-auto flex-1 min-h-0 text-slate-700"
         >
           
           {/* Quick Stats Grid */}

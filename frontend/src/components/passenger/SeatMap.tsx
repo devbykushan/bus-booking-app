@@ -11,6 +11,7 @@ export const SeatMap: React.FC = () => {
     selectedDropPoint,
     setSelectedDropPoint,
     setCurrentView,
+    goToSearchSchedules,
     lockActive,
     lockExpirySeconds,
     tickLockTimer,
@@ -36,7 +37,7 @@ export const SeatMap: React.FC = () => {
       <div className="text-center py-12">
         <p className="text-slate-500">{t('noRecentTicket')}</p>
         <button
-          onClick={() => setCurrentView('passenger-search')}
+          onClick={goToSearchSchedules}
           className="mt-4 px-4 py-2 bg-blue-600 text-white font-bold rounded-xl"
         >
           {t('backToSearch')}
@@ -66,7 +67,7 @@ export const SeatMap: React.FC = () => {
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <button
-          onClick={() => setCurrentView('passenger-search')}
+          onClick={goToSearchSchedules}
           className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors text-sm font-medium"
         >
           <ArrowLeft className="w-4 h-4" /> {t('backToSearch')}
