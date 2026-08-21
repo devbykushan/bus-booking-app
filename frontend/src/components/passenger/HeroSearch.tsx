@@ -73,7 +73,7 @@ export const HeroSearch: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-[95vh] flex flex-col justify-center overflow-hidden">
+    <div className="relative min-h-[95vh] flex flex-col justify-center overflow-hidden pt-20 md:pt-24 pb-12">
 
       {/* ── Ken Burns Hero Background ──────────────────────────────────── */}
       <div className="absolute inset-0 z-0 overflow-hidden">

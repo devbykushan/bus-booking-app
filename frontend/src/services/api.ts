@@ -38,6 +38,10 @@ export const routesApi = {
   /** Remove all seats from a route while keeping its schedule available */
   deleteLayout: (id: string): Promise<any> =>
     apiFetch(`/routes/${id}/layout`, { method: 'DELETE' }),
+
+  /** Delete a bus route entirely from fleet */
+  delete: (id: string): Promise<any> =>
+    apiFetch(`/routes/${id}`, { method: 'DELETE' }),
 };
 
 // ─── Bookings API ─────────────────────────────────────────────────────────────

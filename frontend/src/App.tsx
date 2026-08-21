@@ -108,7 +108,7 @@ export function App() {
         </div>
       )}
 
-      <main className="flex-1 transition-all duration-300">
+      <main className={`flex-1 transition-all duration-300 ${currentView === 'passenger-search' ? '' : 'pt-20 md:pt-24'}`}>
         {currentView === 'admin-panel' ? (
           <div key="admin">
             <AdminDashboard />
