@@ -25,10 +25,9 @@ export const RouteTimetableModal: React.FC<RouteTimetableModalProps> = ({ route,
       ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-in-up">
       <div 
-        className="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 shadow-2xl flex flex-col overflow-hidden"
-        style={{ maxHeight: '85vh', height: '100%' }}
+        className="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 shadow-2xl flex flex-col overflow-hidden max-h-[85vh] my-auto animate-pop-in"
       >
         
         {/* Header */}
@@ -46,7 +45,7 @@ export const RouteTimetableModal: React.FC<RouteTimetableModalProps> = ({ route,
               {route.origin} → {route.destination}
             </h3>
             <p className="text-xs text-blue-200 mt-0.5">
-              {route.operatorName} • <strong className="text-white">{route.busNumber}</strong>
+              {route.operatorName} • <strong className="text-white">{route.busNumber}</strong> • {route.busType}
             </p>
           </div>
 
@@ -60,8 +59,7 @@ export const RouteTimetableModal: React.FC<RouteTimetableModalProps> = ({ route,
 
         {/* Timetable Content */}
         <div 
-          className="p-5 sm:p-6 space-y-6 overflow-y-auto flex-1 text-slate-700"
-          style={{ minHeight: 0 }}
+          className="p-5 sm:p-6 space-y-6 overflow-y-auto flex-1 min-h-0 text-slate-700"
         >
           
           {/* Journey Overview Bar */}

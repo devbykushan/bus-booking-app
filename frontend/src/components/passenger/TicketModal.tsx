@@ -4,14 +4,14 @@ import { QRCodeSVG } from 'qrcode.react';
 import { CheckCircle2, Printer, MapPin, MessageSquare, Bus, Clock, Calendar } from 'lucide-react';
 
 export const TicketModal: React.FC = () => {
-  const { latestConfirmedBooking, setCurrentView, setTrackingRouteId, t } = useBookingStore();
+  const { latestConfirmedBooking, setCurrentView, goToSearchSchedules, setTrackingRouteId, t } = useBookingStore();
   const [showSMSModal, setShowSMSModal] = useState(false);
 
   if (!latestConfirmedBooking) {
     return (
       <div className="text-center py-16">
         <p className="text-slate-500">{t('noRecentTicket')}</p>
-        <button onClick={() => setCurrentView('passenger-search')} className="mt-4 px-4 py-2 bg-blue-600 text-white font-bold rounded-xl">
+        <button onClick={goToSearchSchedules} className="mt-4 px-4 py-2 bg-blue-600 text-white font-bold rounded-xl">
           {t('backToSearch')}
         </button>
       </div>
@@ -156,6 +156,13 @@ export const TicketModal: React.FC = () => {
           className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm flex items-center gap-2 transition-all"
         >
           <MapPin className="w-4 h-4 text-white" /> {t('trackBus')}
+        </button>
+
+        <button
+          onClick={goToSearchSchedules}
+          className="px-6 py-3 rounded-xl bg-slate-900 hover:bg-blue-600 text-white font-bold text-sm shadow-sm flex items-center gap-2 transition-all"
+        >
+          <Bus className="w-4 h-4 text-white" /> {t('backToSearch')}
         </button>
 
       </div>

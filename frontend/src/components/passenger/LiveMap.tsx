@@ -23,7 +23,7 @@ const stopIcon = L.divIcon({
 });
 
 export const LiveMap: React.FC = () => {
-  const { routes, trackingRouteId, setCurrentView } = useBookingStore();
+  const { routes, trackingRouteId, goToSearchSchedules } = useBookingStore();
 
   const activeRoute = routes.find(r => r.id === trackingRouteId) || routes[0];
 
@@ -59,7 +59,7 @@ export const LiveMap: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <button
-          onClick={() => setCurrentView('passenger-search')}
+          onClick={goToSearchSchedules}
           className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors text-sm font-medium"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Passenger Portal

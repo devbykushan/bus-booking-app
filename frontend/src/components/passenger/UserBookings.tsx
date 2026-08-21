@@ -3,7 +3,7 @@ import { useBookingStore } from '../../store/bookingStore';
 import { Ticket, MapPin, XCircle } from 'lucide-react';
 
 export const UserBookings: React.FC = () => {
-  const { bookings, cancelBooking, setCurrentView, setTrackingRouteId } = useBookingStore();
+  const { bookings, cancelBooking, setCurrentView, goToSearchSchedules, setTrackingRouteId } = useBookingStore();
 
   const handleTrack = (routeId: string) => {
     setTrackingRouteId(routeId);
@@ -27,7 +27,7 @@ export const UserBookings: React.FC = () => {
           <p className="text-xs text-slate-500">View upcoming journeys, download tickets, or track your bus in real time.</p>
         </div>
         <button
-          onClick={() => setCurrentView('passenger-search')}
+          onClick={goToSearchSchedules}
           className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm"
         >
           + Book New Trip
@@ -39,7 +39,7 @@ export const UserBookings: React.FC = () => {
           <Ticket className="w-12 h-12 text-slate-400 mx-auto" />
           <p className="text-slate-500 text-sm">No active bookings found.</p>
           <button
-            onClick={() => setCurrentView('passenger-search')}
+            onClick={goToSearchSchedules}
             className="px-6 py-2.5 bg-blue-600 text-white font-bold text-xs rounded-xl shadow-sm"
           >
             Search Bus Routes

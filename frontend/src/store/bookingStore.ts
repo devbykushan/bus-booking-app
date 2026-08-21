@@ -42,6 +42,7 @@ interface BookingStore {
   // Navigation
   currentView: AppView;
   setCurrentView: (view: AppView) => void;
+  goToSearchSchedules: () => void;
 
   // Role switching
   userRole: 'passenger' | 'admin';
@@ -180,6 +181,15 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
 
   currentView: 'passenger-search',
   setCurrentView: (view) => set({ currentView: view }),
+  goToSearchSchedules: () => {
+    set({ currentView: 'passenger-search' });
+    setTimeout(() => {
+      const el = document.getElementById('available-schedules');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 60);
+  },
 
   userRole: JSON.parse(localStorage.getItem('dewmina_user') || 'null')?.role || 'passenger',
   setUserRole: (role) => set({ userRole: role }),
