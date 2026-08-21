@@ -5,6 +5,9 @@ import { Footer } from './components/common/Footer';
 import { HeroSearch } from './components/passenger/HeroSearch';
 import { StatsSection } from './components/passenger/StatsSection';
 import { ServicesSection } from './components/passenger/ServicesSection';
+import { BookingGuideSection } from './components/passenger/BookingGuideSection';
+import { AboutPlatformSection } from './components/passenger/AboutPlatformSection';
+import { BusBookingFAQSection } from './components/passenger/BusBookingFAQSection';
 import { BusCard } from './components/passenger/BusCard';
 import { InteractiveRouteMap } from './components/passenger/InteractiveRouteMap';
 import { SeatMap } from './components/passenger/SeatMap';
@@ -170,6 +173,9 @@ export function App() {
                 </div>
 
                 <ServicesSection />
+                <BookingGuideSection />
+                <AboutPlatformSection />
+                <BusBookingFAQSection />
               </div>
             )}
 
