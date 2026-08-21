@@ -508,7 +508,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               <span className="text-[11px] italic">Front of Bus / Driver Steering Wheel Right</span>
             </div>
 
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3 max-h-[360px] overflow-y-auto">
+            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3">
               {rowNumbers.length === 0 ? (
                 <div className="text-center py-10 text-slate-400 text-xs font-medium">
                   No seats configured on {activeDeck} deck. Click "Add Custom Seat" above to insert seats.
