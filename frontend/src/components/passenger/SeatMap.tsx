@@ -8,6 +8,8 @@ export const SeatMap: React.FC = () => {
     selectedRoute, 
     selectedSeatIds, 
     toggleSeatSelection, 
+    selectedDropPoint,
+    setSelectedDropPoint,
     setCurrentView,
     lockActive,
     lockExpirySeconds,
@@ -282,6 +284,26 @@ export const SeatMap: React.FC = () => {
               {selectedRoute.boardingPoints.map(bp => (
                 <option key={bp.id} value={bp.id}>
                   {bp.name} ({bp.time}) - {bp.landmark}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Drop-off point
+            </label>
+            <select
+              value={selectedDropPoint?.id ?? ''}
+              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl p-3 text-xs focus:outline-none focus:border-blue-500"
+              onChange={(e) => {
+                const dp = selectedRoute.dropPoints.find(p => p.id === e.target.value);
+                if (dp) setSelectedDropPoint(dp);
+              }}
+            >
+              {selectedRoute.dropPoints.map(dp => (
+                <option key={dp.id} value={dp.id}>
+                  {dp.name} ({dp.time}) - {dp.landmark}
                 </option>
               ))}
             </select>

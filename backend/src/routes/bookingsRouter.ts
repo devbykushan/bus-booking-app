@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { getDb } from '../db/database';
-import { unlockSeats } from '../locks/seatLocks';
+import { isSeatLockedBySession, unlockSeats } from '../locks/seatLocks';
 import { v4 as uuidv4 } from 'uuid';
 
 export const bookingsRouter = Router();
@@ -86,6 +86,27 @@ bookingsRouter.post('/', (req: Request, res: Response) => {
   const seats = seatIds.map((id: string) =>
     db.prepare('SELECT * FROM seats WHERE id = ?').get(id)
   ).filter(Boolean) as any[];
+
+  if (seats.length !== seatIds.length || seats.some((seat: any) => seat.routeId !== routeId)) {
+    res.status(400).json({ error: 'All selected seats must belong to the chosen route.' });
+    return;
+  }
+
+  if (!sessionId || seatIds.some((seatId: string) => !isSeatLockedBySession(seatId, sessionId))) {
+    res.status(409).json({ error: 'Your seat hold has expired. Please select your seats again.' });
+    return;
+  }
+
+  const boardingPoint = db.prepare(
+    "SELECT id FROM boarding_points WHERE id = ? AND routeId = ? AND type = 'boarding'"
+  ).get(boardingPointId, routeId);
+  const dropPoint = db.prepare(
+    "SELECT id FROM boarding_points WHERE id = ? AND routeId = ? AND type = 'drop'"
+  ).get(dropPointId, routeId);
+  if (!boardingPoint || !dropPoint) {
+    res.status(400).json({ error: 'Boarding and drop-off points must belong to the chosen route.' });
+    return;
+  }
 
   const bookedSeats = seats.filter((s: any) => s.status === 'booked');
   if (bookedSeats.length > 0) {

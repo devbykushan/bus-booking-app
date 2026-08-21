@@ -47,8 +47,10 @@ export function App() {
 
   // Filter routes based on active search criteria
   const filteredRoutes = routes.filter(route => {
-    if (busTypeFilter !== 'all' && route.busType !== busTypeFilter) return false;
-    return true;
+    if (busTypeFilter !== 'all' && !route.busType.toLowerCase().includes(busTypeFilter.toLowerCase())) return false;
+    if (searchOrigin && route.origin.toLowerCase() !== searchOrigin.toLowerCase()) return false;
+    if (searchDestination && route.destination.toLowerCase() !== searchDestination.toLowerCase()) return false;
+    return route.availableSeatsCount > 0;
   });
 
   // ─── Backend offline splash ───────────────────────────────────────────────

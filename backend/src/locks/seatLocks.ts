@@ -44,6 +44,15 @@ export function isSeatAvailable(seatId: string, sessionId: string): boolean {
   return lock.sessionId === sessionId;
 }
 
+export function isSeatLockedBySession(seatId: string, sessionId: string): boolean {
+  const lock = seatLocks.get(seatId);
+  if (!lock || lock.expiresAt <= Date.now()) {
+    if (lock) seatLocks.delete(seatId);
+    return false;
+  }
+  return lock.sessionId === sessionId;
+}
+
 export function getLockRemainingSeconds(seatId: string): number {
   const lock = seatLocks.get(seatId);
   if (!lock || lock.expiresAt <= Date.now()) return 0;

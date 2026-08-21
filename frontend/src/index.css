@@ -122,8 +122,8 @@
     rgba(20, 18, 60, 0.96) 40%,
     rgba(10, 25, 55, 0.97) 100%
   );
-  backdrop-filter: blur(24px) saturate(1.8);
   -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   overflow: visible;
 }
@@ -533,6 +533,7 @@
   right: 0;
   width: 220px;
   background: rgba(10, 15, 35, 0.98);
+  -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
@@ -856,12 +857,14 @@
 .gradient-text-blue {
   background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .gradient-text-emerald {
   background: linear-gradient(135deg, #065f46 0%, #059669 50%, #10b981 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -873,8 +876,8 @@
 
 .glass-panel {
   background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   border: 1px solid rgba(226, 232, 240, 0.8);
   box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -895,6 +898,7 @@
 
 .glass-card-dark {
   background: rgba(15, 23, 42, 0.95);
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #f8fafc;
