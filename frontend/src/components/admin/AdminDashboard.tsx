@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
+import { RouteDeploymentForm } from './RouteDeploymentForm';
 import { SeatLayoutCustomizerModal } from './SeatLayoutCustomizerModal';
 import { QRScannerModal } from '../operator/QRScannerModal';
 import { routesApi } from '../../services/api';
 import type { BusRoute } from '../../types/booking';
 import { 
   TrendingUp, Users, DollarSign, Bus, Shield, Award, BarChart2, 
-  SlidersHorizontal, Plus, QrCode, LayoutGrid, Download, ShieldCheck,
+  SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
   Trash2, RefreshCw
 } from 'lucide-react';
 
@@ -21,54 +22,11 @@ export const AdminDashboard: React.FC = () => {
   const [deletingRouteId, setDeletingRouteId] = useState<string | null>(null);
   const [confirmDeleteRouteId, setConfirmDeleteRouteId] = useState<string | null>(null);
 
-  // New Route Deploy Form State
-  const [newOperatorName, setNewOperatorName] = useState('Dewmina Super Line');
-  const [newBusNumber, setNewBusNumber] = useState('ND-8899 (Lanka Ashok Leyland)');
-  const [newOrigin, setNewOrigin] = useState('Monaragala');
-  const [newDestination, setNewDestination] = useState('Colombo');
-  const [newDepTime, setNewDepTime] = useState('10:00 AM');
-  const [newArrivalTime, setNewArrivalTime] = useState('03:30 PM');
-  const [newDuration, setNewDuration] = useState('5h 30m');
-  const [newPrice, setNewPrice] = useState(1800);
-  const [newBusType, setNewBusType] = useState<any>('Ashok Leyland (54 Seats 3*2)');
-  const [customBusType, setCustomBusType] = useState('Custom Bus Layout');
-
   const selectedRoute = routes.find(r => r.id === selectedRouteId) || routes[0] || null;
   const manifestBookings = bookings.filter(b => b.routeId === selectedRoute?.id);
 
   const totalRevenue = bookings.reduce((sum, b) => sum + (b.bookingStatus !== 'cancelled' ? b.totalFare : 0), 0);
   const confirmedBookingsCount = bookings.filter(b => b.bookingStatus !== 'cancelled').length;
-
-  const handleCreateRoute = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const newId = `route-${Date.now()}`;
-    const selectedBusType = newBusType === '__custom__' ? customBusType.trim() : newBusType;
-    if (!selectedBusType) return;
-
-    try {
-      await routesApi.create({
-        id: newId,
-        operatorId: 'op-custom',
-        operatorName: newOperatorName,
-        operatorRating: 4.9,
-        busNumber: newBusNumber,
-        busType: selectedBusType,
-        origin: newOrigin,
-        destination: newDestination,
-        departureTime: newDepTime,
-        arrivalTime: newArrivalTime,
-        duration: newDuration,
-        priceStarting: newPrice,
-        hasUpperDeck: selectedBusType.includes('Double') || selectedBusType.includes('Sleeper'),
-        amenities: ['Wi-Fi', 'AC', 'Live GPS'],
-      });
-      await loadRoutes();
-      setShowSeatBuilder(false);
-      alert(`Bus Route ${newBusNumber} successfully deployed to live fleet!`);
-    } catch (err: any) {
-      alert(`Failed to deploy route: ${err.message}`);
-    }
-  };
 
   const handleDeleteRoute = async (e: React.MouseEvent, routeId: string) => {
     e.stopPropagation();
@@ -171,75 +129,7 @@ export const AdminDashboard: React.FC = () => {
 
           {/* New Bus Deployment Form */}
           {showSeatBuilder && (
-            <form onSubmit={handleCreateRoute} className="bg-white p-6 rounded-3xl border border-blue-200 shadow-sm space-y-4 animate-pop-in">
-              <h3 className="text-base font-bold text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-2">
-                <LayoutGrid className="w-5 h-5 text-blue-600" /> Route & Visual Seat Layout Designer
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                <div>
-                  <label className="block text-slate-600 mb-1">Operator Name</label>
-                  <input type="text" value={newOperatorName} onChange={e => setNewOperatorName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
-                </div>
-                <div>
-                  <label className="block text-slate-600 mb-1">Bus Reg. Number</label>
-                  <input type="text" value={newBusNumber} onChange={e => setNewBusNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
-                </div>
-                <div>
-                  <label className="block text-slate-600 mb-1 font-bold text-blue-600">Bus Model & Seating</label>
-                  <select value={newBusType} onChange={(e: any) => setNewBusType(e.target.value)} className="w-full bg-slate-50 border border-blue-300 rounded-xl p-2.5 text-slate-800 font-bold">
-                    <option value="Ashok Leyland (54 Seats 3*2)">🚌 Ashok Leyland (54 Seats 3*2)</option>
-                    <option value="Ashok Leyland (54 Seats 2*2)">🚌 Ashok Leyland (54 Seats 2*2)</option>
-                    <option value="Yutong (48 Seats 2*2)">🚌 Yutong (48 Seats 2*2)</option>
-                    <option value="Yutong (51 Seats 2*2)">🚌 Yutong (51 Seats 2*2)</option>
-                    <option value="__custom__">⚙️ Custom Bus Model</option>
-                  </select>
-                  {newBusType === '__custom__' && (
-                    <input
-                      type="text"
-                      value={customBusType}
-                      onChange={e => setCustomBusType(e.target.value)}
-                      placeholder="Enter custom bus model"
-                      className="w-full mt-2 bg-white border border-blue-300 rounded-xl p-2.5 text-slate-800 font-semibold"
-                      required
-                    />
-                  )}
-                </div>
-                <div>
-                  <label className="block text-slate-600 mb-1">Origin City</label>
-                  <input type="text" value={newOrigin} onChange={e => setNewOrigin(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
-                </div>
-                <div>
-                  <label className="block text-slate-600 mb-1">Destination City</label>
-                  <input type="text" value={newDestination} onChange={e => setNewDestination(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
-                </div>
-                <div>
-                  <label className="block text-slate-600 mb-1">Departure Time</label>
-                  <input type="text" value={newDepTime} onChange={e => setNewDepTime(e.target.value)} placeholder="10:00 AM" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
-                </div>
-                <div>
-                  <label className="block text-slate-600 mb-1">Arrival Time</label>
-                  <input type="text" value={newArrivalTime} onChange={e => setNewArrivalTime(e.target.value)} placeholder="03:30 PM" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
-                </div>
-                <div>
-                  <label className="block text-slate-600 mb-1">Journey Duration</label>
-                  <input type="text" value={newDuration} onChange={e => setNewDuration(e.target.value)} placeholder="5h 30m" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
-                </div>
-                <div>
-                  <label className="block text-slate-600 mb-1">Base Price (LKR)</label>
-                  <input type="number" value={newPrice} onChange={e => setNewPrice(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setShowSeatBuilder(false)} className="px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs">
-                  Cancel
-                </button>
-                <button type="submit" className="px-6 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs shadow-sm">
-                  Deploy Bus to Live Fleet
-                </button>
-              </div>
-            </form>
+            <RouteDeploymentForm onClose={() => setShowSeatBuilder(false)} />
           )}
 
           {/* Fleet Grid & Passenger Manifest Split Panel */}

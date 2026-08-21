@@ -177,28 +177,6 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
           });
         }
       });
-    } else if (type.includes('Double Decker Sleeper')) {
-      // Double Decker Sleeper 48 Seats (24 lower, 24 upper)
-      ['lower', 'upper'].forEach((deckName) => {
-        const prefix = deckName === 'lower' ? 'L' : 'U';
-        for (let r = 1; r <= 6; r++) {
-          [1, 2, 4, 5].forEach((c) => {
-            const seatLetter = String.fromCharCode(64 + (c > 3 ? c - 1 : c));
-            const seatNum = `${prefix}${r}${seatLetter}`;
-            newSeats.push({
-              id: `${route.id}-${seatNum}`,
-              number: seatNum,
-              deck: deckName as DeckType,
-              row: r,
-              col: c,
-              price: price + (deckName === 'upper' ? 300 : 0),
-              status: 'available',
-              isSleeper: true,
-              isFemaleOnly: r === 1 && c <= 2,
-            });
-          });
-        }
-      });
     } else {
       // Standard Volvo 40 seats (2*2 Luxury)
       for (let r = 1; r <= 10; r++) {

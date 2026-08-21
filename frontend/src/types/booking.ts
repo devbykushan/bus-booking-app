@@ -8,8 +8,7 @@ export type BusCategory =
   | 'AC Seater' 
   | 'AC Sleeper' 
   | 'Non-AC Seater' 
-  | 'Luxury Volvo Multi-Axle' 
-  | 'Double Decker Sleeper';
+  | 'Luxury Volvo Multi-Axle';
 
 export type SeatStatus = 'available' | 'selected' | 'booked' | 'locked';
 

@@ -6,6 +6,7 @@ import { HeroSearch } from './components/passenger/HeroSearch';
 import { StatsSection } from './components/passenger/StatsSection';
 import { ServicesSection } from './components/passenger/ServicesSection';
 import { BusCard } from './components/passenger/BusCard';
+import { InteractiveRouteMap } from './components/passenger/InteractiveRouteMap';
 import { SeatMap } from './components/passenger/SeatMap';
 import { FareBreakdown } from './components/passenger/FareBreakdown';
 import { TicketModal } from './components/passenger/TicketModal';
@@ -13,6 +14,7 @@ import { LiveMap } from './components/passenger/LiveMap';
 import { UserBookings } from './components/passenger/UserBookings';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { Bus, AlertCircle, Wifi, RefreshCw } from 'lucide-react';
+import type { BusRoute } from './types/booking';
 
 export function App() {
   const {
@@ -27,6 +29,8 @@ export function App() {
     loadBookings,
     setError,
   } = useBookingStore();
+
+  const [focusedRoute, setFocusedRoute] = useState<BusRoute | null>(null);
 
   const [backendReady, setBackendReady] = useState(false);
   const [backendError, setBackendError] = useState(false);
@@ -123,8 +127,8 @@ export function App() {
                   <StatsSection />
                 </div>
 
-                <div id="available-schedules" className="bg-slate-50 pb-10 scroll-mt-24">
-                  <div className="max-w-5xl mx-auto px-4 space-y-4">
+                <div id="available-schedules" className="bg-slate-50 pb-16 scroll-mt-24">
+                  <div className="max-w-7xl mx-auto px-4 space-y-6">
                     <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                       <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                         <Bus className="w-5 h-5 text-blue-500 animate-bus-drive" />
@@ -142,12 +146,24 @@ export function App() {
                         <p className="text-xs text-slate-400">Try resetting the Bus Category filter.</p>
                       </div>
                     ) : (
-                      <div className="space-y-4">
-                        {filteredRoutes.map((route, idx) => (
-                          <div key={route.id} style={{ animationDelay: `${idx * 0.08}s` }} className="animate-fade-in-up">
-                            <BusCard route={route as any} />
-                          </div>
-                        ))}
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        {/* Left Side: Bus Schedule Cards */}
+                        <div className="lg:col-span-7 space-y-4">
+                          {filteredRoutes.map((route, idx) => (
+                            <div key={route.id} style={{ animationDelay: `${idx * 0.08}s` }} className="animate-fade-in-up">
+                              <BusCard
+                                route={route as any}
+                                isSelected={(focusedRoute?.id || filteredRoutes[0]?.id) === route.id}
+                                onFocusRoute={(r) => setFocusedRoute(r)}
+                              />
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Right Side: Interactive Route Map Preview */}
+                        <div className="lg:col-span-5 hidden lg:block sticky top-24">
+                          <InteractiveRouteMap route={(focusedRoute || filteredRoutes[0]) as any} />
+                        </div>
                       </div>
                     )}
                   </div>

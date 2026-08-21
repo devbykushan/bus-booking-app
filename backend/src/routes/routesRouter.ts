@@ -137,6 +137,49 @@ routesRouter.post('/', async (req: Request, res: Response) => {
     amenities, seats: customSeats,
   } = req.body;
 
+  // ─── Server-side Input Validation ──────────────────────────────────────────
+  if (!operatorName || typeof operatorName !== 'string' || operatorName.trim().length < 2) {
+    res.status(400).json({ error: 'Valid operator name is required (min 2 characters).' });
+    return;
+  }
+  if (!busNumber || typeof busNumber !== 'string') {
+    res.status(400).json({ error: 'Valid bus registration number is required.' });
+    return;
+  }
+  const trimmedBusNum = busNumber.trim();
+  const platePattern = /^(([A-Za-z]{1,3}|[0-9]{2,3})\s*[- ]\s*[0-9]{3,4}|(WP|CP|SP|NP|EP|NW|NC|UP|SG)[- ]([A-Za-z]{2,3}|[0-9]{2,3})[- ][0-9]{3,4})(\s*\([^)]+\))?$/i;
+  const generalPattern = /^[A-Za-z0-9\s\-]+[- ]\d{3,4}(\s*\([^)]+\))?$/i;
+  if (trimmedBusNum.length < 5 || (!platePattern.test(trimmedBusNum) && !generalPattern.test(trimmedBusNum))) {
+    res.status(400).json({ error: 'Valid Sri Lankan bus registration number is required (e.g., ND-8899, WP ND-8899, or ND-8899 (Bus Name)).' });
+    return;
+  }
+  if (!busType || typeof busType !== 'string' || !busType.trim()) {
+    res.status(400).json({ error: 'Bus model & seating configuration is required.' });
+    return;
+  }
+  if (!origin || typeof origin !== 'string' || !origin.trim() || !destination || typeof destination !== 'string' || !destination.trim()) {
+    res.status(400).json({ error: 'Origin and destination cities are required.' });
+    return;
+  }
+  if (origin.trim().toLowerCase() === destination.trim().toLowerCase()) {
+    res.status(400).json({ error: 'Destination city must be different from Origin city.' });
+    return;
+  }
+  if (!departureTime || typeof departureTime !== 'string' || !departureTime.trim()) {
+    res.status(400).json({ error: 'Departure time is required.' });
+    return;
+  }
+  const parsedPrice = Number(priceStarting);
+  if (isNaN(parsedPrice) || parsedPrice < 500) {
+    res.status(400).json({ error: 'Base starting price must be at least 500 LKR.' });
+    return;
+  }
+  if (parsedPrice > 50000) {
+    res.status(400).json({ error: 'Base starting price cannot exceed 50,000 LKR.' });
+    return;
+  }
+
+  const routeId = id || `route-${Date.now()}`;
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -148,8 +191,8 @@ routesRouter.post('/', async (req: Request, res: Response) => {
         "amenities", "gpsLat", "gpsLng", "gpsSpeedKmH", "gpsCurrentStop", "gpsNextStop", "gpsEtaMinutes"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 6.8722, 81.3507, 72, 'Main Terminal', 'En Route', 360)
     `, [
-      id, operatorId, operatorName, operatorRating || 4.9, busNumber, busType,
-      origin, destination, departureTime, arrivalTime || '04:00 PM', duration || '5h 30m', priceStarting || 1800,
+      routeId, operatorId || 'op-custom', operatorName.trim(), operatorRating || 4.9, busNumber.trim(), busType.trim(),
+      origin.trim(), destination.trim(), departureTime.trim(), arrivalTime || '04:00 PM', duration || '5h 30m', parsedPrice,
       hasUpperDeck ? 1 : 0, JSON.stringify(amenities || ['Wi-Fi', 'AC', 'Live GPS']),
     ]);
 

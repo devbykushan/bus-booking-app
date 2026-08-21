@@ -404,28 +404,6 @@ export async function seedData(p: Pool): Promise<void> {
       gpsNextStop: 'Kottawa Interchange',
       gpsEtaMinutes: 360,
     },
-    {
-      id: 'route-103',
-      operatorId: 'op-dewmina',
-      operatorName: 'Dewmina Super Line',
-      operatorRating: 4.8,
-      busNumber: 'ND-4455 (Dewmina Air Bus)',
-      busType: 'Double Decker Sleeper',
-      origin: 'Monaragala',
-      destination: 'Colombo',
-      departureTime: '01:30 PM',
-      arrivalTime: '07:30 PM',
-      duration: '6h 00m',
-      priceStarting: 3200,
-      hasUpperDeck: 1,
-      amenities: JSON.stringify(['AC', 'Panoramic Roof', 'Live GPS Tracking', 'Wi-Fi', 'Reclining Sleeper']),
-      gpsLat: 6.7410,
-      gpsLng: 81.1020,
-      gpsSpeedKmH: 68,
-      gpsCurrentStop: 'Wellawaya Junction',
-      gpsNextStop: 'Pelmadulla Station',
-      gpsEtaMinutes: 240,
-    },
   ];
 
   const client = await p.connect();

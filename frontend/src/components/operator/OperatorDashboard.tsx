@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { QRScannerModal } from './QRScannerModal';
 import { SeatLayoutCustomizerModal } from '../admin/SeatLayoutCustomizerModal';
+import { RouteDeploymentForm } from '../admin/RouteDeploymentForm';
 import { routesApi } from '../../services/api';
 import type { BusRoute } from '../../types/booking';
-import { QrCode, Plus, Users, LayoutGrid, Download, SlidersHorizontal, Trash2, RefreshCw } from 'lucide-react';
+import { QrCode, Plus, Users, Download, SlidersHorizontal, Trash2, RefreshCw } from 'lucide-react';
 
 export const OperatorDashboard: React.FC = () => {
   const { routes, bookings, loadRoutes } = useBookingStore();
@@ -16,44 +17,8 @@ export const OperatorDashboard: React.FC = () => {
   const [deletingRouteId, setDeletingRouteId] = useState<string | null>(null);
   const [confirmDeleteRouteId, setConfirmDeleteRouteId] = useState<string | null>(null);
 
-  const [newOperatorName, setNewOperatorName] = useState('Dewmina Super Line');
-  const [newBusNumber, setNewBusNumber] = useState('ND-8899 (Lanka Ashok Leyland)');
-  const [newOrigin, setNewOrigin] = useState('Monaragala');
-  const [newDestination, setNewDestination] = useState('Colombo');
-  const [newDepTime] = useState('10:00 AM');
-  const [newPrice, setNewPrice] = useState(1800);
-  const [newBusType, setNewBusType] = useState<any>('Ashok Leyland (54 Seats 3*2)');
-
   const selectedRoute = routes.find(r => r.id === selectedRouteId) || routes[0] || null;
   const manifestBookings = bookings.filter(b => b.routeId === selectedRoute?.id);
-
-  const handleCreateRoute = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const newId = `route-${Date.now()}`;
-    try {
-      await routesApi.create({
-        id: newId,
-        operatorId: 'op-custom',
-        operatorName: newOperatorName,
-        operatorRating: 4.9,
-        busNumber: newBusNumber,
-        busType: newBusType,
-        origin: newOrigin,
-        destination: newDestination,
-        departureTime: newDepTime,
-        arrivalTime: '03:30 PM',
-        duration: '5h 30m',
-        priceStarting: newPrice,
-        hasUpperDeck: newBusType.includes('Double') || newBusType.includes('Sleeper'),
-        amenities: ['Wi-Fi', 'AC', 'Live GPS'],
-      });
-      await loadRoutes();
-      setShowSeatBuilder(false);
-      alert(`Bus Route ${newBusNumber} successfully deployed to live fleet!`);
-    } catch (err: any) {
-      alert(`Failed to deploy route: ${err.message}`);
-    }
-  };
 
   const handleDeleteRoute = async (e: React.MouseEvent, routeId: string) => {
     e.stopPropagation();
@@ -108,52 +73,7 @@ export const OperatorDashboard: React.FC = () => {
       </div>
 
       {showSeatBuilder && (
-        <form onSubmit={handleCreateRoute} className="bg-white p-6 rounded-3xl border border-blue-200 shadow-sm space-y-4">
-          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-2">
-            <LayoutGrid className="w-5 h-5 text-blue-600" /> Route & Visual Seat Layout Designer
-          </h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-            <div>
-              <label className="block text-slate-600 mb-1">Operator Name</label>
-              <input type="text" value={newOperatorName} onChange={e => setNewOperatorName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
-            </div>
-            <div>
-              <label className="block text-slate-600 mb-1">Bus Reg. Number</label>
-              <input type="text" value={newBusNumber} onChange={e => setNewBusNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
-            </div>
-            <div>
-              <label className="block text-slate-600 mb-1 font-bold text-blue-600">Bus Model & Seating</label>
-              <select value={newBusType} onChange={(e: any) => setNewBusType(e.target.value)} className="w-full bg-slate-50 border border-blue-300 rounded-xl p-2.5 text-slate-800 font-bold">
-                <option value="Ashok Leyland (54 Seats 3*2)">🚌 Ashok Leyland (54 Seats 3*2)</option>
-                <option value="Ashok Leyland (54 Seats 2*2)">🚌 Ashok Leyland (54 Seats 2*2)</option>
-                <option value="Yutong (48 Seats 2*2)">🚌 Yutong (48 Seats 2*2)</option>
-                <option value="Yutong (51 Seats 2*2)">🚌 Yutong (51 Seats 2*2)</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-slate-600 mb-1">Origin City</label>
-              <input type="text" value={newOrigin} onChange={e => setNewOrigin(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
-            </div>
-            <div>
-              <label className="block text-slate-600 mb-1">Destination City</label>
-              <input type="text" value={newDestination} onChange={e => setNewDestination(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
-            </div>
-            <div>
-              <label className="block text-slate-600 mb-1">Base Price (LKR)</label>
-              <input type="number" value={newPrice} onChange={e => setNewPrice(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold" />
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={() => setShowSeatBuilder(false)} className="px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs">
-              Cancel
-            </button>
-            <button type="submit" className="px-6 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs shadow-sm">
-              Deploy Bus to Live Fleet
-            </button>
-          </div>
-        </form>
+        <RouteDeploymentForm onClose={() => setShowSeatBuilder(false)} />
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

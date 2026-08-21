@@ -258,7 +258,7 @@ export const MOCK_ROUTES: BusRoute[] = [
     operatorName: 'Dewmina Super Line',
     operatorRating: 4.9,
     busNumber: 'ND-9900 (Dewmina Night Super)',
-    busType: 'Double Decker Sleeper',
+    busType: 'AC Sleeper',
     origin: 'Colombo',
     destination: 'Jaffna',
     departureTime: '09:30 PM',
@@ -266,7 +266,7 @@ export const MOCK_ROUTES: BusRoute[] = [
     duration: '7h 30m',
     priceStarting: 3500,
     availableSeatsCount: 18,
-    totalSeatsCount: 48,
+    totalSeatsCount: 36,
     hasUpperDeck: true,
     amenities: ['Wi-Fi', 'AC Sleeper', 'Blanket', 'Charging Ports', 'Live GPS', 'Night Reading Lamp'],
     boardingPoints: [
@@ -284,7 +284,7 @@ export const MOCK_ROUTES: BusRoute[] = [
       etaMinutes: 450,
       lastUpdated: 'Just now'
     },
-    seats: generateSeats('Double Decker Sleeper', true)
+    seats: generateSeats('AC Sleeper', true)
   },
   {
     id: 'route-104',
