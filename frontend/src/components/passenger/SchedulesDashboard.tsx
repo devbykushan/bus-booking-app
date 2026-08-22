@@ -18,7 +18,9 @@ import {
   RotateCcw,
   Search,
   CheckCircle2,
-  PhoneCall
+  PhoneCall,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 const CITIES = [
@@ -46,10 +48,53 @@ export const SchedulesDashboard: React.FC = () => {
   const [focusedRoute, setFocusedRoute] = useState<BusRoute | null>(null);
   const [isModifyOpen, setIsModifyOpen] = useState(false);
 
+  // Helper to format date like "Sat, 22 Aug"
+  const formatDateLabel = (d: Date) => {
+    const weekday = d.toLocaleDateString('en-US', { weekday: 'short' });
+    const day = d.getDate();
+    const month = d.toLocaleDateString('en-US', { month: 'short' });
+    return `${weekday}, ${day} ${month}`;
+  };
+
+  const toISODateString = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // Search modify draft state
   const [modOrigin, setModOrigin] = useState(searchOrigin);
   const [modDestination, setModDestination] = useState(searchDestination);
   const [modDate, setModDate] = useState(searchDate);
+
+  // Date strip state
+  const [dateOffset, setDateOffset] = useState(() => {
+    if (!searchDate) return 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(searchDate);
+    target.setHours(0, 0, 0, 0);
+    const diff = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.max(0, diff > 1 ? diff - 1 : 0);
+  });
+
+  const visibleDates = useMemo(() => {
+    const base = new Date();
+    base.setHours(0, 0, 0, 0);
+    const dates = [];
+    for (let i = 0; i < 4; i++) {
+      const d = new Date(base);
+      d.setDate(base.getDate() + dateOffset + i);
+      const iso = toISODateString(d);
+      dates.push({
+        dateObj: d,
+        isoString: iso,
+        label: formatDateLabel(d),
+      });
+    }
+    return dates;
+  }, [dateOffset]);
 
   // Time and Sorting states
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all');
@@ -323,40 +368,88 @@ export const SchedulesDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Toolbar: Class Filter, Time of Day, and Sorting ── */}
+      {/* ── Toolbar: Date Strip, Class Filter, Time of Day, and Sorting ── */}
       <div className="bg-white border-b border-slate-200 shadow-sm sticky top-16 md:top-[72px] z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            {/* Left: Class Filters */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 mr-1">
-                <Filter className="w-3.5 h-3.5" />
-                <span>Class:</span>
-              </span>
-
-              {[
-                { id: 'all', label: 'All Coaches' },
-                { id: 'Ashok Leyland', label: 'Ashok Leyland 54' },
-                { id: 'Yutong', label: 'Yutong Luxury' },
-              ].map((tab) => (
+          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+            
+            {/* ── Left: Date Carousel Strip (Exact Match to User UI) ── */}
+            <div className="flex items-center overflow-x-auto pb-1 xl:pb-0 scrollbar-none">
+              <div className="inline-flex items-center bg-slate-50 border border-slate-200/90 rounded-2xl p-1 shadow-xs">
                 <button
-                  key={tab.id}
-                  onClick={() => setBusTypeFilter(tab.id)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer ${
-                    busTypeFilter === tab.id
-                      ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
-                      : 'bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900'
+                  type="button"
+                  onClick={() => setDateOffset((p) => Math.max(0, p - 1))}
+                  disabled={dateOffset <= 0}
+                  className={`p-2 rounded-xl text-slate-700 transition-all ${
+                    dateOffset <= 0
+                      ? 'opacity-25 cursor-not-allowed text-slate-400'
+                      : 'hover:bg-white hover:shadow-xs hover:text-slate-900 cursor-pointer active:scale-95'
                   }`}
+                  aria-label="Previous date"
                 >
-                  {tab.label}
+                  <ChevronLeft className="w-4 h-4" />
                 </button>
-              ))}
+
+                <div className="flex items-center gap-1 sm:gap-1.5 px-1">
+                  {visibleDates.map((item) => {
+                    const isSelected = searchDate === item.isoString;
+                    return (
+                      <button
+                        key={item.isoString}
+                        type="button"
+                        onClick={() => {
+                          setSearchCriteria(searchOrigin, searchDestination, item.isoString);
+                          setModDate(item.isoString);
+                        }}
+                        className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                          isSelected
+                            ? 'bg-[#4f46e5] text-white font-bold shadow-md shadow-indigo-500/25'
+                            : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setDateOffset((p) => p + 1)}
+                  className="p-2 rounded-xl text-slate-700 hover:bg-white hover:shadow-xs hover:text-slate-900 transition-all cursor-pointer active:scale-95"
+                  aria-label="Next date"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
-            {/* Right: Time Filter & Sort Dropdown */}
-            <div className="flex flex-wrap items-center gap-3">
+            {/* ── Right: Class Filter, Time Filter & Sorting ── */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Class Filter */}
+              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+                <Filter className="w-3.5 h-3.5 text-slate-400 ml-1.5" />
+                {[
+                  { id: 'all', label: 'All Coaches' },
+                  { id: 'Ashok Leyland', label: 'Ashok Leyland 54' },
+                  { id: 'Yutong', label: 'Yutong Luxury' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setBusTypeFilter(tab.id)}
+                    className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                      busTypeFilter === tab.id
+                        ? 'bg-white text-blue-600 shadow-xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
               {/* Time Filter Pills */}
-              <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
                 <Clock className="w-3.5 h-3.5 text-slate-400 ml-1.5" />
                 {[
                   { id: 'all', label: 'Anytime' },
@@ -369,7 +462,7 @@ export const SchedulesDashboard: React.FC = () => {
                     onClick={() => setTimeFilter(tItem.id as TimeFilter)}
                     className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
                       timeFilter === tItem.id
-                        ? 'bg-white text-blue-600 shadow-sm font-bold'
+                        ? 'bg-white text-blue-600 shadow-xs font-bold'
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
@@ -406,6 +499,7 @@ export const SchedulesDashboard: React.FC = () => {
                 </button>
               )}
             </div>
+
           </div>
         </div>
       </div>
