@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { BusCard } from './BusCard';
 import { InteractiveRouteMap } from './InteractiveRouteMap';
@@ -9,7 +9,6 @@ import {
   ArrowRightLeft,
   Calendar,
   MapPin,
-  Filter,
   SlidersHorizontal,
   Clock,
   Sparkles,
@@ -20,7 +19,9 @@ import {
   CheckCircle2,
   PhoneCall,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ChevronDown,
+  Check
 } from 'lucide-react';
 
 const CITIES = [
@@ -47,6 +48,27 @@ export const SchedulesDashboard: React.FC = () => {
 
   const [focusedRoute, setFocusedRoute] = useState<BusRoute | null>(null);
   const [isModifyOpen, setIsModifyOpen] = useState(false);
+
+  // Dropdown open states
+  const [operatorOpen, setOperatorOpen] = useState(false);
+  const [timeOpen, setTimeOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+
+  const opRef = useRef<HTMLDivElement>(null);
+  const timeRef = useRef<HTMLDivElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (opRef.current && !opRef.current.contains(target)) setOperatorOpen(false);
+      if (timeRef.current && !timeRef.current.contains(target)) setTimeOpen(false);
+      if (sortRef.current && !sortRef.current.contains(target)) setSortOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Helper to format date like "Sat, 22 Aug"
   const formatDateLabel = (d: Date) => {
@@ -95,6 +117,26 @@ export const SchedulesDashboard: React.FC = () => {
     }
     return dates;
   }, [dateOffset]);
+
+  // Operator list options
+  const operatorOptions = useMemo(() => {
+    const ops = new Set<string>();
+    routes.forEach((r) => {
+      if (r.operatorName) ops.add(r.operatorName);
+      if (r.busType) {
+        if (r.busType.toLowerCase().includes('leyland')) ops.add('Ashok Leyland 54');
+        if (r.busType.toLowerCase().includes('yutong')) ops.add('Yutong Luxury');
+      }
+    });
+    return [
+      { id: 'all', label: 'All Operators & Coaches' },
+      { id: 'Ashok Leyland', label: 'Ashok Leyland 54' },
+      { id: 'Yutong', label: 'Yutong Luxury' },
+      ...Array.from(ops)
+        .filter((o) => o !== 'Ashok Leyland 54' && o !== 'Yutong Luxury' && o !== 'Ashok Leyland' && o !== 'Yutong')
+        .map((o) => ({ id: o, label: o })),
+    ];
+  }, [routes]);
 
   // Time and Sorting states
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all');
@@ -422,68 +464,194 @@ export const SchedulesDashboard: React.FC = () => {
               </button>
             </div>
 
-            {/* 2. Filters & Sort in clean single line */}
+            {/* 2. Dropdown Filters on the Right */}
             <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
-              {/* Class Filter */}
-              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs flex-shrink-0">
-                <Filter className="w-3.5 h-3.5 text-slate-400 ml-1.5" />
-                {[
-                  { id: 'all', label: 'All Coaches' },
-                  { id: 'Ashok Leyland', label: 'Ashok Leyland 54' },
-                  { id: 'Yutong', label: 'Yutong Luxury' },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setBusTypeFilter(tab.id)}
-                    className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                      busTypeFilter === tab.id
-                        ? 'bg-white text-blue-600 shadow-xs font-bold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
 
-              {/* Time Filter Pills */}
-              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs flex-shrink-0">
-                <Clock className="w-3.5 h-3.5 text-slate-400 ml-1.5" />
-                {[
-                  { id: 'all', label: 'Anytime' },
-                  { id: 'morning', label: 'Morning' },
-                  { id: 'afternoon', label: 'Afternoon' },
-                  { id: 'evening', label: 'Night' },
-                ].map((tItem) => (
-                  <button
-                    key={tItem.id}
-                    onClick={() => setTimeFilter(tItem.id as TimeFilter)}
-                    className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
-                      timeFilter === tItem.id
-                        ? 'bg-white text-blue-600 shadow-xs font-bold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    {tItem.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Sort By Select */}
-              <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 text-xs flex-shrink-0">
-                <span className="text-slate-500 font-medium">Sort:</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="bg-transparent text-slate-800 font-bold focus:outline-none cursor-pointer"
+              {/* ── Operator Dropdown (Exact Match to User UI) ── */}
+              <div className="relative" ref={opRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOperatorOpen(!operatorOpen);
+                    setTimeOpen(false);
+                    setSortOpen(false);
+                  }}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold transition-all duration-200 cursor-pointer shadow-xs ${
+                    operatorOpen || busTypeFilter !== 'all'
+                      ? 'bg-indigo-50/90 border-indigo-300 text-indigo-600 shadow-sm'
+                      : 'bg-white hover:bg-slate-50 border-slate-200 text-indigo-600 hover:border-slate-300'
+                  }`}
                 >
-                  <option value="departure-asc">Departure: Earliest</option>
-                  <option value="departure-desc">Departure: Latest</option>
-                  <option value="price-asc">Price: Lowest First</option>
-                  <option value="price-desc">Price: Highest First</option>
-                  <option value="seats-desc">Available Seats</option>
-                  <option value="rating-desc">Rating: Highest</option>
-                </select>
+                  <span>{busTypeFilter === 'all' ? 'Operator' : busTypeFilter}</span>
+                  <ChevronDown className={`w-4 h-4 text-indigo-600 transition-transform duration-200 ${operatorOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {operatorOpen && (
+                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl p-1.5 z-50 animate-fade-in-up">
+                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                      Select Operator / Class
+                    </div>
+                    <div className="py-1 space-y-0.5 max-h-60 overflow-y-auto">
+                      {operatorOptions.map((opt) => {
+                        const isSelected = busTypeFilter === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => {
+                              setBusTypeFilter(opt.id);
+                              setOperatorOpen(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                              isSelected
+                                ? 'bg-indigo-50 text-indigo-700 font-bold'
+                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                            }`}
+                          >
+                            <span>{opt.label}</span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-indigo-600" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* ── Time Dropdown ── */}
+              <div className="relative" ref={timeRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTimeOpen(!timeOpen);
+                    setOperatorOpen(false);
+                    setSortOpen(false);
+                  }}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold transition-all duration-200 cursor-pointer shadow-xs ${
+                    timeOpen || timeFilter !== 'all'
+                      ? 'bg-blue-50/90 border-blue-300 text-blue-600 shadow-sm'
+                      : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  <Clock className="w-3.5 h-3.5 text-slate-400" />
+                  <span>
+                    {timeFilter === 'all'
+                      ? 'Departure Time'
+                      : timeFilter === 'morning'
+                      ? 'Morning'
+                      : timeFilter === 'afternoon'
+                      ? 'Afternoon'
+                      : 'Night'}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${timeOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {timeOpen && (
+                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-52 bg-white rounded-2xl border border-slate-200 shadow-xl p-1.5 z-50 animate-fade-in-up">
+                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                      Departure Window
+                    </div>
+                    <div className="py-1 space-y-0.5">
+                      {[
+                        { id: 'all', label: 'Anytime (All Day)' },
+                        { id: 'morning', label: 'Morning (5 AM - 12 PM)' },
+                        { id: 'afternoon', label: 'Afternoon (12 PM - 5 PM)' },
+                        { id: 'evening', label: 'Night (5 PM - 5 AM)' },
+                      ].map((tItem) => {
+                        const isSelected = timeFilter === tItem.id;
+                        return (
+                          <button
+                            key={tItem.id}
+                            type="button"
+                            onClick={() => {
+                              setTimeFilter(tItem.id as TimeFilter);
+                              setTimeOpen(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                              isSelected
+                                ? 'bg-blue-50 text-blue-700 font-bold'
+                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                            }`}
+                          >
+                            <span>{tItem.label}</span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* ── Sort Dropdown ── */}
+              <div className="relative" ref={sortRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSortOpen(!sortOpen);
+                    setOperatorOpen(false);
+                    setTimeOpen(false);
+                  }}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold transition-all duration-200 cursor-pointer shadow-xs ${
+                    sortOpen
+                      ? 'bg-slate-100 border-slate-300 text-slate-900 shadow-sm'
+                      : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  <span className="text-slate-400 font-normal">Sort:</span>
+                  <span className="font-semibold text-slate-800">
+                    {sortBy === 'departure-asc'
+                      ? 'Earliest'
+                      : sortBy === 'departure-desc'
+                      ? 'Latest'
+                      : sortBy === 'price-asc'
+                      ? 'Lowest Price'
+                      : sortBy === 'price-desc'
+                      ? 'Highest Price'
+                      : sortBy === 'seats-desc'
+                      ? 'Seats Left'
+                      : 'Top Rated'}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {sortOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl border border-slate-200 shadow-xl p-1.5 z-50 animate-fade-in-up">
+                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                      Sort Schedules
+                    </div>
+                    <div className="py-1 space-y-0.5">
+                      {[
+                        { id: 'departure-asc', label: 'Departure: Earliest' },
+                        { id: 'departure-desc', label: 'Departure: Latest' },
+                        { id: 'price-asc', label: 'Price: Lowest First' },
+                        { id: 'price-desc', label: 'Price: Highest First' },
+                        { id: 'seats-desc', label: 'Available Seats' },
+                        { id: 'rating-desc', label: 'Rating: Highest' },
+                      ].map((sItem) => {
+                        const isSelected = sortBy === sItem.id;
+                        return (
+                          <button
+                            key={sItem.id}
+                            type="button"
+                            onClick={() => {
+                              setSortBy(sItem.id as SortOption);
+                              setSortOpen(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                              isSelected
+                                ? 'bg-slate-100 text-slate-900 font-bold'
+                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                            }`}
+                          >
+                            <span>{sItem.label}</span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Reset if filters active */}
@@ -491,7 +659,7 @@ export const SchedulesDashboard: React.FC = () => {
                 <button
                   onClick={handleResetFilters}
                   title="Reset all filters"
-                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors flex-shrink-0"
+                  className="p-2 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors flex-shrink-0 cursor-pointer"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
