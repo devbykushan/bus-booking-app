@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { AuthModal } from './AuthModal';
-import { Bus, MapPin, Ticket, Clock, ShieldCheck, LogOut, LogIn, Menu, X, ChevronDown, Sparkles, Globe } from 'lucide-react';
+import { Bus, MapPin, Ticket, Clock, ShieldCheck, LogOut, LogIn, Menu, X, ChevronDown, Sparkles, Globe, Route } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { 
     currentView, 
     setCurrentView, 
     goToHome,
+    goToSearchSchedules,
     currentUser,
     userRole, 
     setUserRole, 
@@ -80,7 +81,8 @@ export const Navbar: React.FC = () => {
   };
 
   const navItems = [
-    { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search', 'schedules-dashboard', 'seat-selection', 'checkout'] },
+    { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
+    { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
     { key: 'live-tracking', translationKey: 'liveGps', icon: MapPin, activeOn: ['live-tracking'] },
     { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
   ];
@@ -97,6 +99,12 @@ export const Navbar: React.FC = () => {
 
     if (view === 'passenger-search') {
       goToHome();
+      setMobileOpen(false);
+      return;
+    }
+
+    if (view === 'schedules-dashboard') {
+      goToSearchSchedules();
       setMobileOpen(false);
       return;
     }
