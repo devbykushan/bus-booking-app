@@ -368,66 +368,64 @@ export const SchedulesDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Toolbar: Date Strip, Class Filter, Time of Day, and Sorting ── */}
+      {/* ── Toolbar: Date Strip, Class Filter, Time of Day, and Sorting in Order ── */}
       <div className="bg-white border-b border-slate-200 shadow-sm sticky top-16 md:top-[72px] z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex flex-wrap 2xl:flex-nowrap items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+          <div className="flex items-center justify-between gap-3 overflow-x-auto scrollbar-none">
             
-            {/* ── Left: Date Carousel Strip (Always fully visible, shrink-0) ── */}
-            <div className="flex-shrink-0 overflow-x-auto max-w-full pb-1 2xl:pb-0 scrollbar-none">
-              <div className="inline-flex items-center bg-slate-50 border border-slate-200/90 rounded-2xl p-1 shadow-xs flex-nowrap">
-                <button
-                  type="button"
-                  onClick={() => setDateOffset((p) => Math.max(0, p - 1))}
-                  disabled={dateOffset <= 0}
-                  className={`p-1.5 sm:p-2 rounded-xl text-slate-700 transition-all flex-shrink-0 ${
-                    dateOffset <= 0
-                      ? 'opacity-25 cursor-not-allowed text-slate-400'
-                      : 'hover:bg-white hover:shadow-xs hover:text-slate-900 cursor-pointer active:scale-95'
-                  }`}
-                  aria-label="Previous date"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
+            {/* 1. Date Carousel Strip */}
+            <div className="inline-flex items-center bg-slate-50 border border-slate-200/90 rounded-2xl p-1 shadow-xs flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setDateOffset((p) => Math.max(0, p - 1))}
+                disabled={dateOffset <= 0}
+                className={`p-1.5 sm:p-2 rounded-xl text-slate-700 transition-all flex-shrink-0 ${
+                  dateOffset <= 0
+                    ? 'opacity-25 cursor-not-allowed text-slate-400'
+                    : 'hover:bg-white hover:shadow-xs hover:text-slate-900 cursor-pointer active:scale-95'
+                }`}
+                aria-label="Previous date"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
 
-                <div className="flex items-center gap-1 sm:gap-1.5 px-0.5 sm:px-1 flex-nowrap">
-                  {visibleDates.map((item) => {
-                    const isSelected = searchDate === item.isoString;
-                    return (
-                      <button
-                        key={item.isoString}
-                        type="button"
-                        onClick={() => {
-                          setSearchCriteria(searchOrigin, searchDestination, item.isoString);
-                          setModDate(item.isoString);
-                        }}
-                        className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap flex-shrink-0 ${
-                          isSelected
-                            ? 'bg-[#4f46e5] text-white font-bold shadow-md shadow-indigo-500/25'
-                            : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setDateOffset((p) => p + 1)}
-                  className="p-1.5 sm:p-2 rounded-xl text-slate-700 hover:bg-white hover:shadow-xs hover:text-slate-900 transition-all cursor-pointer active:scale-95 flex-shrink-0"
-                  aria-label="Next date"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
+              <div className="flex items-center gap-1 sm:gap-1.5 px-0.5 sm:px-1 flex-nowrap">
+                {visibleDates.map((item) => {
+                  const isSelected = searchDate === item.isoString;
+                  return (
+                    <button
+                      key={item.isoString}
+                      type="button"
+                      onClick={() => {
+                        setSearchCriteria(searchOrigin, searchDestination, item.isoString);
+                        setModDate(item.isoString);
+                      }}
+                      className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap flex-shrink-0 ${
+                        isSelected
+                          ? 'bg-[#4f46e5] text-white font-bold shadow-md shadow-indigo-500/25'
+                          : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
               </div>
+
+              <button
+                type="button"
+                onClick={() => setDateOffset((p) => p + 1)}
+                className="p-1.5 sm:p-2 rounded-xl text-slate-700 hover:bg-white hover:shadow-xs hover:text-slate-900 transition-all cursor-pointer active:scale-95 flex-shrink-0"
+                aria-label="Next date"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
 
-            {/* ── Right: Class Filter, Time Filter & Sorting ── */}
-            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            {/* 2. Filters & Sort in clean single line */}
+            <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
               {/* Class Filter */}
-              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs flex-shrink-0">
                 <Filter className="w-3.5 h-3.5 text-slate-400 ml-1.5" />
                 {[
                   { id: 'all', label: 'All Coaches' },
@@ -449,7 +447,7 @@ export const SchedulesDashboard: React.FC = () => {
               </div>
 
               {/* Time Filter Pills */}
-              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs flex-shrink-0">
                 <Clock className="w-3.5 h-3.5 text-slate-400 ml-1.5" />
                 {[
                   { id: 'all', label: 'Anytime' },
@@ -472,7 +470,7 @@ export const SchedulesDashboard: React.FC = () => {
               </div>
 
               {/* Sort By Select */}
-              <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
+              <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 text-xs flex-shrink-0">
                 <span className="text-slate-500 font-medium">Sort:</span>
                 <select
                   value={sortBy}
@@ -493,7 +491,7 @@ export const SchedulesDashboard: React.FC = () => {
                 <button
                   onClick={handleResetFilters}
                   title="Reset all filters"
-                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors"
+                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors flex-shrink-0"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
