@@ -1303,5 +1303,24 @@
   scrollbar-width: none;  /* Firefox */
 }
 
+@keyframes datePillPop {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.8;
+  }
+  60% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-date-pop {
+  animation: datePillPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+
 
 
