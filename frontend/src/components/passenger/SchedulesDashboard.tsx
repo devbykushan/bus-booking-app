@@ -413,7 +413,7 @@ export const SchedulesDashboard: React.FC = () => {
       {/* ── Toolbar: Date Strip, Class Filter, Time of Day, and Sorting in Order ── */}
       <div className="bg-white border-b border-slate-200 shadow-sm sticky top-16 md:top-[72px] z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
-          <div className="flex items-center justify-between gap-3 overflow-x-auto scrollbar-none">
+          <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-3 relative">
             
             {/* 1. Date Carousel Strip */}
             <div className="inline-flex items-center bg-slate-50 border border-slate-200/90 rounded-2xl p-1 shadow-xs flex-shrink-0">
