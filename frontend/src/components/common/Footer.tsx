@@ -222,7 +222,7 @@ export const Footer: React.FC = () => {
               <div className="flex items-center gap-2.5">
                 {/* Facebook */}
                 <a
-                  href="https://facebook.com"
+                  href="https://www.facebook.com/share/18G2xVLaQk/?mibextid=wwXIfr"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Follow Dewmina Super Line on Facebook"

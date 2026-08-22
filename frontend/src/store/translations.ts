@@ -2,6 +2,7 @@ export const translations = {
   english: {
     // Navbar
     findBuses: 'Find Buses',
+    journeys: 'Journeys',
     liveGps: 'Live GPS',
     myTickets: 'My Tickets',
     adminPortal: 'Admin Portal',
@@ -90,6 +91,7 @@ export const translations = {
   sinhala: {
     // Navbar
     findBuses: 'බස් රථ සොයන්න',
+    journeys: 'ගමන් වාර',
     liveGps: 'සජීවී GPS',
     myTickets: 'මගේ ප්‍රවේශපත්',
     adminPortal: 'පරිපාලන ද්වාරය',
@@ -178,6 +180,7 @@ export const translations = {
   tamil: {
     // Navbar
     findBuses: 'பஸ்களைத் தேடுக',
+    journeys: 'பயணங்கள்',
     liveGps: 'நேரடி ஜிபிஎஸ்',
     myTickets: 'என் டிக்கெட்டுகள்',
     adminPortal: 'நிர்வாகி போர்டல்',
