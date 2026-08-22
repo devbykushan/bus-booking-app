@@ -76,28 +76,28 @@ export const HomePromoAdSection: React.FC = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-red-500 text-white text-[11px] font-black tracking-wider uppercase shadow-md shadow-amber-500/20">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white text-[11px] font-black tracking-wider uppercase shadow-md shadow-blue-500/20">
                   <Flame className="w-3.5 h-3.5 animate-bounce" />
-                  Special Travel Deals & Advertisements
+                  About Dewmina Super Line
                 </span>
                 <span className="hidden sm:inline-flex items-center gap-1 text-xs text-blue-300 font-semibold bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-400/20">
                   <Zap className="w-3 h-3 text-amber-400" />
-                  Instant Discount Codes
+                  Book Premium Seats Online
                 </span>
               </div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-                Exclusive Deals & Expressway Offers
+                About Dewmina Super Line, Book Premium Seats
               </h2>
               <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
-                Apply active promo vouchers at checkout to save instantly on premier Dewmina Super Line routes across Sri Lanka.
+                Sri Lanka’s premier express bus platform. Reserve your guaranteed seat on luxury Ashok Leyland 54 & Yutong coaches, apply instant discount vouchers, and enjoy seamless expressway travel.
               </p>
             </div>
 
             <button
               onClick={goToSearchSchedules}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-2xl shadow-lg shadow-blue-600/30 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer self-start md:self-auto flex-shrink-0"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-2xl shadow-lg shadow-blue-600/30 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer self-start md:self-auto flex-shrink-0"
             >
-              <span>Explore All Bus Schedules</span>
+              <span>Book Premium Seats</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
