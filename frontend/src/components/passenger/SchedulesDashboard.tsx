@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { BusCard } from './BusCard';
 import { InteractiveRouteMap } from './InteractiveRouteMap';
@@ -88,34 +88,39 @@ export const SchedulesDashboard: React.FC = () => {
   const todayStr = useMemo(() => toISODateString(new Date()), []);
   const maxDateStr = useMemo(() => {
     const d = new Date();
-    d.setDate(d.getDate() + 7);
+    d.setDate(d.getDate() + 7); // Strictly 1 week (7 days) advance booking limit
     return toISODateString(d);
   }, []);
-  const maxDateOffset = 4; // allows up to 7 days advance booking (days 0..7)
 
   // Search modify draft state
   const [modOrigin, setModOrigin] = useState(searchOrigin);
   const [modDestination, setModDestination] = useState(searchDestination);
   const [modDate, setModDate] = useState(searchDate || todayStr);
 
-  // Date strip state
-  const [dateOffset, setDateOffset] = useState(() => {
-    if (!searchDate) return 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const target = new Date(searchDate);
-    target.setHours(0, 0, 0, 0);
-    const diff = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    return Math.min(maxDateOffset, Math.max(0, diff > 1 ? diff - 1 : 0));
+  // Horizontal scrollable dates state (Strictly 1 week / 7 days advance booking)
+  const dateScrollRef = useRef<HTMLDivElement>(null);
+  const selectedDateBtnRef = useRef<HTMLButtonElement>(null);
+  const dateBtnRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  // Sliding animated indicator pill position
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; top: number; width: number; height: number; opacity: number }>({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+    opacity: 0,
   });
 
-  const visibleDates = useMemo(() => {
+  const availableDates = useMemo(() => {
     const base = new Date();
     base.setHours(0, 0, 0, 0);
     const dates = [];
-    for (let i = 0; i < 4; i++) {
+    // 0 to 7 days (1 week window)
+    for (let i = 0; i <= 7; i++) {
       const d = new Date(base);
-      d.setDate(base.getDate() + dateOffset + i);
+      d.setDate(base.getDate() + i);
       const iso = toISODateString(d);
       dates.push({
         dateObj: d,
@@ -124,7 +129,70 @@ export const SchedulesDashboard: React.FC = () => {
       });
     }
     return dates;
-  }, [dateOffset]);
+  }, []);
+
+  // Update sliding indicator position
+  const updateIndicator = useCallback(() => {
+    const activeDateKey = searchDate || availableDates[0]?.isoString;
+    const activeBtn = dateBtnRefs.current[activeDateKey];
+    if (activeBtn) {
+      setIndicatorStyle({
+        left: activeBtn.offsetLeft,
+        top: activeBtn.offsetTop,
+        width: activeBtn.offsetWidth,
+        height: activeBtn.offsetHeight,
+        opacity: 1,
+      });
+    }
+  }, [searchDate, availableDates]);
+
+  useEffect(() => {
+    // Initial measurement after layout pass
+    const timer = setTimeout(updateIndicator, 40);
+    return () => clearTimeout(timer);
+  }, [updateIndicator]);
+
+  // Scroll tracking to enable/disable arrow buttons & update indicator
+  const checkScroll = useCallback(() => {
+    if (dateScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = dateScrollRef.current;
+      setCanScrollLeft(scrollLeft > 4);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 4);
+    }
+    updateIndicator();
+  }, [updateIndicator]);
+
+  useEffect(() => {
+    const el = dateScrollRef.current;
+    if (el) {
+      checkScroll();
+      el.addEventListener('scroll', checkScroll, { passive: true });
+      window.addEventListener('resize', updateIndicator);
+      return () => {
+        el.removeEventListener('scroll', checkScroll);
+        window.removeEventListener('resize', updateIndicator);
+      };
+    }
+  }, [availableDates, checkScroll, updateIndicator]);
+
+  // Center selected date into view on mount or change
+  useEffect(() => {
+    if (selectedDateBtnRef.current) {
+      selectedDateBtnRef.current.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest',
+      });
+    }
+    updateIndicator();
+  }, [searchDate, updateIndicator]);
+
+  const handleScrollDates = (direction: 'left' | 'right') => {
+    if (dateScrollRef.current) {
+      const scrollAmount = direction === 'left' ? -200 : 200;
+      dateScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   // Operator list options
   const operatorOptions = useMemo(() => {
@@ -429,37 +497,69 @@ export const SchedulesDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
           <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-3 relative">
             
-            {/* 1. Date Carousel Strip (Limited to 1 Week Advance Booking) */}
-            <div className="inline-flex items-center bg-slate-50 border border-slate-200/90 rounded-2xl p-1 shadow-xs flex-shrink-0">
+            {/* 1. Date Carousel Strip with Vibrant Sliding Indicator & Rich Colors */}
+            <div className="inline-flex items-center bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl p-1 shadow-xs max-w-full sm:max-w-[440px] md:max-w-[520px] lg:max-w-[580px] relative">
+              {/* Left Scroll Button */}
               <button
                 type="button"
-                onClick={() => setDateOffset((p) => Math.max(0, p - 1))}
-                disabled={dateOffset <= 0}
-                className={`p-1.5 sm:p-2 rounded-xl text-slate-700 transition-all flex-shrink-0 ${
-                  dateOffset <= 0
-                    ? 'opacity-25 cursor-not-allowed text-slate-400'
-                    : 'hover:bg-white hover:shadow-xs hover:text-slate-900 cursor-pointer active:scale-95'
+                onClick={() => handleScrollDates('left')}
+                disabled={!canScrollLeft}
+                className={`group p-1.5 sm:p-2 rounded-xl transition-all duration-200 flex-shrink-0 z-10 ${
+                  !canScrollLeft
+                    ? 'opacity-30 cursor-not-allowed text-slate-300'
+                    : 'text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 cursor-pointer active:scale-85 hover:shadow-xs'
                 }`}
-                aria-label="Previous date"
+                aria-label="Scroll dates left"
+                title="Scroll previous dates"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
               </button>
 
-              <div className="flex items-center gap-1 sm:gap-1.5 px-0.5 sm:px-1 flex-nowrap">
-                {visibleDates.map((item) => {
+              {/* Scrollable Dates Strip with Vibrant Sliding Indicator */}
+              <div 
+                ref={dateScrollRef}
+                className="overflow-x-auto no-scrollbar scroll-smooth flex items-center gap-1 px-1 py-0.5 flex-nowrap relative"
+              >
+                {/* ── Rich Gradient Sliding Active Capsule Indicator ── */}
+                <div
+                  className="absolute bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 rounded-2xl shadow-md shadow-indigo-500/30 pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]"
+                  style={{
+                    left: `${indicatorStyle.left}px`,
+                    top: `${indicatorStyle.top}px`,
+                    width: `${indicatorStyle.width}px`,
+                    height: `${indicatorStyle.height}px`,
+                    opacity: indicatorStyle.opacity,
+                  }}
+                />
+
+                {availableDates.map((item) => {
                   const isSelected = searchDate === item.isoString;
+                  const isPast = item.isoString < todayStr;
+                  const isBeyondMax = item.isoString > maxDateStr;
+                  const isValid = !isPast && !isBeyondMax;
+
                   return (
                     <button
                       key={item.isoString}
+                      ref={(el) => {
+                        dateBtnRefs.current[item.isoString] = el;
+                        if (isSelected) {
+                          (selectedDateBtnRef as any).current = el;
+                        }
+                      }}
                       type="button"
+                      disabled={!isValid}
                       onClick={() => {
+                        if (!isValid) return;
                         setSearchCriteria(searchOrigin, searchDestination, item.isoString);
                         setModDate(item.isoString);
                       }}
-                      className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap flex-shrink-0 ${
-                        isSelected
-                          ? 'bg-[#4f46e5] text-white font-bold shadow-md shadow-indigo-500/25'
-                          : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
+                      className={`relative z-10 px-4 py-2 sm:px-4.5 sm:py-2.5 rounded-2xl text-xs sm:text-sm whitespace-nowrap flex-shrink-0 select-none transition-all duration-200 ${
+                        !isValid
+                          ? 'opacity-40 cursor-not-allowed text-slate-400'
+                          : isSelected
+                          ? 'text-white font-extrabold cursor-default drop-shadow-xs'
+                          : 'text-slate-700 font-semibold hover:text-indigo-600 hover:bg-indigo-50/70 hover:scale-105 hover:-translate-y-0.5 active:scale-95 cursor-pointer'
                       }`}
                     >
                       {item.label}
@@ -468,25 +568,27 @@ export const SchedulesDashboard: React.FC = () => {
                 })}
               </div>
 
+              {/* Right Scroll Button */}
               <button
                 type="button"
-                onClick={() => setDateOffset((p) => Math.min(maxDateOffset, p + 1))}
-                disabled={dateOffset >= maxDateOffset}
-                className={`p-1.5 sm:p-2 rounded-xl text-slate-700 transition-all flex-shrink-0 ${
-                  dateOffset >= maxDateOffset
-                    ? 'opacity-25 cursor-not-allowed text-slate-400'
-                    : 'hover:bg-white hover:shadow-xs hover:text-slate-900 cursor-pointer active:scale-95'
+                onClick={() => handleScrollDates('right')}
+                disabled={!canScrollRight}
+                className={`group p-1.5 sm:p-2 rounded-xl transition-all duration-200 flex-shrink-0 z-10 ${
+                  !canScrollRight
+                    ? 'opacity-30 cursor-not-allowed text-slate-300'
+                    : 'text-slate-800 hover:text-indigo-600 hover:bg-indigo-50 cursor-pointer active:scale-85 hover:shadow-xs'
                 }`}
-                aria-label="Next date"
+                aria-label="Scroll dates right"
+                title="Scroll next dates"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
               </button>
             </div>
 
-            {/* 2. Dropdown Filters on the Right */}
+            {/* 2. Dropdown Filters on the Right with Rich Colors & Glowing States */}
             <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
 
-              {/* ── Operator Dropdown (Exact Match to User UI) ── */}
+              {/* ── Operator Dropdown (Vibrant Indigo Theme) ── */}
               <div className="relative" ref={opRef}>
                 <button
                   type="button"
@@ -495,20 +597,26 @@ export const SchedulesDashboard: React.FC = () => {
                     setTimeOpen(false);
                     setSortOpen(false);
                   }}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold transition-all duration-200 cursor-pointer shadow-xs ${
+                  className={`filter-btn-animate flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold cursor-pointer select-none ${
                     operatorOpen || busTypeFilter !== 'all'
-                      ? 'bg-indigo-50/90 border-indigo-300 text-indigo-600 shadow-sm'
-                      : 'bg-white hover:bg-slate-50 border-slate-200 text-indigo-600 hover:border-slate-300'
+                      ? 'bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-300 text-indigo-700 shadow-sm ring-2 ring-indigo-500/20'
+                      : 'bg-white hover:bg-indigo-50/60 border-slate-200 text-indigo-600 hover:border-indigo-200 shadow-xs'
                   }`}
                 >
+                  {busTypeFilter !== 'all' && (
+                    <span className="w-2 h-2 rounded-full bg-indigo-600 animate-ping inline-block shadow-sm shadow-indigo-500/50" />
+                  )}
                   <span>{busTypeFilter === 'all' ? 'Operator' : busTypeFilter}</span>
-                  <ChevronDown className={`w-4 h-4 text-indigo-600 transition-transform duration-200 ${operatorOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-indigo-600 transition-transform duration-300 ease-out ${operatorOpen ? 'rotate-180 scale-110' : ''}`} />
                 </button>
 
                 {operatorOpen && (
-                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl p-1.5 z-50 animate-fade-in-up">
-                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                      Select Operator / Class
+                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 rounded-2xl border border-slate-200/90 shadow-2xl p-1.5 z-50 animate-popover-in">
+                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100/80 flex items-center justify-between">
+                      <span>Select Operator / Class</span>
+                      {busTypeFilter !== 'all' && (
+                        <span className="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-1.5 py-0.5 rounded-md">Active</span>
+                      )}
                     </div>
                     <div className="py-1 space-y-0.5 max-h-60 overflow-y-auto">
                       {operatorOptions.map((opt) => {
@@ -521,14 +629,14 @@ export const SchedulesDashboard: React.FC = () => {
                               setBusTypeFilter(opt.id);
                               setOperatorOpen(false);
                             }}
-                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all duration-150 cursor-pointer ${
                               isSelected
-                                ? 'bg-indigo-50 text-indigo-700 font-bold'
-                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                                ? 'bg-indigo-50 text-indigo-700 font-bold translate-x-0.5 shadow-xs'
+                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'
                             }`}
                           >
                             <span>{opt.label}</span>
-                            {isSelected && <Check className="w-3.5 h-3.5 text-indigo-600" />}
+                            {isSelected && <Check className="w-3.5 h-3.5 text-indigo-600 animate-pop-check" />}
                           </button>
                         );
                       })}
@@ -537,7 +645,7 @@ export const SchedulesDashboard: React.FC = () => {
                 )}
               </div>
 
-              {/* ── Time Dropdown ── */}
+              {/* ── Time Dropdown (Vibrant Blue & Sky Theme) ── */}
               <div className="relative" ref={timeRef}>
                 <button
                   type="button"
@@ -546,13 +654,16 @@ export const SchedulesDashboard: React.FC = () => {
                     setOperatorOpen(false);
                     setSortOpen(false);
                   }}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold transition-all duration-200 cursor-pointer shadow-xs ${
+                  className={`filter-btn-animate animate-clock-pulse group flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold cursor-pointer select-none ${
                     timeOpen || timeFilter !== 'all'
-                      ? 'bg-blue-50/90 border-blue-300 text-blue-600 shadow-sm'
-                      : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
+                      ? 'bg-gradient-to-r from-sky-50 to-blue-50 border-blue-300 text-blue-700 shadow-sm ring-2 ring-blue-500/20'
+                      : 'bg-white hover:bg-sky-50/60 border-slate-200 text-slate-700 hover:border-sky-200 shadow-xs'
                   }`}
                 >
-                  <Clock className="w-3.5 h-3.5 text-slate-400" />
+                  <Clock className={`clock-icon w-3.5 h-3.5 transition-colors duration-200 ${timeFilter !== 'all' ? 'text-blue-600' : 'text-slate-400 group-hover:text-blue-500'}`} />
+                  {timeFilter !== 'all' && (
+                    <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping inline-block shadow-sm shadow-blue-500/50" />
+                  )}
                   <span>
                     {timeFilter === 'all'
                       ? 'Departure Time'
@@ -562,13 +673,16 @@ export const SchedulesDashboard: React.FC = () => {
                       ? 'Afternoon'
                       : 'Night'}
                   </span>
-                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${timeOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ease-out group-hover:text-slate-600 ${timeOpen ? 'rotate-180 scale-110 text-blue-600' : ''}`} />
                 </button>
 
                 {timeOpen && (
-                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-52 bg-white rounded-2xl border border-slate-200 shadow-xl p-1.5 z-50 animate-fade-in-up">
-                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                      Departure Window
+                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 rounded-2xl border border-slate-200/90 shadow-2xl p-1.5 z-50 animate-popover-in">
+                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100/80 flex items-center justify-between">
+                      <span>Departure Window</span>
+                      {timeFilter !== 'all' && (
+                        <span className="text-[10px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded-md">Active</span>
+                      )}
                     </div>
                     <div className="py-1 space-y-0.5">
                       {[
@@ -586,14 +700,14 @@ export const SchedulesDashboard: React.FC = () => {
                               setTimeFilter(tItem.id as TimeFilter);
                               setTimeOpen(false);
                             }}
-                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all duration-150 cursor-pointer ${
                               isSelected
-                                ? 'bg-blue-50 text-blue-700 font-bold'
-                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                                ? 'bg-blue-50 text-blue-700 font-bold translate-x-0.5 shadow-xs'
+                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'
                             }`}
                           >
                             <span>{tItem.label}</span>
-                            {isSelected && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                            {isSelected && <Check className="w-3.5 h-3.5 text-blue-600 animate-pop-check" />}
                           </button>
                         );
                       })}
@@ -602,7 +716,7 @@ export const SchedulesDashboard: React.FC = () => {
                 )}
               </div>
 
-              {/* ── Sort Dropdown ── */}
+              {/* ── Sort Dropdown (Vibrant Amber Theme & Animated Micro-interactions) ── */}
               <div className="relative" ref={sortRef}>
                 <button
                   type="button"
@@ -611,10 +725,10 @@ export const SchedulesDashboard: React.FC = () => {
                     setOperatorOpen(false);
                     setTimeOpen(false);
                   }}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold transition-all duration-200 cursor-pointer shadow-xs ${
-                    sortOpen
-                      ? 'bg-slate-100 border-slate-300 text-slate-900 shadow-sm'
-                      : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
+                  className={`filter-btn-animate flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold cursor-pointer select-none ${
+                    sortOpen || sortBy !== 'departure-asc'
+                      ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-300 text-amber-900 shadow-sm ring-2 ring-amber-500/20'
+                      : 'bg-white hover:bg-amber-50/50 border-slate-200 text-slate-700 hover:border-amber-200 shadow-xs'
                   }`}
                 >
                   <span className="text-slate-400 font-normal">Sort:</span>
@@ -631,12 +745,12 @@ export const SchedulesDashboard: React.FC = () => {
                       ? 'Seats Left'
                       : 'Top Rated'}
                   </span>
-                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ease-out ${sortOpen ? 'rotate-180 scale-110 text-amber-700' : ''}`} />
                 </button>
 
                 {sortOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl border border-slate-200 shadow-xl p-1.5 z-50 animate-fade-in-up">
-                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                  <div className="absolute right-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 rounded-2xl border border-slate-200/90 shadow-2xl p-1.5 z-50 animate-popover-in">
+                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100/80">
                       Sort Schedules
                     </div>
                     <div className="py-1 space-y-0.5">
@@ -657,14 +771,14 @@ export const SchedulesDashboard: React.FC = () => {
                               setSortBy(sItem.id as SortOption);
                               setSortOpen(false);
                             }}
-                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all duration-150 cursor-pointer ${
                               isSelected
-                                ? 'bg-slate-100 text-slate-900 font-bold'
-                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                                ? 'bg-amber-50 text-amber-900 font-bold translate-x-0.5 shadow-xs'
+                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'
                             }`}
                           >
                             <span>{sItem.label}</span>
-                            {isSelected && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                            {isSelected && <Check className="w-3.5 h-3.5 text-amber-600 animate-pop-check" />}
                           </button>
                         );
                       })}
@@ -673,14 +787,15 @@ export const SchedulesDashboard: React.FC = () => {
                 )}
               </div>
 
-              {/* Reset if filters active */}
+              {/* Reset if filters active with Rose Gradient & Rotation */}
               {(busTypeFilter !== 'all' || timeFilter !== 'all' || sortBy !== 'departure-asc') && (
                 <button
                   onClick={handleResetFilters}
                   title="Reset all filters"
-                  className="p-2 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors flex-shrink-0 cursor-pointer"
+                  className="filter-btn-animate flex items-center gap-1 px-3 py-2 rounded-2xl bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-600 border border-rose-200 shadow-xs cursor-pointer select-none text-xs font-bold"
                 >
-                  <RotateCcw className="w-4 h-4" />
+                  <RotateCcw className="w-3.5 h-3.5 transition-transform duration-300 hover:rotate-180" />
+                  <span className="hidden sm:inline">Reset</span>
                 </button>
               )}
             </div>
