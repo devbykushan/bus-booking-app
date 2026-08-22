@@ -7,7 +7,6 @@ import { SchedulesDashboard } from './components/passenger/SchedulesDashboard';
 import { StatsSection } from './components/passenger/StatsSection';
 import { ServicesSection } from './components/passenger/ServicesSection';
 import { BookingGuideSection } from './components/passenger/BookingGuideSection';
-import { HomePromoAdSection } from './components/passenger/HomePromoAdSection';
 import { AboutPlatformSection } from './components/passenger/AboutPlatformSection';
 import { BusBookingFAQSection } from './components/passenger/BusBookingFAQSection';
 import { SeatMap } from './components/passenger/SeatMap';
@@ -115,7 +114,6 @@ export function App() {
                   <StatsSection />
                 </div>
                 <ServicesSection />
-                <HomePromoAdSection />
                 <BookingGuideSection />
                 <AboutPlatformSection />
                 <BusBookingFAQSection />
