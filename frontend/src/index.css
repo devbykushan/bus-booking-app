@@ -1321,6 +1321,169 @@
   animation: datePillPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+@keyframes serviceCardEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(32px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 
+@keyframes serviceShimmerSweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
 
+@keyframes wifiWavePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.85;
+    filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.6));
+  }
+}
 
+@keyframes shieldGlowPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0px rgba(236, 72, 153, 0));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(236, 72, 153, 0.6));
+  }
+}
+
+@keyframes clockTickSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(35deg) scale(1.12);
+  }
+  40% {
+    transform: rotate(-15deg) scale(1.08);
+  }
+  60% {
+    transform: rotate(10deg);
+  }
+  80% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes armchairFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-4px) scale(1.08);
+    filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.35));
+  }
+}
+
+@keyframes badgeBeacon {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.4;
+  }
+}
+
+@keyframes cardAmbientGlow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+.service-card-wrapper {
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+  isolation: isolate;
+}
+
+.service-card-wrapper:hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+.service-card-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  transform: translateX(-150%) skewX(-20deg);
+  pointer-events: none;
+}
+
+.service-card-wrapper:hover .service-card-shine {
+  animation: serviceShimmerSweep 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.service-anim-armchair {
+  animation: armchairFloat 4s ease-in-out infinite;
+}
+
+.service-card-wrapper:hover .service-anim-armchair {
+  animation: armchairFloat 1.2s ease-in-out infinite;
+}
+
+.service-anim-wifi {
+  animation: wifiWavePulse 3s ease-in-out infinite;
+}
+
+.service-card-wrapper:hover .service-anim-wifi {
+  animation: wifiWavePulse 1.2s ease-in-out infinite;
+}
+
+.service-anim-shield {
+  animation: shieldGlowPulse 3.5s ease-in-out infinite;
+}
+
+.service-card-wrapper:hover .service-anim-shield {
+  animation: shieldGlowPulse 1.2s ease-in-out infinite;
+}
+
+.service-anim-clock {
+  transition: transform 0.4s ease;
+}
+
+.service-card-wrapper:hover .service-anim-clock {
+  animation: clockTickSpin 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+}
+
+.service-badge-beacon {
+  animation: badgeBeacon 2s ease-in-out infinite;
+}
+
+.service-ambient-glow {
+  animation: cardAmbientGlow 4s ease-in-out infinite;
+}
