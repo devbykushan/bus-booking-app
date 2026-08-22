@@ -85,10 +85,18 @@ export const SchedulesDashboard: React.FC = () => {
     return `${year}-${month}-${day}`;
   };
 
+  const todayStr = useMemo(() => toISODateString(new Date()), []);
+  const maxDateStr = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return toISODateString(d);
+  }, []);
+  const maxDateOffset = 4; // allows up to 7 days advance booking (days 0..7)
+
   // Search modify draft state
   const [modOrigin, setModOrigin] = useState(searchOrigin);
   const [modDestination, setModDestination] = useState(searchDestination);
-  const [modDate, setModDate] = useState(searchDate);
+  const [modDate, setModDate] = useState(searchDate || todayStr);
 
   // Date strip state
   const [dateOffset, setDateOffset] = useState(() => {
@@ -98,7 +106,7 @@ export const SchedulesDashboard: React.FC = () => {
     const target = new Date(searchDate);
     target.setHours(0, 0, 0, 0);
     const diff = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    return Math.max(0, diff > 1 ? diff - 1 : 0);
+    return Math.min(maxDateOffset, Math.max(0, diff > 1 ? diff - 1 : 0));
   });
 
   const visibleDates = useMemo(() => {
@@ -152,6 +160,10 @@ export const SchedulesDashboard: React.FC = () => {
   // Submit search modification
   const handleApplyModifiedSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    if (modDate < todayStr || modDate > maxDateStr) {
+      alert('Advance seat bookings are only allowed up to 1 week (7 days) in advance.');
+      return;
+    }
     setSearchCriteria(modOrigin, modDestination, modDate);
     setIsModifyOpen(false);
   };
@@ -389,6 +401,8 @@ export const SchedulesDashboard: React.FC = () => {
                     <input
                       type="date"
                       value={modDate}
+                      min={todayStr}
+                      max={maxDateStr}
                       onChange={(e) => setModDate(e.target.value)}
                       className="w-full bg-transparent text-slate-900 font-bold text-sm focus:outline-none cursor-pointer"
                     />
@@ -415,7 +429,7 @@ export const SchedulesDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
           <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-3 relative">
             
-            {/* 1. Date Carousel Strip */}
+            {/* 1. Date Carousel Strip (Limited to 1 Week Advance Booking) */}
             <div className="inline-flex items-center bg-slate-50 border border-slate-200/90 rounded-2xl p-1 shadow-xs flex-shrink-0">
               <button
                 type="button"
@@ -456,8 +470,13 @@ export const SchedulesDashboard: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => setDateOffset((p) => p + 1)}
-                className="p-1.5 sm:p-2 rounded-xl text-slate-700 hover:bg-white hover:shadow-xs hover:text-slate-900 transition-all cursor-pointer active:scale-95 flex-shrink-0"
+                onClick={() => setDateOffset((p) => Math.min(maxDateOffset, p + 1))}
+                disabled={dateOffset >= maxDateOffset}
+                className={`p-1.5 sm:p-2 rounded-xl text-slate-700 transition-all flex-shrink-0 ${
+                  dateOffset >= maxDateOffset
+                    ? 'opacity-25 cursor-not-allowed text-slate-400'
+                    : 'hover:bg-white hover:shadow-xs hover:text-slate-900 cursor-pointer active:scale-95'
+                }`}
                 aria-label="Next date"
               >
                 <ChevronRight className="w-4 h-4" />
