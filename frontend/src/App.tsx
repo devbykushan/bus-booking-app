@@ -3,13 +3,12 @@ import { useBookingStore } from './store/bookingStore';
 import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { HeroSearch } from './components/passenger/HeroSearch';
+import { SchedulesDashboard } from './components/passenger/SchedulesDashboard';
 import { StatsSection } from './components/passenger/StatsSection';
 import { ServicesSection } from './components/passenger/ServicesSection';
 import { BookingGuideSection } from './components/passenger/BookingGuideSection';
 import { AboutPlatformSection } from './components/passenger/AboutPlatformSection';
 import { BusBookingFAQSection } from './components/passenger/BusBookingFAQSection';
-import { BusCard } from './components/passenger/BusCard';
-import { InteractiveRouteMap } from './components/passenger/InteractiveRouteMap';
 import { SeatMap } from './components/passenger/SeatMap';
 import { FareBreakdown } from './components/passenger/FareBreakdown';
 import { TicketModal } from './components/passenger/TicketModal';
@@ -17,23 +16,17 @@ import { LiveMap } from './components/passenger/LiveMap';
 import { UserBookings } from './components/passenger/UserBookings';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { Bus, AlertCircle, Wifi, RefreshCw } from 'lucide-react';
-import type { BusRoute } from './types/booking';
 
 export function App() {
   const {
     currentView,
     routes,
-    searchOrigin,
-    searchDestination,
-    busTypeFilter,
     isLoading,
     error,
     loadRoutes,
     loadBookings,
     setError,
   } = useBookingStore();
-
-  const [focusedRoute, setFocusedRoute] = useState<BusRoute | null>(null);
 
   const [backendReady, setBackendReady] = useState(false);
   const [backendError, setBackendError] = useState(false);
@@ -50,15 +43,7 @@ export function App() {
         setBackendError(true);
       }
     })();
-  }, []);
-
-  // Filter routes based on active search criteria
-  const filteredRoutes = routes.filter(route => {
-    if (busTypeFilter !== 'all' && !route.busType.toLowerCase().includes(busTypeFilter.toLowerCase())) return false;
-    if (searchOrigin && route.origin.toLowerCase() !== searchOrigin.toLowerCase()) return false;
-    if (searchDestination && route.destination.toLowerCase() !== searchDestination.toLowerCase()) return false;
-    return route.availableSeatsCount > 0;
-  });
+  }, [loadRoutes, loadBookings]);
 
   // ─── Backend offline splash ───────────────────────────────────────────────
   if (backendError) {
@@ -123,55 +108,11 @@ export function App() {
         ) : (
           <div key={currentView} className="animate-fade-in-up">
             {currentView === 'passenger-search' && (
-              <div className="pb-16">
+              <div>
                 <HeroSearch />
-
                 <div className="bg-slate-50 py-10">
                   <StatsSection />
                 </div>
-
-                <div id="available-schedules" className="bg-slate-50 pb-16 scroll-mt-24">
-                  <div className="max-w-7xl mx-auto px-4 space-y-6">
-                    <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                      <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <Bus className="w-5 h-5 text-blue-500 animate-bus-drive" />
-                        <span>Available Bus Schedules ({filteredRoutes.length})</span>
-                      </h2>
-                      <span className="text-xs text-slate-400 font-mono">
-                        Showing results for {searchOrigin} → {searchDestination}
-                      </span>
-                    </div>
-
-                    {filteredRoutes.length === 0 ? (
-                      <div className="glass-panel p-12 rounded-3xl text-center border border-slate-200 space-y-3">
-                        <AlertCircle className="w-10 h-10 text-amber-400 mx-auto" />
-                        <p className="text-slate-600 font-semibold text-sm">No buses matched your filters.</p>
-                        <p className="text-xs text-slate-400">Try resetting the Bus Category filter.</p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                        {/* Left Side: Bus Schedule Cards */}
-                        <div className="lg:col-span-7 space-y-4">
-                          {filteredRoutes.map((route, idx) => (
-                            <div key={route.id} style={{ animationDelay: `${idx * 0.08}s` }} className="animate-fade-in-up">
-                              <BusCard
-                                route={route as any}
-                                isSelected={(focusedRoute?.id || filteredRoutes[0]?.id) === route.id}
-                                onFocusRoute={(r) => setFocusedRoute(r)}
-                              />
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Right Side: Interactive Route Map Preview */}
-                        <div className="lg:col-span-5 hidden lg:block sticky top-24">
-                          <InteractiveRouteMap route={(focusedRoute || filteredRoutes[0]) as any} />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
                 <ServicesSection />
                 <BookingGuideSection />
                 <AboutPlatformSection />
@@ -179,6 +120,7 @@ export function App() {
               </div>
             )}
 
+            {currentView === 'schedules-dashboard' && <SchedulesDashboard />}
             {currentView === 'seat-selection' && <SeatMap />}
             {currentView === 'checkout' && <FareBreakdown />}
             {currentView === 'ticket-confirmation' && <TicketModal />}

@@ -7,7 +7,7 @@ export const Navbar: React.FC = () => {
   const { 
     currentView, 
     setCurrentView, 
-    goToSearchSchedules,
+    goToHome,
     currentUser,
     userRole, 
     setUserRole, 
@@ -80,7 +80,7 @@ export const Navbar: React.FC = () => {
   };
 
   const navItems = [
-    { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search', 'seat-selection'] },
+    { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search', 'schedules-dashboard', 'seat-selection', 'checkout'] },
     { key: 'live-tracking', translationKey: 'liveGps', icon: MapPin, activeOn: ['live-tracking'] },
     { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
   ];
@@ -96,7 +96,7 @@ export const Navbar: React.FC = () => {
     }
 
     if (view === 'passenger-search') {
-      goToSearchSchedules();
+      goToHome();
       setMobileOpen(false);
       return;
     }
@@ -134,7 +134,7 @@ export const Navbar: React.FC = () => {
               
               {/* ── Brand with 3D float ── */}
               <div
-                onClick={() => { goToSearchSchedules(); setMobileOpen(false); }}
+                onClick={() => { goToHome(); setMobileOpen(false); }}
                 className="nav3d-brand group cursor-pointer flex items-center gap-3"
               >
                 <div className="nav3d-logo-wrapper">

@@ -18,6 +18,7 @@ function getSessionId(): string {
 
 export type AppView =
   | 'passenger-search'
+  | 'schedules-dashboard'
   | 'seat-selection'
   | 'checkout'
   | 'ticket-confirmation'
@@ -43,6 +44,7 @@ interface BookingStore {
   currentView: AppView;
   setCurrentView: (view: AppView) => void;
   goToSearchSchedules: () => void;
+  goToHome: () => void;
 
   // Role switching
   userRole: 'passenger' | 'admin';
@@ -182,13 +184,12 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   currentView: 'passenger-search',
   setCurrentView: (view) => set({ currentView: view }),
   goToSearchSchedules: () => {
+    set({ currentView: 'schedules-dashboard' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  },
+  goToHome: () => {
     set({ currentView: 'passenger-search' });
-    setTimeout(() => {
-      const el = document.getElementById('available-schedules');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 60);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   },
 
   userRole: JSON.parse(localStorage.getItem('dewmina_user') || 'null')?.role || 'passenger',

@@ -54,14 +54,8 @@ export const HeroSearch: React.FC = () => {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSearchCriteria(origin, destination, date);
-
-    // Smoothly scroll down to the Available Bus Schedules section
-    setTimeout(() => {
-      const schedulesElement = document.getElementById('available-schedules');
-      if (schedulesElement) {
-        schedulesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
+    setCurrentView('schedules-dashboard');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleAccountClick = () => {
