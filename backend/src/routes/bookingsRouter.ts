@@ -94,6 +94,19 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
     return;
   }
 
+  if (searchDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const bookingDate = new Date(searchDate);
+    bookingDate.setHours(0, 0, 0, 0);
+    const maxAllowed = new Date(today);
+    maxAllowed.setDate(maxAllowed.getDate() + 7);
+    if (bookingDate < today || bookingDate > maxAllowed) {
+      res.status(400).json({ error: 'Bookings are only permitted up to 1 week (7 days) in advance.' });
+      return;
+    }
+  }
+
   try {
     // Fetch route
     const routeRes = await pool.query('SELECT * FROM routes WHERE "id" = $1', [routeId]);

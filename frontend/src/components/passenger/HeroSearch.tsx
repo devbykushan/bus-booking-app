@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import {
   MapPin, Calendar, ArrowRightLeft, Search,
@@ -41,9 +41,23 @@ export const HeroSearch: React.FC = () => {
     t,
   } = useBookingStore();
 
+  const toISODateString = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayStr = useMemo(() => toISODateString(new Date()), []);
+  const maxDateStr = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return toISODateString(d);
+  }, []);
+
   const [origin, setOrigin] = useState(searchOrigin);
   const [destination, setDestination] = useState(searchDestination);
-  const [date, setDate] = useState(searchDate);
+  const [date, setDate] = useState(searchDate || todayStr);
 
   const handleSwap = () => {
     const temp = origin;
@@ -53,6 +67,10 @@ export const HeroSearch: React.FC = () => {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (date < todayStr || date > maxDateStr) {
+      alert('Advance seat bookings are only allowed up to 1 week (7 days) in advance.');
+      return;
+    }
     setSearchCriteria(origin, destination, date);
     setCurrentView('schedules-dashboard');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -244,6 +262,8 @@ export const HeroSearch: React.FC = () => {
                 <input
                   type="date"
                   value={date}
+                  min={todayStr}
+                  max={maxDateStr}
                   onChange={(e) => setDate(e.target.value)}
                   className="w-full bg-transparent text-slate-900 font-extrabold text-sm focus:outline-none cursor-pointer"
                 />

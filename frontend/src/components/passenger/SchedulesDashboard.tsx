@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { BusCard } from './BusCard';
 import { InteractiveRouteMap } from './InteractiveRouteMap';
@@ -9,7 +9,6 @@ import {
   ArrowRightLeft,
   Calendar,
   MapPin,
-  Filter,
   SlidersHorizontal,
   Clock,
   Sparkles,
@@ -18,7 +17,11 @@ import {
   RotateCcw,
   Search,
   CheckCircle2,
-  PhoneCall
+  PhoneCall,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Check
 } from 'lucide-react';
 
 const CITIES = [
@@ -46,10 +49,102 @@ export const SchedulesDashboard: React.FC = () => {
   const [focusedRoute, setFocusedRoute] = useState<BusRoute | null>(null);
   const [isModifyOpen, setIsModifyOpen] = useState(false);
 
+  // Dropdown open states
+  const [operatorOpen, setOperatorOpen] = useState(false);
+  const [timeOpen, setTimeOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+
+  const opRef = useRef<HTMLDivElement>(null);
+  const timeRef = useRef<HTMLDivElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (opRef.current && !opRef.current.contains(target)) setOperatorOpen(false);
+      if (timeRef.current && !timeRef.current.contains(target)) setTimeOpen(false);
+      if (sortRef.current && !sortRef.current.contains(target)) setSortOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Helper to format date like "Sat, 22 Aug"
+  const formatDateLabel = (d: Date) => {
+    const weekday = d.toLocaleDateString('en-US', { weekday: 'short' });
+    const day = d.getDate();
+    const month = d.toLocaleDateString('en-US', { month: 'short' });
+    return `${weekday}, ${day} ${month}`;
+  };
+
+  const toISODateString = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayStr = useMemo(() => toISODateString(new Date()), []);
+  const maxDateStr = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return toISODateString(d);
+  }, []);
+  const maxDateOffset = 4; // allows up to 7 days advance booking (days 0..7)
+
   // Search modify draft state
   const [modOrigin, setModOrigin] = useState(searchOrigin);
   const [modDestination, setModDestination] = useState(searchDestination);
-  const [modDate, setModDate] = useState(searchDate);
+  const [modDate, setModDate] = useState(searchDate || todayStr);
+
+  // Date strip state
+  const [dateOffset, setDateOffset] = useState(() => {
+    if (!searchDate) return 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(searchDate);
+    target.setHours(0, 0, 0, 0);
+    const diff = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.min(maxDateOffset, Math.max(0, diff > 1 ? diff - 1 : 0));
+  });
+
+  const visibleDates = useMemo(() => {
+    const base = new Date();
+    base.setHours(0, 0, 0, 0);
+    const dates = [];
+    for (let i = 0; i < 4; i++) {
+      const d = new Date(base);
+      d.setDate(base.getDate() + dateOffset + i);
+      const iso = toISODateString(d);
+      dates.push({
+        dateObj: d,
+        isoString: iso,
+        label: formatDateLabel(d),
+      });
+    }
+    return dates;
+  }, [dateOffset]);
+
+  // Operator list options
+  const operatorOptions = useMemo(() => {
+    const ops = new Set<string>();
+    routes.forEach((r) => {
+      if (r.operatorName) ops.add(r.operatorName);
+      if (r.busType) {
+        if (r.busType.toLowerCase().includes('leyland')) ops.add('Ashok Leyland 54');
+        if (r.busType.toLowerCase().includes('yutong')) ops.add('Yutong Luxury');
+      }
+    });
+    return [
+      { id: 'all', label: 'All Operators & Coaches' },
+      { id: 'Ashok Leyland', label: 'Ashok Leyland 54' },
+      { id: 'Yutong', label: 'Yutong Luxury' },
+      ...Array.from(ops)
+        .filter((o) => o !== 'Ashok Leyland 54' && o !== 'Yutong Luxury' && o !== 'Ashok Leyland' && o !== 'Yutong')
+        .map((o) => ({ id: o, label: o })),
+    ];
+  }, [routes]);
 
   // Time and Sorting states
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all');
@@ -65,6 +160,10 @@ export const SchedulesDashboard: React.FC = () => {
   // Submit search modification
   const handleApplyModifiedSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    if (modDate < todayStr || modDate > maxDateStr) {
+      alert('Advance seat bookings are only allowed up to 1 week (7 days) in advance.');
+      return;
+    }
     setSearchCriteria(modOrigin, modDestination, modDate);
     setIsModifyOpen(false);
   };
@@ -302,6 +401,8 @@ export const SchedulesDashboard: React.FC = () => {
                     <input
                       type="date"
                       value={modDate}
+                      min={todayStr}
+                      max={maxDateStr}
                       onChange={(e) => setModDate(e.target.value)}
                       className="w-full bg-transparent text-slate-900 font-bold text-sm focus:outline-none cursor-pointer"
                     />
@@ -323,76 +424,253 @@ export const SchedulesDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Toolbar: Class Filter, Time of Day, and Sorting ── */}
+      {/* ── Toolbar: Date Strip, Class Filter, Time of Day, and Sorting in Order ── */}
       <div className="bg-white border-b border-slate-200 shadow-sm sticky top-16 md:top-[72px] z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            {/* Left: Class Filters */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 mr-1">
-                <Filter className="w-3.5 h-3.5" />
-                <span>Class:</span>
-              </span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+          <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-3 relative">
+            
+            {/* 1. Date Carousel Strip (Limited to 1 Week Advance Booking) */}
+            <div className="inline-flex items-center bg-slate-50 border border-slate-200/90 rounded-2xl p-1 shadow-xs flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setDateOffset((p) => Math.max(0, p - 1))}
+                disabled={dateOffset <= 0}
+                className={`p-1.5 sm:p-2 rounded-xl text-slate-700 transition-all flex-shrink-0 ${
+                  dateOffset <= 0
+                    ? 'opacity-25 cursor-not-allowed text-slate-400'
+                    : 'hover:bg-white hover:shadow-xs hover:text-slate-900 cursor-pointer active:scale-95'
+                }`}
+                aria-label="Previous date"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
 
-              {[
-                { id: 'all', label: 'All Coaches' },
-                { id: 'Ashok Leyland', label: 'Ashok Leyland 54' },
-                { id: 'Yutong', label: 'Yutong Luxury' },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setBusTypeFilter(tab.id)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer ${
-                    busTypeFilter === tab.id
-                      ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
-                      : 'bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Right: Time Filter & Sort Dropdown */}
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Time Filter Pills */}
-              <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
-                <Clock className="w-3.5 h-3.5 text-slate-400 ml-1.5" />
-                {[
-                  { id: 'all', label: 'Anytime' },
-                  { id: 'morning', label: 'Morning' },
-                  { id: 'afternoon', label: 'Afternoon' },
-                  { id: 'evening', label: 'Night' },
-                ].map((tItem) => (
-                  <button
-                    key={tItem.id}
-                    onClick={() => setTimeFilter(tItem.id as TimeFilter)}
-                    className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
-                      timeFilter === tItem.id
-                        ? 'bg-white text-blue-600 shadow-sm font-bold'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    {tItem.label}
-                  </button>
-                ))}
+              <div className="flex items-center gap-1 sm:gap-1.5 px-0.5 sm:px-1 flex-nowrap">
+                {visibleDates.map((item) => {
+                  const isSelected = searchDate === item.isoString;
+                  return (
+                    <button
+                      key={item.isoString}
+                      type="button"
+                      onClick={() => {
+                        setSearchCriteria(searchOrigin, searchDestination, item.isoString);
+                        setModDate(item.isoString);
+                      }}
+                      className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap flex-shrink-0 ${
+                        isSelected
+                          ? 'bg-[#4f46e5] text-white font-bold shadow-md shadow-indigo-500/25'
+                          : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
               </div>
 
-              {/* Sort By Select */}
-              <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
-                <span className="text-slate-500 font-medium">Sort:</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="bg-transparent text-slate-800 font-bold focus:outline-none cursor-pointer"
+              <button
+                type="button"
+                onClick={() => setDateOffset((p) => Math.min(maxDateOffset, p + 1))}
+                disabled={dateOffset >= maxDateOffset}
+                className={`p-1.5 sm:p-2 rounded-xl text-slate-700 transition-all flex-shrink-0 ${
+                  dateOffset >= maxDateOffset
+                    ? 'opacity-25 cursor-not-allowed text-slate-400'
+                    : 'hover:bg-white hover:shadow-xs hover:text-slate-900 cursor-pointer active:scale-95'
+                }`}
+                aria-label="Next date"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* 2. Dropdown Filters on the Right */}
+            <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+
+              {/* ── Operator Dropdown (Exact Match to User UI) ── */}
+              <div className="relative" ref={opRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOperatorOpen(!operatorOpen);
+                    setTimeOpen(false);
+                    setSortOpen(false);
+                  }}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold transition-all duration-200 cursor-pointer shadow-xs ${
+                    operatorOpen || busTypeFilter !== 'all'
+                      ? 'bg-indigo-50/90 border-indigo-300 text-indigo-600 shadow-sm'
+                      : 'bg-white hover:bg-slate-50 border-slate-200 text-indigo-600 hover:border-slate-300'
+                  }`}
                 >
-                  <option value="departure-asc">Departure: Earliest</option>
-                  <option value="departure-desc">Departure: Latest</option>
-                  <option value="price-asc">Price: Lowest First</option>
-                  <option value="price-desc">Price: Highest First</option>
-                  <option value="seats-desc">Available Seats</option>
-                  <option value="rating-desc">Rating: Highest</option>
-                </select>
+                  <span>{busTypeFilter === 'all' ? 'Operator' : busTypeFilter}</span>
+                  <ChevronDown className={`w-4 h-4 text-indigo-600 transition-transform duration-200 ${operatorOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {operatorOpen && (
+                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl p-1.5 z-50 animate-fade-in-up">
+                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                      Select Operator / Class
+                    </div>
+                    <div className="py-1 space-y-0.5 max-h-60 overflow-y-auto">
+                      {operatorOptions.map((opt) => {
+                        const isSelected = busTypeFilter === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => {
+                              setBusTypeFilter(opt.id);
+                              setOperatorOpen(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                              isSelected
+                                ? 'bg-indigo-50 text-indigo-700 font-bold'
+                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                            }`}
+                          >
+                            <span>{opt.label}</span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-indigo-600" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* ── Time Dropdown ── */}
+              <div className="relative" ref={timeRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTimeOpen(!timeOpen);
+                    setOperatorOpen(false);
+                    setSortOpen(false);
+                  }}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold transition-all duration-200 cursor-pointer shadow-xs ${
+                    timeOpen || timeFilter !== 'all'
+                      ? 'bg-blue-50/90 border-blue-300 text-blue-600 shadow-sm'
+                      : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  <Clock className="w-3.5 h-3.5 text-slate-400" />
+                  <span>
+                    {timeFilter === 'all'
+                      ? 'Departure Time'
+                      : timeFilter === 'morning'
+                      ? 'Morning'
+                      : timeFilter === 'afternoon'
+                      ? 'Afternoon'
+                      : 'Night'}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${timeOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {timeOpen && (
+                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-52 bg-white rounded-2xl border border-slate-200 shadow-xl p-1.5 z-50 animate-fade-in-up">
+                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                      Departure Window
+                    </div>
+                    <div className="py-1 space-y-0.5">
+                      {[
+                        { id: 'all', label: 'Anytime (All Day)' },
+                        { id: 'morning', label: 'Morning (5 AM - 12 PM)' },
+                        { id: 'afternoon', label: 'Afternoon (12 PM - 5 PM)' },
+                        { id: 'evening', label: 'Night (5 PM - 5 AM)' },
+                      ].map((tItem) => {
+                        const isSelected = timeFilter === tItem.id;
+                        return (
+                          <button
+                            key={tItem.id}
+                            type="button"
+                            onClick={() => {
+                              setTimeFilter(tItem.id as TimeFilter);
+                              setTimeOpen(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                              isSelected
+                                ? 'bg-blue-50 text-blue-700 font-bold'
+                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                            }`}
+                          >
+                            <span>{tItem.label}</span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* ── Sort Dropdown ── */}
+              <div className="relative" ref={sortRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSortOpen(!sortOpen);
+                    setOperatorOpen(false);
+                    setTimeOpen(false);
+                  }}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold transition-all duration-200 cursor-pointer shadow-xs ${
+                    sortOpen
+                      ? 'bg-slate-100 border-slate-300 text-slate-900 shadow-sm'
+                      : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  <span className="text-slate-400 font-normal">Sort:</span>
+                  <span className="font-semibold text-slate-800">
+                    {sortBy === 'departure-asc'
+                      ? 'Earliest'
+                      : sortBy === 'departure-desc'
+                      ? 'Latest'
+                      : sortBy === 'price-asc'
+                      ? 'Lowest Price'
+                      : sortBy === 'price-desc'
+                      ? 'Highest Price'
+                      : sortBy === 'seats-desc'
+                      ? 'Seats Left'
+                      : 'Top Rated'}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {sortOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl border border-slate-200 shadow-xl p-1.5 z-50 animate-fade-in-up">
+                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                      Sort Schedules
+                    </div>
+                    <div className="py-1 space-y-0.5">
+                      {[
+                        { id: 'departure-asc', label: 'Departure: Earliest' },
+                        { id: 'departure-desc', label: 'Departure: Latest' },
+                        { id: 'price-asc', label: 'Price: Lowest First' },
+                        { id: 'price-desc', label: 'Price: Highest First' },
+                        { id: 'seats-desc', label: 'Available Seats' },
+                        { id: 'rating-desc', label: 'Rating: Highest' },
+                      ].map((sItem) => {
+                        const isSelected = sortBy === sItem.id;
+                        return (
+                          <button
+                            key={sItem.id}
+                            type="button"
+                            onClick={() => {
+                              setSortBy(sItem.id as SortOption);
+                              setSortOpen(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                              isSelected
+                                ? 'bg-slate-100 text-slate-900 font-bold'
+                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                            }`}
+                          >
+                            <span>{sItem.label}</span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Reset if filters active */}
@@ -400,12 +678,13 @@ export const SchedulesDashboard: React.FC = () => {
                 <button
                   onClick={handleResetFilters}
                   title="Reset all filters"
-                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors"
+                  className="p-2 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors flex-shrink-0 cursor-pointer"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
               )}
             </div>
+
           </div>
         </div>
       </div>
