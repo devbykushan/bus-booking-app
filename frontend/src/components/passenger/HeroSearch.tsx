@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import {
   MapPin, Calendar, ArrowRightLeft, Search,
-  Shield, Filter, Clock, Star, UserRound
+  Shield, Filter, Clock, Star, UserRound, ChevronDown
 } from 'lucide-react';
 
 const CITIES = [
@@ -204,10 +204,18 @@ export const HeroSearch: React.FC = () => {
               <div className="md:col-span-4 relative bg-white/90 backdrop-blur rounded-2xl p-4
                               border border-white/50 focus-within:border-blue-400 focus-within:ring-4
                               focus-within:ring-blue-400/20 transition-all duration-300 shadow-sm
-                              hover:shadow-blue-200/40 hover:shadow-md">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-blue-600 flex items-center gap-1.5 mb-1">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {t('from')}
+                              hover:shadow-blue-200/40 hover:shadow-md group/from">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-blue-600 flex items-center justify-between gap-1.5 mb-1.5">
+                  <span className="flex items-center gap-1.5">
+                    <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-blue-50 border border-blue-200/80 text-blue-600 shadow-xs transition-transform duration-300 group-hover/from:scale-110 group-hover/from:-translate-y-0.5">
+                      <span className="absolute -inset-0.5 rounded-md bg-blue-400/30 animate-from-beacon pointer-events-none" />
+                      <MapPin className="w-3.5 h-3.5 animate-from-icon relative z-10" />
+                    </span>
+                    <span className="font-extrabold">{t('from')}</span>
+                  </span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-100/70 text-blue-700 font-semibold normal-case">
+                    Origin
+                  </span>
                 </label>
                 <select
                   value={origin}
@@ -223,12 +231,12 @@ export const HeroSearch: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleSwap}
-                  title="Swap"
-                  className="p-3 rounded-2xl bg-white/90 hover:bg-blue-50 border border-white/50
+                  title="Swap Departure & Destination"
+                  className="group/swap p-3 rounded-2xl bg-white/90 hover:bg-blue-50 border border-white/50
                              text-slate-600 hover:text-blue-600 shadow-sm
-                             transition-all duration-300 hover:rotate-180 hover:scale-110 active:scale-95"
+                             transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer relative"
                 >
-                  <ArrowRightLeft className="w-4 h-4" />
+                  <ArrowRightLeft className="w-4 h-4 transition-transform duration-500 group-hover/swap:rotate-180 text-blue-600" />
                 </button>
               </div>
 
@@ -236,10 +244,18 @@ export const HeroSearch: React.FC = () => {
               <div className="md:col-span-4 relative bg-white/90 backdrop-blur rounded-2xl p-4
                               border border-white/50 focus-within:border-indigo-400 focus-within:ring-4
                               focus-within:ring-indigo-400/20 transition-all duration-300 shadow-sm
-                              hover:shadow-indigo-200/40 hover:shadow-md">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5 mb-1">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {t('to')}
+                              hover:shadow-indigo-200/40 hover:shadow-md group/to">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 flex items-center justify-between gap-1.5 mb-1.5">
+                  <span className="flex items-center gap-1.5">
+                    <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-indigo-50 border border-indigo-200/80 text-indigo-600 shadow-xs transition-transform duration-300 group-hover/to:scale-110 group-hover/to:-translate-y-0.5">
+                      <span className="absolute -inset-0.5 rounded-md bg-indigo-400/30 animate-to-beacon pointer-events-none" />
+                      <MapPin className="w-3.5 h-3.5 animate-to-icon relative z-10" />
+                    </span>
+                    <span className="font-extrabold">{t('to')}</span>
+                  </span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-indigo-100/70 text-indigo-700 font-semibold normal-case">
+                    Destination
+                  </span>
                 </label>
                 <select
                   value={destination}
@@ -254,10 +270,12 @@ export const HeroSearch: React.FC = () => {
               <div className="md:col-span-3 relative bg-white/90 backdrop-blur rounded-2xl p-4
                               border border-white/50 focus-within:border-amber-400 focus-within:ring-4
                               focus-within:ring-amber-400/20 transition-all duration-300 shadow-sm
-                              hover:shadow-amber-200/40 hover:shadow-md">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5 mb-1">
-                  <Calendar className="w-3.5 h-3.5" />
-                  {t('journeyDate')}
+                              hover:shadow-amber-200/40 hover:shadow-md group/date">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5 mb-1.5">
+                  <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-amber-50 border border-amber-200/80 text-amber-600 shadow-xs transition-transform duration-300 group-hover/date:scale-110 group-hover/date:rotate-6">
+                    <Calendar className="w-3.5 h-3.5 animate-date-icon relative z-10" />
+                  </span>
+                  <span className="font-extrabold">{t('journeyDate')}</span>
                 </label>
                 <input
                   type="date"
@@ -273,15 +291,36 @@ export const HeroSearch: React.FC = () => {
             {/* Filters + Submit */}
             <div className="relative flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-white/20">
 
-              <div className="flex items-center gap-2 text-xs bg-white/10 backdrop-blur-sm
-                              border border-white/20 px-3.5 py-2.5 rounded-2xl text-white/80
-                              hover:bg-white/15 transition-all duration-300">
-                <Filter className="w-3.5 h-3.5 text-white/60" />
-                <span className="text-white/70 font-semibold">{t('busClass')}:</span>
+              {/* Animated Bus Class Pill Filter */}
+              <div className="group/filter relative inline-flex items-center gap-2.5 text-xs bg-white/10 backdrop-blur-md
+                              border border-white/25 px-4 py-2 rounded-full text-white
+                              hover:bg-white/20 hover:border-white/40 hover:shadow-lg hover:shadow-blue-500/20
+                              transition-all duration-300 transform hover:scale-[1.03] active:scale-95 cursor-pointer overflow-hidden">
+                {/* Ambient glow sweep on hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover/filter:translate-x-full transition-transform duration-700 pointer-events-none" />
+
+                {/* Animated Filter Icon */}
+                <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-white/15 border border-white/20 text-blue-200 transition-transform duration-300 group-hover/filter:scale-110 group-hover/filter:rotate-[-8deg] flex-shrink-0">
+                  <Filter className="w-3.5 h-3.5 animate-filter-tilt relative z-10 text-blue-300" />
+                </span>
+
+                {/* Label & Active Option */}
+                <span className="text-white/80 font-semibold tracking-wide flex items-center gap-1.5 whitespace-nowrap">
+                  <span>{t('busClass')}:</span>
+                  <span className="font-extrabold text-white text-sm">
+                    {busTypeFilter === 'all' ? t('allClasses') : busTypeFilter}
+                  </span>
+                </span>
+
+                {/* Animated Chevron Down */}
+                <ChevronDown className="w-3.5 h-3.5 text-white/80 transition-transform duration-300 group-hover/filter:translate-y-0.5 group-hover/filter:text-white animate-chevron-bob flex-shrink-0 ml-0.5" />
+
+                {/* Hidden Overlay Select for native click & accessibility */}
                 <select
                   value={busTypeFilter}
                   onChange={(e) => setBusTypeFilter(e.target.value)}
-                  className="bg-transparent text-white font-bold focus:outline-none cursor-pointer"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-slate-900"
+                  title="Select Bus Class"
                 >
                   <option value="all" className="text-slate-900">{t('allClasses')}</option>
                   <option value="Ashok Leyland" className="text-slate-900">Ashok Leyland 54</option>
