@@ -34,12 +34,15 @@ export const HeroSearch: React.FC = () => {
     searchDate,
     busTypeFilter,
     currentUser,
+    userRole,
     setSearchCriteria,
     setBusTypeFilter,
     setCurrentView,
     setShowAuthModal,
     t,
   } = useBookingStore();
+
+  const isAdmin = currentUser?.role === 'admin' || userRole === 'admin';
 
   const toISODateString = (d: Date) => {
     const year = d.getFullYear();
@@ -78,7 +81,11 @@ export const HeroSearch: React.FC = () => {
 
   const handleAccountClick = () => {
     if (currentUser) {
-      setCurrentView('my-bookings');
+      if (isAdmin) {
+        setCurrentView('admin-panel');
+      } else {
+        setCurrentView('my-bookings');
+      }
     } else {
       setShowAuthModal(true);
     }
@@ -336,8 +343,12 @@ export const HeroSearch: React.FC = () => {
                            backdrop-blur-sm hover:bg-white/20 hover:border-white/35
                            transition-all duration-300 hover:scale-105 active:scale-95"
               >
-                <UserRound className="w-4 h-4 text-blue-200" />
-                Passenger Profile
+                {isAdmin ? (
+                  <Shield className="w-4 h-4 text-purple-300" />
+                ) : (
+                  <UserRound className="w-4 h-4 text-blue-200" />
+                )}
+                {isAdmin ? 'Admin Profile' : 'Passenger Profile'}
               </button>
 
               {/* Search CTA with ripple */}

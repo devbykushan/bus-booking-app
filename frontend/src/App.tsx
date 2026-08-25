@@ -15,6 +15,7 @@ import { TicketModal } from './components/passenger/TicketModal';
 import { LiveMap } from './components/passenger/LiveMap';
 import { UserBookings } from './components/passenger/UserBookings';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
 import { Bus, AlertCircle, Wifi, RefreshCw } from 'lucide-react';
 
 export function App() {
@@ -131,6 +132,7 @@ export function App() {
       </main>
 
       <Footer />
+      <FloatingWhatsApp />
     </div>
   );
 }
