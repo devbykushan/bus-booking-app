@@ -205,11 +205,11 @@ export const SchedulesDashboard: React.FC = () => {
       }
     });
     return [
-      { id: 'all', label: 'All Operators & Coaches' },
-      { id: 'Ashok Leyland', label: 'Ashok Leyland 54' },
-      { id: 'Yutong', label: 'Yutong Luxury' },
+      { id: 'all', label: 'All Classes' },
+      { id: 'Normal Service', label: 'Normal Service' },
+      { id: 'Super Luxury', label: 'Super Luxury' },
       ...Array.from(ops)
-        .filter((o) => o !== 'Ashok Leyland 54' && o !== 'Yutong Luxury' && o !== 'Ashok Leyland' && o !== 'Yutong')
+        .filter((o) => o !== 'Ashok Leyland 54' && o !== 'Yutong Luxury' && o !== 'Ashok Leyland' && o !== 'Yutong' && o !== 'Normal Service' && o !== 'Super Luxury')
         .map((o) => ({ id: o, label: o })),
     ];
   }, [routes]);
@@ -262,8 +262,25 @@ export const SchedulesDashboard: React.FC = () => {
   const filteredAndSortedRoutes = useMemo(() => {
     let result = routes.filter((route) => {
       // Bus class / type filter
-      if (busTypeFilter !== 'all' && !route.busType.toLowerCase().includes(busTypeFilter.toLowerCase())) {
-        return false;
+      if (busTypeFilter !== 'all') {
+        const busTypeLower = (route.busType || '').toLowerCase();
+        const opNameLower = (route.operatorName || '').toLowerCase();
+
+        if (busTypeFilter === 'Normal Service') {
+          // Normal service matches standard Leyland / non-luxury / standard seater
+          const isLuxury = busTypeLower.includes('luxury') || busTypeLower.includes('sleeper') || busTypeLower.includes('volvo') || busTypeLower.includes('yutong');
+          if (isLuxury) {
+            return false;
+          }
+        } else if (busTypeFilter === 'Super Luxury') {
+          // Super Luxury matches Luxury, Volvo, Sleeper, Yutong, etc.
+          const isLuxury = busTypeLower.includes('luxury') || busTypeLower.includes('sleeper') || busTypeLower.includes('volvo') || busTypeLower.includes('yutong') || busTypeLower.includes('super');
+          if (!isLuxury) {
+            return false;
+          }
+        } else if (!busTypeLower.includes(busTypeFilter.toLowerCase()) && !opNameLower.includes(busTypeFilter.toLowerCase())) {
+          return false;
+        }
       }
       // Origin filter
       if (searchOrigin && route.origin.toLowerCase() !== searchOrigin.toLowerCase()) {

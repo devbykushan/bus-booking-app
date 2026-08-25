@@ -3,10 +3,11 @@ import type { BusRoute } from '../../types/booking';
 import { useBookingStore } from '../../store/bookingStore';
 import { 
   Star, Clock, ChevronRight, Info, AlertTriangle, 
-  CheckCircle2, MapPin
+  CheckCircle2, MapPin, Edit3
 } from 'lucide-react';
 import { RouteDetailsModal } from './RouteDetailsModal';
 import { RouteTimetableModal } from './RouteTimetableModal';
+import { RouteDetailsTimetableEditorModal } from '../admin/RouteDetailsTimetableEditorModal';
 
 interface BusCardProps {
   route: BusRoute;
@@ -15,10 +16,12 @@ interface BusCardProps {
 }
 
 export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRoute }) => {
-  const { setSelectedRoute, setCurrentView, searchDate } = useBookingStore();
+  const { setSelectedRoute, setCurrentView, searchDate, userRole, currentUser } = useBookingStore();
+  const isAdmin = userRole === 'admin' || currentUser?.role === 'admin';
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showTimetableModal, setShowTimetableModal] = useState(false);
+  const [showEditorModal, setShowEditorModal] = useState(false);
 
   const handleSelectSeats = () => {
     setSelectedRoute(route);
@@ -211,6 +214,21 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
               <Clock className="w-3.5 h-3.5 text-slate-500" />
               <span>Timetable</span>
             </button>
+
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowEditorModal(true);
+                }}
+                className="px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs border border-blue-200 flex items-center gap-1.5 transition-colors shadow-xs"
+                title="Edit Route Details & Timetable"
+              >
+                <Edit3 className="w-3.5 h-3.5 text-blue-600" />
+                <span className="hidden sm:inline">Edit</span>
+              </button>
+            )}
           </div>
 
           <button
@@ -233,6 +251,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
           route={route}
           onClose={() => setShowDetailsModal(false)}
           onBookNow={handleSelectSeats}
+          onEdit={() => setShowEditorModal(true)}
         />
       )}
 
@@ -242,6 +261,15 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
           route={route}
           onClose={() => setShowTimetableModal(false)}
           onBookNow={handleSelectSeats}
+          onEdit={() => setShowEditorModal(true)}
+        />
+      )}
+
+      {/* Admin Route & Timetable Editor Modal */}
+      {showEditorModal && (
+        <RouteDetailsTimetableEditorModal
+          route={route}
+          onClose={() => setShowEditorModal(false)}
         />
       )}
     </>

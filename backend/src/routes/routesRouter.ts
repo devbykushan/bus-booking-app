@@ -303,8 +303,8 @@ routesRouter.post('/', async (req: Request, res: Response) => {
           "id", "routeId", "number", "deck", "row", "col", "price", "status", "isSleeper", "isFemaleOnly"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       `, [
-        seat.id || `${id}-${seat.number}`,
-        id,
+        seat.id || `${routeId}-${seat.number}`,
+        routeId,
         seat.number,
         seat.deck || 'lower',
         seat.row,
@@ -316,8 +316,176 @@ routesRouter.post('/', async (req: Request, res: Response) => {
       ]);
     }
 
+    // Insert Boarding & Drop points if provided, or default
+    const boardingPointsToInsert = req.body.boardingPoints && Array.isArray(req.body.boardingPoints) && req.body.boardingPoints.length > 0
+      ? req.body.boardingPoints
+      : [
+          { id: `bp-${routeId}-1`, name: `${origin.trim()} Main Terminal`, time: departureTime.trim(), landmark: 'Main Station Gate', lat: 6.8722, lng: 81.3507 },
+          { id: `bp-${routeId}-2`, name: 'Wellawaya Junction', time: '01:45 PM', landmark: 'Clock Tower Interchange', lat: 6.7410, lng: 81.1020 },
+        ];
+
+    const dropPointsToInsert = req.body.dropPoints && Array.isArray(req.body.dropPoints) && req.body.dropPoints.length > 0
+      ? req.body.dropPoints
+      : [
+          { id: `dp-${routeId}-1`, name: 'Kottawa Highway Exit', time: '06:45 PM', landmark: 'Makumbura Multimodal Hub', lat: 6.8416, lng: 79.9974 },
+          { id: `dp-${routeId}-2`, name: `${destination.trim()} Fort Station`, time: arrivalTime || '03:30 PM', landmark: 'Main Passenger Drop Bay', lat: 6.9344, lng: 79.8510 },
+        ];
+
+    for (const bp of boardingPointsToInsert) {
+      if (!bp.name) continue;
+      await client.query(`
+        INSERT INTO boarding_points ("id", "routeId", "type", "name", "time", "landmark", "lat", "lng")
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `, [
+        bp.id || `bp-${routeId}-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        routeId,
+        'boarding',
+        bp.name.trim(),
+        bp.time?.trim() || departureTime.trim(),
+        bp.landmark?.trim() || '',
+        Number(bp.lat) || 0,
+        Number(bp.lng) || 0,
+      ]);
+    }
+
+    for (const dp of dropPointsToInsert) {
+      if (!dp.name) continue;
+      await client.query(`
+        INSERT INTO boarding_points ("id", "routeId", "type", "name", "time", "landmark", "lat", "lng")
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `, [
+        dp.id || `dp-${routeId}-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        routeId,
+        'drop',
+        dp.name.trim(),
+        dp.time?.trim() || arrivalTime || '03:30 PM',
+        dp.landmark?.trim() || '',
+        Number(dp.lat) || 0,
+        Number(dp.lng) || 0,
+      ]);
+    }
+
     await client.query('COMMIT');
-    res.status(201).json({ success: true, id });
+    res.status(201).json({ success: true, id: routeId });
+  } catch (err: any) {
+    await client.query('ROLLBACK');
+    res.status(400).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// ─── PUT /api/routes/:id — Admin Edit Route Details & Timetable ──────────────
+routesRouter.put('/:id', async (req: Request, res: Response) => {
+  const pool = getPool();
+  const { id } = req.params;
+  const {
+    operatorName, operatorRating, busNumber, busType,
+    origin, destination, departureTime, arrivalTime, duration, priceStarting,
+    hasUpperDeck, amenities, boardingPoints, dropPoints,
+  } = req.body;
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const existingRes = await client.query('SELECT * FROM routes WHERE "id" = $1', [id]);
+    if (existingRes.rows.length === 0) {
+      res.status(404).json({ error: 'Route not found' });
+      client.release();
+      return;
+    }
+    const current = existingRes.rows[0];
+
+    const updatedOperatorName = operatorName !== undefined ? operatorName.trim() : current.operatorName;
+    const updatedOperatorRating = operatorRating !== undefined ? Number(operatorRating) : current.operatorRating;
+    const updatedBusNumber = busNumber !== undefined ? busNumber.trim() : current.busNumber;
+    const updatedBusType = busType !== undefined ? busType.trim() : current.busType;
+    const updatedOrigin = origin !== undefined ? origin.trim() : current.origin;
+    const updatedDestination = destination !== undefined ? destination.trim() : current.destination;
+    const updatedDepartureTime = departureTime !== undefined ? departureTime.trim() : current.departureTime;
+    const updatedArrivalTime = arrivalTime !== undefined ? arrivalTime.trim() : current.arrivalTime;
+    const updatedDuration = duration !== undefined ? duration.trim() : current.duration;
+    const updatedPrice = priceStarting !== undefined ? Number(priceStarting) : current.priceStarting;
+    const updatedHasUpperDeck = hasUpperDeck !== undefined ? (hasUpperDeck ? 1 : 0) : current.hasUpperDeck;
+    const updatedAmenities = amenities !== undefined ? (typeof amenities === 'string' ? amenities : JSON.stringify(amenities)) : current.amenities;
+
+    await client.query(`
+      UPDATE routes SET
+        "operatorName" = $1,
+        "operatorRating" = $2,
+        "busNumber" = $3,
+        "busType" = $4,
+        "origin" = $5,
+        "destination" = $6,
+        "departureTime" = $7,
+        "arrivalTime" = $8,
+        "duration" = $9,
+        "priceStarting" = $10,
+        "hasUpperDeck" = $11,
+        "amenities" = $12
+      WHERE "id" = $13
+    `, [
+      updatedOperatorName,
+      updatedOperatorRating,
+      updatedBusNumber,
+      updatedBusType,
+      updatedOrigin,
+      updatedDestination,
+      updatedDepartureTime,
+      updatedArrivalTime,
+      updatedDuration,
+      updatedPrice,
+      updatedHasUpperDeck,
+      updatedAmenities,
+      id,
+    ]);
+
+    // Update boarding & drop points if provided
+    if (boardingPoints || dropPoints) {
+      await client.query('DELETE FROM boarding_points WHERE "routeId" = $1', [id]);
+
+      if (Array.isArray(boardingPoints)) {
+        for (const bp of boardingPoints) {
+          if (!bp.name) continue;
+          await client.query(`
+            INSERT INTO boarding_points ("id", "routeId", "type", "name", "time", "landmark", "lat", "lng")
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          `, [
+            bp.id || `bp-${id}-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+            id,
+            'boarding',
+            bp.name.trim(),
+            bp.time?.trim() || updatedDepartureTime,
+            bp.landmark?.trim() || '',
+            Number(bp.lat) || 0,
+            Number(bp.lng) || 0,
+          ]);
+        }
+      }
+
+      if (Array.isArray(dropPoints)) {
+        for (const dp of dropPoints) {
+          if (!dp.name) continue;
+          await client.query(`
+            INSERT INTO boarding_points ("id", "routeId", "type", "name", "time", "landmark", "lat", "lng")
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          `, [
+            dp.id || `dp-${id}-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+            id,
+            'drop',
+            dp.name.trim(),
+            dp.time?.trim() || updatedArrivalTime,
+            dp.landmark?.trim() || '',
+            Number(dp.lat) || 0,
+            Number(dp.lng) || 0,
+          ]);
+        }
+      }
+    }
+
+    await client.query('COMMIT');
+    res.json({ success: true, message: 'Route details & timetable updated successfully.' });
   } catch (err: any) {
     await client.query('ROLLBACK');
     res.status(400).json({ error: err.message });

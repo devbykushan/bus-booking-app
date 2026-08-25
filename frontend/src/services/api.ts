@@ -35,6 +35,10 @@ export const routesApi = {
   create: (routeData: any): Promise<any> =>
     apiFetch('/routes', { method: 'POST', body: JSON.stringify(routeData) }),
 
+  /** Update an existing bus route's details and timetable */
+  update: (id: string, routeData: any): Promise<any> =>
+    apiFetch(`/routes/${id}`, { method: 'PUT', body: JSON.stringify(routeData) }),
+
   /** Remove all seats from a route while keeping its schedule available */
   deleteLayout: (id: string): Promise<any> =>
     apiFetch(`/routes/${id}/layout`, { method: 'DELETE' }),

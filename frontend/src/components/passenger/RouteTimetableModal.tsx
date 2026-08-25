@@ -1,14 +1,19 @@
 import React from 'react';
 import type { BusRoute } from '../../types/booking';
-import { X, Clock, MapPin, Navigation, ExternalLink, Calendar } from 'lucide-react';
+import { useBookingStore } from '../../store/bookingStore';
+import { X, Clock, MapPin, Navigation, ExternalLink, Calendar, Edit3 } from 'lucide-react';
 
 interface RouteTimetableModalProps {
   route: BusRoute;
   onClose: () => void;
   onBookNow: () => void;
+  onEdit?: () => void;
 }
 
-export const RouteTimetableModal: React.FC<RouteTimetableModalProps> = ({ route, onClose, onBookNow }) => {
+export const RouteTimetableModal: React.FC<RouteTimetableModalProps> = ({ route, onClose, onBookNow, onEdit }) => {
+  const { userRole, currentUser } = useBookingStore();
+  const isAdmin = userRole === 'admin' || currentUser?.role === 'admin';
+
   // Combine boarding & drop points or generate default timeline
   const boardingStops = route.boardingPoints && route.boardingPoints.length > 0 
     ? route.boardingPoints 
@@ -49,12 +54,27 @@ export const RouteTimetableModal: React.FC<RouteTimetableModalProps> = ({ route,
             </p>
           </div>
 
-          <button
-            onClick={onClose}
-            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors relative z-10"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2 relative z-10">
+            {isAdmin && onEdit && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onEdit();
+                }}
+                className="px-3 py-1.5 rounded-xl bg-blue-600/80 hover:bg-blue-600 text-white border border-blue-400/40 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+              >
+                <Edit3 className="w-3.5 h-3.5" /> Edit as Admin
+              </button>
+            )}
+
+            <button
+              onClick={onClose}
+              className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Timetable Content */}

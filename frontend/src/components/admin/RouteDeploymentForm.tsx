@@ -22,6 +22,12 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
   const [arrivalTime, setArrivalTime] = useState('03:30 PM');
   const [duration, setDuration] = useState('5h 30m');
   const [priceStarting, setPriceStarting] = useState<number | string>(1800);
+  const [amenities, setAmenities] = useState<string[]>(['AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats']);
+  const [showAdvancedStops, setShowAdvancedStops] = useState(false);
+  const [pickupStop1, setPickupStop1] = useState('');
+  const [pickupStop2, setPickupStop2] = useState('');
+  const [dropStop1, setDropStop1] = useState('');
+  const [dropStop2, setDropStop2] = useState('');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -130,6 +136,15 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
     const newId = `route-${Date.now()}`;
     const numericPrice = Number(priceStarting);
 
+    const bpList = [
+      { name: pickupStop1.trim() || `${origin.trim()} Main Terminal`, time: departureTime.trim(), landmark: 'Main Station Gate', lat: 6.8722, lng: 81.3507 },
+      ...(pickupStop2.trim() ? [{ name: pickupStop2.trim(), time: departureTime.trim(), landmark: 'Intermediate Pickup Stop', lat: 6.7410, lng: 81.1020 }] : [])
+    ];
+    const dpList = [
+      ...(dropStop1.trim() ? [{ name: dropStop1.trim(), time: arrivalTime.trim(), landmark: 'Highway Exit Hub', lat: 6.8416, lng: 79.9974 }] : []),
+      { name: dropStop2.trim() || `${destination.trim()} Fort Station`, time: arrivalTime.trim(), landmark: 'Main Passenger Drop Bay', lat: 6.9344, lng: 79.8510 }
+    ];
+
     setIsSubmitting(true);
     try {
       await routesApi.create({
@@ -146,7 +161,9 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
         duration: duration.trim(),
         priceStarting: numericPrice,
         hasUpperDeck: selectedBusType.includes('Double') || selectedBusType.includes('Sleeper'),
-        amenities: ['Wi-Fi', 'AC', 'Live GPS', 'Charging Ports'],
+        amenities: amenities.length > 0 ? amenities : ['Wi-Fi', 'AC', 'Live GPS', 'Charging Ports', 'Reclining Seats'],
+        boardingPoints: bpList,
+        dropPoints: dpList,
       });
 
       await loadRoutes();
@@ -481,6 +498,94 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
           )}
         </div>
 
+      </div>
+
+      {/* Luxury Amenities & Timetable Stops Section */}
+      <div className="pt-3 border-t border-slate-100 space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-800">
+            Luxury Amenities ({amenities.length})
+          </label>
+          <button
+            type="button"
+            onClick={() => setShowAdvancedStops(!showAdvancedStops)}
+            className="text-[11px] font-bold text-blue-600 hover:text-blue-700 underline"
+          >
+            {showAdvancedStops ? 'Hide Timetable Stops' : '+ Custom Timetable Stops (Optional)'}
+          </button>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {['AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats', 'Water Bottle', 'Blanket', 'Music'].map(item => {
+            const isSelected = amenities.includes(item);
+            return (
+              <button
+                key={item}
+                type="button"
+                onClick={() => {
+                  if (isSelected) {
+                    setAmenities(amenities.filter(a => a !== item));
+                  } else {
+                    setAmenities([...amenities, item]);
+                  }
+                }}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all ${
+                  isSelected
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                <CheckCircle2 className={`w-3 h-3 ${isSelected ? 'text-white' : 'text-slate-400'}`} />
+                <span>{item}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {showAdvancedStops && (
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs animate-fade-in">
+            <div>
+              <label className="block text-slate-600 font-bold mb-1">Pickup Stop 1 (Origin)</label>
+              <input
+                type="text"
+                value={pickupStop1}
+                onChange={e => setPickupStop1(e.target.value)}
+                placeholder={`${origin || 'Origin'} Main Bus Stand`}
+                className="w-full rounded-xl p-2 bg-white border border-slate-200 text-slate-800 text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-600 font-bold mb-1">Pickup Stop 2 (Intermediate)</label>
+              <input
+                type="text"
+                value={pickupStop2}
+                onChange={e => setPickupStop2(e.target.value)}
+                placeholder="Wellawaya Clock Tower Junction"
+                className="w-full rounded-xl p-2 bg-white border border-slate-200 text-slate-800 text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-600 font-bold mb-1">Drop Stop 1 (Highway Exit)</label>
+              <input
+                type="text"
+                value={dropStop1}
+                onChange={e => setDropStop1(e.target.value)}
+                placeholder="Kottawa Highway Exit Hub"
+                className="w-full rounded-xl p-2 bg-white border border-slate-200 text-slate-800 text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-600 font-bold mb-1">Drop Stop 2 (Destination)</label>
+              <input
+                type="text"
+                value={dropStop2}
+                onChange={e => setDropStop2(e.target.value)}
+                placeholder={`${destination || 'Destination'} Fort Bus Station`}
+                className="w-full rounded-xl p-2 bg-white border border-slate-200 text-slate-800 text-xs"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
