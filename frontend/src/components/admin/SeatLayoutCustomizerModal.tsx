@@ -187,7 +187,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
 
   // New Seat Form State
   const [newSeatNum, setNewSeatNum] = useState('');
-  const [newSeatPrice, setNewSeatPrice] = useState(route.priceStarting || 1800);
+  const [newSeatPrice, setNewSeatPrice] = useState(route.priceStarting || 2670);
   const [newSeatDeck, setNewSeatDeck] = useState<DeckType>('lower');
   const [newSeatRow, setNewSeatRow] = useState(1);
   const [newSeatCol, setNewSeatCol] = useState(1);

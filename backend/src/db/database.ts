@@ -185,7 +185,7 @@ export function buildSeats(
   hasUpperDeck: boolean
 ): { id: string; routeId: string; number: string; deck: string; row: number; col: number; price: number; status: string; isSleeper: number; isFemaleOnly: number }[] {
   const seats: ReturnType<typeof buildSeats> = [];
-  const basePrice = busType.includes('Sleeper') ? 2800 : 1800;
+  const basePrice = busType.includes('Sleeper') ? 2800 : busType.includes('Super Luxury') || busType.includes('49 Seats') ? 2670 : 1800;
 
   if (busType.includes('49 Seats') || busType.includes('Super Luxury')) {
     const femaleSeats = ['15', '19', '20', '23'];

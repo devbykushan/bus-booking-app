@@ -51,7 +51,7 @@ export const BUS_CLASS_PRESETS: Record<string, BusClassPreset> = {
     shortName: 'Super Luxury Express',
     seatsCount: 49,
     layoutDescription: '49 Seats (2×2 AC Pushback Layout)',
-    defaultPrice: 1800,
+    defaultPrice: 2670,
     defaultDuration: '5h 30m',
     defaultAmenities: [
       'AC',
@@ -110,7 +110,7 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
   const [busType, setBusType] = useState<string>(route.busType || 'Super Luxury (49 Seats 2*2)');
   const [origin, setOrigin] = useState(route.origin || '');
   const [destination, setDestination] = useState(route.destination || '');
-  const [priceStarting, setPriceStarting] = useState<number | string>(route.priceStarting || 1800);
+  const [priceStarting, setPriceStarting] = useState<number | string>(route.priceStarting || 2670);
   const [amenities, setAmenities] = useState<string[]>(
     route.amenities && route.amenities.length > 0
       ? route.amenities
@@ -479,7 +479,7 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                     value={priceStarting}
                     onChange={(e) => setPriceStarting(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="1800"
+                    placeholder="2670"
                   />
                 </div>
 

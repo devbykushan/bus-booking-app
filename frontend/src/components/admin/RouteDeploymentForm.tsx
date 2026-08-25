@@ -27,7 +27,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
   const [departureTime, setDepartureTime] = useState('10:00 AM');
   const [arrivalTime, setArrivalTime] = useState('03:30 PM');
   const [duration, setDuration] = useState('5h 30m');
-  const [priceStarting, setPriceStarting] = useState<number | string>(1800);
+  const [priceStarting, setPriceStarting] = useState<number | string>(2670);
   const [amenities, setAmenities] = useState<string[]>([
     'AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats', 'Water Bottle', 'Blanket', 'LED TV Screen'
   ]);
@@ -56,7 +56,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
       departureTime: departureTime.trim() || '10:00 AM',
       arrivalTime: arrivalTime.trim() || '03:30 PM',
       duration: duration.trim() || '5h 30m',
-      priceStarting: Number(priceStarting) || 1800,
+      priceStarting: Number(priceStarting) || 2670,
       availableSeatsCount: 49,
       totalSeatsCount: 49,
       hasUpperDeck: busType.includes('Double') || busType.includes('Sleeper'),
