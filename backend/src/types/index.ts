@@ -5,6 +5,7 @@ export type BusCategory =
   | 'Super Luxury'
   | 'Luxury Air Bus (48 Seats 2*2)'
   | 'Semi Luxury (2*2 Coach)'
+  | 'Normal Service (58 Seats 3*2)'
   | 'Normal Service (54 Seats 3*2)'
   | 'Normal Service'
   | 'AC Sleeper'

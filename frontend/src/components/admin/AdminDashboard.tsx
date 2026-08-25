@@ -176,7 +176,7 @@ export const AdminDashboard: React.FC = () => {
                           </span>
                         </div>
                         <p className="text-xs text-blue-600 font-semibold">{r.origin} → {r.destination}</p>
-                        <p className="text-[11px] text-slate-500 font-mono mt-0.5">{r.busType}</p>
+                        <p className="text-[11px] text-slate-500 font-mono mt-0.5">{(r.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}</p>
                         
                         <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-600 font-medium">
                           <span className="flex items-center gap-1">
@@ -395,7 +395,7 @@ export const AdminDashboard: React.FC = () => {
                         <div>
                           <span className="font-bold text-sm">{r.origin} → {r.destination}</span>
                           <span className="text-xs text-slate-500 font-normal ml-2">({r.operatorName})</span>
-                          <p className="text-[11px] text-blue-600 font-mono">{r.busType} • {total} Seats</p>
+                          <p className="text-[11px] text-blue-600 font-mono">{(r.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()} • {total} Seats</p>
                         </div>
                       </div>
 

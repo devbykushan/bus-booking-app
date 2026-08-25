@@ -170,65 +170,8 @@ export const SeatMap: React.FC = () => {
     setSearchCriteria(selectedRoute.origin, selectedRoute.destination, travelDate);
   };
 
-  // Select Gender Popup Modal State
-  const [pendingGenderSeatId, setPendingGenderSeatId] = useState<string | null>(null);
-  const [seatGenderMap, setSeatGenderMap] = useState<{ [seatId: string]: 'male' | 'female' }>({});
-  const [genderError, setGenderError] = useState<string | null>(null);
-
-  // Adjacent seat helper for Sri Lankan coach standard
-  const getAdjacentSeat = (seatIdOrNum: string): string | null => {
-    const pairs: [string, string][] = [
-      ['3', '4'], ['7', '8'], ['11', '12'], ['15', '16'], ['19', '20'], ['23', '24'], ['27', '28'], ['31', '32'], ['35', '36'], ['39', '40'], ['43', '44'], ['47', '48'],
-      ['2', '1'], ['6', '5'], ['10', '09'], ['14', '13'], ['18', '17'], ['22', '21'], ['26', '25'], ['30', '29'], ['34', '33'], ['38', '37'], ['42', '41'], ['46', '45'],
-    ];
-    const clean = seatIdOrNum.replace('seat-', '').replace(/^0+/, '');
-    for (const [p1, p2] of pairs) {
-      const c1 = p1.replace(/^0+/, '');
-      const c2 = p2.replace(/^0+/, '');
-      if (clean === c1) return p2;
-      if (clean === c2) return p1;
-    }
-    return null;
-  };
-
   const handleSeatClick = (seatId: string) => {
-    setGenderError(null);
-    if (selectedSeatIds.includes(seatId)) {
-      toggleSeatSelection(seatId);
-      setSeatGenderMap(prev => {
-        const copy = { ...prev };
-        delete copy[seatId];
-        return copy;
-      });
-    } else {
-      setPendingGenderSeatId(seatId);
-    }
-  };
-
-  const handleSelectGender = (gender: 'male' | 'female') => {
-    if (!pendingGenderSeatId) return;
-
-    // Check adjacent seat gender validation
-    const adjSeatNum = getAdjacentSeat(pendingGenderSeatId);
-    if (adjSeatNum && selectedRoute) {
-      const normAdj = adjSeatNum.replace(/^0+/, '');
-      const adjSeat = selectedRoute.seats.find(s => s.number === normAdj || s.number === adjSeatNum);
-      const isAdjBookedFemale = (adjSeat && adjSeat.isFemaleOnly) || (adjSeat && adjSeat.status === 'booked' && (adjSeat as any).gender === 'female');
-      const isAdjSelectedFemale = selectedSeatIds.some(id => {
-        const n = id.replace('seat-', '').replace(/^0+/, '');
-        return (n === normAdj || n === adjSeatNum) && seatGenderMap[id] === 'female';
-      });
-
-      if (gender === 'male' && (isAdjBookedFemale || isAdjSelectedFemale)) {
-        setGenderError(`⚠️ Male booking not allowed: The adjacent seat (Seat #${adjSeatNum}) is occupied by a female passenger.`);
-        return;
-      }
-    }
-
-    setSeatGenderMap(prev => ({ ...prev, [pendingGenderSeatId]: gender }));
-    toggleSeatSelection(pendingGenderSeatId);
-    setPendingGenderSeatId(null);
-    setGenderError(null);
+    toggleSeatSelection(seatId);
   };
 
   const handleVerifyPhone = () => {
@@ -351,7 +294,7 @@ export const SeatMap: React.FC = () => {
         <div className="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm text-slate-600">
           <span className="font-semibold">{selectedRoute.operatorName || 'Dewmina Super Line'}</span>
           <span>-</span>
-          <span className="text-slate-700 font-medium">{selectedRoute.busType || 'Super Luxury'}</span>
+          <span className="text-slate-700 font-medium">{(selectedRoute.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}</span>
           <span>|</span>
           <span className="font-mono text-slate-800 font-bold">{selectedRoute.busNumber || 'ND-8899'}</span>
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-bold text-xs border border-emerald-200 shadow-2xs animate-pulse">
@@ -390,7 +333,7 @@ export const SeatMap: React.FC = () => {
               </div>
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition-colors">
                 <p className="text-[10px] text-slate-400 font-semibold uppercase">Coach Class</p>
-                <p className="font-bold text-blue-600">{selectedRoute.busType}</p>
+                <p className="font-bold text-blue-600">{(selectedRoute.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}</p>
               </div>
             </div>
 
@@ -726,7 +669,6 @@ export const SeatMap: React.FC = () => {
                 {/* List of Selected Seat rows */}
                 <div className="space-y-3 pt-4">
                   {selectedSeatsList.map((s) => {
-                    const gender = seatGenderMap[s.id] || 'male';
                     return (
                       <div key={s.id} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3.5">
                         <div className="flex items-center gap-2.5 sm:gap-3.5 flex-1 min-w-0">
@@ -752,10 +694,8 @@ export const SeatMap: React.FC = () => {
                         </div>
 
                         <div className="flex items-center gap-2.5 sm:gap-3.5 flex-shrink-0">
-                          {/* Gender Icon Box */}
-                          <div className={`w-[64px] sm:w-[70px] h-[64px] sm:h-[70px] rounded-2xl flex items-center justify-center text-white shadow-xs flex-shrink-0 transition-colors ${
-                            gender === 'female' ? 'bg-[#c2185b]' : 'bg-blue-600'
-                          }`}>
+                          {/* Passenger Icon Box */}
+                          <div className="w-[64px] sm:w-[70px] h-[64px] sm:h-[70px] rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-xs flex-shrink-0">
                             <User className="w-7 h-7 sm:w-8 sm:h-8" />
                           </div>
 
@@ -1129,7 +1069,7 @@ export const SeatMap: React.FC = () => {
               <div className="flex items-center justify-between gap-3 pt-1 pb-2 border-b border-slate-100">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>{selectedRoute.busNumber || 'ND-9999'} • {selectedRoute.busType || 'Super Luxury Express'}</span>
+                  <span>{selectedRoute.busNumber || 'ND-9999'} • {(selectedRoute.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}</span>
                 </div>
                 <div className="border border-blue-500/80 rounded-xl px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50/50 flex items-center gap-2 shadow-2xs">
                   <Crown className="w-4 h-4 text-blue-600 flex-shrink-0" />
@@ -1529,18 +1469,14 @@ export const SeatMap: React.FC = () => {
                     <p className="text-[11px] text-slate-500">No seats selected yet. Click any seat above.</p>
                   ) : (
                     <div className="flex flex-wrap gap-1.5">
-                      {selectedSeatsList.map(s => {
-                        const gender = seatGenderMap[s.id];
-                        return (
-                          <span 
-                            key={s.id} 
-                            className="px-2.5 py-0.5 rounded-lg font-bold text-xs flex items-center gap-1 bg-emerald-100 text-emerald-800 border border-emerald-300"
-                          >
-                            <span>Seat #{s.number}</span>
-                            {gender && <span className="text-[10px] opacity-75 capitalize">({gender})</span>}
-                          </span>
-                        );
-                      })}
+                      {selectedSeatsList.map(s => (
+                        <span 
+                          key={s.id} 
+                          className="px-2.5 py-0.5 rounded-lg font-bold text-xs flex items-center gap-1 bg-emerald-100 text-emerald-800 border border-emerald-300"
+                        >
+                          <span>Seat #{s.number}</span>
+                        </span>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -1586,80 +1522,6 @@ export const SeatMap: React.FC = () => {
 
             </div>
 
-          </div>
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════════════════════════════════ */}
-      {/* ── SELECT GENDER POPUP MODAL (MOCKUP EXACT STYLE) ──────────────────── */}
-      {/* ══════════════════════════════════════════════════════════════════════ */}
-      {pendingGenderSeatId && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          {/* Backdrop Overlay */}
-          <div 
-            onClick={() => { setPendingGenderSeatId(null); setGenderError(null); }}
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-200" 
-          />
-
-          {/* Dialog Card Box */}
-          <div className="relative w-full max-w-sm sm:max-w-md bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-10 animate-scale-in">
-            {/* Header with Title & Close ✕ */}
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-white">
-              <h3 className="text-lg font-extrabold text-slate-900">
-                Select Gender
-              </h3>
-              <button
-                type="button"
-                onClick={() => { setPendingGenderSeatId(null); setGenderError(null); }}
-                className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-5 sm:p-6 space-y-5">
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-                Please be mindful if the next seat is booked by a female passenger.
-              </p>
-
-              {/* Validation Warning Alert */}
-              {genderError && (
-                <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold leading-relaxed animate-shake flex items-start gap-2">
-                  <span className="text-sm">⚠️</span>
-                  <span>{genderError}</span>
-                </div>
-              )}
-
-              {/* Male / Female Action Buttons */}
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                <button
-                  type="button"
-                  onClick={() => handleSelectGender('male')}
-                  className="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-xs transition-all transform active:scale-95 cursor-pointer text-center"
-                >
-                  Male
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSelectGender('female')}
-                  className="w-full py-3.5 px-4 rounded-xl bg-[#c2185b] hover:bg-[#ad1457] text-white font-bold text-sm shadow-xs transition-all transform active:scale-95 cursor-pointer text-center"
-                >
-                  Female
-                </button>
-              </div>
-
-              {/* Divider & Cancel */}
-              <div className="border-t border-slate-100 pt-3">
-                <button
-                  type="button"
-                  onClick={() => { setPendingGenderSeatId(null); setGenderError(null); }}
-                  className="w-full py-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-all active:scale-95 cursor-pointer text-center"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       )}

@@ -231,15 +231,15 @@ routesRouter.post('/', async (req: Request, res: Response) => {
         backSeats.forEach(s => {
           seatsToInsert.push({ id: `${id}-${s.num}`, routeId: id, number: s.num, deck: 'lower', row: 12, col: s.col, price: parsedPrice, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
         });
-      } else if (busType.includes('Ashok Leyland (54 Seats 3*2') || busType.includes('Normal Service (54 Seats 3*2') || busType.includes('54 Seats 3*2')) {
-        for (let r = 1; r <= 10; r++) {
+      } else if (busType.includes('58 Seats 3*2') || busType.includes('Normal Service') || busType.includes('54 Seats 3*2') || busType.includes('Ashok Leyland (54 Seats 3*2')) {
+        for (let r = 1; r <= 11; r++) {
           for (const c of [1, 2, 3, 5, 6]) {
             const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
             seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: r, col: c, price: parsedPrice, status: 'available', isSleeper: 0, isFemaleOnly: (r === 2 || r === 3) && c <= 3 ? 1 : 0 });
           }
         }
-        for (const c of [1, 2, 3, 5]) {
-          const seatNum = `11${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+        for (const c of [1, 2, 3]) {
+          const seatNum = `12${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
           seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: 12, col: c, price: parsedPrice, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
         }
       } else if (busType.includes('Ashok Leyland (54 Seats')) {
@@ -539,15 +539,15 @@ routesRouter.put('/:id', async (req: Request, res: Response) => {
         backSeats.forEach(s => {
           seatsToInsert.push({ id: `${id}-${s.num}`, routeId: id, number: s.num, deck: 'lower', row: 12, col: s.col, price: updatedPrice, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
         });
-      } else if (updatedBusType.includes('Ashok Leyland (54 Seats 3*2') || updatedBusType.includes('Normal Service') || updatedBusType.includes('54 Seats 3*2')) {
-        for (let r = 1; r <= 10; r++) {
+      } else if (updatedBusType.includes('58 Seats 3*2') || updatedBusType.includes('Normal Service') || updatedBusType.includes('54 Seats 3*2') || updatedBusType.includes('Ashok Leyland (54 Seats 3*2')) {
+        for (let r = 1; r <= 11; r++) {
           for (const c of [1, 2, 3, 5, 6]) {
             const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
             seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: r, col: c, price: updatedPrice, status: 'available', isSleeper: 0, isFemaleOnly: (r === 2 || r === 3) && c <= 3 ? 1 : 0 });
           }
         }
-        for (const c of [1, 2, 3, 5]) {
-          const seatNum = `11${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+        for (const c of [1, 2, 3]) {
+          const seatNum = `12${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
           seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: 12, col: c, price: updatedPrice, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
         }
       }

@@ -45,9 +45,9 @@ export interface BusClassPreset {
 }
 
 export const BUS_CLASS_PRESETS: Record<string, BusClassPreset> = {
-  'Super Luxury (49 Seats 2*2)': {
-    id: 'Super Luxury (49 Seats 2*2)',
-    label: '✨ Super Luxury Express (49 Seats 2×2 AC Pushback)',
+  'Super Luxury': {
+    id: 'Super Luxury',
+    label: '✨ Super Luxury Express',
     shortName: 'Super Luxury Express',
     seatsCount: 49,
     layoutDescription: '49 Seats (2×2 AC Pushback Layout)',
@@ -68,12 +68,12 @@ export const BUS_CLASS_PRESETS: Record<string, BusClassPreset> = {
     badgeColor: 'bg-amber-50 text-amber-800 border-amber-300',
     icon: '✨',
   },
-  'Normal Service (54 Seats 3*2)': {
-    id: 'Normal Service (54 Seats 3*2)',
-    label: '🇱🇰 Normal Service (54 Seats 3×2 Standard - Route 98)',
+  'Normal Service': {
+    id: 'Normal Service',
+    label: '🇱🇰 Normal Service (Route 98)',
     shortName: 'Normal Service (Route 98)',
-    seatsCount: 54,
-    layoutDescription: '54 Seats (3×2 Standard Leyland Layout)',
+    seatsCount: 58,
+    layoutDescription: '58 Seats (3×2 Standard Leyland Layout)',
     defaultPrice: 950,
     defaultDuration: '7h 30m',
     defaultAmenities: [
@@ -82,7 +82,68 @@ export const BUS_CLASS_PRESETS: Record<string, BusClassPreset> = {
       'Emergency First-Aid',
       'Reading Lamp',
     ],
-    description: 'Classic Route 98 A4 highway intercity service with 54 seats in a 3×2 arrangement at standard fare.',
+    description: 'Classic Route 98 A4 highway intercity service with 58 seats in a 3×2 arrangement at standard fare.',
+    badge: 'A4 Highway (Route 98)',
+    badgeColor: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+    icon: '🇱🇰',
+  },
+  'Super Luxury (49 Seats 2*2)': {
+    id: 'Super Luxury',
+    label: '✨ Super Luxury Express',
+    shortName: 'Super Luxury Express',
+    seatsCount: 49,
+    layoutDescription: '49 Seats (2×2 AC Pushback Layout)',
+    defaultPrice: 2670,
+    defaultDuration: '5h 30m',
+    defaultAmenities: [
+      'AC',
+      'Wi-Fi',
+      'Charging Ports',
+      'Live GPS Tracking',
+      'Reclining Seats',
+      'Water Bottle',
+      'Blanket',
+      'LED TV Screen',
+    ],
+    description: 'High-speed Expressway coach with 49 comfortable 2×2 pushback seats, air conditioning & VIP passenger amenities.',
+    badge: 'Expressway Direct (E01)',
+    badgeColor: 'bg-amber-50 text-amber-800 border-amber-300',
+    icon: '✨',
+  },
+  'Normal Service (58 Seats 3*2)': {
+    id: 'Normal Service',
+    label: '🇱🇰 Normal Service (Route 98)',
+    shortName: 'Normal Service (Route 98)',
+    seatsCount: 58,
+    layoutDescription: '58 Seats (3×2 Standard Leyland Layout)',
+    defaultPrice: 950,
+    defaultDuration: '7h 30m',
+    defaultAmenities: [
+      'Live GPS Tracking',
+      'Music / Audio',
+      'Emergency First-Aid',
+      'Reading Lamp',
+    ],
+    description: 'Classic Route 98 A4 highway intercity service with 58 seats in a 3×2 arrangement at standard fare.',
+    badge: 'A4 Highway (Route 98)',
+    badgeColor: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+    icon: '🇱🇰',
+  },
+  'Normal Service (54 Seats 3*2)': {
+    id: 'Normal Service',
+    label: '🇱🇰 Normal Service (Route 98)',
+    shortName: 'Normal Service (Route 98)',
+    seatsCount: 58,
+    layoutDescription: '58 Seats (3×2 Standard Leyland Layout)',
+    defaultPrice: 950,
+    defaultDuration: '7h 30m',
+    defaultAmenities: [
+      'Live GPS Tracking',
+      'Music / Audio',
+      'Emergency First-Aid',
+      'Reading Lamp',
+    ],
+    description: 'Classic Route 98 A4 highway intercity service with 58 seats in a 3×2 arrangement at standard fare.',
     badge: 'A4 Highway (Route 98)',
     badgeColor: 'bg-emerald-50 text-emerald-800 border-emerald-300',
     icon: '🇱🇰',
@@ -90,8 +151,8 @@ export const BUS_CLASS_PRESETS: Record<string, BusClassPreset> = {
 };
 
 const BUS_CLASSES = [
-  { id: 'Super Luxury (49 Seats 2*2)', label: '✨ Super Luxury Express (49 Seats 2×2 AC Pushback)' },
-  { id: 'Normal Service (54 Seats 3*2)', label: '🇱🇰 Normal Service (54 Seats 3×2 Standard - Route 98)' },
+  { id: 'Super Luxury', label: '✨ Super Luxury Express' },
+  { id: 'Normal Service', label: '🇱🇰 Normal Service (Route 98)' },
 ];
 
 export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEditorModalProps> = ({
@@ -107,7 +168,7 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
   const [operatorName, setOperatorName] = useState(route.operatorName || 'Dewmina Super Line');
   const [operatorRating, setOperatorRating] = useState<number>(route.operatorRating || 4.9);
   const [busNumber, setBusNumber] = useState(route.busNumber || '');
-  const [busType, setBusType] = useState<string>(route.busType || 'Super Luxury (49 Seats 2*2)');
+  const [busType, setBusType] = useState<string>(route.busType || 'Super Luxury');
   const [origin, setOrigin] = useState(route.origin || '');
   const [destination, setDestination] = useState(route.destination || '');
   const [priceStarting, setPriceStarting] = useState<number | string>(route.priceStarting || 2670);
@@ -570,14 +631,10 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                         {BUS_CLASS_PRESETS[busType].description}
                       </p>
 
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
                         <div className="p-2 rounded-xl bg-white border border-slate-200/80">
                           <span className="text-[10px] text-slate-400 font-medium block">Capacity</span>
                           <span className="text-xs font-bold text-slate-800 font-mono">{BUS_CLASS_PRESETS[busType].seatsCount} Seats</span>
-                        </div>
-                        <div className="p-2 rounded-xl bg-white border border-slate-200/80">
-                          <span className="text-[10px] text-slate-400 font-medium block">Layout</span>
-                          <span className="text-xs font-bold text-slate-800">{BUS_CLASS_PRESETS[busType].layoutDescription.split('(')[1]?.replace(')', '') || 'Standard'}</span>
                         </div>
                         <div className="p-2 rounded-xl bg-white border border-slate-200/80">
                           <span className="text-[10px] text-slate-400 font-medium block">Default Fare</span>

@@ -78,7 +78,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
             </span>
             <span className="text-xs text-slate-400">•</span>
             <span className="text-xs font-medium text-slate-500">
-              {route.busType}
+              {(route.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}
             </span>
           </div>
 

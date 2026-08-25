@@ -174,6 +174,14 @@ export async function initializeSchema(p: Pool): Promise<void> {
       "createdAt" TEXT NOT NULL,
       FOREIGN KEY ("routeId") REFERENCES routes("id")
     );
+
+    UPDATE routes 
+    SET "busType" = 'Normal Service' 
+    WHERE "busType" LIKE '%Normal Service%' OR "busType" LIKE '%58 Seats%' OR "busType" LIKE '%54 Seats%';
+
+    UPDATE routes 
+    SET "busType" = 'Super Luxury' 
+    WHERE "busType" LIKE '%Super Luxury%';
   `);
 }
 
@@ -215,15 +223,15 @@ export function buildSeats(
     return seats;
   }
 
-  if (busType.includes('Ashok Leyland (54 Seats 3*2') || busType.includes('Normal Service (54 Seats 3*2') || busType.includes('54 Seats 3*2')) {
-    for (let r = 1; r <= 10; r++) {
+  if (busType.includes('58 Seats 3*2') || busType.includes('Normal Service') || busType.includes('54 Seats 3*2') || busType.includes('Ashok Leyland (54 Seats 3*2')) {
+    for (let r = 1; r <= 11; r++) {
       for (const c of [1, 2, 3, 5, 6]) {
         const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
         seats.push({ id: `${routeId}-${seatNum}`, routeId, number: seatNum, deck: 'lower', row: r, col: c, price: basePrice, status: 'available', isSleeper: 0, isFemaleOnly: (r === 2 || r === 3) && c <= 3 ? 1 : 0 });
       }
     }
-    for (const c of [1, 2, 3, 5]) {
-      const seatNum = `11${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+    for (const c of [1, 2, 3]) {
+      const seatNum = `12${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
       seats.push({ id: `${routeId}-${seatNum}`, routeId, number: seatNum, deck: 'lower', row: 12, col: c, price: basePrice, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
     }
     return seats;

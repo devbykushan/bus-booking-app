@@ -6,8 +6,8 @@ import { LayoutGrid, CheckCircle2, AlertCircle, RefreshCw, Clock, Zap } from 'lu
 import { BUS_CLASS_PRESETS } from './RouteDetailsTimetableEditorModal';
 
 const BUS_CLASSES = [
-  { id: 'Super Luxury (49 Seats 2*2)', label: '✨ Super Luxury Express (49 Seats 2×2 AC Pushback)' },
-  { id: 'Normal Service (54 Seats 3*2)', label: '🇱🇰 Normal Service (54 Seats 3×2 Standard - Route 98)' },
+  { id: 'Super Luxury', label: '✨ Super Luxury Express' },
+  { id: 'Normal Service', label: '🇱🇰 Normal Service (Route 98)' },
 ];
 
 interface RouteDeploymentFormProps {
@@ -21,7 +21,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
 
   const [operatorName, setOperatorName] = useState('Dewmina Super Line');
   const [busNumber, setBusNumber] = useState('ND-8899');
-  const [busType, setBusType] = useState<BusCategory>('Super Luxury (49 Seats 2*2)');
+  const [busType, setBusType] = useState<BusCategory>('Super Luxury');
   const [origin, setOrigin] = useState('Monaragala');
   const [destination, setDestination] = useState('Colombo');
   const [departureTime, setDepartureTime] = useState('10:00 AM');
@@ -307,14 +307,10 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
         )}
 
         {BUS_CLASS_PRESETS[busType] && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
             <div className="p-2 rounded-xl bg-white border border-slate-200">
               <span className="text-[10px] text-slate-400 font-medium block">Capacity</span>
               <span className="text-xs font-bold text-slate-800 font-mono">{BUS_CLASS_PRESETS[busType].seatsCount} Seats</span>
-            </div>
-            <div className="p-2 rounded-xl bg-white border border-slate-200">
-              <span className="text-[10px] text-slate-400 font-medium block">Layout</span>
-              <span className="text-xs font-bold text-slate-800">{BUS_CLASS_PRESETS[busType].layoutDescription.split('(')[1]?.replace(')', '') || 'Standard'}</span>
             </div>
             <div className="p-2 rounded-xl bg-white border border-slate-200">
               <span className="text-[10px] text-slate-400 font-medium block">Default Fare</span>

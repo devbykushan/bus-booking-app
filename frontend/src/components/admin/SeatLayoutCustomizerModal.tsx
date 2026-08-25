@@ -45,16 +45,16 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
         newSeats.push({ id: `${routeId}-${s.num}`, number: s.num, deck: 'lower', row: 12, col: s.col, price, status: 'available', isSleeper: false, isFemaleOnly: false });
       });
       return newSeats;
-    } else if (type.includes('54 Seats 3*2')) {
-      // Ashok Leyland 54 seats: 10 rows of 5 plus 4 rear seats.
-      for (let r = 1; r <= 10; r++) {
+    } else if (type.includes('58 Seats 3*2') || type.includes('Normal Service') || type.includes('54 Seats 3*2')) {
+      // Ashok Leyland 58 seats: 11 rows of 5 plus 3 rear seats.
+      for (let r = 1; r <= 11; r++) {
         [1, 2, 3, 5, 6].forEach((c) => {
           const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
           newSeats.push({ id: `${routeId}-${seatNum}`, number: seatNum, deck: 'lower', row: r, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 3 });
         });
       }
-      [1, 2, 3, 5].forEach((c) => {
-        const seatNum = `11${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+      [1, 2, 3].forEach((c) => {
+        const seatNum = `12${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
         newSeats.push({ id: `${routeId}-${seatNum}`, number: seatNum, deck: 'lower', row: 12, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: false });
       });
       return newSeats;

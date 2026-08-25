@@ -39,7 +39,7 @@ export const RouteDetailsModal: React.FC<RouteDetailsModalProps> = ({ route, onC
               {route.origin} → {route.destination}
             </h3>
             <p className="text-xs text-blue-200 mt-0.5 font-medium">
-              {route.operatorName} • <strong className="text-white">{route.busNumber}</strong> • {route.busType}
+              {route.operatorName} • <strong className="text-white">{route.busNumber}</strong> • {(route.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}
             </p>
           </div>
 
