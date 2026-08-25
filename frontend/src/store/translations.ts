@@ -21,6 +21,8 @@ export const translations = {
     soloFemaleSeatsOnly: 'Solo Female Seats Only',
     busClass: 'Bus Class',
     allClasses: 'All Classes',
+    normalService: 'Normal Service',
+    superLuxury: 'Super Luxury',
     searchBuses: 'Search Buses',
     
     // Cities
@@ -110,6 +112,8 @@ export const translations = {
     soloFemaleSeatsOnly: 'තනි කාන්තා ආසන පමණි',
     busClass: 'බස් වර්ගය',
     allClasses: 'සියලුම බස් වර්ග',
+    normalService: 'සාමාන්‍ය සේවය (Normal Service)',
+    superLuxury: 'සුපිරි සුඛෝපභෝගී (Super Luxury)',
     searchBuses: 'බස් රථ සොයන්න',
 
     // Cities
@@ -199,6 +203,8 @@ export const translations = {
     soloFemaleSeatsOnly: 'தனி பெண் இருக்கைகள் மட்டும்',
     busClass: 'வகுப்பு',
     allClasses: 'அனைத்து வகுப்புகளும்',
+    normalService: 'சாதாரண சேவை (Normal Service)',
+    superLuxury: 'சூப்பர் லக்சுரி (Super Luxury)',
     searchBuses: 'பஸ்களைத் தேடுங்கள்',
 
     // Cities
