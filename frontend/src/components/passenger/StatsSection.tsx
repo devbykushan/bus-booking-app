@@ -72,8 +72,8 @@ export const StatsSection: React.FC = () => {
   ];
 
   return (
-    <div ref={sectionRef} className="max-w-5xl mx-auto px-4 py-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div ref={sectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {stats.map((stat, idx) => (
           <StatCard key={idx} stat={stat} isVisible={isVisible} />
         ))}

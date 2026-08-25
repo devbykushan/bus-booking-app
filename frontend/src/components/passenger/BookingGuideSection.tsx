@@ -48,11 +48,11 @@ export const BookingGuideSection: React.FC = () => {
   ];
 
   return (
-    <section className="max-w-7xl mx-auto px-4 py-12">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="bg-gradient-to-b from-white via-slate-50/50 to-blue-50/20 rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-10">
         
-        {/* Header */}
-        <div className="text-center space-y-3 max-w-3xl mx-auto">
+        {/* Header (Left-aligned) */}
+        <div className="text-left space-y-2.5 max-w-3xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold shadow-xs">
             <Sparkles className="w-3.5 h-3.5 text-blue-600" />
             <span>Fast, Effortless & 100% Digital</span>

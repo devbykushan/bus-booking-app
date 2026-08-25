@@ -96,16 +96,16 @@ export const ServicesSection: React.FC = () => {
   ];
 
   return (
-    <div ref={sectionRef} className="max-w-5xl mx-auto px-4 py-12 space-y-8 relative">
+    <div ref={sectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8 relative">
       {/* Background ambient lighting */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
         <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-blue-400/5 rounded-full blur-3xl" />
         <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-96 h-96 bg-indigo-400/5 rounded-full blur-3xl" />
       </div>
 
-      {/* Header section with badge */}
+      {/* Header section with left-alignment */}
       <div
-        className="text-center space-y-3 transition-all duration-700"
+        className="text-left space-y-2.5 transition-all duration-700 max-w-3xl"
         style={{
           opacity: isVisible ? 1 : 0,
           transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
@@ -118,7 +118,7 @@ export const ServicesSection: React.FC = () => {
         <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">
           Why Travel With <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Dewmina Super Line</span>?
         </h2>
-        <p className="text-slate-500 text-xs md:text-sm max-w-xl mx-auto leading-relaxed">
+        <p className="text-slate-500 text-xs md:text-sm leading-relaxed">
           We combine cutting-edge technology with Sri Lanka’s finest hospitality to make every bus journey smooth, safe, and comfortable.
         </p>
       </div>
