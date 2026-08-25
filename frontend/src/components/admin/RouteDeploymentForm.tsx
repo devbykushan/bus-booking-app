@@ -15,8 +15,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
 
   const [operatorName, setOperatorName] = useState('Dewmina Super Line');
   const [busNumber, setBusNumber] = useState('ND-8899');
-  const [busType, setBusType] = useState<BusCategory | '__custom__'>('Super Luxury (49 Seats 2*2)');
-  const [customBusType, setCustomBusType] = useState('');
+  const busType: BusCategory = 'Super Luxury (49 Seats 2*2)';
   const [origin, setOrigin] = useState('Monaragala');
   const [destination, setDestination] = useState('Colombo');
   const [departureTime, setDepartureTime] = useState('10:00 AM');
@@ -38,14 +37,13 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleOpenTimetableEditor = () => {
-    const selectedBusType = busType === '__custom__' ? (customBusType.trim() || 'Super Luxury (49 Seats 2*2)') : busType;
     const draftRoute: BusRoute = {
       id: `route-${Date.now()}`,
       operatorId: 'op-custom',
       operatorName: operatorName.trim() || 'Dewmina Super Line',
       operatorRating: 4.9,
       busNumber: busNumber.trim() || 'ND-8899',
-      busType: selectedBusType as BusCategory,
+      busType: busType,
       origin: origin.trim() || 'Monaragala',
       destination: destination.trim() || 'Colombo',
       departureTime: departureTime.trim() || '10:00 AM',
@@ -54,7 +52,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
       priceStarting: Number(priceStarting) || 1800,
       availableSeatsCount: 49,
       totalSeatsCount: 49,
-      hasUpperDeck: selectedBusType.includes('Double') || selectedBusType.includes('Sleeper'),
+      hasUpperDeck: busType.includes('Double') || busType.includes('Sleeper'),
       amenities: amenities.length > 0 ? amenities : ['AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats'],
       boardingPoints: [
         { id: 'bp-1', name: pickupStop1.trim() || `${origin.trim()} Main Terminal`, time: departureTime.trim(), landmark: 'Platform 1', lat: 6.8722, lng: 81.3507 },
@@ -124,11 +122,6 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
       errs.busNumber = `Bus ${trimmedBusNum} is already active in the fleet.`;
     }
 
-    // 3. Bus Model
-    if (busType === '__custom__' && !customBusType.trim()) {
-      errs.busType = 'Please enter the custom bus model name.';
-    }
-
     // 4. Origin
     if (!origin.trim()) {
       errs.origin = 'Origin city is required.';
@@ -179,7 +172,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
       return;
     }
 
-    const selectedBusType = busType === '__custom__' ? customBusType.trim() : busType;
+    const selectedBusType = busType;
     const newId = `route-${Date.now()}`;
     const numericPrice = Number(priceStarting);
 
@@ -348,53 +341,6 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
           ) : (
             <p className="text-[10px] text-slate-400 mt-1">
               Format: <span className="font-mono text-slate-500">ND-8899</span> or <span className="font-mono text-slate-500">WP ND-8899</span>
-            </p>
-          )}
-        </div>
-
-        {/* Bus Model & Seating */}
-        <div>
-          <label className="block text-slate-700 font-bold mb-1 text-blue-600">
-            Bus Model & Seating <span className="text-rose-500">*</span>
-          </label>
-          <select
-            value={busType}
-            onChange={(e: any) => {
-              setBusType(e.target.value);
-              if (errors.busType) setErrors(prev => ({ ...prev, busType: '' }));
-            }}
-            className="w-full bg-slate-50 border border-blue-300 rounded-xl p-2.5 text-slate-800 font-bold focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          >
-            <option value="Super Luxury (49 Seats 2*2)">✨ Super Luxury Express (49 Seats 2*2)</option>
-            <option value="Ashok Leyland (54 Seats 3*2)">🚌 Ashok Leyland (54 Seats 3*2)</option>
-            <option value="Ashok Leyland (54 Seats 2*2)">🚌 Ashok Leyland (54 Seats 2*2)</option>
-            <option value="Lanka Ashok Leyland (57 Seats 3*2)">🚌 Lanka Ashok Leyland (57 Seats 3*2)</option>
-            <option value="Lanka Ashok Leyland (57 Seats 2*2)">🚌 Lanka Ashok Leyland (57 Seats 2*2)</option>
-            <option value="Yutong (48 Seats 2*2)">🚌 Yutong (48 Seats 2*2)</option>
-            <option value="Yutong (51 Seats 2*2)">🚌 Yutong (51 Seats 2*2)</option>
-            <option value="AC Sleeper">🛌 AC Sleeper</option>
-            <option value="Luxury Volvo Multi-Axle">✨ Luxury Volvo Multi-Axle</option>
-            <option value="__custom__">⚙️ Custom Bus Model</option>
-          </select>
-          {busType === '__custom__' && (
-            <input
-              type="text"
-              value={customBusType}
-              onChange={e => {
-                setCustomBusType(e.target.value);
-                if (errors.busType) setErrors(prev => ({ ...prev, busType: '' }));
-              }}
-              placeholder="Enter custom bus model"
-              className={`w-full mt-2 rounded-xl p-2.5 font-semibold text-slate-800 border transition-all ${
-                errors.busType
-                  ? 'bg-rose-50/50 border-rose-400 focus:border-rose-500'
-                  : 'bg-white border-blue-300 focus:border-blue-500'
-              }`}
-            />
-          )}
-          {errors.busType && (
-            <p className="text-[11px] text-rose-600 font-semibold mt-1 flex items-center gap-1">
-              <AlertCircle className="w-3 h-3 flex-shrink-0" /> {errors.busType}
             </p>
           )}
         </div>

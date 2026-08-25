@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { routesApi } from '../../services/api';
-import type { BusRoute, BusCategory, BoardingPoint } from '../../types/booking';
+import type { BusRoute, BoardingPoint } from '../../types/booking';
 import { 
   X, Info, Clock, Save, Plus, Trash2, 
   CheckCircle, ShieldCheck, Star, 
@@ -29,18 +29,9 @@ const PRESET_AMENITIES = [
   'Emergency First-Aid',
 ];
 
-const BUS_TYPES: BusCategory[] = [
-  'Super Luxury (49 Seats 2*2)',
-  'Ashok Leyland (54 Seats 3*2)',
-  'Ashok Leyland (54 Seats 2*2)',
-  'Yutong (48 Seats 2*2)',
-  'Yutong (51 Seats 2*2)',
-  'Lanka Ashok Leyland (57 Seats 3*2)',
-  'Lanka Ashok Leyland (57 Seats 2*2)',
-  'Luxury Volvo Multi-Axle',
-  'AC Sleeper',
-  'AC Seater',
-  'Non-AC Seater',
+const BUS_CLASSES = [
+  { id: 'Super Luxury (49 Seats 2*2)', label: '✨ Super Luxury Express (49 Seats 2×2 AC Pushback)' },
+  { id: 'Normal Service (54 Seats 3*2)', label: '🇱🇰 Normal Service (54 Seats 3×2 Standard - Route 98)' },
 ];
 
 export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEditorModalProps> = ({
@@ -56,7 +47,7 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
   const [operatorName, setOperatorName] = useState(route.operatorName || 'Dewmina Super Line');
   const [operatorRating, setOperatorRating] = useState<number>(route.operatorRating || 4.9);
   const [busNumber, setBusNumber] = useState(route.busNumber || '');
-  const [busType, setBusType] = useState<string>(route.busType || 'Ashok Leyland (54 Seats 3*2)');
+  const [busType, setBusType] = useState<string>(route.busType || 'Super Luxury (49 Seats 2*2)');
   const [origin, setOrigin] = useState(route.origin || '');
   const [destination, setDestination] = useState(route.destination || '');
   const [priceStarting, setPriceStarting] = useState<number | string>(route.priceStarting || 1800);
@@ -393,22 +384,6 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                   </div>
                 </div>
 
-                {/* Bus Category / Type */}
-                <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-xs font-bold text-slate-700">Bus Model & Seating Configuration</label>
-                  <select
-                    value={busType}
-                    onChange={(e) => setBusType(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
-                  >
-                    {BUS_TYPES.map((bt) => (
-                      <option key={bt} value={bt}>
-                        {bt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
                 {/* Starting Price */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700">Base Ticket Fare (LKR)</label>
@@ -458,6 +433,22 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     placeholder="6h 00m"
                   />
+                </div>
+
+                {/* Bus Class */}
+                <div className="space-y-1.5 sm:col-span-2">
+                  <label className="text-xs font-bold text-slate-700">Bus Class</label>
+                  <select
+                    value={busType}
+                    onChange={(e) => setBusType(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white font-medium"
+                  >
+                    {BUS_CLASSES.map((bc) => (
+                      <option key={bc.id} value={bc.id}>
+                        {bc.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
               </div>
