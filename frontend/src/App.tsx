@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useBookingStore } from './store/bookingStore';
+import { useBookingStore, HASH_VIEW_MAP, VIEW_HASH_MAP, type AppView } from './store/bookingStore';
 import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { HeroSearch } from './components/passenger/HeroSearch';
@@ -31,6 +31,55 @@ export function App() {
 
   const [backendReady, setBackendReady] = useState(false);
   const [backendError, setBackendError] = useState(false);
+
+  // Sync browser history state and handle browser Back / Forward buttons
+  useEffect(() => {
+    const rawHash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+    const initialView = HASH_VIEW_MAP[rawHash] || currentView;
+    const initialHash = VIEW_HASH_MAP[initialView] || 'home';
+
+    // Replace current history entry with initial view state
+    window.history.replaceState(
+      { view: initialView, routeId: useBookingStore.getState().selectedRoute?.id },
+      '',
+      `#${initialHash}`
+    );
+
+    const handlePopState = (event: PopStateEvent) => {
+      const state = event.state;
+      let targetView: AppView = 'passenger-search';
+
+      if (state && state.view && (HASH_VIEW_MAP[state.view] || VIEW_HASH_MAP[state.view as AppView])) {
+        targetView = (HASH_VIEW_MAP[state.view] || state.view) as AppView;
+      } else {
+        const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+        if (hash && HASH_VIEW_MAP[hash]) {
+          targetView = HASH_VIEW_MAP[hash];
+        }
+      }
+
+      // If returning to a seat selection view, restore route if possible
+      if (state?.routeId) {
+        const storeRoutes = useBookingStore.getState().routes;
+        const matchingRoute = storeRoutes.find((r) => r.id === state.routeId);
+        if (matchingRoute) {
+          useBookingStore.getState().setSelectedRoute(matchingRoute);
+        }
+      }
+
+      // If going to seat selection or checkout with no route selected, fallback to schedules
+      const currentRoute = useBookingStore.getState().selectedRoute;
+      if ((targetView === 'seat-selection' || targetView === 'checkout') && !currentRoute) {
+        targetView = 'schedules-dashboard';
+      }
+
+      // Transition view without pushing redundant history entry
+      useBookingStore.getState().setCurrentView(targetView, false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // On app start: ping backend health, then load data
   useEffect(() => {

@@ -26,6 +26,47 @@ export type AppView =
   | 'live-tracking'
   | 'admin-panel';
 
+export const VIEW_HASH_MAP: Record<AppView, string> = {
+  'passenger-search': 'home',
+  'schedules-dashboard': 'journeys',
+  'seat-selection': 'seats',
+  'checkout': 'checkout',
+  'ticket-confirmation': 'confirmation',
+  'my-bookings': 'my-tickets',
+  'live-tracking': 'live-gps',
+  'admin-panel': 'admin',
+};
+
+export const HASH_VIEW_MAP: Record<string, AppView> = {
+  'home': 'passenger-search',
+  '': 'passenger-search',
+  '/': 'passenger-search',
+  'search': 'passenger-search',
+  'journeys': 'schedules-dashboard',
+  'schedules': 'schedules-dashboard',
+  'schedules-dashboard': 'schedules-dashboard',
+  'seats': 'seat-selection',
+  'seat-selection': 'seat-selection',
+  'checkout': 'checkout',
+  'confirmation': 'ticket-confirmation',
+  'ticket-confirmation': 'ticket-confirmation',
+  'my-tickets': 'my-bookings',
+  'my-bookings': 'my-bookings',
+  'live-gps': 'live-tracking',
+  'live-tracking': 'live-tracking',
+  'admin': 'admin-panel',
+  'admin-panel': 'admin-panel',
+};
+
+export function getViewFromLocation(): AppView {
+  if (typeof window === 'undefined') return 'passenger-search';
+  const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+  if (hash && HASH_VIEW_MAP[hash]) {
+    return HASH_VIEW_MAP[hash];
+  }
+  return 'passenger-search';
+}
+
 interface BookingStore {
   // Authentication
   currentUser: UserAccount | null;
@@ -42,7 +83,7 @@ interface BookingStore {
 
   // Navigation
   currentView: AppView;
-  setCurrentView: (view: AppView) => void;
+  setCurrentView: (view: AppView, pushHistory?: boolean) => void;
   goToSearchSchedules: () => void;
   goToHome: () => void;
 
@@ -133,9 +174,9 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         set({
           currentUser: user,
           userRole: user.role as any,
-          currentView: user.role === 'admin' ? 'admin-panel' : 'passenger-search',
           showAuthModal: false,
         });
+        get().setCurrentView(user.role === 'admin' ? 'admin-panel' : 'passenger-search');
         return { success: true, message: res.message || 'Logged in successfully' };
       }
       return { success: false, message: res.message || 'Login failed' };
@@ -160,9 +201,9 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         set({
           currentUser: user,
           userRole: user.role as any,
-          currentView: user.role === 'admin' ? 'admin-panel' : 'passenger-search',
           showAuthModal: false,
         });
+        get().setCurrentView(user.role === 'admin' ? 'admin-panel' : 'passenger-search');
         return { success: true, message: res.message || 'Registration successful' };
       }
       return { success: false, message: res.message || 'Registration failed' };
@@ -174,22 +215,35 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   logout: () => {
     localStorage.removeItem('dewmina_user');
     localStorage.removeItem('auth_token');
-    set({ currentUser: null, userRole: 'passenger', currentView: 'passenger-search' });
+    set({ currentUser: null, userRole: 'passenger' });
+    get().setCurrentView('passenger-search');
   },
 
   isLoading: false,
   error: null,
   setError: (msg) => set({ error: msg }),
 
-  currentView: 'passenger-search',
-  setCurrentView: (view) => set({ currentView: view }),
-  goToSearchSchedules: () => {
-    set({ currentView: 'schedules-dashboard' });
+  currentView: getViewFromLocation(),
+  setCurrentView: (view, pushHistory = true) => {
+    const current = get().currentView;
+    if (view === current) return;
+
+    if (pushHistory !== false && typeof window !== 'undefined') {
+      const hash = VIEW_HASH_MAP[view] || 'home';
+      window.history.pushState(
+        { view, routeId: get().selectedRoute?.id },
+        '',
+        `#${hash}`
+      );
+    }
+    set({ currentView: view });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   },
+  goToSearchSchedules: () => {
+    get().setCurrentView('schedules-dashboard');
+  },
   goToHome: () => {
-    set({ currentView: 'passenger-search' });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    get().setCurrentView('passenger-search');
   },
 
   userRole: JSON.parse(localStorage.getItem('dewmina_user') || 'null')?.role || 'passenger',
@@ -391,10 +445,10 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         selectedSeatIds: [],
         lockActive: false,
         isLoading: false,
-        currentView: 'ticket-confirmation',
         appliedPromo: '',
         discountRate: 0,
       });
+      get().setCurrentView('ticket-confirmation');
 
       return newBooking;
     } catch (err: any) {
@@ -428,7 +482,10 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   },
 
   trackingRouteId: 'route-101',
-  setTrackingRouteId: (id) => set({ trackingRouteId: id, currentView: 'live-tracking' }),
+  setTrackingRouteId: (id) => {
+    set({ trackingRouteId: id });
+    get().setCurrentView('live-tracking');
+  },
 
   // Localization Implementation
   language: (localStorage.getItem('dewmina_lang') as Language) || 'english',

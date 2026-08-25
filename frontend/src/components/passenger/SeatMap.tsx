@@ -21,6 +21,7 @@ export const SeatMap: React.FC = () => {
     applyPromoCode,
     createBooking,
     goToSearchSchedules,
+    goToHome,
     searchDate,
     setSearchCriteria,
     lockActive,
@@ -260,15 +261,15 @@ export const SeatMap: React.FC = () => {
       <div className="flex items-center justify-between gap-4 text-xs font-medium text-slate-500 border-b border-slate-200/80 pb-3">
         <div className="flex items-center gap-2 overflow-hidden truncate">
           <button 
-            onClick={goToSearchSchedules}
-            className="hover:text-blue-600 transition-colors flex items-center gap-1 font-semibold text-slate-600 hover:-translate-x-0.5 transform duration-150"
+            onClick={goToHome}
+            className="hover:text-blue-600 transition-colors flex items-center gap-1 font-semibold text-slate-600 hover:-translate-x-0.5 transform duration-150 cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Home
           </button>
           <span>›</span>
           <button 
             onClick={goToSearchSchedules}
-            className="hover:text-blue-600 transition-colors truncate"
+            className="hover:text-blue-600 transition-colors truncate cursor-pointer"
           >
             Journeys
           </button>
