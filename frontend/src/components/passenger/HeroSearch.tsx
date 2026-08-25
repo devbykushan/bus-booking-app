@@ -4,6 +4,7 @@ import {
   MapPin, Calendar, ArrowRightLeft, Search,
   Shield, Filter, Clock, Star, ChevronDown
 } from 'lucide-react';
+import { RealisticBusAnimation } from '../common/RealisticBusAnimation';
 
 const CITIES = [
   'Monaragala', 'Colombo', 'Kandy', 'Galle',
@@ -109,16 +110,13 @@ export const HeroSearch: React.FC = () => {
         ))}
       </div>
 
-      {/* ── Animated Bus Streak at bottom ──────────────────────────────── */}
-      <div className="absolute bottom-24 left-0 z-[2] pointer-events-none">
+      {/* ── Animated Real Luxury Coach Streak at bottom ──────────────── */}
+      <div className="absolute bottom-[68px] left-0 z-[3] pointer-events-none w-full overflow-hidden">
         <div
-          className="animate-bus-streak flex items-center gap-1 opacity-30"
-          style={{ animationDelay: '3s' }}
+          className="animate-bus-streak flex items-center"
+          style={{ animationDelay: '1s', animationDuration: '14s' }}
         >
-          {/* Simplified bus silhouette using emoji+text */}
-          <span className="text-3xl" role="img" aria-label="bus">🚌</span>
-          {/* Motion blur trail */}
-          <div className="h-1 w-20 bg-gradient-to-r from-blue-400/60 to-transparent rounded-full" />
+          <RealisticBusAnimation />
         </div>
       </div>
 
