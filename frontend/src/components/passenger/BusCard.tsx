@@ -15,19 +15,15 @@ interface BusCardProps {
 }
 
 export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRoute }) => {
-  const { setSelectedRoute, setCurrentView, setShowAuthModal, searchDate } = useBookingStore();
+  const { setSelectedRoute, setCurrentView, searchDate } = useBookingStore();
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showTimetableModal, setShowTimetableModal] = useState(false);
 
   const handleSelectSeats = () => {
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      setShowAuthModal(true);
-      return;
-    }
     setSelectedRoute(route);
     setCurrentView('seat-selection');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Helper to determine if journey is an overnight / midnight journey
