@@ -187,7 +187,35 @@ export function buildSeats(
   const seats: ReturnType<typeof buildSeats> = [];
   const basePrice = busType.includes('Sleeper') ? 2800 : 1800;
 
-  if (busType.includes('Ashok Leyland (54 Seats 3*2')) {
+  if (busType.includes('49 Seats') || busType.includes('Super Luxury')) {
+    const femaleSeats = ['15', '19', '20', '23'];
+    for (let r = 1; r <= 11; r++) {
+      const leftWindowNum = ((r - 1) * 4 + 3).toString();
+      const leftAisleNum = ((r - 1) * 4 + 4).toString();
+      const rightAisleNum = ((r - 1) * 4 + 2).toString();
+      const rightWindowNum = ((r - 1) * 4 + 1).toString();
+
+      seats.push(
+        { id: `${routeId}-${leftWindowNum}`, routeId, number: leftWindowNum, deck: 'lower', row: r, col: 1, price: basePrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(leftWindowNum) ? 1 : 0 },
+        { id: `${routeId}-${leftAisleNum}`, routeId, number: leftAisleNum, deck: 'lower', row: r, col: 2, price: basePrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(leftAisleNum) ? 1 : 0 },
+        { id: `${routeId}-${rightAisleNum}`, routeId, number: rightAisleNum, deck: 'lower', row: r, col: 4, price: basePrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(rightAisleNum) ? 1 : 0 },
+        { id: `${routeId}-${rightWindowNum}`, routeId, number: rightWindowNum, deck: 'lower', row: r, col: 5, price: basePrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(rightWindowNum) ? 1 : 0 }
+      );
+    }
+    const backSeats = [
+      { num: '47', col: 1 },
+      { num: '48', col: 2 },
+      { num: '49', col: 3 },
+      { num: '46', col: 4 },
+      { num: '45', col: 5 },
+    ];
+    backSeats.forEach(s => {
+      seats.push({ id: `${routeId}-${s.num}`, routeId, number: s.num, deck: 'lower', row: 12, col: s.col, price: basePrice, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
+    });
+    return seats;
+  }
+
+  if (busType.includes('Ashok Leyland (54 Seats 3*2') || busType.includes('Normal Service (54 Seats 3*2') || busType.includes('54 Seats 3*2')) {
     for (let r = 1; r <= 10; r++) {
       for (const c of [1, 2, 3, 5, 6]) {
         const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;

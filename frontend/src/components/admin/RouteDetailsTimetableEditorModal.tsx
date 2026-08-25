@@ -29,6 +29,66 @@ const PRESET_AMENITIES = [
   'Emergency First-Aid',
 ];
 
+export interface BusClassPreset {
+  id: string;
+  label: string;
+  shortName: string;
+  seatsCount: number;
+  layoutDescription: string;
+  defaultPrice: number;
+  defaultDuration: string;
+  defaultAmenities: string[];
+  description: string;
+  badge: string;
+  badgeColor: string;
+  icon: string;
+}
+
+export const BUS_CLASS_PRESETS: Record<string, BusClassPreset> = {
+  'Super Luxury (49 Seats 2*2)': {
+    id: 'Super Luxury (49 Seats 2*2)',
+    label: '✨ Super Luxury Express (49 Seats 2×2 AC Pushback)',
+    shortName: 'Super Luxury Express',
+    seatsCount: 49,
+    layoutDescription: '49 Seats (2×2 AC Pushback Layout)',
+    defaultPrice: 1800,
+    defaultDuration: '5h 30m',
+    defaultAmenities: [
+      'AC',
+      'Wi-Fi',
+      'Charging Ports',
+      'Live GPS Tracking',
+      'Reclining Seats',
+      'Water Bottle',
+      'Blanket',
+      'LED TV Screen',
+    ],
+    description: 'High-speed Expressway coach with 49 comfortable 2×2 pushback seats, air conditioning & VIP passenger amenities.',
+    badge: 'Expressway Direct (E01)',
+    badgeColor: 'bg-amber-50 text-amber-800 border-amber-300',
+    icon: '✨',
+  },
+  'Normal Service (54 Seats 3*2)': {
+    id: 'Normal Service (54 Seats 3*2)',
+    label: '🇱🇰 Normal Service (54 Seats 3×2 Standard - Route 98)',
+    shortName: 'Normal Service (Route 98)',
+    seatsCount: 54,
+    layoutDescription: '54 Seats (3×2 Standard Leyland Layout)',
+    defaultPrice: 950,
+    defaultDuration: '7h 30m',
+    defaultAmenities: [
+      'Live GPS Tracking',
+      'Music / Audio',
+      'Emergency First-Aid',
+      'Reading Lamp',
+    ],
+    description: 'Classic Route 98 A4 highway intercity service with 54 seats in a 3×2 arrangement at standard fare.',
+    badge: 'A4 Highway (Route 98)',
+    badgeColor: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+    icon: '🇱🇰',
+  },
+};
+
 const BUS_CLASSES = [
   { id: 'Super Luxury (49 Seats 2*2)', label: '✨ Super Luxury Express (49 Seats 2×2 AC Pushback)' },
   { id: 'Normal Service (54 Seats 3*2)', label: '🇱🇰 Normal Service (54 Seats 3×2 Standard - Route 98)' },
@@ -57,6 +117,7 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
       : ['AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats']
   );
   const [customAmenityInput, setCustomAmenityInput] = useState('');
+  const [classUpdateNotice, setClassUpdateNotice] = useState<string | null>(null);
 
   // ─── Timetable State ───
   const [departureTime, setDepartureTime] = useState(route.departureTime || '06:30 AM');
@@ -94,6 +155,29 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
     const lastDigits = digitsMatch[digitsMatch.length - 1];
     if (lastDigits && lastDigits.length > 4) return false;
     return true;
+  };
+
+  // Bus Class Preset Auto-Update Handler
+  const applyClassDefaults = (type: string, silent: boolean = false) => {
+    const preset = BUS_CLASS_PRESETS[type];
+    if (preset) {
+      setBusType(type);
+      setPriceStarting(preset.defaultPrice);
+      setAmenities([...preset.defaultAmenities]);
+      setDuration(preset.defaultDuration);
+      if (!silent) {
+        setClassUpdateNotice(
+          `Auto-configured ${preset.shortName}: LKR ${preset.defaultPrice.toLocaleString()} base fare, ${preset.seatsCount} seats (${preset.layoutDescription}) & ${preset.defaultAmenities.length} default amenities.`
+        );
+        setTimeout(() => setClassUpdateNotice(null), 6000);
+      }
+    } else {
+      setBusType(type);
+    }
+  };
+
+  const handleBusTypeChange = (newType: string) => {
+    applyClassDefaults(newType);
   };
 
   // Amenities handlers
@@ -436,12 +520,15 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                 </div>
 
                 {/* Bus Class */}
-                <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-xs font-bold text-slate-700">Bus Class</label>
+                <div className="space-y-2 sm:col-span-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-700">Bus Class & Service Profile</label>
+                    <span className="text-[11px] font-semibold text-blue-600">Auto-syncs price, layout & amenities</span>
+                  </div>
                   <select
                     value={busType}
-                    onChange={(e) => setBusType(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white font-medium"
+                    onChange={(e) => handleBusTypeChange(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-slate-900 shadow-xs"
                   >
                     {BUS_CLASSES.map((bc) => (
                       <option key={bc.id} value={bc.id}>
@@ -449,6 +536,60 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                       </option>
                     ))}
                   </select>
+
+                  {/* Auto-update Notice Banner */}
+                  {classUpdateNotice && (
+                    <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-xs font-semibold flex items-center gap-2 animate-fade-in">
+                      <Zap className="w-4 h-4 text-blue-600 flex-shrink-0 animate-pulse" />
+                      <span>{classUpdateNotice}</span>
+                    </div>
+                  )}
+
+                  {/* Selected Bus Class Profile Card */}
+                  {BUS_CLASS_PRESETS[busType] && (
+                    <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-50 to-blue-50/50 border border-slate-200 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">{BUS_CLASS_PRESETS[busType].icon}</span>
+                          <span className="text-xs font-bold text-slate-800">{BUS_CLASS_PRESETS[busType].shortName}</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${BUS_CLASS_PRESETS[busType].badgeColor}`}>
+                            {BUS_CLASS_PRESETS[busType].badge}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => applyClassDefaults(busType)}
+                          className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-blue-400 text-slate-700 hover:text-blue-600 text-[11px] font-bold flex items-center gap-1 shadow-xs transition-all"
+                          title="Reset price, duration, and amenities to this class's defaults"
+                        >
+                          <RefreshCw className="w-3 h-3" /> Re-apply Defaults
+                        </button>
+                      </div>
+
+                      <p className="text-[11px] text-slate-600 leading-relaxed">
+                        {BUS_CLASS_PRESETS[busType].description}
+                      </p>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                        <div className="p-2 rounded-xl bg-white border border-slate-200/80">
+                          <span className="text-[10px] text-slate-400 font-medium block">Capacity</span>
+                          <span className="text-xs font-bold text-slate-800 font-mono">{BUS_CLASS_PRESETS[busType].seatsCount} Seats</span>
+                        </div>
+                        <div className="p-2 rounded-xl bg-white border border-slate-200/80">
+                          <span className="text-[10px] text-slate-400 font-medium block">Layout</span>
+                          <span className="text-xs font-bold text-slate-800">{BUS_CLASS_PRESETS[busType].layoutDescription.split('(')[1]?.replace(')', '') || 'Standard'}</span>
+                        </div>
+                        <div className="p-2 rounded-xl bg-white border border-slate-200/80">
+                          <span className="text-[10px] text-slate-400 font-medium block">Default Fare</span>
+                          <span className="text-xs font-bold text-blue-600 font-mono">LKR {BUS_CLASS_PRESETS[busType].defaultPrice}</span>
+                        </div>
+                        <div className="p-2 rounded-xl bg-white border border-slate-200/80">
+                          <span className="text-[10px] text-slate-400 font-medium block">Duration</span>
+                          <span className="text-xs font-bold text-slate-800 font-mono">{BUS_CLASS_PRESETS[busType].defaultDuration}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
               </div>

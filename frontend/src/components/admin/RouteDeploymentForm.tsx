@@ -2,7 +2,13 @@ import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { routesApi } from '../../services/api';
 import type { BusRoute, BusCategory } from '../../types/booking';
-import { LayoutGrid, CheckCircle2, AlertCircle, RefreshCw, Clock } from 'lucide-react';
+import { LayoutGrid, CheckCircle2, AlertCircle, RefreshCw, Clock, Zap } from 'lucide-react';
+import { BUS_CLASS_PRESETS } from './RouteDetailsTimetableEditorModal';
+
+const BUS_CLASSES = [
+  { id: 'Super Luxury (49 Seats 2*2)', label: '✨ Super Luxury Express (49 Seats 2×2 AC Pushback)' },
+  { id: 'Normal Service (54 Seats 3*2)', label: '🇱🇰 Normal Service (54 Seats 3×2 Standard - Route 98)' },
+];
 
 interface RouteDeploymentFormProps {
   onClose: () => void;
@@ -15,7 +21,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
 
   const [operatorName, setOperatorName] = useState('Dewmina Super Line');
   const [busNumber, setBusNumber] = useState('ND-8899');
-  const busType: BusCategory = 'Super Luxury (49 Seats 2*2)';
+  const [busType, setBusType] = useState<BusCategory>('Super Luxury (49 Seats 2*2)');
   const [origin, setOrigin] = useState('Monaragala');
   const [destination, setDestination] = useState('Colombo');
   const [departureTime, setDepartureTime] = useState('10:00 AM');
@@ -23,8 +29,9 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
   const [duration, setDuration] = useState('5h 30m');
   const [priceStarting, setPriceStarting] = useState<number | string>(1800);
   const [amenities, setAmenities] = useState<string[]>([
-    'AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats', 'Water Bottle'
+    'AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats', 'Water Bottle', 'Blanket', 'LED TV Screen'
   ]);
+  const [classNotice, setClassNotice] = useState<string | null>(null);
   const [showAdvancedStops, setShowAdvancedStops] = useState(false);
   const [pickupStop1, setPickupStop1] = useState('');
   const [pickupStop2, setPickupStop2] = useState('');
@@ -95,6 +102,20 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
     const platePattern = /^(([A-Za-z]{1,3}|[0-9]{2,3})\s*[- ]\s*[0-9]{1,4}|(WP|CP|SP|NP|EP|NW|NC|UP|SG)[- ]([A-Za-z]{2,3}|[0-9]{2,3})[- ][0-9]{1,4})$/i;
     const generalPattern = /^[A-Za-z0-9\s\-]+[- ]\d{1,4}$/i;
     return platePattern.test(trimmed) || generalPattern.test(trimmed);
+  };
+
+  const handleBusTypeChange = (newType: BusCategory) => {
+    setBusType(newType);
+    const preset = BUS_CLASS_PRESETS[newType];
+    if (preset) {
+      setPriceStarting(preset.defaultPrice);
+      setAmenities([...preset.defaultAmenities]);
+      setDuration(preset.defaultDuration);
+      setClassNotice(
+        `Configured ${preset.shortName}: LKR ${preset.defaultPrice} base fare, ${preset.seatsCount} seats (${preset.layoutDescription}) & ${preset.defaultAmenities.length} default amenities.`
+      );
+      setTimeout(() => setClassNotice(null), 5000);
+    }
   };
 
   // Validate all fields
@@ -257,6 +278,55 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
           <span>{successMessage}</span>
         </div>
       )}
+
+      {/* Bus Class Selection & Preset Config */}
+      <div className="space-y-2 p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100 text-xs">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <Zap className="w-3.5 h-3.5 text-amber-500" /> Bus Class & Service Profile
+          </label>
+          <span className="text-[11px] font-semibold text-blue-600">Auto-syncs price, layout & amenities</span>
+        </div>
+        <select
+          value={busType}
+          onChange={(e) => handleBusTypeChange(e.target.value as BusCategory)}
+          className="w-full rounded-xl p-2.5 font-bold text-slate-900 bg-white border border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 shadow-xs"
+        >
+          {BUS_CLASSES.map((bc) => (
+            <option key={bc.id} value={bc.id}>
+              {bc.label}
+            </option>
+          ))}
+        </select>
+
+        {classNotice && (
+          <div className="p-2.5 rounded-xl bg-blue-100/60 border border-blue-200 text-blue-800 text-xs font-semibold flex items-center gap-2 animate-fade-in">
+            <Zap className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+            <span>{classNotice}</span>
+          </div>
+        )}
+
+        {BUS_CLASS_PRESETS[busType] && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+            <div className="p-2 rounded-xl bg-white border border-slate-200">
+              <span className="text-[10px] text-slate-400 font-medium block">Capacity</span>
+              <span className="text-xs font-bold text-slate-800 font-mono">{BUS_CLASS_PRESETS[busType].seatsCount} Seats</span>
+            </div>
+            <div className="p-2 rounded-xl bg-white border border-slate-200">
+              <span className="text-[10px] text-slate-400 font-medium block">Layout</span>
+              <span className="text-xs font-bold text-slate-800">{BUS_CLASS_PRESETS[busType].layoutDescription.split('(')[1]?.replace(')', '') || 'Standard'}</span>
+            </div>
+            <div className="p-2 rounded-xl bg-white border border-slate-200">
+              <span className="text-[10px] text-slate-400 font-medium block">Default Fare</span>
+              <span className="text-xs font-bold text-blue-600 font-mono">LKR {BUS_CLASS_PRESETS[busType].defaultPrice}</span>
+            </div>
+            <div className="p-2 rounded-xl bg-white border border-slate-200">
+              <span className="text-[10px] text-slate-400 font-medium block">Duration</span>
+              <span className="text-xs font-bold text-slate-800 font-mono">{BUS_CLASS_PRESETS[busType].defaultDuration}</span>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
         

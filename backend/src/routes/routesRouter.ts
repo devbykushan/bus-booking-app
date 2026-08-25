@@ -206,16 +206,41 @@ routesRouter.post('/', async (req: Request, res: Response) => {
       const totalRows = busType.includes('3*2') || busType.includes('Leyland') ? 11 : busType.includes('2*2') ? 14 : 10;
       seatsToInsert = [];
 
-      if (busType.includes('Ashok Leyland (54 Seats 3*2')) {
+      if (busType.includes('49 Seats') || busType.includes('Super Luxury')) {
+        const femaleSeats = ['15', '19', '20', '23'];
+        for (let r = 1; r <= 11; r++) {
+          const leftWindowNum = ((r - 1) * 4 + 3).toString();
+          const leftAisleNum = ((r - 1) * 4 + 4).toString();
+          const rightAisleNum = ((r - 1) * 4 + 2).toString();
+          const rightWindowNum = ((r - 1) * 4 + 1).toString();
+
+          seatsToInsert.push(
+            { id: `${id}-${leftWindowNum}`, routeId: id, number: leftWindowNum, deck: 'lower', row: r, col: 1, price: parsedPrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(leftWindowNum) ? 1 : 0 },
+            { id: `${id}-${leftAisleNum}`, routeId: id, number: leftAisleNum, deck: 'lower', row: r, col: 2, price: parsedPrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(leftAisleNum) ? 1 : 0 },
+            { id: `${id}-${rightAisleNum}`, routeId: id, number: rightAisleNum, deck: 'lower', row: r, col: 4, price: parsedPrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(rightAisleNum) ? 1 : 0 },
+            { id: `${id}-${rightWindowNum}`, routeId: id, number: rightWindowNum, deck: 'lower', row: r, col: 5, price: parsedPrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(rightWindowNum) ? 1 : 0 }
+          );
+        }
+        const backSeats = [
+          { num: '47', col: 1 },
+          { num: '48', col: 2 },
+          { num: '49', col: 3 },
+          { num: '46', col: 4 },
+          { num: '45', col: 5 },
+        ];
+        backSeats.forEach(s => {
+          seatsToInsert.push({ id: `${id}-${s.num}`, routeId: id, number: s.num, deck: 'lower', row: 12, col: s.col, price: parsedPrice, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
+        });
+      } else if (busType.includes('Ashok Leyland (54 Seats 3*2') || busType.includes('Normal Service (54 Seats 3*2') || busType.includes('54 Seats 3*2')) {
         for (let r = 1; r <= 10; r++) {
           for (const c of [1, 2, 3, 5, 6]) {
             const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
-            seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: r, col: c, price: priceStarting || 1800, status: 'available', isSleeper: 0, isFemaleOnly: (r === 2 || r === 3) && c <= 3 ? 1 : 0 });
+            seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: r, col: c, price: parsedPrice, status: 'available', isSleeper: 0, isFemaleOnly: (r === 2 || r === 3) && c <= 3 ? 1 : 0 });
           }
         }
         for (const c of [1, 2, 3, 5]) {
           const seatNum = `11${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
-          seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: 12, col: c, price: priceStarting || 1800, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
+          seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: 12, col: c, price: parsedPrice, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
         }
       } else if (busType.includes('Ashok Leyland (54 Seats')) {
         for (let r = 1; r <= 13; r++) {
@@ -482,6 +507,72 @@ routesRouter.put('/:id', async (req: Request, res: Response) => {
           ]);
         }
       }
+    }
+
+    // Auto-synchronize seat layout when busType changes (e.g. 49 Seats Super Luxury vs 54 Seats Normal Service)
+    if (updatedBusType !== current.busType) {
+      await client.query('DELETE FROM seats WHERE "routeId" = $1', [id]);
+
+      const seatsToInsert: any[] = [];
+      if (updatedBusType.includes('49 Seats') || updatedBusType.includes('Super Luxury')) {
+        const femaleSeats = ['15', '19', '20', '23'];
+        for (let r = 1; r <= 11; r++) {
+          const leftWindowNum = ((r - 1) * 4 + 3).toString();
+          const leftAisleNum = ((r - 1) * 4 + 4).toString();
+          const rightAisleNum = ((r - 1) * 4 + 2).toString();
+          const rightWindowNum = ((r - 1) * 4 + 1).toString();
+
+          seatsToInsert.push(
+            { id: `${id}-${leftWindowNum}`, routeId: id, number: leftWindowNum, deck: 'lower', row: r, col: 1, price: updatedPrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(leftWindowNum) ? 1 : 0 },
+            { id: `${id}-${leftAisleNum}`, routeId: id, number: leftAisleNum, deck: 'lower', row: r, col: 2, price: updatedPrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(leftAisleNum) ? 1 : 0 },
+            { id: `${id}-${rightAisleNum}`, routeId: id, number: rightAisleNum, deck: 'lower', row: r, col: 4, price: updatedPrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(rightAisleNum) ? 1 : 0 },
+            { id: `${id}-${rightWindowNum}`, routeId: id, number: rightWindowNum, deck: 'lower', row: r, col: 5, price: updatedPrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(rightWindowNum) ? 1 : 0 }
+          );
+        }
+        const backSeats = [
+          { num: '47', col: 1 },
+          { num: '48', col: 2 },
+          { num: '49', col: 3 },
+          { num: '46', col: 4 },
+          { num: '45', col: 5 },
+        ];
+        backSeats.forEach(s => {
+          seatsToInsert.push({ id: `${id}-${s.num}`, routeId: id, number: s.num, deck: 'lower', row: 12, col: s.col, price: updatedPrice, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
+        });
+      } else if (updatedBusType.includes('Ashok Leyland (54 Seats 3*2') || updatedBusType.includes('Normal Service') || updatedBusType.includes('54 Seats 3*2')) {
+        for (let r = 1; r <= 10; r++) {
+          for (const c of [1, 2, 3, 5, 6]) {
+            const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+            seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: r, col: c, price: updatedPrice, status: 'available', isSleeper: 0, isFemaleOnly: (r === 2 || r === 3) && c <= 3 ? 1 : 0 });
+          }
+        }
+        for (const c of [1, 2, 3, 5]) {
+          const seatNum = `11${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+          seatsToInsert.push({ id: `${id}-${seatNum}`, routeId: id, number: seatNum, deck: 'lower', row: 12, col: c, price: updatedPrice, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
+        }
+      }
+
+      for (const seat of seatsToInsert) {
+        await client.query(`
+          INSERT INTO seats (
+            "id", "routeId", "number", "deck", "row", "col", "price", "status", "isSleeper", "isFemaleOnly"
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        `, [
+          seat.id,
+          id,
+          seat.number,
+          seat.deck || 'lower',
+          seat.row,
+          seat.col,
+          seat.price,
+          seat.status || 'available',
+          seat.isSleeper ? 1 : 0,
+          seat.isFemaleOnly ? 1 : 0,
+        ]);
+      }
+    } else if (updatedPrice !== current.priceStarting) {
+      // Update seat prices for existing layout
+      await client.query('UPDATE seats SET "price" = $1 WHERE "routeId" = $2', [updatedPrice, id]);
     }
 
     await client.query('COMMIT');

@@ -57,7 +57,6 @@ export const SeatMap: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking' | 'wallet'>('card');
   const [promoInput, setPromoInput] = useState('');
   const [promoMessage, setPromoMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [insuranceSelected, setInsuranceSelected] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Phone input changer with automatic zero stripping
@@ -164,9 +163,8 @@ export const SeatMap: React.FC = () => {
 
   const baseTotal = selectedSeatsList.reduce((sum, s) => sum + s.price, 0);
   const taxAmount = Number((baseTotal * 0.05).toFixed(2));
-  const insuranceAmount = insuranceSelected ? selectedSeatsList.length * 150 : 0;
   const discountAmount = Number((baseTotal * discountRate).toFixed(2));
-  const finalTotal = Math.max(0, baseTotal + taxAmount + insuranceAmount - discountAmount);
+  const finalTotal = Math.max(0, baseTotal + taxAmount - discountAmount);
 
   const handleDateConfirm = () => {
     setSearchCriteria(selectedRoute.origin, selectedRoute.destination, travelDate);
@@ -304,7 +302,7 @@ export const SeatMap: React.FC = () => {
     });
 
     setIsSubmitting(true);
-    const booking = await createBooking(paymentMethod, insuranceSelected);
+    const booking = await createBooking(paymentMethod, false);
     setIsSubmitting(false);
 
     if (!booking) {
@@ -926,21 +924,6 @@ export const SeatMap: React.FC = () => {
                       </p>
                     )}
                   </form>
-
-                  {/* Travel Insurance Checkbox */}
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-2.5 hover:border-slate-300 transition-colors">
-                    <input
-                      type="checkbox"
-                      id="insurance-checkbox"
-                      checked={insuranceSelected}
-                      onChange={(e) => setInsuranceSelected(e.target.checked)}
-                      className="mt-0.5 w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
-                    />
-                    <label htmlFor="insurance-checkbox" className="text-[11px] text-slate-700 cursor-pointer">
-                      <strong className="text-slate-900 block">Passenger & Luggage Insurance (+ LKR 150/seat)</strong>
-                      Covers medical emergencies and luggage loss up to LKR 250,000.
-                    </label>
-                  </div>
                 </div>
 
               </div>
@@ -1019,12 +1002,6 @@ export const SeatMap: React.FC = () => {
                       <span>Base Ticket Fare</span>
                       <span className="font-mono font-semibold text-slate-800">LKR {baseTotal.toLocaleString()}</span>
                     </div>
-                    {insuranceSelected && (
-                      <div className="flex justify-between text-emerald-700 font-medium">
-                        <span>Passenger Insurance</span>
-                        <span className="font-mono font-semibold">+ LKR {insuranceAmount.toLocaleString()}</span>
-                      </div>
-                    )}
                     {discountRate > 0 && (
                       <div className="flex justify-between text-emerald-600 font-bold">
                         <span>Promo Discount ({(discountRate * 100).toFixed(0)}%)</span>
