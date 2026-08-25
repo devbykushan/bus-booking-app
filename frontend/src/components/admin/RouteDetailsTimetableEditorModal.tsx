@@ -30,6 +30,7 @@ const PRESET_AMENITIES = [
 ];
 
 const BUS_TYPES: BusCategory[] = [
+  'Super Luxury (49 Seats 2*2)',
   'Ashok Leyland (54 Seats 3*2)',
   'Ashok Leyland (54 Seats 2*2)',
   'Yutong (48 Seats 2*2)',

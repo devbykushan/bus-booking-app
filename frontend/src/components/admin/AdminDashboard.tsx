@@ -140,7 +140,13 @@ export const AdminDashboard: React.FC = () => {
 
           {/* New Bus Deployment Form */}
           {showSeatBuilder && (
-            <RouteDeploymentForm onClose={() => setShowSeatBuilder(false)} />
+            <RouteDeploymentForm 
+              onClose={() => setShowSeatBuilder(false)} 
+              onOpenTimetableEditor={(draftRoute) => {
+                setShowSeatBuilder(false);
+                setEditDetailsRoute(draftRoute);
+              }}
+            />
           )}
 
           {/* Fleet Grid & Passenger Manifest Split Panel */}

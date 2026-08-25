@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { routesApi } from '../../services/api';
-import type { BusCategory } from '../../types/booking';
-import { LayoutGrid, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import type { BusRoute, BusCategory } from '../../types/booking';
+import { LayoutGrid, CheckCircle2, AlertCircle, RefreshCw, Clock } from 'lucide-react';
 
 interface RouteDeploymentFormProps {
   onClose: () => void;
   onSuccess?: () => void;
+  onOpenTimetableEditor?: (route: BusRoute) => void;
 }
 
-export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClose, onSuccess }) => {
+export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClose, onSuccess, onOpenTimetableEditor }) => {
   const { routes, loadRoutes } = useBookingStore();
 
   const [operatorName, setOperatorName] = useState('Dewmina Super Line');
   const [busNumber, setBusNumber] = useState('ND-8899');
-  const [busType, setBusType] = useState<BusCategory | '__custom__'>('Ashok Leyland (54 Seats 3*2)');
+  const [busType, setBusType] = useState<BusCategory | '__custom__'>('Super Luxury (49 Seats 2*2)');
   const [customBusType, setCustomBusType] = useState('');
   const [origin, setOrigin] = useState('Monaragala');
   const [destination, setDestination] = useState('Colombo');
@@ -22,7 +23,9 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
   const [arrivalTime, setArrivalTime] = useState('03:30 PM');
   const [duration, setDuration] = useState('5h 30m');
   const [priceStarting, setPriceStarting] = useState<number | string>(1800);
-  const [amenities, setAmenities] = useState<string[]>(['AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats']);
+  const [amenities, setAmenities] = useState<string[]>([
+    'AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats', 'Water Bottle'
+  ]);
   const [showAdvancedStops, setShowAdvancedStops] = useState(false);
   const [pickupStop1, setPickupStop1] = useState('');
   const [pickupStop2, setPickupStop2] = useState('');
@@ -33,6 +36,50 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const handleOpenTimetableEditor = () => {
+    const selectedBusType = busType === '__custom__' ? (customBusType.trim() || 'Super Luxury (49 Seats 2*2)') : busType;
+    const draftRoute: BusRoute = {
+      id: `route-${Date.now()}`,
+      operatorId: 'op-custom',
+      operatorName: operatorName.trim() || 'Dewmina Super Line',
+      operatorRating: 4.9,
+      busNumber: busNumber.trim() || 'ND-8899',
+      busType: selectedBusType as BusCategory,
+      origin: origin.trim() || 'Monaragala',
+      destination: destination.trim() || 'Colombo',
+      departureTime: departureTime.trim() || '10:00 AM',
+      arrivalTime: arrivalTime.trim() || '03:30 PM',
+      duration: duration.trim() || '5h 30m',
+      priceStarting: Number(priceStarting) || 1800,
+      availableSeatsCount: 49,
+      totalSeatsCount: 49,
+      hasUpperDeck: selectedBusType.includes('Double') || selectedBusType.includes('Sleeper'),
+      amenities: amenities.length > 0 ? amenities : ['AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats'],
+      boardingPoints: [
+        { id: 'bp-1', name: pickupStop1.trim() || `${origin.trim()} Main Terminal`, time: departureTime.trim(), landmark: 'Platform 1', lat: 6.8722, lng: 81.3507 },
+        ...(pickupStop2.trim() ? [{ id: 'bp-2', name: pickupStop2.trim(), time: departureTime.trim(), landmark: 'Intermediate Pickup Stop', lat: 6.7410, lng: 81.1020 }] : [])
+      ],
+      dropPoints: [
+        ...(dropStop1.trim() ? [{ id: 'dp-1', name: dropStop1.trim(), time: arrivalTime.trim(), landmark: 'Highway Exit Hub', lat: 6.8416, lng: 79.9974 }] : []),
+        { id: 'dp-2', name: dropStop2.trim() || `${destination.trim()} Fort Station`, time: arrivalTime.trim(), landmark: 'Main Passenger Drop Bay', lat: 6.9344, lng: 79.8510 }
+      ],
+      gpsLocation: {
+        lat: 6.8722,
+        lng: 81.3507,
+        speedKmH: 70,
+        currentStopName: `${origin.trim() || 'Monaragala'} Main Terminal`,
+        nextStopName: pickupStop2.trim() || 'Intermediate Stop',
+        etaMinutes: 330,
+        lastUpdated: 'Just now'
+      },
+      seats: []
+    };
+
+    if (onOpenTimetableEditor) {
+      onOpenTimetableEditor(draftRoute);
+    }
+  };
 
   // Sri Lanka Bus License Plate format validation helper
   // Strictly max 4 digits in number portion, e.g. "ND-8899", "WP ND-8899", "62-1234"
@@ -181,13 +228,25 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-3xl border border-blue-200 shadow-sm space-y-4 animate-pop-in">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-3 gap-2">
         <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
           <LayoutGrid className="w-5 h-5 text-blue-600" /> Route & Visual Seat Layout Designer
         </h3>
-        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-          Fleet Deployment Validator
-        </span>
+        <div className="flex items-center gap-2">
+          {onOpenTimetableEditor && (
+            <button
+              type="button"
+              onClick={handleOpenTimetableEditor}
+              className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200 flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+            >
+              <Clock className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Full Timetable & Stops Editor (7+) ➔</span>
+            </button>
+          )}
+          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+            Fleet Deployment Validator
+          </span>
+        </div>
       </div>
 
       {/* Global Server Error Banner */}
@@ -306,6 +365,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
             }}
             className="w-full bg-slate-50 border border-blue-300 rounded-xl p-2.5 text-slate-800 font-bold focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           >
+            <option value="Super Luxury (49 Seats 2*2)">✨ Super Luxury Express (49 Seats 2*2)</option>
             <option value="Ashok Leyland (54 Seats 3*2)">🚌 Ashok Leyland (54 Seats 3*2)</option>
             <option value="Ashok Leyland (54 Seats 2*2)">🚌 Ashok Leyland (54 Seats 2*2)</option>
             <option value="Lanka Ashok Leyland (57 Seats 3*2)">🚌 Lanka Ashok Leyland (57 Seats 3*2)</option>
@@ -502,17 +562,29 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
 
       {/* Luxury Amenities & Timetable Stops Section */}
       <div className="pt-3 border-t border-slate-100 space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <label className="text-xs font-bold text-slate-800">
             Luxury Amenities ({amenities.length})
           </label>
-          <button
-            type="button"
-            onClick={() => setShowAdvancedStops(!showAdvancedStops)}
-            className="text-[11px] font-bold text-blue-600 hover:text-blue-700 underline"
-          >
-            {showAdvancedStops ? 'Hide Timetable Stops' : '+ Custom Timetable Stops (Optional)'}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowAdvancedStops(!showAdvancedStops)}
+              className="text-[11px] font-bold text-blue-600 hover:text-blue-700 underline cursor-pointer"
+            >
+              {showAdvancedStops ? 'Hide Timetable Stops' : '+ Custom Timetable Stops (Optional)'}
+            </button>
+            {onOpenTimetableEditor && (
+              <button
+                type="button"
+                onClick={handleOpenTimetableEditor}
+                className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200 cursor-pointer"
+              >
+                <Clock className="w-3 h-3" />
+                <span>Open Timetable & Stops Editor (7+) ➔</span>
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2">

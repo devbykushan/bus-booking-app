@@ -4,7 +4,7 @@ import type { DeckType } from '../../types/booking';
 import { 
   ArrowLeft, Clock, Check, Armchair, ChevronRight, 
   ChevronUp, ChevronDown, Lock, CheckCircle2, Info,
-  ArrowRight, Crown, X, User, Users
+  ArrowRight, Crown, X, User, Users, Bus
 } from 'lucide-react';
 
 export const SeatMap: React.FC = () => {
@@ -180,7 +180,7 @@ export const SeatMap: React.FC = () => {
   // Adjacent seat helper for Sri Lankan coach standard
   const getAdjacentSeat = (seatIdOrNum: string): string | null => {
     const pairs: [string, string][] = [
-      ['3', '4'], ['7', '8'], ['11', '12'], ['15', '16'], ['19', '20'], ['23', '24'], ['27', '28'], ['31', '32'], ['35', '36'], ['39', '40'], ['43', '44'],
+      ['3', '4'], ['7', '8'], ['11', '12'], ['15', '16'], ['19', '20'], ['23', '24'], ['27', '28'], ['31', '32'], ['35', '36'], ['39', '40'], ['43', '44'], ['47', '48'],
       ['2', '1'], ['6', '5'], ['10', '09'], ['14', '13'], ['18', '17'], ['22', '21'], ['26', '25'], ['30', '29'], ['34', '33'], ['38', '37'], ['42', '41'], ['46', '45'],
     ];
     const clean = seatIdOrNum.replace('seat-', '').replace(/^0+/, '');
@@ -1148,137 +1148,178 @@ export const SeatMap: React.FC = () => {
             {/* Drawer Scrollable Content */}
             <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 pb-36 sm:pb-44 space-y-6 scroll-smooth">
               
-              {/* ── Top Economy Class Floating Pill (Mockup Exact Style) ── */}
-              <div className="relative flex items-center justify-end pt-1 pb-2">
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="w-full border-t border-slate-200" />
+              {/* ── Top Economy Class Floating Pill with Live Coach Stats ── */}
+              <div className="flex items-center justify-between gap-3 pt-1 pb-2 border-b border-slate-100">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>{selectedRoute.busNumber || 'ND-9999'} • {selectedRoute.busType || 'Super Luxury Express'}</span>
                 </div>
-                <div className="relative bg-white pl-4">
-                  <div className="border border-blue-500/80 rounded-xl px-4 py-2 bg-blue-50/20 flex items-center gap-3 shadow-2xs hover:bg-blue-50/40 transition-colors">
-                    <Crown className="w-5 h-5 text-blue-600" />
-                    <div className="text-left leading-tight">
-                      <div className="text-[11px] font-black text-blue-600 tracking-wider">ECONOMY_CLASS</div>
-                      <div className="text-[11px] font-extrabold text-slate-800 font-mono">
-                        LKR {selectedRoute.seats[0]?.price || 3430}
-                      </div>
+                <div className="border border-blue-500/80 rounded-xl px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50/50 flex items-center gap-2 shadow-2xs">
+                  <Crown className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <div className="text-left leading-tight">
+                    <div className="text-[10px] font-black text-blue-600 tracking-wider uppercase">Economy Luxury</div>
+                    <div className="text-xs font-black text-slate-900 font-mono">
+                      LKR {selectedRoute.seats[0]?.price || 3430}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* ── Seating Matrix (Exact 51-Seat Layout matching mockup) ── */}
-              <div className="space-y-3 py-2 flex flex-col items-center">
-                {[
-                  { rowNum: 1, left: ['3', '4'], right: ['2', '1'] },
-                  { rowNum: 2, left: ['7', '8'], right: ['6', '5'] },
-                  { rowNum: 3, left: ['11', '12'], right: ['10', '09'] },
-                  { rowNum: 4, left: ['15', '16'], right: ['14', '13'] },
-                  { rowNum: 5, left: ['19', '20'], right: ['18', '17'] },
-                  { rowNum: 6, left: ['23', '24'], right: ['22', '21'] },
-                  { rowNum: 7, left: ['27', '28'], right: ['26', '25'] },
-                  { rowNum: 8, left: ['31', '32'], right: ['30', '29'] },
-                  { rowNum: 9, left: ['35', '36'], right: ['34', '33'] },
-                  { rowNum: 10, left: ['39', '40'], right: ['38', '37'] },
-                  { rowNum: 11, left: ['43', '44'], right: ['42', '41'] },
-                  { rowNum: 12, left: [], right: ['46', '45'] },
-                  { rowNum: 13, isRear: true, seats: ['47', '48', '51', '50', '49'] },
-                ].map((row, rIdx) => {
-                  if (row.isRear && row.seats) {
-                    return (
-                      <div 
-                        key={row.rowNum} 
-                        className="pt-2 flex items-center justify-center gap-2 sm:gap-2.5"
-                      >
-                        {row.seats.map((seatNumStr, sIdx) => {
-                          const normalizedNum = seatNumStr.replace(/^0+/, '');
-                          const existingSeat = selectedRoute.seats.find(s => s.number === normalizedNum || s.number === seatNumStr || s.id === seatNumStr);
-                          const seat = existingSeat || {
-                            id: `seat-${seatNumStr}`,
-                            number: seatNumStr,
-                            row: 13,
-                            col: sIdx + 1,
-                            price: selectedRoute.seats[0]?.price || 3430,
-                            status: 'available' as const,
-                            deck: 'lower' as DeckType
-                          };
+              {/* ════ LUXURY 3D BUS COACH CONTAINER WITH ANIMATIONS ════ */}
+              <div className="relative rounded-3xl border-2 border-slate-300/80 bg-gradient-to-b from-slate-100 via-slate-50 to-slate-100 p-3 sm:p-4 shadow-xl overflow-hidden">
+                
+                {/* ── Front Cockpit & Windshield ── */}
+                <div className="relative rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white p-3.5 mb-5 shadow-md border border-slate-700/60 overflow-hidden">
+                  {/* Windshield Gloss Reflections */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none" />
+                  
+                  <div className="flex items-center justify-between relative z-10">
+                    {/* Passenger Entry Door Steps */}
+                    <div className="flex items-center gap-2">
+                      <div className="flex flex-col gap-1">
+                        <div className="w-6 h-1 rounded-full bg-emerald-400/80 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
+                        <div className="w-6 h-1 rounded-full bg-emerald-400/60" />
+                        <div className="w-6 h-1 rounded-full bg-emerald-400/40" />
+                      </div>
+                      <span className="text-[10px] uppercase tracking-wider font-extrabold text-emerald-400">
+                        Entry Door
+                      </span>
+                    </div>
 
-                          const isSelected = selectedSeatIds.includes(seat.id) || selectedSeatIds.includes(seatNumStr) || selectedSeatIds.includes(normalizedNum);
-                          const isBooked = seat.status === 'booked';
-                          const isBookedFemale = isBooked && ((seat as any).gender === 'female' || seat.isFemaleOnly);
+                    {/* Bus Front Windshield Curved Glass / Center Badge */}
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-[10px] font-bold text-slate-300">
+                      <Bus className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Front Cockpit</span>
+                    </div>
 
-                          return (
-                            <div 
-                              key={seatNumStr} 
-                              className="relative"
-                              onMouseEnter={() => setHoveredSeatNum(seatNumStr)}
-                              onMouseLeave={() => setHoveredSeatNum(null)}
-                            >
-                              {/* Hover Floating Tooltip */}
-                              {hoveredSeatNum === seatNumStr && (
-                                <div className="absolute -top-14 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
-                                  <div className="border border-blue-500/90 rounded-xl px-3 py-1.5 bg-white flex items-center gap-2 shadow-2xl whitespace-nowrap">
-                                    <Crown className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                                    <div className="text-left leading-tight">
-                                      <div className="text-[10px] font-black text-blue-600 tracking-wider">ECONOMY_CLASS</div>
-                                      <div className="text-[11px] font-extrabold text-slate-800 font-mono">
+                    {/* Driver Steering Wheel on Right */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-300">
+                        Driver
+                      </span>
+                      <div className="w-8 h-8 rounded-full bg-slate-800 border-2 border-slate-600 flex items-center justify-center shadow-inner animate-steering">
+                        <div className="w-5 h-5 rounded-full border border-dashed border-slate-400 flex items-center justify-center">
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Seating Matrix with Aisle LED Runner ── */}
+                <div className="relative space-y-3 py-1 flex flex-col items-center">
+                  
+                  {/* Center Ambient Aisle Glow */}
+                  <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-10 pointer-events-none rounded-full aisle-led-strip opacity-40 z-0" />
+
+                  {([
+                    { rowNum: 1, left: ['3', '4'], right: ['2', '1'] },
+                    { rowNum: 2, left: ['7', '8'], right: ['6', '5'] },
+                    { rowNum: 3, left: ['11', '12'], right: ['10', '09'] },
+                    { rowNum: 4, left: ['15', '16'], right: ['14', '13'] },
+                    { rowNum: 5, left: ['19', '20'], right: ['18', '17'] },
+                    { rowNum: 6, left: ['23', '24'], right: ['22', '21'] },
+                    { rowNum: 7, left: ['27', '28'], right: ['26', '25'] },
+                    { rowNum: 8, left: ['31', '32'], right: ['30', '29'] },
+                    { rowNum: 9, left: ['35', '36'], right: ['34', '33'] },
+                    { rowNum: 10, left: ['39', '40'], right: ['38', '37'] },
+                    { rowNum: 11, left: ['43', '44'], right: ['42', '41'] },
+                    { rowNum: 12, isRear: true, seats: ['47', '48', '49', '46', '45'] },
+                  ] as Array<{ rowNum: number; left?: string[]; right?: string[]; isRear?: boolean; seats?: string[] }>).map((row, rIdx) => {
+                    
+                    // Render Rear 5-Seat Bench
+                    if (row.isRear && row.seats) {
+                      return (
+                        <div 
+                          key={row.rowNum} 
+                          className="pt-3 pb-1 flex items-center justify-center gap-1.5 sm:gap-2 w-full relative z-10"
+                        >
+                          {row.seats.map((seatNumStr, sIdx) => {
+                            const normalizedNum = seatNumStr.replace(/^0+/, '');
+                            const existingSeat = selectedRoute.seats.find(s => s.number === normalizedNum || s.number === seatNumStr || s.id === seatNumStr);
+                            const seat = existingSeat || {
+                              id: `seat-${seatNumStr}`,
+                              number: seatNumStr,
+                              row: 12,
+                              col: sIdx + 1,
+                              price: selectedRoute.seats[0]?.price || 3430,
+                              status: 'available' as const,
+                              deck: 'lower' as DeckType
+                            };
+
+                            const isSelected = selectedSeatIds.includes(seat.id) || selectedSeatIds.includes(seatNumStr) || selectedSeatIds.includes(normalizedNum);
+                            const isBooked = seat.status === 'booked';
+                            const isBookedFemale = isBooked && ((seat as any).gender === 'female' || seat.isFemaleOnly);
+
+                            return (
+                              <div 
+                                key={seatNumStr} 
+                                className="relative"
+                                onMouseEnter={() => setHoveredSeatNum(seatNumStr)}
+                                onMouseLeave={() => setHoveredSeatNum(null)}
+                              >
+                                {/* Floating 3D Tooltip */}
+                                {hoveredSeatNum === seatNumStr && (
+                                  <div className="absolute -top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
+                                    <div className="border border-blue-500 rounded-xl px-3 py-1.5 bg-slate-900 text-white shadow-2xl whitespace-nowrap text-left leading-tight">
+                                      <div className="text-[10px] font-black text-blue-400 tracking-wider">
+                                        SEAT #{seatNumStr} • {sIdx === 2 ? 'REAR CENTER' : sIdx === 0 || sIdx === 4 ? 'WINDOW' : 'AISLE'}
+                                      </div>
+                                      <div className="text-xs font-extrabold font-mono text-emerald-400">
                                         LKR {seat.price || selectedRoute.seats[0]?.price || 3430}
                                       </div>
                                     </div>
+                                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 shadow-xs" />
                                   </div>
-                                  <div className="w-2.5 h-2.5 bg-white border-r border-b border-blue-500/90 rotate-45 -mt-1.5 shadow-xs" />
-                                </div>
-                              )}
-
-                              <button
-                                type="button"
-                                disabled={isBooked}
-                                onClick={() => handleSeatClick(seat.id)}
-                                style={{ animationDelay: `${(rIdx * 4 + sIdx) * 20}ms` }}
-                                className={`animate-seat-pop w-[50px] sm:w-[56px] h-[64px] sm:h-[70px] rounded-xl flex flex-col items-center justify-between p-1.5 font-bold transition-all duration-200 transform cursor-pointer relative shadow-xs ${
-                                  isSelected
-                                    ? 'bg-[#00b875] border-2 border-[#009e63] text-white shadow-lg shadow-emerald-500/30 scale-105 active:scale-95'
-                                    : isBookedFemale
-                                    ? 'bg-[#c2185b] border-2 border-[#ad1457] text-white cursor-not-allowed shadow-inner'
-                                    : isBooked
-                                    ? 'bg-[#1e40af] border-2 border-[#1e3a8a] text-white cursor-not-allowed shadow-inner'
-                                    : 'bg-white border-[1.5px] border-slate-700 text-slate-900 hover:border-blue-600 hover:-translate-y-1 hover:shadow-md active:scale-95'
-                                }`}
-                              >
-                                <span className={`text-sm sm:text-base font-extrabold tracking-tight pt-0.5 ${isBooked || isSelected ? 'text-white' : 'text-slate-800'}`}>
-                                  {seatNumStr}
-                                </span>
-                                {isSelected ? (
-                                  <div className="w-5 h-1 rounded-sm bg-[#80ffd0] my-0.5" />
-                                ) : !isBooked ? (
-                                  <div className="w-5 h-1 rounded-sm border border-slate-700 my-0.5" />
-                                ) : null}
-                                {!isBooked && !isSelected && (
-                                  <div className="w-full h-1.5 rounded-b-lg bg-blue-600 mt-auto" />
                                 )}
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  }
 
-                  const leftSeats = row.left || [];
-                  const rightSeats = row.right || [];
+                                <button
+                                  type="button"
+                                  disabled={isBooked}
+                                  onClick={() => handleSeatClick(seat.id)}
+                                  style={{ animationDelay: `${(rIdx * 4 + sIdx) * 15}ms` }}
+                                  className={`animate-seat-pop w-[46px] sm:w-[52px] h-[64px] sm:h-[68px] rounded-xl flex flex-col items-center justify-between p-1.5 font-bold transition-all duration-200 transform cursor-pointer relative shadow-sm hover:z-20 ${
+                                    isSelected
+                                      ? 'bg-gradient-to-b from-emerald-500 to-emerald-600 border-2 border-emerald-400 text-white seat-selected-glow scale-105 active:scale-95'
+                                      : isBookedFemale
+                                      ? 'bg-gradient-to-b from-pink-600 to-pink-700 border-2 border-pink-500 text-white cursor-not-allowed shadow-inner opacity-90'
+                                      : isBooked
+                                      ? 'bg-gradient-to-b from-slate-700 to-slate-800 border-2 border-slate-600 text-slate-300 cursor-not-allowed shadow-inner opacity-90'
+                                      : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-blue-500 hover:-translate-y-1.5 hover:shadow-lg active:scale-95'
+                                  }`}
+                                >
+                                  {/* Headrest Cushion Bar */}
+                                  <div className={`w-full h-1.5 rounded-t-md ${
+                                    isSelected ? 'bg-emerald-300' : isBooked ? 'bg-slate-600' : 'bg-slate-200'
+                                  }`} />
 
-                  return (
-                    <div 
-                      key={row.rowNum} 
-                      className="flex items-center justify-between gap-6 sm:gap-8 w-full max-w-[320px] sm:max-w-[360px]"
-                    >
-                      {/* Left Column Seats */}
-                      <div className="flex items-center gap-2 sm:gap-2.5">
-                        {leftSeats.length === 0 ? (
-                          <div className="w-[104px] sm:w-[116px] h-[64px] sm:h-[70px] flex items-center justify-center text-[10px] uppercase font-bold text-slate-300 tracking-wider">
-                            
-                          </div>
-                        ) : (
-                          leftSeats.map((seatNumStr, sIdx) => {
+                                  <span className={`text-xs sm:text-sm font-black tracking-tight ${isBooked || isSelected ? 'text-white' : 'text-slate-800'}`}>
+                                    {seatNumStr}
+                                  </span>
+
+                                  {/* Bottom Accent Bar */}
+                                  <div className={`w-4/5 h-1 rounded-full ${
+                                    isSelected ? 'bg-white/80' : isBooked ? 'bg-transparent' : 'bg-blue-600'
+                                  }`} />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    }
+
+                    const leftSeats = row.left || [];
+                    const rightSeats = row.right || [];
+
+                    return (
+                      <div 
+                        key={row.rowNum} 
+                        className="flex items-center justify-between gap-4 sm:gap-6 w-full max-w-[320px] sm:max-w-[350px] relative z-10"
+                      >
+                        {/* Left Column Seats */}
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          {leftSeats.map((seatNumStr, sIdx) => {
                             const normalizedNum = seatNumStr.replace(/^0+/, '');
                             const existingSeat = selectedRoute.seats.find(s => s.number === normalizedNum || s.number === seatNumStr || s.id === seatNumStr);
                             const seat = existingSeat || {
@@ -1302,19 +1343,18 @@ export const SeatMap: React.FC = () => {
                                 onMouseEnter={() => setHoveredSeatNum(seatNumStr)}
                                 onMouseLeave={() => setHoveredSeatNum(null)}
                               >
-                                {/* Hover Floating Tooltip */}
+                                {/* Floating 3D Tooltip */}
                                 {hoveredSeatNum === seatNumStr && (
-                                  <div className="absolute -top-14 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
-                                    <div className="border border-blue-500/90 rounded-xl px-3 py-1.5 bg-white flex items-center gap-2 shadow-2xl whitespace-nowrap">
-                                      <Crown className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                                      <div className="text-left leading-tight">
-                                        <div className="text-[10px] font-black text-blue-600 tracking-wider">ECONOMY_CLASS</div>
-                                        <div className="text-[11px] font-extrabold text-slate-800 font-mono">
-                                          LKR {seat.price || selectedRoute.seats[0]?.price || 3430}
-                                        </div>
+                                  <div className="absolute -top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
+                                    <div className="border border-blue-500 rounded-xl px-3 py-1.5 bg-slate-900 text-white shadow-2xl whitespace-nowrap text-left leading-tight">
+                                      <div className="text-[10px] font-black text-blue-400 tracking-wider">
+                                        SEAT #{seatNumStr} • {sIdx === 0 ? 'LEFT WINDOW' : 'LEFT AISLE'}
+                                      </div>
+                                      <div className="text-xs font-extrabold font-mono text-emerald-400">
+                                        LKR {seat.price || selectedRoute.seats[0]?.price || 3430}
                                       </div>
                                     </div>
-                                    <div className="w-2.5 h-2.5 bg-white border-r border-b border-blue-500/90 rotate-45 -mt-1.5 shadow-xs" />
+                                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 shadow-xs" />
                                   </div>
                                 )}
 
@@ -1322,111 +1362,133 @@ export const SeatMap: React.FC = () => {
                                   type="button"
                                   disabled={isBooked}
                                   onClick={() => handleSeatClick(seat.id)}
-                                  style={{ animationDelay: `${(rIdx * 4 + sIdx) * 20}ms` }}
-                                  className={`animate-seat-pop w-[50px] sm:w-[56px] h-[64px] sm:h-[70px] rounded-xl flex flex-col items-center justify-between p-1.5 font-bold transition-all duration-200 transform cursor-pointer relative shadow-xs ${
+                                  style={{ animationDelay: `${(rIdx * 4 + sIdx) * 15}ms` }}
+                                  className={`animate-seat-pop w-[48px] sm:w-[54px] h-[64px] sm:h-[68px] rounded-xl flex flex-col items-center justify-between p-1.5 font-bold transition-all duration-200 transform cursor-pointer relative shadow-sm hover:z-20 ${
                                     isSelected
-                                      ? 'bg-[#00b875] border-2 border-[#009e63] text-white shadow-lg shadow-emerald-500/30 scale-105 active:scale-95'
+                                      ? 'bg-gradient-to-b from-emerald-500 to-emerald-600 border-2 border-emerald-400 text-white seat-selected-glow scale-105 active:scale-95'
                                       : isBookedFemale
-                                      ? 'bg-[#c2185b] border-2 border-[#ad1457] text-white cursor-not-allowed shadow-inner'
+                                      ? 'bg-gradient-to-b from-pink-600 to-pink-700 border-2 border-pink-500 text-white cursor-not-allowed shadow-inner opacity-90'
                                       : isBooked
-                                      ? 'bg-[#1e40af] border-2 border-[#1e3a8a] text-white cursor-not-allowed shadow-inner'
-                                      : 'bg-white border-[1.5px] border-slate-700 text-slate-900 hover:border-blue-600 hover:-translate-y-1 hover:shadow-md active:scale-95'
+                                      ? 'bg-gradient-to-b from-slate-700 to-slate-800 border-2 border-slate-600 text-slate-300 cursor-not-allowed shadow-inner opacity-90'
+                                      : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-blue-500 hover:-translate-y-1.5 hover:shadow-lg active:scale-95'
                                   }`}
                                 >
-                                  <span className={`text-sm sm:text-base font-extrabold tracking-tight pt-0.5 ${isBooked || isSelected ? 'text-white' : 'text-slate-800'}`}>
+                                  {/* Headrest Cushion Bar */}
+                                  <div className={`w-full h-1.5 rounded-t-md ${
+                                    isSelected ? 'bg-emerald-300' : isBooked ? 'bg-slate-600' : 'bg-slate-200'
+                                  }`} />
+
+                                  <span className={`text-xs sm:text-sm font-black tracking-tight ${isBooked || isSelected ? 'text-white' : 'text-slate-800'}`}>
                                     {seatNumStr}
                                   </span>
-                                  {isSelected ? (
-                                    <div className="w-5 h-1 rounded-sm bg-[#80ffd0] my-0.5" />
-                                  ) : !isBooked ? (
-                                    <div className="w-5 h-1 rounded-sm border border-slate-700 my-0.5" />
-                                  ) : null}
-                                  {!isBooked && !isSelected && (
-                                    <div className="w-full h-1.5 rounded-b-lg bg-blue-600 mt-auto" />
-                                  )}
+
+                                  {/* Bottom Accent Bar */}
+                                  <div className={`w-4/5 h-1 rounded-full ${
+                                    isSelected ? 'bg-white/80' : isBooked ? 'bg-transparent' : 'bg-blue-600'
+                                  }`} />
                                 </button>
                               </div>
                             );
-                          })
-                        )}
-                      </div>
+                          })}
+                        </div>
 
-                      {/* Right Column Seats */}
-                      <div className="flex items-center gap-2 sm:gap-2.5">
-                        {rightSeats.map((seatNumStr, sIdx) => {
-                          const normalizedNum = seatNumStr.replace(/^0+/, '');
-                          const existingSeat = selectedRoute.seats.find(s => s.number === normalizedNum || s.number === seatNumStr || s.id === seatNumStr);
-                          const seat = existingSeat || {
-                            id: `seat-${seatNumStr}`,
-                            number: seatNumStr,
-                            row: row.rowNum,
-                            col: sIdx + 3,
-                            price: selectedRoute.seats[0]?.price || 3430,
-                            status: 'available' as const,
-                            deck: 'lower' as DeckType
-                          };
+                        {/* Animated Aisle Label Indicator */}
+                        <div className="text-[9px] font-mono font-black text-slate-400/80 tracking-widest pointer-events-none select-none">
+                          ┃
+                        </div>
 
-                          const isSelected = selectedSeatIds.includes(seat.id) || selectedSeatIds.includes(seatNumStr) || selectedSeatIds.includes(normalizedNum);
-                          const isBooked = seat.status === 'booked';
-                          const isBookedFemale = isBooked && ((seat as any).gender === 'female' || seat.isFemaleOnly);
+                        {/* Right Column Seats */}
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          {rightSeats.map((seatNumStr, sIdx) => {
+                            const normalizedNum = seatNumStr.replace(/^0+/, '');
+                            const existingSeat = selectedRoute.seats.find(s => s.number === normalizedNum || s.number === seatNumStr || s.id === seatNumStr);
+                            const seat = existingSeat || {
+                              id: `seat-${seatNumStr}`,
+                              number: seatNumStr,
+                              row: row.rowNum,
+                              col: sIdx + 3,
+                              price: selectedRoute.seats[0]?.price || 3430,
+                              status: 'available' as const,
+                              deck: 'lower' as DeckType
+                            };
 
-                          return (
-                            <div 
-                              key={seatNumStr} 
-                              className="relative"
-                              onMouseEnter={() => setHoveredSeatNum(seatNumStr)}
-                              onMouseLeave={() => setHoveredSeatNum(null)}
-                            >
-                              {/* Hover Floating Tooltip */}
-                              {hoveredSeatNum === seatNumStr && (
-                                <div className="absolute -top-14 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
-                                  <div className="border border-blue-500/90 rounded-xl px-3 py-1.5 bg-white flex items-center gap-2 shadow-2xl whitespace-nowrap">
-                                    <Crown className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                                    <div className="text-left leading-tight">
-                                      <div className="text-[10px] font-black text-blue-600 tracking-wider">ECONOMY_CLASS</div>
-                                      <div className="text-[11px] font-extrabold text-slate-800 font-mono">
+                            const isSelected = selectedSeatIds.includes(seat.id) || selectedSeatIds.includes(seatNumStr) || selectedSeatIds.includes(normalizedNum);
+                            const isBooked = seat.status === 'booked';
+                            const isBookedFemale = isBooked && ((seat as any).gender === 'female' || seat.isFemaleOnly);
+
+                            return (
+                              <div 
+                                key={seatNumStr} 
+                                className="relative"
+                                onMouseEnter={() => setHoveredSeatNum(seatNumStr)}
+                                onMouseLeave={() => setHoveredSeatNum(null)}
+                              >
+                                {/* Floating 3D Tooltip */}
+                                {hoveredSeatNum === seatNumStr && (
+                                  <div className="absolute -top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
+                                    <div className="border border-blue-500 rounded-xl px-3 py-1.5 bg-slate-900 text-white shadow-2xl whitespace-nowrap text-left leading-tight">
+                                      <div className="text-[10px] font-black text-blue-400 tracking-wider">
+                                        SEAT #{seatNumStr} • {sIdx === 0 ? 'RIGHT AISLE' : 'RIGHT WINDOW'}
+                                      </div>
+                                      <div className="text-xs font-extrabold font-mono text-emerald-400">
                                         LKR {seat.price || selectedRoute.seats[0]?.price || 3430}
                                       </div>
                                     </div>
+                                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 shadow-xs" />
                                   </div>
-                                  <div className="w-2.5 h-2.5 bg-white border-r border-b border-blue-500/90 rotate-45 -mt-1.5 shadow-xs" />
-                                </div>
-                              )}
-
-                              <button
-                                type="button"
-                                disabled={isBooked}
-                                onClick={() => handleSeatClick(seat.id)}
-                                style={{ animationDelay: `${(rIdx * 4 + sIdx + 2) * 20}ms` }}
-                                className={`animate-seat-pop w-[50px] sm:w-[56px] h-[64px] sm:h-[70px] rounded-xl flex flex-col items-center justify-between p-1.5 font-bold transition-all duration-200 transform cursor-pointer relative shadow-xs ${
-                                  isSelected
-                                    ? 'bg-[#00b875] border-2 border-[#009e63] text-white shadow-lg shadow-emerald-500/30 scale-105 active:scale-95'
-                                    : isBookedFemale
-                                    ? 'bg-[#c2185b] border-2 border-[#ad1457] text-white cursor-not-allowed shadow-inner'
-                                    : isBooked
-                                    ? 'bg-[#1e40af] border-2 border-[#1e3a8a] text-white cursor-not-allowed shadow-inner'
-                                    : 'bg-white border-[1.5px] border-slate-700 text-slate-900 hover:border-blue-600 hover:-translate-y-1 hover:shadow-md active:scale-95'
-                                }`}
-                              >
-                                <span className={`text-sm sm:text-base font-extrabold tracking-tight pt-0.5 ${isBooked || isSelected ? 'text-white' : 'text-slate-800'}`}>
-                                  {seatNumStr}
-                                </span>
-                                {isSelected ? (
-                                  <div className="w-5 h-1 rounded-sm bg-[#80ffd0] my-0.5" />
-                                ) : !isBooked ? (
-                                  <div className="w-5 h-1 rounded-sm border border-slate-700 my-0.5" />
-                                ) : null}
-                                {!isBooked && !isSelected && (
-                                  <div className="w-full h-1.5 rounded-b-lg bg-blue-600 mt-auto" />
                                 )}
-                              </button>
-                            </div>
-                          );
-                        })}
+
+                                <button
+                                  type="button"
+                                  disabled={isBooked}
+                                  onClick={() => handleSeatClick(seat.id)}
+                                  style={{ animationDelay: `${(rIdx * 4 + sIdx + 2) * 15}ms` }}
+                                  className={`animate-seat-pop w-[48px] sm:w-[54px] h-[64px] sm:h-[68px] rounded-xl flex flex-col items-center justify-between p-1.5 font-bold transition-all duration-200 transform cursor-pointer relative shadow-sm hover:z-20 ${
+                                    isSelected
+                                      ? 'bg-gradient-to-b from-emerald-500 to-emerald-600 border-2 border-emerald-400 text-white seat-selected-glow scale-105 active:scale-95'
+                                      : isBookedFemale
+                                      ? 'bg-gradient-to-b from-pink-600 to-pink-700 border-2 border-pink-500 text-white cursor-not-allowed shadow-inner opacity-90'
+                                      : isBooked
+                                      ? 'bg-gradient-to-b from-slate-700 to-slate-800 border-2 border-slate-600 text-slate-300 cursor-not-allowed shadow-inner opacity-90'
+                                      : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-blue-500 hover:-translate-y-1.5 hover:shadow-lg active:scale-95'
+                                  }`}
+                                >
+                                  {/* Headrest Cushion Bar */}
+                                  <div className={`w-full h-1.5 rounded-t-md ${
+                                    isSelected ? 'bg-emerald-300' : isBooked ? 'bg-slate-600' : 'bg-slate-200'
+                                  }`} />
+
+                                  <span className={`text-xs sm:text-sm font-black tracking-tight ${isBooked || isSelected ? 'text-white' : 'text-slate-800'}`}>
+                                    {seatNumStr}
+                                  </span>
+
+                                  {/* Bottom Accent Bar */}
+                                  <div className={`w-4/5 h-1 rounded-full ${
+                                    isSelected ? 'bg-white/80' : isBooked ? 'bg-transparent' : 'bg-blue-600'
+                                  }`} />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+
+                {/* ── Rear Engine Bumper ── */}
+                <div className="mt-4 pt-3 border-t-2 border-slate-300/80 flex items-center justify-between text-[10px] font-extrabold text-slate-400 uppercase tracking-widest px-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                    <span>Rear Engine</span>
+                  </div>
+                  <span>Dewmina Luxury Coach</span>
+                  <div className="flex items-center gap-1.5">
+                    <span>Back</span>
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                  </div>
+                </div>
+
               </div>
 
               {/* ── Legend (Mockup Exact Style) ── */}
@@ -1506,9 +1568,12 @@ export const SeatMap: React.FC = () => {
                   )}
                 </div>
 
-                {/* Sub Total Blue Bar */}
-                <div className="p-3.5 rounded-2xl bg-blue-600 text-white flex items-center justify-between font-bold text-xs shadow-sm">
-                  <span>Sub Total ( {selectedSeatIds.length} Seats )</span>
+                {/* Sub Total Glowing Bar */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between font-bold text-xs shadow-md animate-luxury-shimmer">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Sub Total ({selectedSeatIds.length} {selectedSeatIds.length === 1 ? 'Seat' : 'Seats'})</span>
+                  </div>
                   <span className="font-mono text-sm sm:text-base font-black">
                     LKR {finalTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
@@ -1517,16 +1582,27 @@ export const SeatMap: React.FC = () => {
                 {/* Security note */}
                 <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-500">
                   <Lock className="w-3 h-3 text-slate-400" />
-                  <span>Your information is never shared with third parties.</span>
+                  <span>Encrypted & secure seat booking reservation</span>
                 </div>
 
                 {/* Proceed / Confirm button */}
                 <button
                   type="button"
                   onClick={() => setIsSeatDrawerOpen(false)}
-                  className="w-full py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer active:scale-95 text-center"
+                  className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer active:scale-95 text-center flex items-center justify-center gap-2 ${
+                    selectedSeatIds.length > 0
+                      ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-500/25 animate-luxury-shimmer'
+                      : 'bg-slate-800 hover:bg-slate-900 text-white'
+                  }`}
                 >
-                  {selectedSeatIds.length > 0 ? 'Done & Confirm Seats' : 'Close Seat Map'}
+                  {selectedSeatIds.length > 0 ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Confirm {selectedSeatIds.length} {selectedSeatIds.length === 1 ? 'Seat' : 'Seats'} (LKR {finalTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
+                    </>
+                  ) : (
+                    'Close Seat Map'
+                  )}
                 </button>
 
               </div>

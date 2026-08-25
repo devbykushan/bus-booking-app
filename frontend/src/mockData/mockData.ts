@@ -4,6 +4,35 @@ const generateSeats = (busType: string, hasUpperDeck: boolean = false): Seat[] =
   const seats: Seat[] = [];
   const basePrice = busType.includes('Sleeper') ? 2800 : 1800;
 
+  // Super Luxury 49-seat 2*2 layout (Sri Lanka Express Coach 1-49)
+  if (busType.includes('49 Seats') || busType.includes('Super Luxury')) {
+    const femaleSeats = ['15', '19', '20', '23'];
+    for (let r = 1; r <= 11; r++) {
+      const leftWindowNum = ((r - 1) * 4 + 3).toString();
+      const leftAisleNum = ((r - 1) * 4 + 4).toString();
+      const rightAisleNum = ((r - 1) * 4 + 2).toString();
+      const rightWindowNum = ((r - 1) * 4 + 1).toString();
+
+      seats.push(
+        { id: leftWindowNum, number: leftWindowNum, deck: 'lower', row: r, col: 1, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: femaleSeats.includes(leftWindowNum) },
+        { id: leftAisleNum, number: leftAisleNum, deck: 'lower', row: r, col: 2, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: femaleSeats.includes(leftAisleNum) },
+        { id: rightAisleNum, number: rightAisleNum, deck: 'lower', row: r, col: 4, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: femaleSeats.includes(rightAisleNum) },
+        { id: rightWindowNum, number: rightWindowNum, deck: 'lower', row: r, col: 5, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: femaleSeats.includes(rightWindowNum) }
+      );
+    }
+    const backSeats = [
+      { num: '47', col: 1 },
+      { num: '48', col: 2 },
+      { num: '49', col: 3 },
+      { num: '46', col: 4 },
+      { num: '45', col: 5 },
+    ];
+    backSeats.forEach(s => {
+      seats.push({ id: s.num, number: s.num, deck: 'lower', row: 12, col: s.col, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: false });
+    });
+    return seats;
+  }
+
   // Ashok Leyland 54-seat 3*2 layout.
   if (busType.includes('Ashok Leyland (54 Seats 3*2')) {
     for (let r = 1; r <= 10; r++) {
