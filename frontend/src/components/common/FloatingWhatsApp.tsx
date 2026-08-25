@@ -45,7 +45,7 @@ export const FloatingWhatsApp: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end select-none" ref={menuRef}>
+    <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end select-none" ref={menuRef}>
       {/* WhatsApp Popup Card */}
       {isOpen && (
         <div className="mb-3 w-80 sm:w-88 rounded-3xl bg-white shadow-2xl border border-slate-100 overflow-hidden animate-scale-up origin-bottom-right">
