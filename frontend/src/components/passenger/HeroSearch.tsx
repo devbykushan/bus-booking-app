@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import {
   MapPin, Calendar, ArrowRightLeft, Search,
-  Shield, Filter, Clock, Star, UserRound, ChevronDown
+  Shield, Filter, Clock, Star, ChevronDown
 } from 'lucide-react';
 
 const CITIES = [
@@ -33,16 +33,11 @@ export const HeroSearch: React.FC = () => {
     searchDestination,
     searchDate,
     busTypeFilter,
-    currentUser,
-    userRole,
     setSearchCriteria,
     setBusTypeFilter,
     setCurrentView,
-    setShowAuthModal,
     t,
   } = useBookingStore();
-
-  const isAdmin = currentUser?.role === 'admin' || userRole === 'admin';
 
   const toISODateString = (d: Date) => {
     const year = d.getFullYear();
@@ -77,18 +72,6 @@ export const HeroSearch: React.FC = () => {
     setSearchCriteria(origin, destination, date);
     setCurrentView('schedules-dashboard');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleAccountClick = () => {
-    if (currentUser) {
-      if (isAdmin) {
-        setCurrentView('admin-panel');
-      } else {
-        setCurrentView('my-bookings');
-      }
-    } else {
-      setShowAuthModal(true);
-    }
   };
 
   return (
@@ -299,22 +282,22 @@ export const HeroSearch: React.FC = () => {
             <div className="relative flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-white/20">
 
               {/* Animated Bus Class Pill Filter */}
-              <div className="group/filter relative inline-flex items-center gap-2.5 text-xs bg-white/10 backdrop-blur-md
-                              border border-white/25 px-4 py-2 rounded-full text-white
-                              hover:bg-white/20 hover:border-white/40 hover:shadow-lg hover:shadow-blue-500/20
+              <div className="group/filter relative inline-flex items-center gap-2.5 text-xs bg-white/95 backdrop-blur-md
+                              border border-white/80 hover:border-blue-400 px-4 py-2.5 rounded-2xl text-slate-800
+                              shadow-lg shadow-black/10 hover:bg-white hover:shadow-xl hover:shadow-blue-500/20
                               transition-all duration-300 transform hover:scale-[1.03] active:scale-95 cursor-pointer overflow-hidden">
                 {/* Ambient glow sweep on hover */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover/filter:translate-x-full transition-transform duration-700 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-100/50 to-transparent -translate-x-full group-hover/filter:translate-x-full transition-transform duration-700 pointer-events-none" />
 
                 {/* Animated Filter Icon */}
-                <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-white/15 border border-white/20 text-blue-200 transition-transform duration-300 group-hover/filter:scale-110 group-hover/filter:rotate-[-8deg] flex-shrink-0">
-                  <Filter className="w-3.5 h-3.5 animate-filter-tilt relative z-10 text-blue-300" />
+                <span className="relative flex items-center justify-center w-6 h-6 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-600 transition-transform duration-300 group-hover/filter:scale-110 group-hover/filter:rotate-[-8deg] flex-shrink-0 shadow-2xs">
+                  <Filter className="w-3.5 h-3.5 animate-filter-tilt relative z-10 text-blue-600" />
                 </span>
 
                 {/* Label & Active Option */}
-                <span className="text-white/80 font-semibold tracking-wide flex items-center gap-1.5 whitespace-nowrap">
-                  <span>{t('busClass')}:</span>
-                  <span className="font-extrabold text-white text-sm">
+                <span className="text-slate-600 font-semibold tracking-wide flex items-center gap-1.5 whitespace-nowrap">
+                  <span className="text-slate-500 font-bold">{t('busClass')}:</span>
+                  <span className="font-extrabold text-slate-900 text-sm tracking-tight">
                     {busTypeFilter === 'all'
                       ? t('allClasses')
                       : busTypeFilter === 'Normal Service' || busTypeFilter === 'Ashok Leyland'
@@ -326,7 +309,7 @@ export const HeroSearch: React.FC = () => {
                 </span>
 
                 {/* Animated Chevron Down */}
-                <ChevronDown className="w-3.5 h-3.5 text-white/80 transition-transform duration-300 group-hover/filter:translate-y-0.5 group-hover/filter:text-white animate-chevron-bob flex-shrink-0 ml-0.5" />
+                <ChevronDown className="w-4 h-4 text-blue-600 transition-transform duration-300 group-hover/filter:translate-y-0.5 group-hover/filter:text-blue-700 animate-chevron-bob flex-shrink-0 ml-0.5" />
 
                 {/* Hidden Overlay Select for native click & accessibility */}
                 <select
@@ -340,22 +323,6 @@ export const HeroSearch: React.FC = () => {
                   <option value="Super Luxury" className="text-slate-900">{t('superLuxury')}</option>
                 </select>
               </div>
-
-              <button
-                type="button"
-                onClick={handleAccountClick}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl
-                           border border-white/20 bg-white/10 text-white/85 text-xs font-bold
-                           backdrop-blur-sm hover:bg-white/20 hover:border-white/35
-                           transition-all duration-300 hover:scale-105 active:scale-95"
-              >
-                {isAdmin ? (
-                  <Shield className="w-4 h-4 text-purple-300" />
-                ) : (
-                  <UserRound className="w-4 h-4 text-blue-200" />
-                )}
-                {isAdmin ? 'Admin Profile' : 'Passenger Profile'}
-              </button>
 
               {/* Search CTA with ripple */}
               <button

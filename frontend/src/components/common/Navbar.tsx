@@ -302,6 +302,19 @@ export const Navbar: React.FC = () => {
                           <p className="text-xs text-slate-400">{currentUser.phone || currentUser.role}</p>
                         </div>
                         <div className="py-1">
+                          {(currentUser.role === 'admin' || userRole === 'admin') && (
+                            <button
+                              onClick={() => {
+                                setUserRole('admin');
+                                setCurrentView('admin-panel');
+                                setProfileOpen(false);
+                              }}
+                              className="nav3d-dropdown-item text-purple-300 hover:text-purple-200 hover:bg-purple-500/20"
+                            >
+                              <ShieldCheck className="w-4 h-4 text-purple-400" />
+                              <span>Admin Profile</span>
+                            </button>
+                          )}
                           <button
                             onClick={() => { setCurrentView('my-bookings'); setProfileOpen(false); }}
                             className="nav3d-dropdown-item"
