@@ -1,6 +1,8 @@
 export type SeatStatus = 'available' | 'booked' | 'locked';
 export type DeckType = 'lower' | 'upper';
 export type BusCategory =
+  | 'Super Luxury'
+  | 'Normal Service'
   | 'Ashok Leyland (54 Seats 3*2)'
   | 'Ashok Leyland (54 Seats 2*2)'
   | 'Yutong (48 Seats 2*2)'

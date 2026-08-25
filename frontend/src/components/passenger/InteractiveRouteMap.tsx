@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import type { BusRoute } from '../../types/booking';
-import { Bus, ExternalLink } from 'lucide-react';
+import { Bus, ExternalLink, Sparkles, Navigation } from 'lucide-react';
 
 // Fix default leaflet marker asset paths in Vite
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -15,28 +15,28 @@ L.Icon.Default.mergeOptions({
 // Custom origin marker
 const originIcon = L.divIcon({
   className: 'custom-map-marker-origin',
-  html: `<div style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: 3px solid #ffffff; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(37,99,235,0.45); color: white; font-weight: bold; font-size: 15px;">
+  html: `<div style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: 3px solid #ffffff; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(37,99,235,0.5); color: white; font-weight: bold; font-size: 16px;">
            🚌
          </div>`,
-  iconSize: [34, 34],
-  iconAnchor: [17, 17],
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
 });
 
 // Custom destination marker
 const destIcon = L.divIcon({
   className: 'custom-map-marker-dest',
-  html: `<div style="background: linear-gradient(135deg, #059669, #047857); border: 3px solid #ffffff; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(5,150,105,0.45); color: white; font-weight: bold; font-size: 15px;">
+  html: `<div style="background: linear-gradient(135deg, #059669, #047857); border: 3px solid #ffffff; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(5,150,105,0.5); color: white; font-weight: bold; font-size: 16px;">
            🏁
          </div>`,
-  iconSize: [34, 34],
-  iconAnchor: [17, 17],
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
 });
 
-// Custom stop marker
+// Custom highway stop marker
 const stopIcon = L.divIcon({
   className: 'custom-map-marker-stop',
-  html: `<div style="background: #4f46e5; border: 2px solid #ffffff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(79,70,229,0.4);">
-           <div style="width: 6px; height: 6px; background: white; border-radius: 50%;"></div>
+  html: `<div style="background: #6366f1; border: 2px solid #ffffff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(99,102,241,0.45);">
+           <div style="width: 7px; height: 7px; background: white; border-radius: 50%;"></div>
          </div>`,
   iconSize: [22, 22],
   iconAnchor: [11, 11],
@@ -57,9 +57,32 @@ const SRI_LANKA_COORDS: Record<string, [number, number]> = {
   'Batticaloa': [7.7170, 81.7000],
   'Kataragama': [6.4167, 81.3333],
   'Wellawaya': [6.7410, 81.1020],
+  'Thanamalwila': [6.4380, 81.1328],
+  'Mattala': [6.3025, 81.1189],
   'Ratnapura': [6.6828, 80.3992],
   'Kottawa': [6.8416, 79.9974],
+  'Makumbura': [6.8416, 79.9974],
 };
+
+// Precise Southern Expressway (E01) Highway Waypoints for Monaragala <-> Colombo
+const MONARAGALA_COLOMBO_HIGHWAY_ROUTE: { name: string; desc: string; coords: [number, number] }[] = [
+  { name: 'Monaragala Main Terminal', desc: 'Starting Point & Passenger Boarding', coords: [6.8722, 81.3507] },
+  { name: 'Wellawaya Clock Tower', desc: 'A4 / A23 Trunk Intersection', coords: [6.7410, 81.1020] },
+  { name: 'Thanamalwila Junction', desc: 'Express Highway Connector', coords: [6.4380, 81.1328] },
+  { name: 'Mattala / Andarawewa Interchange', desc: 'Southern Expressway (E01) Highway Entry', coords: [6.3025, 81.1189] },
+  { name: 'Barawakumbuka Interchange', desc: 'E01 Expressway Node', coords: [6.2052, 80.8920] },
+  { name: 'Beliatta / Kasagala Interchange', desc: 'E01 Expressway Node', coords: [6.1754, 80.7853] },
+  { name: 'Matara (Godagama Interchange)', desc: 'E01 Expressway Flyover', coords: [6.0025, 80.5480] },
+  { name: 'Galle (Pinnaduwa Interchange)', desc: 'E01 Expressway Corridor', coords: [6.0725, 80.2464] },
+  { name: 'Kurundugahahetekma Interchange', desc: 'E01 Expressway Connector', coords: [6.3421, 80.1250] },
+  { name: 'Welipenna Expressway Service Area', desc: 'Express Rest Stop & Highway Transit', coords: [6.6111, 80.0520] },
+  { name: 'Dodangoda Interchange', desc: 'E01 Expressway Node', coords: [6.6850, 80.0230] },
+  { name: 'Gelanigama Interchange', desc: 'E01 Bandaragama Exit', coords: [6.7325, 80.0120] },
+  { name: 'Kahathuduwa Interchange', desc: 'E01 Expressway Corridor', coords: [6.7950, 79.9980] },
+  { name: 'Makumbura (Kottawa) Multimodal Center', desc: 'Expressway Exit & Drop Hub', coords: [6.8416, 79.9974] },
+  { name: 'Maharagama', desc: 'High Level Road Corridor', coords: [6.8480, 79.9265] },
+  { name: 'Colombo Fort (Bastian Mawatha)', desc: 'Super Luxury Terminal & Final Drop', coords: [6.9344, 79.8530] },
+];
 
 function getCoords(place: string, defaultLat: number, defaultLng: number): [number, number] {
   const clean = place.split('(')[0].trim();
@@ -93,35 +116,61 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
   const originCoord = getCoords(route.origin, route.boardingPoints?.[0]?.lat, route.boardingPoints?.[0]?.lng);
   const destCoord = getCoords(route.destination, route.dropPoints?.[0]?.lat, route.dropPoints?.[0]?.lng);
 
-  // Generate intermediate curve/waypoint coordinates across Sri Lanka highway network
-  const intermediateWaypoints: [number, number][] = [];
-  if (route.boardingPoints && route.boardingPoints.length > 1) {
-    route.boardingPoints.slice(1).forEach(bp => {
-      if (bp.lat && bp.lng) intermediateWaypoints.push([bp.lat, bp.lng]);
-    });
+  const isMonaragalaColomboRoute =
+    (route.origin.toLowerCase().includes('monaragala') && route.destination.toLowerCase().includes('colombo')) ||
+    (route.origin.toLowerCase().includes('colombo') && route.destination.toLowerCase().includes('monaragala'));
+
+  let polylineCoords: [number, number][] = [];
+  let intermediateWaypoints: { name: string; desc: string; coords: [number, number] }[] = [];
+
+  if (isMonaragalaColomboRoute) {
+    // Exact Southern Expressway E01 Route
+    const highwaySequence = route.origin.toLowerCase().includes('monaragala')
+      ? MONARAGALA_COLOMBO_HIGHWAY_ROUTE
+      : [...MONARAGALA_COLOMBO_HIGHWAY_ROUTE].reverse();
+
+    polylineCoords = highwaySequence.map((h) => h.coords);
+    // Intermediate key transit hubs to display markers
+    intermediateWaypoints = highwaySequence.slice(1, -1).filter((_, idx) => idx % 2 === 0 || idx === 1 || idx === 2);
   } else {
-    // Generate realistic midpoint curve across Uva / Sabaragamuwa / Central highway
-    const midLat = (originCoord[0] + destCoord[0]) / 2 + (originCoord[0] < destCoord[0] ? -0.12 : 0.08);
-    const midLng = (originCoord[1] + destCoord[1]) / 2;
-    intermediateWaypoints.push([midLat, midLng]);
+    // Generic route waypoints
+    const genericCoords: [number, number][] = [];
+    if (route.boardingPoints && route.boardingPoints.length > 1) {
+      route.boardingPoints.slice(1).forEach((bp) => {
+        if (bp.lat && bp.lng) {
+          genericCoords.push([bp.lat, bp.lng]);
+          intermediateWaypoints.push({ name: bp.name, desc: bp.landmark || 'Scheduled Transit Stop', coords: [bp.lat, bp.lng] });
+        }
+      });
+    } else {
+      const midLat = (originCoord[0] + destCoord[0]) / 2 + (originCoord[0] < destCoord[0] ? -0.12 : 0.08);
+      const midLng = (originCoord[1] + destCoord[1]) / 2;
+      genericCoords.push([midLat, midLng]);
+      intermediateWaypoints.push({ name: 'Highway Transit Corridor', desc: 'Express Highway Waypoint', coords: [midLat, midLng] });
+    }
+    polylineCoords = [originCoord, ...genericCoords, destCoord];
   }
 
-  const polylineCoords: [number, number][] = [
-    originCoord,
-    ...intermediateWaypoints,
-    destCoord,
-  ];
+  // Google Maps directions URL with expressway waypoints
+  const googleMapsUrl = isMonaragalaColomboRoute
+    ? `https://www.google.com/maps/dir/?api=1&origin=${originCoord[0]},${originCoord[1]}&destination=${destCoord[0]},${destCoord[1]}&waypoints=6.4380,81.1328%7C6.3025,81.1189%7C6.0725,80.2464%7C6.8416,79.9974`
+    : `https://www.google.com/maps/dir/?api=1&origin=${originCoord[0]},${originCoord[1]}&destination=${destCoord[0]},${destCoord[1]}`;
 
   return (
     <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full sticky top-24 min-h-[480px]">
-      
       {/* Map Header */}
       <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
-              Interactive Route Map
+            <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <span>Interactive Route Map</span>
+              {isMonaragalaColomboRoute && (
+                <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-extrabold flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-indigo-600" />
+                  Southern Expressway (E01)
+                </span>
+              )}
             </h4>
           </div>
           <p className="text-xs text-slate-500 mt-0.5 truncate font-medium">
@@ -150,13 +199,13 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
 
           <MapBoundsAdjuster coords={polylineCoords} />
 
-          {/* Polyline connecting route stops */}
+          {/* Polyline connecting route highway nodes */}
           <Polyline
             positions={polylineCoords}
             pathOptions={{
               color: '#2563eb',
               weight: 5,
-              opacity: 0.85,
+              opacity: 0.9,
               dashArray: '8, 8',
               lineCap: 'round',
               lineJoin: 'round',
@@ -170,17 +219,23 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
                 <p className="font-extrabold text-slate-800 text-sm">Departure: {route.origin}</p>
                 <p className="text-blue-600 font-bold font-mono">Departs at {route.departureTime}</p>
                 <p className="text-slate-500">{route.operatorName}</p>
+                <span className="inline-block px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-bold text-[10px]">
+                  Super Luxury Service
+                </span>
               </div>
             </Popup>
           </Marker>
 
-          {/* Intermediate Stops */}
-          {intermediateWaypoints.map((coord, idx) => (
-            <Marker key={idx} position={coord} icon={stopIcon}>
+          {/* Intermediate Highway Stops */}
+          {intermediateWaypoints.map((stop, idx) => (
+            <Marker key={idx} position={stop.coords} icon={stopIcon}>
               <Popup>
                 <div className="text-xs p-1 font-sans">
-                  <p className="font-bold text-slate-800">Intermediate Transit Hub</p>
-                  <p className="text-slate-500 font-mono">Scheduled Express Stop</p>
+                  <p className="font-bold text-slate-800 flex items-center gap-1">
+                    <Navigation className="w-3 h-3 text-indigo-600" />
+                    {stop.name}
+                  </p>
+                  <p className="text-slate-500 font-mono text-[11px]">{stop.desc}</p>
                 </div>
               </Popup>
             </Marker>
@@ -192,7 +247,10 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
               <div className="text-xs space-y-1 p-1 font-sans">
                 <p className="font-extrabold text-slate-800 text-sm">Destination: {route.destination}</p>
                 <p className="text-emerald-600 font-bold font-mono">Arrives at {route.arrivalTime}</p>
-                <p className="text-slate-500">Fare: LKR {route.priceStarting.toLocaleString()}</p>
+                <p className="text-slate-500">Fare: LKR {(route.priceStarting || 2800).toLocaleString()}</p>
+                <span className="inline-block px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold text-[10px]">
+                  Expressway Direct Arrival
+                </span>
               </div>
             </Popup>
           </Marker>
@@ -200,27 +258,40 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
 
         {/* Floating Route Summary Overlay */}
         <div className="absolute bottom-3 left-3 right-3 z-10 bg-white/95 backdrop-blur-md p-3 rounded-2xl border border-slate-200/80 shadow-lg flex items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center font-bold shadow-md shadow-blue-500/20">
               <Bus className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-bold text-slate-800 leading-tight">{route.busType}</p>
-              <p className="text-[11px] text-slate-500">Starting from <strong className="text-blue-600 font-mono font-bold">LKR {route.priceStarting.toLocaleString()}</strong></p>
+              <div className="flex items-center gap-1.5">
+                <p className="font-extrabold text-slate-800 leading-tight">
+                  {route.busType.toLowerCase().includes('leyland') ? 'Super Luxury' : route.busType}
+                </p>
+                <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[9px] font-extrabold tracking-wide uppercase">
+                  Super Luxury Only
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Starting from{' '}
+                <strong className="text-blue-600 font-mono font-bold">
+                  LKR {(route.priceStarting || 2800).toLocaleString()}
+                </strong>
+              </p>
             </div>
           </div>
 
           <a
-            href={`https://www.google.com/maps/dir/?api=1&origin=${originCoord[0]},${originCoord[1]}&destination=${destCoord[0]},${destCoord[1]}`}
+            href={googleMapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-blue-600 text-white font-bold text-[11px] flex items-center gap-1 transition-colors flex-shrink-0"
+            className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-blue-600 text-white font-bold text-[11px] flex items-center gap-1.5 transition-all hover:scale-105 shadow-sm flex-shrink-0"
+            title="Open Southern Expressway Route on Google Maps"
           >
-            Google Maps <ExternalLink className="w-3 h-3" />
+            <span>Google Maps</span>
+            <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>
       </div>
-
     </div>
   );
 };

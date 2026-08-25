@@ -366,21 +366,21 @@ export async function seedData(p: Pool): Promise<void> {
       operatorName: 'Dewmina Super Line',
       operatorRating: 4.9,
       busNumber: 'ND-7788 (Dewmina Express)',
-      busType: 'Luxury Volvo Multi-Axle',
+      busType: 'Super Luxury',
       origin: 'Monaragala',
       destination: 'Colombo',
       departureTime: '06:30 AM',
-      arrivalTime: '12:30 PM',
-      duration: '6h 00m',
+      arrivalTime: '12:00 PM',
+      duration: '5h 30m',
       priceStarting: 2800,
       hasUpperDeck: 0,
-      amenities: JSON.stringify(['AC', 'Reclining Seats', 'Charging Ports', 'Live GPS Tracking', 'Water Bottle', 'Music']),
+      amenities: JSON.stringify(['Super Luxury AC', 'High-Speed Wi-Fi', 'Reclining Push-Back Seats', 'USB Fast Charging', 'Live GPS Tracking', 'Bottled Water', 'Expressway Direct Pass']),
       gpsLat: 6.8722,
       gpsLng: 81.3507,
-      gpsSpeedKmH: 72,
+      gpsSpeedKmH: 78,
       gpsCurrentStop: 'Monaragala Main Terminal',
       gpsNextStop: 'Wellawaya Clock Tower',
-      gpsEtaMinutes: 360,
+      gpsEtaMinutes: 330,
     },
     {
       id: 'route-102',
@@ -388,21 +388,21 @@ export async function seedData(p: Pool): Promise<void> {
       operatorName: 'Dewmina Super Line',
       operatorRating: 4.9,
       busNumber: 'ND-7789 (Dewmina Night Super)',
-      busType: 'AC Sleeper',
+      busType: 'Super Luxury',
       origin: 'Colombo',
       destination: 'Monaragala',
       departureTime: '09:30 PM',
-      arrivalTime: '03:30 AM',
-      duration: '6h 00m',
+      arrivalTime: '03:00 AM',
+      duration: '5h 30m',
       priceStarting: 3000,
       hasUpperDeck: 1,
-      amenities: JSON.stringify(['AC Sleeper', 'Blanket', 'Charging Ports', 'Live GPS Tracking', 'Night Reading Lamp']),
+      amenities: JSON.stringify(['Super Luxury AC Sleeper', 'High-Speed Wi-Fi', 'Blanket & Pillow', 'USB Charging', 'Live GPS Tracking', 'Night Reading Lamp']),
       gpsLat: 6.9271,
       gpsLng: 79.8612,
       gpsSpeedKmH: 80,
       gpsCurrentStop: 'Colombo Fort Bus Terminal',
-      gpsNextStop: 'Kottawa Interchange',
-      gpsEtaMinutes: 360,
+      gpsNextStop: 'Makumbura Interchange',
+      gpsEtaMinutes: 330,
     },
   ];
 
@@ -417,7 +417,11 @@ export async function seedData(p: Pool): Promise<void> {
           "origin", "destination", "departureTime", "arrivalTime", "duration", "priceStarting",
           "hasUpperDeck", "amenities", "gpsLat", "gpsLng", "gpsSpeedKmH", "gpsCurrentStop", "gpsNextStop", "gpsEtaMinutes"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
-        ON CONFLICT ("id") DO NOTHING
+        ON CONFLICT ("id") DO UPDATE SET
+          "busType" = EXCLUDED."busType",
+          "priceStarting" = EXCLUDED."priceStarting",
+          "amenities" = EXCLUDED."amenities",
+          "duration" = EXCLUDED."duration"
       `, [
         route.id, route.operatorId, route.operatorName, route.operatorRating, route.busNumber, route.busType,
         route.origin, route.destination, route.departureTime, route.arrivalTime, route.duration, route.priceStarting,
@@ -450,18 +454,15 @@ export async function seedData(p: Pool): Promise<void> {
 
     const boardingPoints = [
       { id: 'bp-101-1', routeId: 'route-101', type: 'boarding', name: 'Monaragala Main Bus Station', time: '06:30 AM', landmark: 'Platform 1', lat: 6.8722, lng: 81.3507 },
-      { id: 'bp-101-2', routeId: 'route-101', type: 'boarding', name: 'Wellawaya Town Clock Tower', time: '07:15 AM', landmark: 'Main Junction', lat: 6.7410, lng: 81.1020 },
-      { id: 'bp-101-3', routeId: 'route-101', type: 'boarding', name: 'Ratnapura Central Bus Stand', time: '10:15 AM', landmark: 'Main Stand Gate 2', lat: 6.6828, lng: 80.3992 },
-      { id: 'dp-101-1', routeId: 'route-101', type: 'drop', name: 'Kottawa Highway Interchange', time: '12:00 PM', landmark: 'Exit Gate', lat: 6.8415, lng: 79.9654 },
-      { id: 'dp-101-2', routeId: 'route-101', type: 'drop', name: 'Maharagama Bus Station', time: '12:15 PM', landmark: 'High Level Road', lat: 6.8480, lng: 79.9265 },
-      { id: 'dp-101-3', routeId: 'route-101', type: 'drop', name: 'Colombo Fort Central Bus Stand', time: '12:30 PM', landmark: 'Main Entrance', lat: 6.9344, lng: 79.8530 },
+      { id: 'bp-101-2', routeId: 'route-101', type: 'boarding', name: 'Wellawaya Clock Tower', time: '07:05 AM', landmark: 'A4 Main Junction', lat: 6.7410, lng: 81.1020 },
+      { id: 'bp-101-3', routeId: 'route-101', type: 'boarding', name: 'Thanamalwila Junction', time: '07:45 AM', landmark: 'Express Stop', lat: 6.4380, lng: 81.1328 },
+      { id: 'bp-101-4', routeId: 'route-101', type: 'boarding', name: 'Mattala E01 Highway Entry', time: '08:15 AM', landmark: 'Expressway Interchange', lat: 6.3025, lng: 81.1189 },
+      { id: 'dp-101-1', routeId: 'route-101', type: 'drop', name: 'Makumbura (Kottawa) Multimodal Center', time: '11:45 AM', landmark: 'Expressway Exit Hub', lat: 6.8416, lng: 79.9974 },
+      { id: 'dp-101-2', routeId: 'route-101', type: 'drop', name: 'Colombo Fort Central Bus Stand', time: '12:00 PM', landmark: 'Bastian Mawatha Gate 1', lat: 6.9344, lng: 79.8530 },
 
       { id: 'bp-102-1', routeId: 'route-102', type: 'boarding', name: 'Colombo Fort Bus Terminal', time: '09:30 PM', landmark: 'Bastian Mawatha Gate', lat: 6.9344, lng: 79.8530 },
-      { id: 'bp-102-2', routeId: 'route-102', type: 'boarding', name: 'Kottawa Interchange', time: '10:15 PM', landmark: 'Expressway Entrance', lat: 6.8415, lng: 79.9654 },
-      { id: 'dp-102-1', routeId: 'route-102', type: 'drop', name: 'Monaragala Main Bus Station', time: '03:30 AM', landmark: 'Platform 1', lat: 6.8722, lng: 81.3507 },
-
-      { id: 'bp-103-1', routeId: 'route-103', type: 'boarding', name: 'Monaragala Main Bus Station', time: '01:30 PM', landmark: 'Platform 1', lat: 6.8722, lng: 81.3507 },
-      { id: 'dp-103-1', routeId: 'route-103', type: 'drop', name: 'Colombo Fort Central Bus Stand', time: '07:30 PM', landmark: 'Main Entrance', lat: 6.9344, lng: 79.8530 },
+      { id: 'bp-102-2', routeId: 'route-102', type: 'boarding', name: 'Makumbura (Kottawa) Interchange', time: '10:00 PM', landmark: 'Southern Expressway Entrance', lat: 6.8416, lng: 79.9974 },
+      { id: 'dp-102-1', routeId: 'route-102', type: 'drop', name: 'Monaragala Main Bus Station', time: '03:00 AM', landmark: 'Platform 1', lat: 6.8722, lng: 81.3507 },
     ];
 
     if (boardingPoints.length > 0) {
