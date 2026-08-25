@@ -315,13 +315,7 @@ export const HeroSearch: React.FC = () => {
                 <span className="text-white/80 font-semibold tracking-wide flex items-center gap-1.5 whitespace-nowrap">
                   <span>{t('busClass')}:</span>
                   <span className="font-extrabold text-white text-sm">
-                    {busTypeFilter === 'all'
-                      ? t('allClasses')
-                      : busTypeFilter === 'Normal Service'
-                      ? t('normalService')
-                      : busTypeFilter === 'Super Luxury'
-                      ? t('superLuxury')
-                      : busTypeFilter}
+                    {busTypeFilter === 'all' ? t('allClasses') : busTypeFilter}
                   </span>
                 </span>
 
@@ -336,8 +330,8 @@ export const HeroSearch: React.FC = () => {
                   title="Select Bus Class"
                 >
                   <option value="all" className="text-slate-900">{t('allClasses')}</option>
-                  <option value="Normal Service" className="text-slate-900">{t('normalService')}</option>
-                  <option value="Super Luxury" className="text-slate-900">{t('superLuxury')}</option>
+                  <option value="Ashok Leyland" className="text-slate-900">Ashok Leyland 54</option>
+                  <option value="Yutong" className="text-slate-900">Yutong 48 / 51</option>
                 </select>
               </div>
 
