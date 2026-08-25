@@ -1321,6 +1321,368 @@
   animation: datePillPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+@keyframes serviceCardEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(32px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 
+@keyframes serviceShimmerSweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+@keyframes wifiWavePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.85;
+    filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.6));
+  }
+}
+
+@keyframes shieldGlowPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0px rgba(236, 72, 153, 0));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(236, 72, 153, 0.6));
+  }
+}
+
+@keyframes clockTickSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(35deg) scale(1.12);
+  }
+  40% {
+    transform: rotate(-15deg) scale(1.08);
+  }
+  60% {
+    transform: rotate(10deg);
+  }
+  80% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes armchairFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-4px) scale(1.08);
+    filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.35));
+  }
+}
+
+@keyframes badgeBeacon {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.4;
+  }
+}
+
+@keyframes cardAmbientGlow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+.service-card-wrapper {
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+  isolation: isolate;
+}
+
+.service-card-wrapper:hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+.service-card-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  transform: translateX(-150%) skewX(-20deg);
+  pointer-events: none;
+}
+
+.service-card-wrapper:hover .service-card-shine {
+  animation: serviceShimmerSweep 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.service-anim-armchair {
+  animation: armchairFloat 4s ease-in-out infinite;
+}
+
+.service-card-wrapper:hover .service-anim-armchair {
+  animation: armchairFloat 1.2s ease-in-out infinite;
+}
+
+.service-anim-wifi {
+  animation: wifiWavePulse 3s ease-in-out infinite;
+}
+
+.service-card-wrapper:hover .service-anim-wifi {
+  animation: wifiWavePulse 1.2s ease-in-out infinite;
+}
+
+.service-anim-shield {
+  animation: shieldGlowPulse 3.5s ease-in-out infinite;
+}
+
+.service-card-wrapper:hover .service-anim-shield {
+  animation: shieldGlowPulse 1.2s ease-in-out infinite;
+}
+
+.service-anim-clock {
+  transition: transform 0.4s ease;
+}
+
+.service-card-wrapper:hover .service-anim-clock {
+  animation: clockTickSpin 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+}
+
+.service-badge-beacon {
+  animation: badgeBeacon 2s ease-in-out infinite;
+}
+
+.service-ambient-glow {
+  animation: cardAmbientGlow 4s ease-in-out infinite;
+}
+
+/* ─── FROM & TO ICON ANIMATIONS ──────────────────────────────────────────────── */
+
+@keyframes fromPinPulse {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.25));
+  }
+  50% {
+    transform: translateY(-3px) scale(1.12);
+    filter: drop-shadow(0 6px 10px rgba(37, 99, 235, 0.45));
+  }
+}
+
+@keyframes fromRadarRing {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@keyframes toPinDrop {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.25));
+  }
+  40% {
+    transform: translateY(-4px) scale(1.14);
+    filter: drop-shadow(0 6px 10px rgba(99, 102, 241, 0.5));
+  }
+  70% {
+    transform: translateY(1px) scale(0.96);
+  }
+}
+
+@keyframes toTargetRipple {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@keyframes bounceHorizontal {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes routeFlowAnim {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes swapSpin {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.15);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes calendarTick {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(6deg) scale(1.08);
+  }
+  75% {
+    transform: rotate(-6deg) scale(1.08);
+  }
+}
+
+.animate-from-icon {
+  animation: fromPinPulse 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  transform-origin: center bottom;
+}
+
+.animate-from-beacon {
+  animation: fromRadarRing 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+.animate-to-icon {
+  animation: toPinDrop 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: 0.6s;
+  transform-origin: center bottom;
+}
+
+.animate-to-beacon {
+  animation: toTargetRipple 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+  animation-delay: 0.6s;
+}
+
+.animate-bounce-horizontal {
+  animation: bounceHorizontal 1.6s ease-in-out infinite;
+}
+
+.animate-route-flow {
+  background-size: 200% 100%;
+  animation: routeFlowAnim 2s linear infinite;
+}
+
+.animate-date-icon {
+  animation: calendarTick 4s ease-in-out infinite;
+}
+
+/* Map marker animations */
+.custom-map-marker-origin,
+.custom-map-marker-dest {
+  transition: transform 0.3s ease;
+}
+
+.custom-map-marker-origin:hover {
+  transform: scale(1.2) translateY(-4px);
+}
+
+.custom-map-marker-dest:hover {
+  transform: scale(1.2) translateY(-4px);
+}
+
+/* ─── BUS CLASS FILTER PILL ANIMATIONS ────────────────────────────────────────── */
+
+@keyframes filterTilt {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-10deg) scale(1.08);
+  }
+  75% {
+    transform: rotate(10deg) scale(1.08);
+  }
+}
+
+@keyframes chevronBob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(2.5px);
+  }
+}
+
+@keyframes pillShimmerSweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+@keyframes activeClassGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0);
+  }
+}
+
+.animate-filter-tilt {
+  animation: filterTilt 3.2s ease-in-out infinite;
+}
+
+.animate-chevron-bob {
+  animation: chevronBob 1.8s ease-in-out infinite;
+}
+
+.animate-active-glow {
+  animation: activeClassGlow 2s infinite;
+}
 
 

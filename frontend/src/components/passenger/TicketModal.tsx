@@ -68,7 +68,12 @@ export const TicketModal: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200 text-xs">
           
           <div className="space-y-1">
-            <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">{t('from')} & {t('selectBoardingPoint')}</span>
+            <span className="text-blue-600 uppercase tracking-wider text-[10px] font-bold flex items-center gap-1.5">
+              <span className="relative flex items-center justify-center w-4 h-4 rounded bg-blue-100 text-blue-600">
+                <MapPin className="w-2.5 h-2.5 animate-from-icon" />
+              </span>
+              {t('from')} & {t('selectBoardingPoint')}
+            </span>
             <p className="text-base font-bold text-slate-800">{t(booking.origin.split(',')[0])}</p>
             <p className="text-blue-600 font-medium">{booking.boardingPoint.name}</p>
             <p className="text-slate-500 text-[11px]">{booking.boardingPoint.landmark} ({booking.boardingPoint.time})</p>
@@ -77,7 +82,7 @@ export const TicketModal: React.FC = () => {
           <div className="space-y-1 text-center md:border-x border-slate-200 md:px-4">
             <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">{t('departureDate')}</span>
             <p className="text-base font-bold text-slate-800 flex items-center justify-center gap-1">
-              <Calendar className="w-4 h-4 text-amber-500" /> {booking.departureDate}
+              <Calendar className="w-4 h-4 text-amber-500 animate-date-icon" /> {booking.departureDate}
             </p>
             <p className="text-amber-600 font-mono text-sm font-bold flex items-center justify-center gap-1">
               <Clock className="w-4 h-4 text-amber-500" /> {booking.departureTime}
@@ -85,7 +90,12 @@ export const TicketModal: React.FC = () => {
           </div>
 
           <div className="space-y-1 md:text-right">
-            <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">{t('destinationDrop')}</span>
+            <span className="text-indigo-600 uppercase tracking-wider text-[10px] font-bold flex items-center md:justify-end gap-1.5">
+              <span className="relative flex items-center justify-center w-4 h-4 rounded bg-indigo-100 text-indigo-600">
+                <MapPin className="w-2.5 h-2.5 animate-to-icon" />
+              </span>
+              {t('destinationDrop')}
+            </span>
             <p className="text-base font-bold text-slate-800">{t(booking.destination.split(',')[0])}</p>
             <p className="text-indigo-600 font-medium">{booking.dropPoint.name}</p>
           </div>

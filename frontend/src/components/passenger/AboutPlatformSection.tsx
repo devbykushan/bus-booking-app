@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useBookingStore } from '../../store/bookingStore';
 import { 
   Bus, 
   ShieldCheck, 
@@ -11,12 +10,10 @@ import {
   CheckCircle2, 
   Compass, 
   Shield, 
-  Star,
-  ArrowRight
+  Star
 } from 'lucide-react';
 
 export const AboutPlatformSection: React.FC = () => {
-  const { goToSearchSchedules } = useBookingStore();
   const [activeTab, setActiveTab] = useState<'overview' | 'fleet' | 'safety' | 'expressway'>('overview');
 
   const stats = [
@@ -164,17 +161,6 @@ export const AboutPlatformSection: React.FC = () => {
                   </div>
                 ))}
               </div>
-
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={goToSearchSchedules}
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold py-2.5 rounded-xl shadow-md shadow-blue-600/20 transition-all cursor-pointer"
-                >
-                  <span>Book a Dewmina Super Line Bus</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
             </div>
           </div>
 
@@ -202,3 +188,4 @@ export const AboutPlatformSection: React.FC = () => {
     </section>
   );
 };
+

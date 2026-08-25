@@ -7,7 +7,6 @@ import { SchedulesDashboard } from './components/passenger/SchedulesDashboard';
 import { StatsSection } from './components/passenger/StatsSection';
 import { ServicesSection } from './components/passenger/ServicesSection';
 import { BookingGuideSection } from './components/passenger/BookingGuideSection';
-import { HomePromoAdSection } from './components/passenger/HomePromoAdSection';
 import { AboutPlatformSection } from './components/passenger/AboutPlatformSection';
 import { BusBookingFAQSection } from './components/passenger/BusBookingFAQSection';
 import { SeatMap } from './components/passenger/SeatMap';
@@ -16,6 +15,7 @@ import { TicketModal } from './components/passenger/TicketModal';
 import { LiveMap } from './components/passenger/LiveMap';
 import { UserBookings } from './components/passenger/UserBookings';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
 import { Bus, AlertCircle, Wifi, RefreshCw } from 'lucide-react';
 
 export function App() {
@@ -115,7 +115,6 @@ export function App() {
                   <StatsSection />
                 </div>
                 <ServicesSection />
-                <HomePromoAdSection />
                 <BookingGuideSection />
                 <AboutPlatformSection />
                 <BusBookingFAQSection />
@@ -133,6 +132,7 @@ export function App() {
       </main>
 
       <Footer />
+      <FloatingWhatsApp />
     </div>
   );
 }

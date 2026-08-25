@@ -358,13 +358,28 @@ export const SchedulesDashboard: React.FC = () => {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white flex items-center gap-2 tracking-tight">
-                  <span>{searchOrigin}</span>
-                  <span className="text-blue-400 font-light">→</span>
-                  <span>{searchDestination}</span>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white flex flex-wrap items-center gap-3 tracking-tight">
+                  <span className="inline-flex items-center gap-2">
+                    <span className="relative flex items-center justify-center w-6 h-6 rounded-lg bg-blue-500/20 border border-blue-400/40 text-blue-300">
+                      <span className="absolute -inset-0.5 rounded-lg bg-blue-400/30 animate-from-beacon pointer-events-none" />
+                      <MapPin className="w-3.5 h-3.5 animate-from-icon relative z-10 text-blue-400" />
+                    </span>
+                    <span>{searchOrigin}</span>
+                  </span>
+                  <span className="text-blue-400 font-light flex items-center gap-1 px-1">
+                    <span className="w-6 sm:w-10 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full animate-route-flow" />
+                    <ChevronRight className="w-5 h-5 text-indigo-300 animate-bounce-horizontal -ml-2" />
+                  </span>
+                  <span className="inline-flex items-center gap-2">
+                    <span className="relative flex items-center justify-center w-6 h-6 rounded-lg bg-indigo-500/20 border border-indigo-400/40 text-indigo-300">
+                      <span className="absolute -inset-0.5 rounded-lg bg-indigo-400/30 animate-to-beacon pointer-events-none" />
+                      <MapPin className="w-3.5 h-3.5 animate-to-icon relative z-10 text-indigo-400" />
+                    </span>
+                    <span>{searchDestination}</span>
+                  </span>
                 </h1>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-bold">
-                  <Calendar className="w-3.5 h-3.5 text-blue-300" />
+                  <Calendar className="w-3.5 h-3.5 text-blue-300 animate-date-icon" />
                   {formattedDate}
                 </span>
                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold">
@@ -411,10 +426,18 @@ export const SchedulesDashboard: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
                   {/* Origin */}
-                  <div className="md:col-span-4 bg-slate-50 border border-slate-200 rounded-2xl p-3 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-blue-600 flex items-center gap-1 mb-1">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {t('from')}
+                  <div className="md:col-span-4 bg-slate-50 border border-slate-200 rounded-2xl p-3 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all group/from">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-blue-600 flex items-center justify-between gap-1 mb-1.5">
+                      <span className="flex items-center gap-1.5">
+                        <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-blue-100/70 border border-blue-300 text-blue-600 shadow-xs transition-transform duration-300 group-hover/from:scale-110">
+                          <span className="absolute -inset-0.5 rounded-md bg-blue-400/30 animate-from-beacon pointer-events-none" />
+                          <MapPin className="w-3.5 h-3.5 animate-from-icon relative z-10" />
+                        </span>
+                        <span className="font-extrabold">{t('from')}</span>
+                      </span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 font-semibold normal-case">
+                        Origin
+                      </span>
                     </label>
                     <select
                       value={modOrigin}
@@ -435,17 +458,25 @@ export const SchedulesDashboard: React.FC = () => {
                       type="button"
                       onClick={handleSwap}
                       title="Swap cities"
-                      className="p-2.5 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-colors border border-slate-200"
+                      className="group/swap p-2.5 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-all duration-300 border border-slate-200 cursor-pointer hover:scale-110 active:scale-95"
                     >
-                      <ArrowRightLeft className="w-4 h-4" />
+                      <ArrowRightLeft className="w-4 h-4 transition-transform duration-500 group-hover/swap:rotate-180 text-blue-600" />
                     </button>
                   </div>
 
                   {/* Destination */}
-                  <div className="md:col-span-4 bg-slate-50 border border-slate-200 rounded-2xl p-3 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1 mb-1">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {t('to')}
+                  <div className="md:col-span-4 bg-slate-50 border border-slate-200 rounded-2xl p-3 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 transition-all group/to">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 flex items-center justify-between gap-1 mb-1.5">
+                      <span className="flex items-center gap-1.5">
+                        <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-indigo-100/70 border border-indigo-300 text-indigo-600 shadow-xs transition-transform duration-300 group-hover/to:scale-110">
+                          <span className="absolute -inset-0.5 rounded-md bg-indigo-400/30 animate-to-beacon pointer-events-none" />
+                          <MapPin className="w-3.5 h-3.5 animate-to-icon relative z-10" />
+                        </span>
+                        <span className="font-extrabold">{t('to')}</span>
+                      </span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-semibold normal-case">
+                        Destination
+                      </span>
                     </label>
                     <select
                       value={modDestination}
@@ -461,10 +492,12 @@ export const SchedulesDashboard: React.FC = () => {
                   </div>
 
                   {/* Date */}
-                  <div className="md:col-span-3 bg-slate-50 border border-slate-200 rounded-2xl p-3 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-100 transition-all">
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1 mb-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {t('journeyDate')}
+                  <div className="md:col-span-3 bg-slate-50 border border-slate-200 rounded-2xl p-3 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-100 transition-all group/date">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5 mb-1.5">
+                      <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-amber-100/70 border border-amber-300 text-amber-600 shadow-xs transition-transform duration-300 group-hover/date:scale-110">
+                        <Calendar className="w-3.5 h-3.5 animate-date-icon relative z-10" />
+                      </span>
+                      <span className="font-extrabold">{t('journeyDate')}</span>
                     </label>
                     <input
                       type="date"
