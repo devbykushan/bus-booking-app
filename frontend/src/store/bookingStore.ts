@@ -115,7 +115,7 @@ interface BookingStore {
   selectedSeatIds: string[];
   lockExpirySeconds: number;
   lockActive: boolean;
-  toggleSeatSelection: (seatId: string) => Promise<void>;
+  toggleSeatSelection: (seatId: string) => void;
   clearSeatSelection: () => void;
   tickLockTimer: () => void;
 
@@ -289,7 +289,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   lockExpirySeconds: 480,
   lockActive: false,
 
-  toggleSeatSelection: async (seatId: string) => {
+  toggleSeatSelection: (seatId: string) => {
     const { selectedSeatIds, selectedRoute, sessionId } = get();
     if (!selectedRoute) return;
 
@@ -317,7 +317,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     let newSelected: string[];
 
     if (selectedSeatIds.includes(actualId) || selectedSeatIds.includes(seatId) || selectedSeatIds.includes(canonicalId)) {
-      // Deselect — unlock on backend
+      // Deselect — unlock on backend asynchronously
       newSelected = selectedSeatIds.filter((id) => id !== actualId && id !== seatId && id !== canonicalId);
       seatsApi.unlock({ seatIds: [actualId], sessionId }).catch(() => {});
     } else {
@@ -326,16 +326,14 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         return;
       }
 
-      // Try to acquire a server-side seat lock
-      try {
-        await seatsApi.lock({ seatIds: [actualId], routeId: selectedRoute.id, sessionId });
-      } catch (err: any) {
-        // Continue if offline/demo
-      }
-
+      // Optimistic instant selection
       newSelected = [...selectedSeatIds, actualId];
+
+      // Async background server lock (non-blocking)
+      seatsApi.lock({ seatIds: [actualId], routeId: selectedRoute.id, sessionId }).catch(() => {});
     }
 
+    // Instant local state update (0ms lag)
     set({
       selectedSeatIds: newSelected,
       lockActive: newSelected.length > 0,

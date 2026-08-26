@@ -56,6 +56,7 @@ export const SeatMap: React.FC = () => {
   const [seatGenders, setSeatGenders] = useState<{ [seatId: string]: 'male' | 'female' }>({});
   const [genderToastMessage, setGenderToastMessage] = useState<string | null>(null);
   const [hoveredSeatNum, setHoveredSeatNum] = useState<string | null>(null);
+  const [pendingGenderSeat, setPendingGenderSeat] = useState<{ id: string; number: string } | null>(null);
 
   // Gender Validation Rule Check Function
   const getGenderValidationError = (seatId: string, assignedGender: 'male' | 'female'): string | null => {
@@ -219,14 +220,27 @@ export const SeatMap: React.FC = () => {
   const handleSeatClick = (seatId: string) => {
     const isSelecting = !selectedSeatIds.includes(seatId);
     if (isSelecting) {
-      const assignedGender = seatGenders[seatId] || 'male';
-      const valErr = getGenderValidationError(seatId, assignedGender);
-      if (valErr) {
-        setGenderToastMessage(valErr);
-        setTimeout(() => setGenderToastMessage(null), 5000);
-      }
+      const routeId = selectedRoute?.id || '';
+      const normalizedNum = seatId.replace(`${routeId}-`, '').replace(/^seat-/, '').replace(/^0+/, '');
+      setPendingGenderSeat({ id: seatId, number: normalizedNum });
+    } else {
+      toggleSeatSelection(seatId);
     }
+  };
+
+  const handleGenderSelect = (gender: 'male' | 'female') => {
+    if (!pendingGenderSeat) return;
+    const seatId = pendingGenderSeat.id;
+    
+    const valErr = getGenderValidationError(seatId, gender);
+    if (valErr) {
+      setGenderToastMessage(valErr);
+      setTimeout(() => setGenderToastMessage(null), 5000);
+    }
+
+    setSeatGenders(prev => ({ ...prev, [seatId]: gender }));
     toggleSeatSelection(seatId);
+    setPendingGenderSeat(null);
   };
 
   const handleVerifyPhone = () => {
@@ -774,32 +788,6 @@ export const SeatMap: React.FC = () => {
                           </div>
 
                           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                            {/* Gender Switcher Pill Buttons */}
-                            <div className="h-[64px] sm:h-[70px] p-1.5 rounded-2xl bg-white border border-slate-200 flex flex-col justify-center gap-1 shadow-2xs">
-                              <button
-                                type="button"
-                                onClick={() => setSeatGenders(prev => ({ ...prev, [s.id]: 'male' }))}
-                                className={`px-3 py-1 rounded-xl text-[11px] font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
-                                  currentGender === 'male'
-                                    ? 'bg-blue-600 text-white shadow-xs'
-                                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-                                }`}
-                              >
-                                <span>👨 Gent</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setSeatGenders(prev => ({ ...prev, [s.id]: 'female' }))}
-                                className={`px-3 py-1 rounded-xl text-[11px] font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
-                                  currentGender === 'female'
-                                    ? 'bg-pink-600 text-white shadow-xs'
-                                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-                                }`}
-                              >
-                                <span>👩 Lady</span>
-                              </button>
-                            </div>
-
                             {/* Price Box */}
                             <div className="h-[64px] sm:h-[70px] px-4 sm:px-6 rounded-2xl border-2 border-blue-500 bg-white flex items-center justify-center font-extrabold text-blue-600 text-base sm:text-lg flex-shrink-0 tracking-tight shadow-2xs min-w-[100px]">
                               LKR {s.price || 3430}
@@ -1621,6 +1609,57 @@ export const SeatMap: React.FC = () => {
 
             </div>
 
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Gender Selection Modal Popup (Compact & Sleek Top Level Portal z-[99999]) ────────────────── */}
+      {pendingGenderSeat && createPortal(
+        <div className="fixed inset-0 z-[99999] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-3 animate-fade-in">
+          <div className="bg-white rounded-3xl p-4 sm:p-5 max-w-[260px] sm:max-w-[280px] w-full space-y-3 shadow-2xl border border-slate-200 animate-scale-in text-center relative z-[100000]">
+            <button
+              type="button"
+              onClick={() => setPendingGenderSeat(null)}
+              className="absolute top-3.5 right-3.5 p-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+
+            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto shadow-inner">
+              <User className="w-4 h-4" />
+            </div>
+
+            <div className="space-y-0.5">
+              <h3 className="text-base font-extrabold text-slate-900 leading-tight">
+                Select Gender
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                Seat <strong className="text-slate-800 font-bold">#{pendingGenderSeat.number}</strong>
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 pt-0.5">
+              {/* Male Bar Button */}
+              <button
+                type="button"
+                onClick={() => handleGenderSelect('male')}
+                className="py-2 px-3 rounded-xl border-2 border-blue-200 hover:border-blue-600 bg-blue-50/50 hover:bg-blue-600 text-slate-800 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer group shadow-2xs hover:shadow-xs active:scale-95"
+              >
+                <span className="text-sm group-hover:scale-110 transition-transform">👨</span>
+                <span className="font-extrabold text-xs">Male</span>
+              </button>
+
+              {/* Female Bar Button */}
+              <button
+                type="button"
+                onClick={() => handleGenderSelect('female')}
+                className="py-2 px-3 rounded-xl border-2 border-pink-200 hover:border-pink-600 bg-pink-50/50 hover:bg-pink-600 text-slate-800 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer group shadow-2xs hover:shadow-xs active:scale-95"
+              >
+                <span className="text-sm group-hover:scale-110 transition-transform">👩</span>
+                <span className="font-extrabold text-xs">Female</span>
+              </button>
+            </div>
           </div>
         </div>,
         document.body
