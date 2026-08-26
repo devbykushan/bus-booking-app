@@ -170,9 +170,32 @@ routesRouter.post('/', async (req: Request, res: Response) => {
     res.status(400).json({ error: 'Destination city must be different from Origin city.' });
     return;
   }
+  const timeRegex = /^((0?[1-9]|1[0-2]):[0-5][0-9]\s*(AM|PM)|([0-1]?[0-9]|2[0-3]):[0-5][0-9])$/i;
+  const durationRegex = /^(\d+(\.\d+)?\s*(h|hr|hrs|hours?))?\s*(\d+\s*(m|min|mins|minutes?))?$/i;
+
   if (!departureTime || typeof departureTime !== 'string' || !departureTime.trim()) {
     res.status(400).json({ error: 'Departure time is required.' });
     return;
+  }
+  if (!timeRegex.test(departureTime.trim())) {
+    res.status(400).json({ error: 'Invalid departure time format (e.g. 10:00 AM or 14:30).' });
+    return;
+  }
+  if (arrivalTime && typeof arrivalTime === 'string' && arrivalTime.trim()) {
+    if (!timeRegex.test(arrivalTime.trim())) {
+      res.status(400).json({ error: 'Invalid arrival time format (e.g. 03:30 PM or 17:45).' });
+      return;
+    }
+    if (departureTime.trim().toLowerCase() === arrivalTime.trim().toLowerCase()) {
+      res.status(400).json({ error: 'Arrival time cannot be identical to departure time.' });
+      return;
+    }
+  }
+  if (duration && typeof duration === 'string' && duration.trim()) {
+    if (!durationRegex.test(duration.trim()) || !/\d/.test(duration)) {
+      res.status(400).json({ error: 'Invalid journey duration format (e.g. 5h 30m or 6h).' });
+      return;
+    }
   }
   const parsedPrice = Number(priceStarting);
   if (isNaN(parsedPrice) || parsedPrice < 500) {

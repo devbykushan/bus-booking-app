@@ -28,6 +28,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
   const [arrivalTime, setArrivalTime] = useState('03:30 PM');
   const [duration, setDuration] = useState('5h 30m');
   const [priceStarting, setPriceStarting] = useState<number | string>(2670);
+  const [capacity, setCapacity] = useState<number | string>(49);
   const [amenities, setAmenities] = useState<string[]>([
     'AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats', 'Water Bottle', 'Blanket', 'LED TV Screen'
   ]);
@@ -57,8 +58,8 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
       arrivalTime: arrivalTime.trim() || '03:30 PM',
       duration: duration.trim() || '5h 30m',
       priceStarting: Number(priceStarting) || 2670,
-      availableSeatsCount: 49,
-      totalSeatsCount: 49,
+      availableSeatsCount: Number(capacity) || 49,
+      totalSeatsCount: Number(capacity) || 49,
       hasUpperDeck: busType.includes('Double') || busType.includes('Sleeper'),
       amenities: amenities.length > 0 ? amenities : ['AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats'],
       boardingPoints: [
@@ -104,11 +105,29 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
     return platePattern.test(trimmed) || generalPattern.test(trimmed);
   };
 
+  // Time format helper (12-hour or 24-hour)
+  const isValidTimeFormat = (val: string): boolean => {
+    const trimmed = val.trim();
+    if (!trimmed) return false;
+    const TwelveHourRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s*(AM|PM)$/i;
+    const TwentyFourHourRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    return TwelveHourRegex.test(trimmed) || TwentyFourHourRegex.test(trimmed);
+  };
+
+  // Journey Duration format helper (e.g. 5h 30m, 6h, 45m, 5.5h)
+  const isValidDurationFormat = (val: string): boolean => {
+    const trimmed = val.trim();
+    if (!trimmed) return false;
+    const durationPattern = /^(\d+(\.\d+)?\s*(h|hr|hrs|hours?))?\s*(\d+\s*(m|min|mins|minutes?))?$/i;
+    return durationPattern.test(trimmed) && /\d/.test(trimmed);
+  };
+
   const handleBusTypeChange = (newType: BusCategory) => {
     setBusType(newType);
     const preset = BUS_CLASS_PRESETS[newType];
     if (preset) {
       setPriceStarting(preset.defaultPrice);
+      setCapacity(preset.seatsCount);
       setAmenities([...preset.defaultAmenities]);
       setDuration(preset.defaultDuration);
       setClassNotice(
@@ -157,17 +176,28 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
 
     // 6. Departure Time
     if (!departureTime.trim()) {
-      errs.departureTime = 'Departure time is required (e.g., 10:00 AM).';
+      errs.departureTime = 'Departure time is required.';
+    } else if (!isValidTimeFormat(departureTime)) {
+      errs.departureTime = 'Invalid format. Use e.g. 10:00 AM or 14:30.';
     }
 
     // 7. Arrival Time
     if (!arrivalTime.trim()) {
-      errs.arrivalTime = 'Arrival time is required (e.g., 03:30 PM).';
+      errs.arrivalTime = 'Arrival time is required.';
+    } else if (!isValidTimeFormat(arrivalTime)) {
+      errs.arrivalTime = 'Invalid format. Use e.g. 03:30 PM or 17:45.';
+    } else if (
+      isValidTimeFormat(departureTime) &&
+      departureTime.trim().toLowerCase() === arrivalTime.trim().toLowerCase()
+    ) {
+      errs.arrivalTime = 'Arrival time cannot be identical to departure time.';
     }
 
     // 8. Duration
     if (!duration.trim()) {
-      errs.duration = 'Journey duration is required (e.g., 5h 30m).';
+      errs.duration = 'Journey duration is required.';
+    } else if (!isValidDurationFormat(duration)) {
+      errs.duration = 'Invalid duration. Use format like 5h 30m, 6h, or 45m.';
     }
 
     // 9. Base Price
@@ -178,6 +208,20 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
       errs.priceStarting = 'Base price must be at least 500 LKR.';
     } else if (numericPrice > 50000) {
       errs.priceStarting = 'Base price cannot exceed 50,000 LKR.';
+    }
+
+    // 10. Capacity (Total Seats)
+    const numericCapacity = Number(capacity);
+    if (capacity === '' || capacity === null || capacity === undefined) {
+      errs.capacity = 'Capacity (seats) is required.';
+    } else if (isNaN(numericCapacity)) {
+      errs.capacity = 'Capacity must be a valid number.';
+    } else if (!Number.isInteger(numericCapacity)) {
+      errs.capacity = 'Capacity must be a whole number of seats.';
+    } else if (numericCapacity < 10) {
+      errs.capacity = 'Capacity must be at least 10 seats.';
+    } else if (numericCapacity > 100) {
+      errs.capacity = 'Capacity cannot exceed 100 seats.';
     }
 
     setErrors(errs);
@@ -196,6 +240,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
     const selectedBusType = busType;
     const newId = `route-${Date.now()}`;
     const numericPrice = Number(priceStarting);
+    const numericCap = Number(capacity);
 
     const bpList = [
       { name: pickupStop1.trim() || `${origin.trim()} Main Terminal`, time: departureTime.trim(), landmark: 'Main Station Gate', lat: 6.8722, lng: 81.3507 },
@@ -221,6 +266,8 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
         arrivalTime: arrivalTime.trim(),
         duration: duration.trim(),
         priceStarting: numericPrice,
+        totalSeatsCount: numericCap,
+        availableSeatsCount: numericCap,
         hasUpperDeck: selectedBusType.includes('Double') || selectedBusType.includes('Sleeper'),
         amenities: amenities.length > 0 ? amenities : ['Wi-Fi', 'AC', 'Live GPS', 'Charging Ports', 'Reclining Seats'],
         boardingPoints: bpList,
@@ -310,7 +357,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
             <div className="p-2 rounded-xl bg-white border border-slate-200">
               <span className="text-[10px] text-slate-400 font-medium block">Capacity</span>
-              <span className="text-xs font-bold text-slate-800 font-mono">{BUS_CLASS_PRESETS[busType].seatsCount} Seats</span>
+              <span className="text-xs font-bold text-slate-800 font-mono">{capacity || BUS_CLASS_PRESETS[busType]?.seatsCount || 49} Seats</span>
             </div>
             <div className="p-2 rounded-xl bg-white border border-slate-200">
               <span className="text-[10px] text-slate-400 font-medium block">Default Fare</span>
@@ -551,7 +598,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
             type="number"
             min={500}
             max={50000}
-            step={50}
+            step="any"
             value={priceStarting}
             onChange={e => {
               setPriceStarting(e.target.value);
@@ -566,6 +613,35 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
           {errors.priceStarting && (
             <p className="text-[11px] text-rose-600 font-semibold mt-1 flex items-center gap-1">
               <AlertCircle className="w-3 h-3 flex-shrink-0" /> {errors.priceStarting}
+            </p>
+          )}
+        </div>
+
+        {/* Capacity (Seats) */}
+        <div>
+          <label className="block text-slate-700 font-bold mb-1">
+            Capacity (Seats) <span className="text-rose-500">*</span>
+          </label>
+          <input
+            type="number"
+            min={10}
+            max={100}
+            step={1}
+            value={capacity}
+            onChange={e => {
+              setCapacity(e.target.value);
+              if (errors.capacity) setErrors(prev => ({ ...prev, capacity: '' }));
+            }}
+            placeholder="e.g. 49"
+            className={`w-full rounded-xl p-2.5 font-semibold text-slate-800 border transition-all ${
+              errors.capacity
+                ? 'bg-rose-50/50 border-rose-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-200'
+                : 'bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+            }`}
+          />
+          {errors.capacity && (
+            <p className="text-[11px] text-rose-600 font-semibold mt-1 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3 flex-shrink-0" /> {errors.capacity}
             </p>
           )}
         </div>

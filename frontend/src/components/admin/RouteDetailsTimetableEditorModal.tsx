@@ -172,6 +172,7 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
   const [origin, setOrigin] = useState(route.origin || '');
   const [destination, setDestination] = useState(route.destination || '');
   const [priceStarting, setPriceStarting] = useState<number | string>(route.priceStarting || 2670);
+  const [capacity, setCapacity] = useState<number | string>(route.totalSeatsCount || route.seats?.length || 49);
   const [amenities, setAmenities] = useState<string[]>(
     route.amenities && route.amenities.length > 0
       ? route.amenities
@@ -218,12 +219,30 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
     return true;
   };
 
+  // Time format helper (12-hour or 24-hour)
+  const isValidTimeFormat = (val: string): boolean => {
+    const trimmed = val.trim();
+    if (!trimmed) return false;
+    const TwelveHourRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s*(AM|PM)$/i;
+    const TwentyFourHourRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    return TwelveHourRegex.test(trimmed) || TwentyFourHourRegex.test(trimmed);
+  };
+
+  // Journey Duration format helper (e.g. 5h 30m, 6h, 45m, 5.5h)
+  const isValidDurationFormat = (val: string): boolean => {
+    const trimmed = val.trim();
+    if (!trimmed) return false;
+    const durationPattern = /^(\d+(\.\d+)?\s*(h|hr|hrs|hours?))?\s*(\d+\s*(m|min|mins|minutes?))?$/i;
+    return durationPattern.test(trimmed) && /\d/.test(trimmed);
+  };
+
   // Bus Class Preset Auto-Update Handler
   const applyClassDefaults = (type: string, silent: boolean = false) => {
     const preset = BUS_CLASS_PRESETS[type];
     if (preset) {
       setBusType(type);
       setPriceStarting(preset.defaultPrice);
+      setCapacity(preset.seatsCount);
       setAmenities([...preset.defaultAmenities]);
       setDuration(preset.defaultDuration);
       if (!silent) {
@@ -338,9 +357,42 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
       setErrorMessage('Origin and destination cannot be identical.');
       return;
     }
+    if (!departureTime.trim()) {
+      setErrorMessage('Departure time is required.');
+      return;
+    }
+    if (!isValidTimeFormat(departureTime)) {
+      setErrorMessage('Invalid departure time format. Use format like 10:00 AM or 14:30.');
+      return;
+    }
+    if (!arrivalTime.trim()) {
+      setErrorMessage('Arrival time is required.');
+      return;
+    }
+    if (!isValidTimeFormat(arrivalTime)) {
+      setErrorMessage('Invalid arrival time format. Use format like 03:30 PM or 17:45.');
+      return;
+    }
+    if (departureTime.trim().toLowerCase() === arrivalTime.trim().toLowerCase()) {
+      setErrorMessage('Arrival time cannot be identical to departure time.');
+      return;
+    }
+    if (!duration.trim()) {
+      setErrorMessage('Journey duration is required.');
+      return;
+    }
+    if (!isValidDurationFormat(duration)) {
+      setErrorMessage('Invalid journey duration format. Use format like 5h 30m, 6h, or 45m.');
+      return;
+    }
     const numPrice = Number(priceStarting);
     if (isNaN(numPrice) || numPrice < 500) {
       setErrorMessage('Starting fare must be at least LKR 500.');
+      return;
+    }
+    const numCap = Number(capacity);
+    if (capacity === '' || isNaN(numCap) || numCap < 10 || numCap > 100 || !Number.isInteger(numCap)) {
+      setErrorMessage('Bus capacity (seats) must be a whole number between 10 and 100.');
       return;
     }
     if (boardingPoints.length === 0) {
@@ -365,6 +417,8 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
         arrivalTime: arrivalTime.trim(),
         duration: duration.trim(),
         priceStarting: numPrice,
+        totalSeatsCount: numCap,
+        availableSeatsCount: numCap,
         hasUpperDeck: busType.includes('Double') || busType.includes('Sleeper'),
         amenities,
         boardingPoints,
@@ -534,7 +588,7 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                   <label className="text-xs font-bold text-slate-700">Base Ticket Fare (LKR)</label>
                   <input
                     type="number"
-                    step="50"
+                    step="any"
                     min="500"
                     max="50000"
                     value={priceStarting}
@@ -577,6 +631,21 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                     onChange={(e) => setDuration(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     placeholder="6h 00m"
+                  />
+                </div>
+
+                {/* Bus Capacity */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Bus Capacity (Seats)</label>
+                  <input
+                    type="number"
+                    min="10"
+                    max="100"
+                    step="1"
+                    value={capacity}
+                    onChange={(e) => setCapacity(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    placeholder="49"
                   />
                 </div>
 
@@ -634,7 +703,7 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
                         <div className="p-2 rounded-xl bg-white border border-slate-200/80">
                           <span className="text-[10px] text-slate-400 font-medium block">Capacity</span>
-                          <span className="text-xs font-bold text-slate-800 font-mono">{BUS_CLASS_PRESETS[busType].seatsCount} Seats</span>
+                          <span className="text-xs font-bold text-slate-800 font-mono">{capacity || BUS_CLASS_PRESETS[busType]?.seatsCount || 49} Seats</span>
                         </div>
                         <div className="p-2 rounded-xl bg-white border border-slate-200/80">
                           <span className="text-[10px] text-slate-400 font-medium block">Default Fare</span>
