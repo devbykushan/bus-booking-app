@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useBookingStore } from '../../store/bookingStore';
 import type { DeckType } from '../../types/booking';
 import { 
@@ -52,7 +53,45 @@ export const SeatMap: React.FC = () => {
   const [dateError, setDateError] = useState<string | null>(null);
   const [bookingType, setBookingType] = useState<'myself' | 'others'>('myself');
   const [seatPassengerNames, setSeatPassengerNames] = useState<{ [seatId: string]: string }>({});
+  const [seatGenders, setSeatGenders] = useState<{ [seatId: string]: 'male' | 'female' }>({});
+  const [genderToastMessage, setGenderToastMessage] = useState<string | null>(null);
   const [hoveredSeatNum, setHoveredSeatNum] = useState<string | null>(null);
+
+  // Gender Validation Rule Check Function
+  const getGenderValidationError = (seatId: string, assignedGender: 'male' | 'female'): string | null => {
+    if (!selectedRoute) return null;
+
+    const normalizedNum = seatId.replace('seat-', '').replace(/^0+/, '');
+    const seatObj = selectedRoute.seats.find(s => s.id === seatId || s.number === normalizedNum || s.number === seatId);
+
+    // Rule 1: Male assigned to Female Reserved Priority seat
+    if (assignedGender === 'male' && seatObj?.isFemaleOnly) {
+      return `Seat #${normalizedNum} is reserved for female passengers only.`;
+    }
+
+    // Rule 2: Male assigned adjacent to a seat Booked by Ladies
+    if (assignedGender === 'male') {
+      const num = parseInt(normalizedNum, 10);
+      if (!isNaN(num)) {
+        // In 2x2 coach layout: (1,2), (3,4), (5,6), (7,8) are adjacent pairs
+        const adjacentNum = num % 2 === 1 ? num + 1 : num - 1;
+        const adjacentSeat = selectedRoute.seats.find(s => 
+          s.number === adjacentNum.toString() || 
+          s.number === `0${adjacentNum}` || 
+          s.id.endsWith(`-${adjacentNum}`)
+        );
+
+        if (adjacentSeat && adjacentSeat.status === 'booked') {
+          const isAdjacentFemale = (adjacentSeat as any).gender === 'female' || adjacentSeat.isFemaleOnly;
+          if (isAdjacentFemale) {
+            return `Gentlemen cannot book Seat #${normalizedNum} because adjacent Seat #${adjacentSeat.number} is Booked by Ladies.`;
+          }
+        }
+      }
+    }
+
+    return null;
+  };
 
   // Payment & Promo states
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking' | 'wallet'>('card');
@@ -60,7 +99,7 @@ export const SeatMap: React.FC = () => {
   const [promoMessage, setPromoMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Phone input changer with automatic zero stripping
+  // Phone input changer with automatic zero stripping and Sri Lanka prefix validation
   const handlePhoneChange = (raw: string) => {
     let clean = raw.replace(/\D/g, '');
     if (countryCode === '+94' && clean.startsWith('0')) {
@@ -71,8 +110,14 @@ export const SeatMap: React.FC = () => {
     }
     setPhoneInput(clean);
     setIsPhoneVerified(false);
-    if (clean.length > 0 && clean.length < 9) {
-      setPhoneError('Please enter 9 digits without leading 0 (e.g. 762581841)');
+    if (countryCode === '+94') {
+      if (clean.length > 0 && clean.length < 9) {
+        setPhoneError(`Must be 9 digits without leading 0 (entered ${clean.length}/9)`);
+      } else if (clean.length === 9 && !/^7[01245678]\d{7}$/.test(clean)) {
+        setPhoneError('Invalid Sri Lankan mobile prefix (must start with 70, 71, 72, 74, 75, 76, 77, or 78)');
+      } else {
+        setPhoneError(null);
+      }
     } else {
       setPhoneError(null);
     }
@@ -172,6 +217,15 @@ export const SeatMap: React.FC = () => {
   };
 
   const handleSeatClick = (seatId: string) => {
+    const isSelecting = !selectedSeatIds.includes(seatId);
+    if (isSelecting) {
+      const assignedGender = seatGenders[seatId] || 'male';
+      const valErr = getGenderValidationError(seatId, assignedGender);
+      if (valErr) {
+        setGenderToastMessage(valErr);
+        setTimeout(() => setGenderToastMessage(null), 5000);
+      }
+    }
     toggleSeatSelection(seatId);
   };
 
@@ -225,6 +279,16 @@ export const SeatMap: React.FC = () => {
     if (selectedSeatIds.length === 0) {
       setIsSeatDrawerOpen(true);
       return;
+    }
+
+    // Gender validation check for all selected seats
+    for (const seatId of selectedSeatIds) {
+      const assignedGender = seatGenders[seatId] || 'male';
+      const valErr = getGenderValidationError(seatId, assignedGender);
+      if (valErr) {
+        setGenderToastMessage(`Validation Error: ${valErr}`);
+        return;
+      }
     }
 
     let cleanPhone = phoneInput.replace(/\D/g, '');
@@ -667,44 +731,89 @@ export const SeatMap: React.FC = () => {
             {/* Selected Seats List & Booking Type (Rendered When Seats are Selected) */}
             {selectedSeatIds.length > 0 && (
               <div className="p-5 sm:p-6 pt-0 space-y-6 animate-fade-in border-t border-slate-100">
+                {/* Gender Toast / Warning Banner */}
+                {genderToastMessage && (
+                  <div className="p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-900 font-bold text-xs sm:text-sm flex items-center justify-between shadow-md animate-bounce">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">⚠️</span>
+                      <span>{genderToastMessage}</span>
+                    </div>
+                    <button onClick={() => setGenderToastMessage(null)} className="text-amber-700 hover:text-amber-900 font-black">✕</button>
+                  </div>
+                )}
+
                 {/* List of Selected Seat rows */}
                 <div className="space-y-3 pt-4">
                   {selectedSeatsList.map((s) => {
+                    const currentGender = seatGenders[s.id] || 'male';
+                    const valErr = getGenderValidationError(s.id, currentGender);
+
                     return (
-                      <div key={s.id} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3.5">
-                        <div className="flex items-center gap-2.5 sm:gap-3.5 flex-1 min-w-0">
-                          {/* Seat Box (Mockup Exact Style) */}
-                          <div className="w-[58px] sm:w-[64px] h-[64px] sm:h-[70px] rounded-xl border-[1.5px] border-slate-700 bg-white flex flex-col items-center justify-between p-1.5 shadow-2xs flex-shrink-0">
-                            <span className="text-base sm:text-lg font-extrabold text-slate-900 leading-none pt-0.5">
-                              {s.number}
-                            </span>
-                            <div className="w-5 h-1 rounded-sm border border-slate-700 my-0.5" />
-                            <div className="w-full h-1.5 rounded-b-md bg-blue-600 mt-auto" />
+                      <div key={s.id} className="space-y-2 p-3 sm:p-4 rounded-2xl bg-slate-50/80 border border-slate-200/90 shadow-2xs">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3.5">
+                          <div className="flex items-center gap-2.5 sm:gap-3.5 flex-1 min-w-0">
+                            {/* Seat Box (Mockup Exact Style) */}
+                            <div className="w-[58px] sm:w-[64px] h-[64px] sm:h-[70px] rounded-xl border-[1.5px] border-slate-700 bg-white flex flex-col items-center justify-between p-1.5 shadow-2xs flex-shrink-0">
+                              <span className="text-base sm:text-lg font-extrabold text-slate-900 leading-none pt-0.5">
+                                {s.number}
+                              </span>
+                              <div className="w-5 h-1 rounded-sm border border-slate-700 my-0.5" />
+                              <div className={`w-full h-1.5 rounded-b-md ${currentGender === 'female' ? 'bg-pink-500' : 'bg-blue-600'} mt-auto`} />
+                            </div>
+
+                            {/* Dashed Input for Passenger Name */}
+                            <div className="flex-1 min-w-0">
+                              <input
+                                type="text"
+                                placeholder="Add a passenger name or keep it as your name"
+                                value={seatPassengerNames[s.id] || ''}
+                                onChange={(e) => setSeatPassengerNames(prev => ({ ...prev, [s.id]: e.target.value }))}
+                                className="w-full h-[64px] sm:h-[70px] px-4 sm:px-5 rounded-2xl border border-dashed border-slate-300 bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-xs sm:text-sm font-medium text-slate-800 placeholder:text-slate-400 transition-all outline-none"
+                              />
+                            </div>
                           </div>
 
-                          {/* Dashed Input for Passenger Name */}
-                          <div className="flex-1 min-w-0">
-                            <input
-                              type="text"
-                              placeholder="Add a passenger name or keep it as your name"
-                              value={seatPassengerNames[s.id] || ''}
-                              onChange={(e) => setSeatPassengerNames(prev => ({ ...prev, [s.id]: e.target.value }))}
-                              className="w-full h-[64px] sm:h-[70px] px-4 sm:px-5 rounded-2xl border border-dashed border-slate-300 bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-xs sm:text-sm font-medium text-slate-800 placeholder:text-slate-400 transition-all outline-none"
-                            />
+                          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                            {/* Gender Switcher Pill Buttons */}
+                            <div className="h-[64px] sm:h-[70px] p-1.5 rounded-2xl bg-white border border-slate-200 flex flex-col justify-center gap-1 shadow-2xs">
+                              <button
+                                type="button"
+                                onClick={() => setSeatGenders(prev => ({ ...prev, [s.id]: 'male' }))}
+                                className={`px-3 py-1 rounded-xl text-[11px] font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                                  currentGender === 'male'
+                                    ? 'bg-blue-600 text-white shadow-xs'
+                                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                                }`}
+                              >
+                                <span>👨 Gent</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setSeatGenders(prev => ({ ...prev, [s.id]: 'female' }))}
+                                className={`px-3 py-1 rounded-xl text-[11px] font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                                  currentGender === 'female'
+                                    ? 'bg-pink-600 text-white shadow-xs'
+                                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                                }`}
+                              >
+                                <span>👩 Lady</span>
+                              </button>
+                            </div>
+
+                            {/* Price Box */}
+                            <div className="h-[64px] sm:h-[70px] px-4 sm:px-6 rounded-2xl border-2 border-blue-500 bg-white flex items-center justify-center font-extrabold text-blue-600 text-base sm:text-lg flex-shrink-0 tracking-tight shadow-2xs min-w-[100px]">
+                              LKR {s.price || 3430}
+                            </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2.5 sm:gap-3.5 flex-shrink-0">
-                          {/* Passenger Icon Box */}
-                          <div className="w-[64px] sm:w-[70px] h-[64px] sm:h-[70px] rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-xs flex-shrink-0">
-                            <User className="w-7 h-7 sm:w-8 sm:h-8" />
+                        {/* Per-Seat Gender Validation Error Warning */}
+                        {valErr && (
+                          <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-xs font-bold flex items-center gap-2 animate-pulse">
+                            <span className="text-sm">⚠️</span>
+                            <span>{valErr}</span>
                           </div>
-
-                          {/* Price Box */}
-                          <div className="h-[64px] sm:h-[70px] px-5 sm:px-7 rounded-2xl border-2 border-blue-500 bg-white flex items-center justify-center font-extrabold text-blue-600 text-base sm:text-lg flex-shrink-0 tracking-tight shadow-2xs min-w-[120px]">
-                            LKR {s.price || 3430}
-                          </div>
-                        </div>
+                        )}
                       </div>
                     );
                   })}
@@ -1029,8 +1138,8 @@ export const SeatMap: React.FC = () => {
       {/* ══════════════════════════════════════════════════════════════════════ */}
       {/* ── RIGHT-SIDE SLIDING SEAT DRAWER (MOCKUP EXACT DESIGN) ────────────── */}
       {/* ══════════════════════════════════════════════════════════════════════ */}
-      {isSeatDrawerOpen && (
-        <div className="fixed inset-0 z-[70] overflow-hidden">
+      {isSeatDrawerOpen && createPortal(
+        <div className="fixed inset-0 z-[100] overflow-hidden">
           {/* Backdrop Blur Overlay */}
           <div 
             onClick={() => setIsSeatDrawerOpen(false)}
@@ -1133,7 +1242,7 @@ export const SeatMap: React.FC = () => {
                   {([
                     { rowNum: 1, left: ['3', '4'], right: ['2', '1'] },
                     { rowNum: 2, left: ['7', '8'], right: ['6', '5'] },
-                    { rowNum: 3, left: ['11', '12'], right: ['10', '09'] },
+                    { rowNum: 3, left: ['11', '12'], right: ['10', '9'] },
                     { rowNum: 4, left: ['15', '16'], right: ['14', '13'] },
                     { rowNum: 5, left: ['19', '20'], right: ['18', '17'] },
                     { rowNum: 6, left: ['23', '24'], right: ['22', '21'] },
@@ -1154,9 +1263,9 @@ export const SeatMap: React.FC = () => {
                         >
                           {row.seats.map((seatNumStr, sIdx) => {
                             const normalizedNum = seatNumStr.replace(/^0+/, '');
-                            const existingSeat = selectedRoute.seats.find(s => s.number === normalizedNum || s.number === seatNumStr || s.id === seatNumStr);
+                            const existingSeat = selectedRoute.seats.find(s => s.id === `${selectedRoute.id}-${normalizedNum}` || s.number === normalizedNum || s.number === seatNumStr || s.id === seatNumStr);
                             const seat = existingSeat || {
-                              id: `seat-${seatNumStr}`,
+                              id: `${selectedRoute.id}-${normalizedNum}`,
                               number: seatNumStr,
                               row: 12,
                               col: sIdx + 1,
@@ -1178,8 +1287,8 @@ export const SeatMap: React.FC = () => {
                               >
                                 {/* Floating 3D Tooltip */}
                                 {hoveredSeatNum === seatNumStr && (
-                                  <div className="absolute -top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
-                                    <div className="border border-blue-500 rounded-xl px-3 py-1.5 bg-slate-900 text-white shadow-2xl whitespace-nowrap text-left leading-tight">
+                                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
+                                    <div className="border border-blue-500 rounded-lg px-2.5 py-1 bg-slate-900 text-white shadow-2xl whitespace-nowrap text-left leading-tight">
                                       <div className="text-[10px] font-black text-blue-400 tracking-wider">
                                         SEAT #{seatNumStr} • {sIdx === 2 ? 'REAR CENTER' : sIdx === 0 || sIdx === 4 ? 'WINDOW' : 'AISLE'}
                                       </div>
@@ -1239,9 +1348,9 @@ export const SeatMap: React.FC = () => {
                         <div className="flex items-center gap-1.5 sm:gap-2">
                           {leftSeats.map((seatNumStr, sIdx) => {
                             const normalizedNum = seatNumStr.replace(/^0+/, '');
-                            const existingSeat = selectedRoute.seats.find(s => s.number === normalizedNum || s.number === seatNumStr || s.id === seatNumStr);
+                            const existingSeat = selectedRoute.seats.find(s => s.id === `${selectedRoute.id}-${normalizedNum}` || s.number === normalizedNum || s.number === seatNumStr || s.id === seatNumStr);
                             const seat = existingSeat || {
-                              id: `seat-${seatNumStr}`,
+                              id: `${selectedRoute.id}-${normalizedNum}`,
                               number: seatNumStr,
                               row: row.rowNum,
                               col: sIdx + 1,
@@ -1263,8 +1372,8 @@ export const SeatMap: React.FC = () => {
                               >
                                 {/* Floating 3D Tooltip */}
                                 {hoveredSeatNum === seatNumStr && (
-                                  <div className="absolute -top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
-                                    <div className="border border-blue-500 rounded-xl px-3 py-1.5 bg-slate-900 text-white shadow-2xl whitespace-nowrap text-left leading-tight">
+                                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
+                                    <div className="border border-blue-500 rounded-lg px-2.5 py-1 bg-slate-900 text-white shadow-2xl whitespace-nowrap text-left leading-tight">
                                       <div className="text-[10px] font-black text-blue-400 tracking-wider">
                                         SEAT #{seatNumStr} • {sIdx === 0 ? 'LEFT WINDOW' : 'LEFT AISLE'}
                                       </div>
@@ -1319,9 +1428,9 @@ export const SeatMap: React.FC = () => {
                         <div className="flex items-center gap-1.5 sm:gap-2">
                           {rightSeats.map((seatNumStr, sIdx) => {
                             const normalizedNum = seatNumStr.replace(/^0+/, '');
-                            const existingSeat = selectedRoute.seats.find(s => s.number === normalizedNum || s.number === seatNumStr || s.id === seatNumStr);
+                            const existingSeat = selectedRoute.seats.find(s => s.id === `${selectedRoute.id}-${normalizedNum}` || s.number === normalizedNum || s.number === seatNumStr || s.id === seatNumStr);
                             const seat = existingSeat || {
-                              id: `seat-${seatNumStr}`,
+                              id: `${selectedRoute.id}-${normalizedNum}`,
                               number: seatNumStr,
                               row: row.rowNum,
                               col: sIdx + 3,
@@ -1343,8 +1452,8 @@ export const SeatMap: React.FC = () => {
                               >
                                 {/* Floating 3D Tooltip */}
                                 {hoveredSeatNum === seatNumStr && (
-                                  <div className="absolute -top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
-                                    <div className="border border-blue-500 rounded-xl px-3 py-1.5 bg-slate-900 text-white shadow-2xl whitespace-nowrap text-left leading-tight">
+                                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
+                                    <div className="border border-blue-500 rounded-lg px-2.5 py-1 bg-slate-900 text-white shadow-2xl whitespace-nowrap text-left leading-tight">
                                       <div className="text-[10px] font-black text-blue-400 tracking-wider">
                                         SEAT #{seatNumStr} • {sIdx === 0 ? 'RIGHT AISLE' : 'RIGHT WINDOW'}
                                       </div>
@@ -1524,7 +1633,8 @@ export const SeatMap: React.FC = () => {
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

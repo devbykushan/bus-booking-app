@@ -293,11 +293,15 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     const { selectedSeatIds, selectedRoute, sessionId } = get();
     if (!selectedRoute) return;
 
-    let seat = selectedRoute.seats.find((s) => s.id === seatId || s.number === seatId || s.number === seatId.replace(/^0+/, ''));
+    const routeId = selectedRoute.id;
+    const normalizedNum = seatId.replace(`${routeId}-`, '').replace(/^seat-/, '').replace(/^0+/, '');
+    const canonicalId = `${routeId}-${normalizedNum}`;
+
+    let seat = selectedRoute.seats.find((s) => s.id === canonicalId || s.id === seatId || s.number === normalizedNum || s.number === seatId);
     if (!seat) {
       seat = {
-        id: seatId,
-        number: seatId,
+        id: canonicalId,
+        number: normalizedNum,
         row: 1,
         col: 1,
         price: selectedRoute.seats[0]?.price || 3430,
@@ -312,9 +316,9 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
 
     let newSelected: string[];
 
-    if (selectedSeatIds.includes(actualId)) {
+    if (selectedSeatIds.includes(actualId) || selectedSeatIds.includes(seatId) || selectedSeatIds.includes(canonicalId)) {
       // Deselect — unlock on backend
-      newSelected = selectedSeatIds.filter((id) => id !== actualId);
+      newSelected = selectedSeatIds.filter((id) => id !== actualId && id !== seatId && id !== canonicalId);
       seatsApi.unlock({ seatIds: [actualId], sessionId }).catch(() => {});
     } else {
       if (selectedSeatIds.length >= 6) {
@@ -410,6 +414,13 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
       return null;
     }
 
+    // Map selectedSeatIds to canonical route-prefixed seat IDs (e.g. "route-101-17")
+    const canonicalSeatIds = selectedSeatIds.map((id: string) => {
+      if (id.startsWith(`${selectedRoute.id}-`)) return id;
+      const num = id.replace(/^[^-]+-/, '').replace(/^seat-/, '').replace(/^0+/, '');
+      return `${selectedRoute.id}-${num}`;
+    });
+
     set({ isLoading: true, error: null });
 
     try {
@@ -417,7 +428,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         routeId: selectedRoute.id,
         boardingPointId: selectedBoardingPoint.id,
         dropPointId: selectedDropPoint.id,
-        seatIds: selectedSeatIds,
+        seatIds: canonicalSeatIds,
         sessionId,
         passenger: {
           fullName: passengerInfo.fullName,

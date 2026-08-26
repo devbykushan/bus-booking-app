@@ -36,8 +36,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const isEmailValid = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
   const isPasswordValid = (val: string) => val.length >= 6;
   const isNameValid = (val: string) => val.trim().length >= 3;
-  const isPhoneValid = (val: string) => /^(?:0|\+94)7\d{8}$/.test(val.replace(/[\s-]/g, ''));
+  const isPhoneValid = (val: string) => {
+    const clean = val.replace(/[\s-]/g, '');
+    if (/^07[01245678]\d{7}$/.test(clean)) return true;
+    if (/^\+947[01245678]\d{7}$/.test(clean)) return true;
+    return false;
+  };
   const normalizedPhone = phone.replace(/[\s-]/g, '').replace(/^0/, '+94');
+
+  const handlePhoneInputChange = (raw: string) => {
+    if (!phoneTouched) setPhoneTouched(true);
+    if (raw.startsWith('+')) {
+      const cleaned = '+' + raw.slice(1).replace(/\D/g, '').slice(0, 11);
+      setPhone(cleaned);
+    } else {
+      // Strictly max 10 digits for local numbers
+      const cleaned = raw.replace(/\D/g, '').slice(0, 10);
+      setPhone(cleaned);
+    }
+  };
 
   const handleRoleChange = (newRole: 'passenger' | 'admin') => {
     setRole(newRole);
@@ -251,9 +268,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                     inputMode="tel"
                     placeholder="07XXXXXXXX"
                     value={phone}
+                    maxLength={phone.startsWith('+') ? 12 : 10}
                     onBlur={() => setPhoneTouched(true)}
-                    onChange={(e) => { setPhone(e.target.value); if (!phoneTouched) setPhoneTouched(true); }}
-                    className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400"
+                    onChange={(e) => handlePhoneInputChange(e.target.value)}
+                    className="w-full bg-transparent text-slate-800 text-xs font-mono tracking-wide focus:outline-none placeholder-slate-400"
                     required
                   />
                   {phoneTouched && (
@@ -264,7 +282,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 </div>
                 {phoneTouched && !isPhoneValid(phone) && (
                   <div className="mt-1 text-[10px] text-rose-500 font-semibold animate-fade-in-up pl-1">
-                    Use 07XXXXXXXX or +947XXXXXXXX.
+                    {phone.length > 0 && phone.length < 10 && !phone.startsWith('+')
+                      ? `Must be exactly 10 digits (entered ${phone.length}/10).`
+                      : 'Must be a valid Sri Lankan mobile number starting with 070, 071, 072, 074, 075, 076, 077, or 078.'}
                   </div>
                 )}
               </div>

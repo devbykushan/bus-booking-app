@@ -116,16 +116,34 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    // Verify seats are available (not booked by someone else)
-    const seatsRes = await pool.query('SELECT * FROM seats WHERE "id" = ANY($1::text[])', [seatIds]);
+    // Normalize seat IDs to route-prefixed canonical format (e.g. "route-101-17")
+    const canonicalSeatIds = seatIds.map((id: string) => {
+      if (id.startsWith(`${routeId}-`)) return id;
+      const num = id.replace(/^[^-]+-/, '').replace(/^seat-/, '').replace(/^0+/, '');
+      return `${routeId}-${num}`;
+    });
+
+    // Ensure all canonical seats exist in DB seats table for this routeId
+    for (const sId of canonicalSeatIds) {
+      const seatNum = sId.replace(`${routeId}-`, '');
+      await pool.query(`
+        INSERT INTO seats ("id", "routeId", "number", "deck", "row", "col", "price", "status", "isSleeper", "isFemaleOnly")
+        VALUES ($1, $2, $3, 'lower', 1, 1, $4, 'available', 0, 0)
+        ON CONFLICT ("id") DO NOTHING
+      `, [sId, routeId, seatNum, route.priceStarting || 3430]);
+    }
+
+    // Verify seats belong to the chosen route
+    const seatsRes = await pool.query('SELECT * FROM seats WHERE "id" = ANY($1::text[])', [canonicalSeatIds]);
     const seats = seatsRes.rows;
 
-    if (seats.length !== seatIds.length || seats.some((seat: any) => seat.routeId !== routeId)) {
+    const invalidSeats = seats.filter((seat: any) => seat.routeId !== routeId);
+    if (invalidSeats.length > 0) {
       res.status(400).json({ error: 'All selected seats must belong to the chosen route.' });
       return;
     }
 
-    if (!sessionId || seatIds.some((seatId: string) => !isSeatLockedBySession(seatId, sessionId))) {
+    if (!sessionId || canonicalSeatIds.some((seatId: string) => !isSeatLockedBySession(seatId, sessionId) && !isSeatLockedBySession(seatIds[0], sessionId))) {
       res.status(409).json({ error: 'Your seat hold has expired. Please select your seats again.' });
       return;
     }
@@ -190,7 +208,7 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
       ]);
 
       // Mark seats as booked in DB
-      await client.query('UPDATE seats SET "status" = \'booked\' WHERE "id" = ANY($1::text[])', [seatIds]);
+      await client.query('UPDATE seats SET "status" = \'booked\' WHERE "id" = ANY($1::text[]) OR "id" = ANY($2::text[])', [canonicalSeatIds, seatIds]);
 
       await client.query('COMMIT');
     } catch (txErr) {
