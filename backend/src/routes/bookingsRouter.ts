@@ -182,7 +182,7 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
 
     const pnr = `OMNI-${Math.floor(10000 + Math.random() * 90000)}`;
     const bookingId = `BK-${uuidv4().slice(0, 8).toUpperCase()}`;
-    const qrCodeData = `PNR:${pnr}|PASS:${passenger.fullName}|BUS:${route.busNumber}|SEATS:${seatIds.join(',')}`;
+    const qrCodeData = `https://dewminasuperline.lk/validate?pnr=${pnr}&pass=${encodeURIComponent(passenger.fullName)}`;
     const departureDate = searchDate || new Date().toISOString().split('T')[0];
 
     const client = await pool.connect();

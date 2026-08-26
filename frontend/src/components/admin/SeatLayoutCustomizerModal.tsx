@@ -333,7 +333,11 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
     rowsMap[s.row].push(s);
   });
   const rowNumbers = Object.keys(rowsMap).map(Number).sort((a, b) => a - b);
-  const is3By2 = busType.includes('3*2') || busType.includes('Leyland');
+  const is3By2 =
+    busType.includes('3*2') ||
+    busType.includes('Leyland') ||
+    busType.includes('Normal Service') ||
+    seats.some((s) => s.col === 6 || /[A-E]$/i.test(s.number));
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fade-in-up">
@@ -357,7 +361,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
           </div>
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -386,7 +390,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
             <button
               type="button"
               onClick={() => applyPreset('Super Luxury (49 Seats 2*2)', 2800)}
-              className={`p-3.5 rounded-2xl border text-left text-xs transition-all ${
+              className={`p-3.5 rounded-2xl border text-left text-xs transition-all cursor-pointer ${
                 busType.includes('49 Seats') || busType.includes('Super Luxury')
                   ? 'bg-blue-50 border-blue-600 text-blue-800 shadow-sm ring-2 ring-blue-500/20'
                   : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
@@ -396,6 +400,21 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                 <Bus className="w-4 h-4 text-blue-600 flex-shrink-0" /> Super Luxury Express
               </div>
               <p className="text-[11px] text-blue-600 font-mono mt-1 font-semibold">Standard 2*2 Luxury Coach (48/49 Seats)</p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => applyPreset('Normal Service (58 Seats 3*2)', 950)}
+              className={`p-3.5 rounded-2xl border text-left text-xs transition-all cursor-pointer ${
+                busType.includes('Normal Service') || busType.includes('58 Seats')
+                  ? 'bg-blue-50 border-blue-600 text-blue-800 shadow-sm ring-2 ring-blue-500/20'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <div className="font-bold flex items-center gap-2 text-slate-800 text-xs">
+                <Bus className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Normal Service (Route 98)
+              </div>
+              <p className="text-[11px] text-emerald-600 font-mono mt-1 font-semibold">Ashok Leyland 3*2 Layout (58 Seats)</p>
             </button>
           </div>
         </div>
@@ -418,7 +437,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
             <button
               type="button"
               onClick={() => bulkSetAllPrices(basePrice)}
-              className="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300 font-bold rounded-xl transition-colors"
+              className="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300 font-bold rounded-xl transition-colors cursor-pointer"
               title="Apply this fare to all seats in bus"
             >
               Apply Fare to All Seats
@@ -440,14 +459,14 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
             <button
               type="button"
               onClick={bulkMakeAllAvailable}
-              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-[11px] flex items-center gap-1"
+              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-[11px] flex items-center gap-1 cursor-pointer"
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Clear All Blocks
             </button>
             <button
               type="button"
               onClick={() => setShowAddSeatModal(true)}
-              className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-sm"
+              className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-sm cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" /> Add Custom Seat
             </button>
@@ -463,7 +482,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
             <button
               type="button"
               onClick={() => setActiveDeck('lower')}
-              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeDeck === 'lower'
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -474,7 +493,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
             <button
               type="button"
               onClick={() => setActiveDeck('upper')}
-              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeDeck === 'upper'
                   ? 'bg-indigo-600 text-white shadow-sm'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -494,90 +513,155 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               <span className="font-semibold text-slate-700">
                 Interactive Grid ({activeDeck.toUpperCase()} DECK) — Click seat to inspect & modify properties
               </span>
-              <span className="text-[11px] italic">Front of Bus / Driver Steering Wheel Right</span>
+              <span className="text-[11px] font-semibold text-blue-600">Front Cockpit (Top) • Rear Engine (Bottom)</span>
             </div>
 
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3">
-              {rowNumbers.length === 0 ? (
-                <div className="text-center py-10 text-slate-400 text-xs font-medium">
-                  No seats configured on {activeDeck} deck. Click a preset above or "Add Custom Seat" to insert seats.
+            {/* Bus Body Container */}
+            <div className={`bg-slate-50/90 rounded-3xl p-4 border border-slate-200/90 space-y-4 shadow-sm mx-auto transition-all ${
+              is3By2 ? 'max-w-[500px]' : 'max-w-[440px]'
+            }`}>
+              
+              {/* Top Cockpit & Driver Header Bar */}
+              <div className="bg-slate-900 rounded-2xl p-3 text-white flex items-center justify-between text-xs font-bold shadow-md">
+                {/* Entry Door */}
+                <div className="flex items-center gap-2 text-emerald-400 font-extrabold text-[11px] tracking-wider uppercase">
+                  <div className="flex flex-col gap-0.5">
+                    <div className="w-4 h-0.5 bg-emerald-400 rounded-full" />
+                    <div className="w-4 h-0.5 bg-emerald-400/70 rounded-full" />
+                    <div className="w-4 h-0.5 bg-emerald-400/40 rounded-full" />
+                  </div>
+                  <span>ENTRY DOOR</span>
                 </div>
-              ) : (
-                rowNumbers.map(rowNum => {
-                  const rowSeats = rowsMap[rowNum] || [];
-                  const leftSeats = rowSeats.filter(s => is3By2 ? s.col <= 3 : s.col <= 2).sort((a, b) => a.col - b.col);
-                  const centerSeats = rowSeats.filter(s => !is3By2 && s.col === 3).sort((a, b) => a.col - b.col);
-                  const rightSeats = rowSeats.filter(s => is3By2 ? s.col >= 5 : s.col >= 4).sort((a, b) => a.col - b.col);
 
-                  const renderSeatButton = (seat: Seat) => {
-                    const isSelected = selectedSeatId === seat.id;
-                    const hasCustomPrice = seat.price && seat.price !== basePrice;
+                {/* Front Cockpit Badge */}
+                <div className="flex items-center gap-1.5 bg-slate-800/90 border border-slate-700 px-3 py-1 rounded-full text-[10px] font-bold text-slate-200">
+                  <Bus className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Front Cockpit</span>
+                </div>
+
+                {/* Driver Steering Wheel */}
+                <div className="flex items-center gap-2 text-slate-300 font-extrabold text-[11px] tracking-wider uppercase">
+                  <span>DRIVER</span>
+                  <div className="w-7 h-7 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center">
+                    <div className="w-4 h-4 rounded-full border border-dashed border-slate-400 flex items-center justify-center">
+                      <div className="w-1 h-1 bg-blue-400 rounded-full" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seating Matrix */}
+              <div className="relative space-y-2.5 py-1 flex flex-col items-center">
+                {/* Ambient Aisle Strip - positioned at exact aisle location */}
+                <div className={`absolute inset-y-0 pointer-events-none z-0 rounded-full bg-indigo-100/60 border-x border-indigo-200/40 ${
+                  is3By2 ? 'left-[60%] -translate-x-1/2 w-8' : 'left-1/2 -translate-x-1/2 w-9'
+                }`} />
+
+                {rowNumbers.length === 0 ? (
+                  <div className="text-center py-10 text-slate-400 text-xs font-medium">
+                    No seats configured on {activeDeck} deck. Click a preset above or "Add Custom Seat" to insert seats.
+                  </div>
+                ) : (
+                  rowNumbers.map(rowNum => {
+                    const rowSeats = rowsMap[rowNum] || [];
+                    const leftSeats = rowSeats.filter(s => is3By2 ? s.col <= 3 : s.col <= 2).sort((a, b) => a.col - b.col);
+                    const centerSeats = rowSeats.filter(s => !is3By2 && s.col === 3).sort((a, b) => a.col - b.col);
+                    const rightSeats = rowSeats.filter(s => is3By2 ? s.col >= 4 : s.col >= 4).sort((a, b) => a.col - b.col);
+
+                    const renderSeatButton = (seat: Seat) => {
+                      const isSelected = selectedSeatId === seat.id;
+                      const hasCustomPrice = seat.price && seat.price !== basePrice;
+
+                      return (
+                        <button
+                          key={seat.id}
+                          type="button"
+                          onClick={() => handleSeatClick(seat.id)}
+                          className={`w-10 h-12 sm:w-11 sm:h-13 rounded-xl flex flex-col items-center justify-between p-1.5 font-bold transition-all relative z-10 shadow-2xs hover:z-20 cursor-pointer ${
+                            isSelected
+                              ? 'ring-2 ring-blue-600 bg-blue-100 border-2 border-blue-500 text-blue-900 shadow-md scale-105'
+                              : seat.status === 'booked'
+                              ? 'bg-slate-200 border-2 border-slate-300 text-slate-500 opacity-80'
+                              : seat.isFemaleOnly
+                              ? 'bg-pink-50 border-2 border-pink-400 text-pink-700 hover:bg-pink-100 shadow-2xs'
+                              : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-blue-500 hover:bg-blue-50/50'
+                          }`}
+                          title={`Seat ${seat.number} • LKR ${seat.price || basePrice} • ${seat.status}${seat.isFemaleOnly ? ' • Female Priority' : ''}`}
+                        >
+                          {/* Headrest Cushion Bar */}
+                          <div className={`w-full h-1.5 rounded-t-sm ${
+                            isSelected ? 'bg-blue-500' : seat.status === 'booked' ? 'bg-slate-400' : seat.isFemaleOnly ? 'bg-pink-400' : 'bg-slate-200'
+                          }`} />
+
+                          <span className={`text-[11px] sm:text-xs font-black tracking-tight ${seat.isFemaleOnly ? 'text-pink-800' : ''}`}>
+                            {seat.number}
+                          </span>
+
+                          {/* Bottom Accent Bar or Custom Price */}
+                          {hasCustomPrice ? (
+                            <span className="text-[8px] font-mono font-extrabold text-amber-700">LKR {seat.price}</span>
+                          ) : (
+                            <div className={`w-3/4 h-1 rounded-full ${
+                              isSelected ? 'bg-blue-600' : seat.isFemaleOnly ? 'bg-pink-500' : 'bg-blue-500/80'
+                            }`} />
+                          )}
+                        </button>
+                      );
+                    };
 
                     return (
-                      <button
-                        key={seat.id}
-                        type="button"
-                        onClick={() => handleSeatClick(seat.id)}
-                        className={`w-10 h-11 rounded-xl flex flex-col items-center justify-center text-[10px] font-bold border transition-all relative ${
-                          isSelected
-                            ? 'ring-2 ring-blue-600 ring-offset-1 bg-blue-100 border-blue-500 text-blue-900 shadow-md scale-105 z-10'
-                            : seat.status === 'booked'
-                            ? 'bg-slate-200 border-slate-300 text-slate-500'
-                            : seat.isFemaleOnly
-                            ? 'bg-pink-100 border-pink-400 text-pink-700 hover:bg-pink-200 shadow-xs'
-                            : 'bg-emerald-100 border-emerald-300 text-emerald-800 hover:bg-emerald-200'
-                        }`}
-                        title={`Seat ${seat.number} • LKR ${seat.price || basePrice} • ${seat.status}${seat.isFemaleOnly ? ' • Female Priority' : ''}`}
-                      >
-                        <span className={seat.isFemaleOnly ? 'text-pink-800 font-black' : ''}>{seat.number}</span>
-                        {seat.isFemaleOnly ? (
-                          <Shield className="w-3 h-3 text-pink-600 mt-0.5" />
-                        ) : hasCustomPrice ? (
-                          <span className="text-[8px] font-mono text-amber-700">LKR {seat.price}</span>
-                        ) : null}
-                      </button>
+                      <div key={rowNum} className="flex items-center justify-between gap-2.5 sm:gap-3 px-1 w-full relative z-10">
+                        {/* Left side seats (3 seats for 3x2, 2 seats for 2x2) */}
+                        <div className="flex items-center gap-1 sm:gap-1.5">
+                          {leftSeats.map(renderSeatButton)}
+                        </div>
+
+                        {/* Center Aisle Spacer */}
+                        <div className="flex items-center justify-center min-w-[28px] sm:min-w-[36px] text-center">
+                          {!is3By2 && centerSeats.length > 0 ? (
+                            <div className="flex items-center gap-1.5">
+                              {centerSeats.map(renderSeatButton)}
+                            </div>
+                          ) : (
+                            <div className="text-[9px] font-mono font-black text-slate-400/60 select-none">│</div>
+                          )}
+                        </div>
+
+                        {/* Right side seats (2 seats for 3x2, 2 seats for 2x2) */}
+                        <div className="flex items-center gap-1 sm:gap-1.5">
+                          {rightSeats.map(renderSeatButton)}
+                        </div>
+                      </div>
                     );
-                  };
+                  })
+                )}
+              </div>
 
-                  return (
-                    <div key={rowNum} className="flex items-center justify-between gap-3 px-2">
-                      {/* Left side seats */}
-                      <div className="flex items-center gap-1.5">
-                        {leftSeats.map(renderSeatButton)}
-                      </div>
-
-                      {/* Center Aisle or Rear Center Seat */}
-                      <div className="flex items-center justify-center min-w-[48px]">
-                        {centerSeats.length > 0 ? (
-                          centerSeats.map(renderSeatButton)
-                        ) : (
-                          <div className="text-[9px] font-mono font-bold text-slate-300 tracking-wider">AISLE</div>
-                        )}
-                      </div>
-
-                      {/* Right side seats */}
-                      <div className="flex items-center gap-1.5">
-                        {rightSeats.map(renderSeatButton)}
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+              {/* Bottom Rear Engine Footer Bar */}
+              <div className="p-2.5 rounded-2xl bg-slate-100 border border-slate-200 text-center flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                <span className="flex items-center gap-1 text-rose-500">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" /> REAR ENGINE
+                </span>
+                <span>DEWMINA LUXURY COACH</span>
+                <span className="flex items-center gap-1 text-rose-500">
+                  BACK <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                </span>
+              </div>
             </div>
 
             {/* Grid Legend */}
-            <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 pt-1">
+            <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 pt-1 justify-center">
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-300" /> Available
+                <span className="w-3 h-3 rounded bg-white border-2 border-slate-300" /> Available
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-pink-100 border border-pink-400" /> Female Reserved (Pink)
+                <span className="w-3 h-3 rounded bg-pink-50 border-2 border-pink-400" /> Female Reserved (Pink)
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-slate-200 border border-slate-300" /> Admin Blocked / Booked
+                <span className="w-3 h-3 rounded bg-slate-200 border-2 border-slate-300" /> Admin Blocked / Booked
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-blue-100 border border-blue-500 ring-2 ring-blue-500" /> Currently Selected
+                <span className="w-3 h-3 rounded bg-blue-100 border-2 border-blue-600 ring-2 ring-blue-600" /> Currently Selected
               </span>
             </div>
           </div>
