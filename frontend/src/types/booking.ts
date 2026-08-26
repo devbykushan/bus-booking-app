@@ -17,7 +17,7 @@ export type BusCategory =
   | 'Lanka Ashok Leyland (57 Seats 3*2)'
   | 'Lanka Ashok Leyland (57 Seats 2*2)';
 
-export type SeatStatus = 'available' | 'selected' | 'booked' | 'locked';
+export type SeatStatus = 'available' | 'selected' | 'booked' | 'locked' | 'blocked' | 'unavailable';
 
 export type DeckType = 'lower' | 'upper';
 

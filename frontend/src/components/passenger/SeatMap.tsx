@@ -5,7 +5,7 @@ import type { DeckType } from '../../types/booking';
 import { 
   ArrowLeft, Clock, Check, Armchair, ChevronRight, 
   ChevronUp, ChevronDown, Lock, CheckCircle2, Info,
-  ArrowRight, Crown, X, User, Users, Bus
+  ArrowRight, Crown, X, User, Users
 } from 'lucide-react';
 
 export const SeatMap: React.FC = () => {
@@ -1192,52 +1192,29 @@ export const SeatMap: React.FC = () => {
                 </div>
               </div>
 
-              {/* ════ LUXURY 3D BUS COACH CONTAINER WITH ANIMATIONS ════ */}
-              <div className="relative rounded-3xl border-2 border-slate-300/80 bg-gradient-to-b from-slate-100 via-slate-50 to-slate-100 p-3 sm:p-4 shadow-xl overflow-hidden">
+              {/* ════ CLEAN MINIMALIST BUS COACH CONTAINER ════ */}
+              <div className="relative rounded-3xl border border-slate-200 bg-slate-50/70 p-3 sm:p-5 shadow-sm overflow-hidden">
                 
-                {/* ── Front Cockpit & Windshield ── */}
-                <div className="relative rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white p-3.5 mb-5 shadow-md border border-slate-700/60 overflow-hidden">
-                  {/* Windshield Gloss Reflections */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none" />
-                  
-                  <div className="flex items-center justify-between relative z-10">
-                    {/* Passenger Entry Door Steps */}
-                    <div className="flex items-center gap-2">
-                      <div className="flex flex-col gap-1">
-                        <div className="w-6 h-1 rounded-full bg-emerald-400/80 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
-                        <div className="w-6 h-1 rounded-full bg-emerald-400/60" />
-                        <div className="w-6 h-1 rounded-full bg-emerald-400/40" />
-                      </div>
-                      <span className="text-[10px] uppercase tracking-wider font-extrabold text-emerald-400">
-                        Entry Door
-                      </span>
-                    </div>
+                {/* ── Minimalist Front Cockpit / Driver Bar ── */}
+                <div className="flex items-center justify-between px-4 py-2.5 bg-white border border-slate-200/90 rounded-2xl mb-4 shadow-2xs">
+                  <div className="flex items-center gap-2 text-xs font-extrabold text-emerald-600">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Entrance Door</span>
+                  </div>
 
-                    {/* Bus Front Windshield Curved Glass / Center Badge */}
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-[10px] font-bold text-slate-300">
-                      <Bus className="w-3.5 h-3.5 text-blue-400" />
-                      <span>Front Cockpit</span>
-                    </div>
-
-                    {/* Driver Steering Wheel on Right */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-300">
-                        Driver
-                      </span>
-                      <div className="w-8 h-8 rounded-full bg-slate-800 border-2 border-slate-600 flex items-center justify-center shadow-inner animate-steering">
-                        <div className="w-5 h-5 rounded-full border border-dashed border-slate-400 flex items-center justify-center">
-                          <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                        </div>
-                      </div>
+                  <div className="flex items-center gap-1.5 text-xs font-extrabold text-sky-600 bg-sky-50/70 px-2.5 py-1 rounded-xl border border-sky-200/80">
+                    <span>Driver</span>
+                    <div className="w-4 h-4 rounded-full border-2 border-sky-400 flex items-center justify-center bg-white shadow-2xs">
+                      <div className="w-1.5 h-1.5 rounded-full bg-sky-500" />
                     </div>
                   </div>
                 </div>
 
-                {/* ── Seating Matrix with Aisle LED Runner ── */}
-                <div className="relative space-y-3 py-1 flex flex-col items-center">
+                {/* ── Seating Matrix ── */}
+                <div className="relative space-y-3 sm:space-y-3.5 py-1 flex flex-col items-center">
                   
-                  {/* Center Ambient Aisle Glow */}
-                  <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-10 pointer-events-none rounded-full aisle-led-strip opacity-40 z-0" />
+                  {/* Center Clean Aisle Runner */}
+                  <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-10 sm:w-12 pointer-events-none rounded-xl bg-slate-200/40 border-x border-slate-200/60 z-0" />
 
                   {([
                     { rowNum: 1, left: ['3', '4'], right: ['2', '1'] },
@@ -1259,7 +1236,7 @@ export const SeatMap: React.FC = () => {
                       return (
                         <div 
                           key={row.rowNum} 
-                          className="pt-3 pb-1 flex items-center justify-center gap-1.5 sm:gap-2 w-full relative z-10"
+                          className="pt-2 pb-1 flex items-center justify-center gap-1.5 sm:gap-2 w-full relative z-10"
                         >
                           {row.seats.map((seatNumStr, sIdx) => {
                             const normalizedNum = seatNumStr.replace(/^0+/, '');
@@ -1276,7 +1253,10 @@ export const SeatMap: React.FC = () => {
 
                             const isSelected = selectedSeatIds.includes(seat.id) || selectedSeatIds.includes(seatNumStr) || selectedSeatIds.includes(normalizedNum);
                             const isBooked = seat.status === 'booked';
-                            const isBookedFemale = isBooked && ((seat as any).gender === 'female' || seat.isFemaleOnly);
+                            const isBookedFemale = isBooked && ((seat as any).gender === 'female' || (seat as any).isFemaleBooked);
+                            const isBookedMale = isBooked && !isBookedFemale;
+                            const isReserved = !isBooked && !isSelected && (seat.isFemaleOnly || seat.status === 'blocked');
+                            const isUnavailable = seat.status === 'unavailable' || seat.status === 'locked';
 
                             return (
                               <div 
@@ -1285,49 +1265,53 @@ export const SeatMap: React.FC = () => {
                                 onMouseEnter={() => setHoveredSeatNum(seatNumStr)}
                                 onMouseLeave={() => setHoveredSeatNum(null)}
                               >
-                                {/* Floating 3D Tooltip */}
+                                {/* Floating Light Tooltip */}
                                 {hoveredSeatNum === seatNumStr && (
-                                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
-                                    <div className="border border-blue-500 rounded-lg px-2.5 py-1 bg-slate-900 text-white shadow-2xl whitespace-nowrap text-left leading-tight">
-                                      <div className="text-[10px] font-black text-blue-400 tracking-wider">
+                                  <div className="absolute -top-11 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
+                                    <div className="border border-slate-300 rounded-lg px-2.5 py-1 bg-white text-slate-900 shadow-md whitespace-nowrap text-left leading-tight">
+                                      <div className="text-[10px] font-bold text-blue-600">
                                         SEAT #{seatNumStr} • {sIdx === 2 ? 'REAR CENTER' : sIdx === 0 || sIdx === 4 ? 'WINDOW' : 'AISLE'}
                                       </div>
-                                      <div className="text-xs font-extrabold font-mono text-emerald-400">
+                                      <div className="text-xs font-mono font-extrabold text-emerald-600">
                                         LKR {seat.price || selectedRoute.seats[0]?.price || 3430}
                                       </div>
                                     </div>
-                                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 shadow-xs" />
+                                    <div className="w-2 h-2 bg-white border-b border-r border-slate-300 rotate-45 -mt-1 shadow-2xs" />
                                   </div>
                                 )}
 
                                 <button
                                   type="button"
-                                  disabled={isBooked}
+                                  disabled={isBooked || isUnavailable}
                                   onClick={() => handleSeatClick(seat.id)}
-                                  style={{ animationDelay: `${(rIdx * 4 + sIdx) * 15}ms` }}
-                                  className={`animate-seat-pop w-[46px] sm:w-[52px] h-[64px] sm:h-[68px] rounded-xl flex flex-col items-center justify-between p-1.5 font-bold transition-all duration-200 transform cursor-pointer relative shadow-sm hover:z-20 ${
+                                  style={{ animationDelay: `${(rIdx * 4 + sIdx) * 12}ms` }}
+                                  className={`w-[48px] sm:w-[54px] h-[48px] sm:h-[54px] rounded-2xl flex flex-col items-center justify-between p-1 transition-all duration-200 cursor-pointer relative shadow-2xs hover:z-30 overflow-hidden ${
                                     isSelected
-                                      ? 'bg-gradient-to-b from-emerald-500 to-emerald-600 border-2 border-emerald-400 text-white seat-selected-glow scale-105 active:scale-95'
+                                      ? 'bg-white border-2 border-[#00a86b] text-slate-900 scale-105 active:scale-95 shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/20'
                                       : isBookedFemale
-                                      ? 'bg-gradient-to-b from-pink-600 to-pink-700 border-2 border-pink-500 text-white cursor-not-allowed shadow-inner opacity-90'
-                                      : isBooked
-                                      ? 'bg-gradient-to-b from-slate-700 to-slate-800 border-2 border-slate-600 text-slate-300 cursor-not-allowed shadow-inner opacity-90'
-                                      : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-blue-500 hover:-translate-y-1.5 hover:shadow-lg active:scale-95'
+                                      ? 'bg-[#ec4899] border-2 border-pink-600 text-white cursor-not-allowed opacity-90'
+                                      : isBookedMale
+                                      ? 'bg-[#3b82f6] border-2 border-blue-600 text-white cursor-not-allowed opacity-90'
+                                      : isReserved
+                                      ? 'bg-[#4f46e5] border-2 border-indigo-600 text-white cursor-not-allowed opacity-90'
+                                      : isUnavailable
+                                      ? 'bg-[#e11d48] border-2 border-rose-600 text-white cursor-not-allowed opacity-80'
+                                      : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-emerald-500 hover:-translate-y-0.5 hover:shadow-md active:scale-95'
                                   }`}
                                 >
-                                  {/* Headrest Cushion Bar */}
-                                  <div className={`w-full h-1.5 rounded-t-md ${
-                                    isSelected ? 'bg-emerald-300' : isBooked ? 'bg-slate-600' : 'bg-slate-200'
-                                  }`} />
-
-                                  <span className={`text-xs sm:text-sm font-black tracking-tight ${isBooked || isSelected ? 'text-white' : 'text-slate-800'}`}>
+                                  {/* Large Bold Seat Number */}
+                                  <span className={`text-base sm:text-lg font-extrabold tracking-tight my-auto ${
+                                    isBookedFemale || isBookedMale || isReserved || isUnavailable ? 'text-white' : 'text-slate-800'
+                                  }`}>
                                     {seatNumStr}
                                   </span>
 
-                                  {/* Bottom Accent Bar */}
-                                  <div className={`w-4/5 h-1 rounded-full ${
-                                    isSelected ? 'bg-white/80' : isBooked ? 'bg-transparent' : 'bg-blue-600'
-                                  }`} />
+                                  {/* Bottom Status Bar for White Cards */}
+                                  {(!isBooked && !isReserved && !isUnavailable) && (
+                                    <div className={`w-full h-1.5 rounded-b-xl -mb-1 ${
+                                      isSelected ? 'bg-[#00a86b]' : 'bg-[#60a5fa]'
+                                    }`} />
+                                  )}
                                 </button>
                               </div>
                             );
@@ -1361,7 +1345,10 @@ export const SeatMap: React.FC = () => {
 
                             const isSelected = selectedSeatIds.includes(seat.id) || selectedSeatIds.includes(seatNumStr) || selectedSeatIds.includes(normalizedNum);
                             const isBooked = seat.status === 'booked';
-                            const isBookedFemale = isBooked && ((seat as any).gender === 'female' || seat.isFemaleOnly);
+                            const isBookedFemale = isBooked && ((seat as any).gender === 'female' || (seat as any).isFemaleBooked);
+                            const isBookedMale = isBooked && !isBookedFemale;
+                            const isReserved = !isBooked && !isSelected && (seat.isFemaleOnly || seat.status === 'blocked');
+                            const isUnavailable = seat.status === 'unavailable' || seat.status === 'locked';
 
                             return (
                               <div 
@@ -1370,59 +1357,61 @@ export const SeatMap: React.FC = () => {
                                 onMouseEnter={() => setHoveredSeatNum(seatNumStr)}
                                 onMouseLeave={() => setHoveredSeatNum(null)}
                               >
-                                {/* Floating 3D Tooltip */}
+                                {/* Floating Light Tooltip */}
                                 {hoveredSeatNum === seatNumStr && (
-                                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
-                                    <div className="border border-blue-500 rounded-lg px-2.5 py-1 bg-slate-900 text-white shadow-2xl whitespace-nowrap text-left leading-tight">
-                                      <div className="text-[10px] font-black text-blue-400 tracking-wider">
+                                  <div className="absolute -top-11 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
+                                    <div className="border border-slate-300 rounded-lg px-2.5 py-1 bg-white text-slate-900 shadow-md whitespace-nowrap text-left leading-tight">
+                                      <div className="text-[10px] font-bold text-blue-600">
                                         SEAT #{seatNumStr} • {sIdx === 0 ? 'LEFT WINDOW' : 'LEFT AISLE'}
                                       </div>
-                                      <div className="text-xs font-extrabold font-mono text-emerald-400">
+                                      <div className="text-xs font-mono font-extrabold text-emerald-600">
                                         LKR {seat.price || selectedRoute.seats[0]?.price || 3430}
                                       </div>
                                     </div>
-                                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 shadow-xs" />
+                                    <div className="w-2 h-2 bg-white border-b border-r border-slate-300 rotate-45 -mt-1 shadow-2xs" />
                                   </div>
                                 )}
 
                                 <button
                                   type="button"
-                                  disabled={isBooked}
+                                  disabled={isBooked || isUnavailable}
                                   onClick={() => handleSeatClick(seat.id)}
-                                  style={{ animationDelay: `${(rIdx * 4 + sIdx) * 15}ms` }}
-                                  className={`animate-seat-pop w-[48px] sm:w-[54px] h-[64px] sm:h-[68px] rounded-xl flex flex-col items-center justify-between p-1.5 font-bold transition-all duration-200 transform cursor-pointer relative shadow-sm hover:z-20 ${
+                                  style={{ animationDelay: `${(rIdx * 4 + sIdx) * 12}ms` }}
+                                  className={`w-[50px] sm:w-[56px] h-[50px] sm:h-[56px] rounded-2xl flex flex-col items-center justify-between p-1 transition-all duration-200 cursor-pointer relative shadow-2xs hover:z-30 overflow-hidden ${
                                     isSelected
-                                      ? 'bg-gradient-to-b from-emerald-500 to-emerald-600 border-2 border-emerald-400 text-white seat-selected-glow scale-105 active:scale-95'
+                                      ? 'bg-white border-2 border-[#00a86b] text-slate-900 scale-105 active:scale-95 shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/20'
                                       : isBookedFemale
-                                      ? 'bg-gradient-to-b from-pink-600 to-pink-700 border-2 border-pink-500 text-white cursor-not-allowed shadow-inner opacity-90'
-                                      : isBooked
-                                      ? 'bg-gradient-to-b from-slate-700 to-slate-800 border-2 border-slate-600 text-slate-300 cursor-not-allowed shadow-inner opacity-90'
-                                      : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-blue-500 hover:-translate-y-1.5 hover:shadow-lg active:scale-95'
+                                      ? 'bg-[#ec4899] border-2 border-pink-600 text-white cursor-not-allowed opacity-90'
+                                      : isBookedMale
+                                      ? 'bg-[#3b82f6] border-2 border-blue-600 text-white cursor-not-allowed opacity-90'
+                                      : isReserved
+                                      ? 'bg-[#4f46e5] border-2 border-indigo-600 text-white cursor-not-allowed opacity-90'
+                                      : isUnavailable
+                                      ? 'bg-[#e11d48] border-2 border-rose-600 text-white cursor-not-allowed opacity-80'
+                                      : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-emerald-500 hover:-translate-y-0.5 hover:shadow-md active:scale-95'
                                   }`}
                                 >
-                                  {/* Headrest Cushion Bar */}
-                                  <div className={`w-full h-1.5 rounded-t-md ${
-                                    isSelected ? 'bg-emerald-300' : isBooked ? 'bg-slate-600' : 'bg-slate-200'
-                                  }`} />
-
-                                  <span className={`text-xs sm:text-sm font-black tracking-tight ${isBooked || isSelected ? 'text-white' : 'text-slate-800'}`}>
+                                  {/* Large Bold Seat Number */}
+                                  <span className={`text-base sm:text-lg font-extrabold tracking-tight my-auto ${
+                                    isBookedFemale || isBookedMale || isReserved || isUnavailable ? 'text-white' : 'text-slate-800'
+                                  }`}>
                                     {seatNumStr}
                                   </span>
 
-                                  {/* Bottom Accent Bar */}
-                                  <div className={`w-4/5 h-1 rounded-full ${
-                                    isSelected ? 'bg-white/80' : isBooked ? 'bg-transparent' : 'bg-blue-600'
-                                  }`} />
+                                  {/* Bottom Status Bar for White Cards */}
+                                  {(!isBooked && !isReserved && !isUnavailable) && (
+                                    <div className={`w-full h-1.5 rounded-b-xl -mb-1 ${
+                                      isSelected ? 'bg-[#00a86b]' : 'bg-[#60a5fa]'
+                                    }`} />
+                                  )}
                                 </button>
                               </div>
                             );
                           })}
                         </div>
 
-                        {/* Animated Aisle Label Indicator */}
-                        <div className="text-[9px] font-mono font-black text-slate-400/80 tracking-widest pointer-events-none select-none">
-                          ┃
-                        </div>
+                        {/* Minimalist Aisle Space */}
+                        <div className="w-4 select-none" />
 
                         {/* Right Column Seats */}
                         <div className="flex items-center gap-1.5 sm:gap-2">
@@ -1441,7 +1430,10 @@ export const SeatMap: React.FC = () => {
 
                             const isSelected = selectedSeatIds.includes(seat.id) || selectedSeatIds.includes(seatNumStr) || selectedSeatIds.includes(normalizedNum);
                             const isBooked = seat.status === 'booked';
-                            const isBookedFemale = isBooked && ((seat as any).gender === 'female' || seat.isFemaleOnly);
+                            const isBookedFemale = isBooked && ((seat as any).gender === 'female' || (seat as any).isFemaleBooked);
+                            const isBookedMale = isBooked && !isBookedFemale;
+                            const isReserved = !isBooked && !isSelected && (seat.isFemaleOnly || seat.status === 'blocked');
+                            const isUnavailable = seat.status === 'unavailable' || seat.status === 'locked';
 
                             return (
                               <div 
@@ -1450,49 +1442,53 @@ export const SeatMap: React.FC = () => {
                                 onMouseEnter={() => setHoveredSeatNum(seatNumStr)}
                                 onMouseLeave={() => setHoveredSeatNum(null)}
                               >
-                                {/* Floating 3D Tooltip */}
+                                {/* Floating Light Tooltip */}
                                 {hoveredSeatNum === seatNumStr && (
-                                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
-                                    <div className="border border-blue-500 rounded-lg px-2.5 py-1 bg-slate-900 text-white shadow-2xl whitespace-nowrap text-left leading-tight">
-                                      <div className="text-[10px] font-black text-blue-400 tracking-wider">
+                                  <div className="absolute -top-11 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
+                                    <div className="border border-slate-300 rounded-lg px-2.5 py-1 bg-white text-slate-900 shadow-md whitespace-nowrap text-left leading-tight">
+                                      <div className="text-[10px] font-bold text-blue-600">
                                         SEAT #{seatNumStr} • {sIdx === 0 ? 'RIGHT AISLE' : 'RIGHT WINDOW'}
                                       </div>
-                                      <div className="text-xs font-extrabold font-mono text-emerald-400">
+                                      <div className="text-xs font-mono font-extrabold text-emerald-600">
                                         LKR {seat.price || selectedRoute.seats[0]?.price || 3430}
                                       </div>
                                     </div>
-                                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 shadow-xs" />
+                                    <div className="w-2 h-2 bg-white border-b border-r border-slate-300 rotate-45 -mt-1 shadow-2xs" />
                                   </div>
                                 )}
 
                                 <button
                                   type="button"
-                                  disabled={isBooked}
+                                  disabled={isBooked || isUnavailable}
                                   onClick={() => handleSeatClick(seat.id)}
-                                  style={{ animationDelay: `${(rIdx * 4 + sIdx + 2) * 15}ms` }}
-                                  className={`animate-seat-pop w-[48px] sm:w-[54px] h-[64px] sm:h-[68px] rounded-xl flex flex-col items-center justify-between p-1.5 font-bold transition-all duration-200 transform cursor-pointer relative shadow-sm hover:z-20 ${
+                                  style={{ animationDelay: `${(rIdx * 4 + sIdx + 2) * 12}ms` }}
+                                  className={`w-[50px] sm:w-[56px] h-[50px] sm:h-[56px] rounded-2xl flex flex-col items-center justify-between p-1 transition-all duration-200 cursor-pointer relative shadow-2xs hover:z-30 overflow-hidden ${
                                     isSelected
-                                      ? 'bg-gradient-to-b from-emerald-500 to-emerald-600 border-2 border-emerald-400 text-white seat-selected-glow scale-105 active:scale-95'
+                                      ? 'bg-white border-2 border-[#00a86b] text-slate-900 scale-105 active:scale-95 shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/20'
                                       : isBookedFemale
-                                      ? 'bg-gradient-to-b from-pink-600 to-pink-700 border-2 border-pink-500 text-white cursor-not-allowed shadow-inner opacity-90'
-                                      : isBooked
-                                      ? 'bg-gradient-to-b from-slate-700 to-slate-800 border-2 border-slate-600 text-slate-300 cursor-not-allowed shadow-inner opacity-90'
-                                      : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-blue-500 hover:-translate-y-1.5 hover:shadow-lg active:scale-95'
+                                      ? 'bg-[#ec4899] border-2 border-pink-600 text-white cursor-not-allowed opacity-90'
+                                      : isBookedMale
+                                      ? 'bg-[#3b82f6] border-2 border-blue-600 text-white cursor-not-allowed opacity-90'
+                                      : isReserved
+                                      ? 'bg-[#4f46e5] border-2 border-indigo-600 text-white cursor-not-allowed opacity-90'
+                                      : isUnavailable
+                                      ? 'bg-[#e11d48] border-2 border-rose-600 text-white cursor-not-allowed opacity-80'
+                                      : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-emerald-500 hover:-translate-y-0.5 hover:shadow-md active:scale-95'
                                   }`}
                                 >
-                                  {/* Headrest Cushion Bar */}
-                                  <div className={`w-full h-1.5 rounded-t-md ${
-                                    isSelected ? 'bg-emerald-300' : isBooked ? 'bg-slate-600' : 'bg-slate-200'
-                                  }`} />
-
-                                  <span className={`text-xs sm:text-sm font-black tracking-tight ${isBooked || isSelected ? 'text-white' : 'text-slate-800'}`}>
+                                  {/* Large Bold Seat Number */}
+                                  <span className={`text-base sm:text-lg font-extrabold tracking-tight my-auto ${
+                                    isBookedFemale || isBookedMale || isReserved || isUnavailable ? 'text-white' : 'text-slate-800'
+                                  }`}>
                                     {seatNumStr}
                                   </span>
 
-                                  {/* Bottom Accent Bar */}
-                                  <div className={`w-4/5 h-1 rounded-full ${
-                                    isSelected ? 'bg-white/80' : isBooked ? 'bg-transparent' : 'bg-blue-600'
-                                  }`} />
+                                  {/* Bottom Status Bar for White Cards */}
+                                  {(!isBooked && !isReserved && !isUnavailable) && (
+                                    <div className={`w-full h-1.5 rounded-b-xl -mb-1 ${
+                                      isSelected ? 'bg-[#00a86b]' : 'bg-[#60a5fa]'
+                                    }`} />
+                                  )}
                                 </button>
                               </div>
                             );
@@ -1503,68 +1499,61 @@ export const SeatMap: React.FC = () => {
                   })}
                 </div>
 
-                {/* ── Rear Engine Bumper ── */}
-                <div className="mt-4 pt-3 border-t-2 border-slate-300/80 flex items-center justify-between text-[10px] font-extrabold text-slate-400 uppercase tracking-widest px-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                    <span>Rear Engine</span>
-                  </div>
-                  <span>Dewmina Luxury Coach</span>
-                  <div className="flex items-center gap-1.5">
-                    <span>Back</span>
-                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                  </div>
+                {/* ── Rear Bumper ── */}
+                <div className="mt-3 pt-2.5 border-t border-slate-200 flex items-center justify-between text-[10px] font-extrabold text-slate-400 uppercase tracking-widest px-2">
+                  <span>Rear Engine</span>
+                  <span>Superline Coach</span>
                 </div>
 
               </div>
 
-              {/* ── Legend (Mockup Exact Style) ── */}
+              {/* ── Legend (Solid Status Fill for Booked/Unavailable, White Body for Available/Selected) ── */}
               <div className="space-y-3 pt-4 border-t border-slate-200">
                 <h4 className="text-sm font-extrabold text-slate-900">
                   Seating Plan for {selectedRoute.busNumber || 'NG 9933'}
                 </h4>
 
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-4 rounded border border-slate-700 bg-white flex items-center justify-center">
-                      <div className="w-3 h-0.5 bg-blue-600" />
+                <div className="grid grid-cols-2 gap-3.5 text-xs">
+                  {/* Available Seats */}
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-md border-2 border-slate-300 bg-white flex flex-col justify-between shadow-2xs overflow-hidden">
+                      <div className="w-full flex-1 bg-white" />
+                      <div className="w-full h-1.5 bg-[#60a5fa] rounded-b-xs" />
                     </div>
-                    <span className="text-slate-800 font-semibold">Available Seats</span>
+                    <span className="text-slate-800 font-bold">Available Seats</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-4 rounded bg-[#00b875] flex items-center justify-center">
-                      <div className="w-3 h-0.5 bg-[#80ffd0]" />
+                  {/* Selected by You */}
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-md border-2 border-[#00a86b] bg-white flex flex-col justify-between shadow-2xs overflow-hidden">
+                      <div className="w-full flex-1 bg-white" />
+                      <div className="w-full h-1.5 bg-[#00a86b] rounded-b-xs" />
                     </div>
-                    <span className="text-slate-800 font-semibold">Selected by You</span>
+                    <span className="text-slate-800 font-bold">Selected by You</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-4 rounded bg-blue-500 flex items-center justify-center">
-                      <div className="w-3 h-0.5 bg-white" />
-                    </div>
-                    <span className="text-slate-800 font-semibold">Booked by Gents</span>
+                  {/* Booked by Gents */}
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-md bg-[#3b82f6] border border-blue-600 shadow-2xs overflow-hidden" />
+                    <span className="text-slate-800 font-bold">Booked by Gents</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-4 rounded bg-pink-500 flex items-center justify-center">
-                      <div className="w-3 h-0.5 bg-white" />
-                    </div>
-                    <span className="text-slate-800 font-semibold">Booked by Ladies</span>
+                  {/* Booked by Ladies */}
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-md bg-[#ec4899] border border-pink-600 shadow-2xs overflow-hidden" />
+                    <span className="text-slate-800 font-bold">Booked by Ladies</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-4 rounded bg-blue-900 flex items-center justify-center">
-                      <div className="w-3 h-0.5 bg-white" />
-                    </div>
-                    <span className="text-slate-800 font-semibold">Reserved Seats</span>
+                  {/* Reserved Seats */}
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-md bg-[#4f46e5] border border-indigo-600 shadow-2xs overflow-hidden" />
+                    <span className="text-slate-800 font-bold">Reserved Seats</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-4 rounded bg-rose-600 flex items-center justify-center">
-                      <div className="w-3 h-0.5 bg-white" />
-                    </div>
-                    <span className="text-slate-800 font-semibold">Unavailable Seats</span>
+                  {/* Unavailable Seats */}
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-md bg-[#e11d48] border border-rose-600 shadow-2xs overflow-hidden" />
+                    <span className="text-slate-800 font-bold">Unavailable Seats</span>
                   </div>
                 </div>
               </div>

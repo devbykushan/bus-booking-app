@@ -443,6 +443,20 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         searchDate,
       });
 
+      // Update selectedRoute local seat status so the SeatMap updates immediately with proper gender colors
+      if (selectedRoute) {
+        canonicalSeatIds.forEach(seatId => {
+          const s = selectedRoute.seats.find(st => st.id === seatId || st.number === seatId.split('-').pop());
+          if (s) {
+            s.status = 'booked';
+            (s as any).gender = passengerInfo.gender || 'male';
+            if (passengerInfo.gender === 'female') {
+              (s as any).isFemaleBooked = true;
+            }
+          }
+        });
+      }
+
       // Refresh routes so seat counts update
       const updatedRoutes = await routesApi.getAll();
 
