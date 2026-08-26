@@ -28,20 +28,20 @@ export const Footer: React.FC = () => {
   return (
     <footer className="relative bg-gradient-to-b from-slate-50 via-white to-blue-50/40 text-slate-600 text-sm mt-20 overflow-hidden border-t border-slate-200 select-none shadow-inner">
       
-      {/* ── Spotless High-Res Coach Background with Gentle Movement ── */}
+      {/* ── High-Clarity Bus Photo Background ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
         <img
-          src="/yutong-hero.jpg"
-          alt="Dewmina Super Line Coach"
-          className="w-full h-full object-cover object-right md:object-[85%_center] opacity-[0.08] filter blur-[0.5px] scale-105 animate-ken-burns"
+          src="/footer-bus-bg.jpg"
+          alt="Dewmina Super Line Coach Background"
+          className="w-full h-full object-cover object-center opacity-75 filter blur-[1.5px] saturate-[0.75] contrast-105 scale-105 transition-all duration-700 animate-ken-burns"
         />
-        {/* Soft daylight gradient overlay for clean contrast */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-slate-50/60" />
+        {/* Subtle daylight gradient overlay to keep text 100% crisp while keeping photo vivid */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-white/50 to-blue-50/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/75 via-white/20 to-slate-50/20" />
 
-        {/* Ambient Floating Pastel Glow Blobs */}
-        <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-300/15 rounded-full blur-3xl animate-blob-1" />
-        <div className="absolute -bottom-20 right-1/3 w-96 h-96 bg-indigo-300/15 rounded-full blur-3xl animate-blob-2" />
+        {/* Ambient Floating Glow Blobs */}
+        <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl animate-blob-1" />
+        <div className="absolute -bottom-20 right-1/3 w-96 h-96 bg-indigo-400/20 rounded-full blur-3xl animate-blob-2" />
       </div>
 
       {/* ── Top Radiant Glowing Shimmer Bar ── */}
