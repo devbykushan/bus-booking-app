@@ -15,11 +15,168 @@ interface Props {
 export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) => {
   const { loadRoutes } = useBookingStore();
 
-  const [busType, setBusType] = useState<BusCategory>(
-    (route.busType as any) || 'Lanka Ashok Leyland (57 Seats 3*2)'
-  );
-  const [basePrice, setBasePrice] = useState<number>(route.priceStarting || 1800);
-  const [seats, setSeats] = useState<Seat[]>([...(route.seats || [])]);
+  const generatePresetSeats = (type: BusCategory | string, price: number, routeId: string): Seat[] => {
+    const newSeats: Seat[] = [];
+
+    if (type.includes('49 Seats') || type.includes('Super Luxury')) {
+      // 49 Seats Standard Sri Lanka Luxury Coach Layout (1 to 49 numbered layout)
+      const femaleSeats = ['15', '19', '20', '23'];
+      for (let r = 1; r <= 11; r++) {
+        const leftWindowNum = ((r - 1) * 4 + 3).toString();
+        const leftAisleNum = ((r - 1) * 4 + 4).toString();
+        const rightAisleNum = ((r - 1) * 4 + 2).toString();
+        const rightWindowNum = ((r - 1) * 4 + 1).toString();
+
+        newSeats.push(
+          { id: `${routeId}-${leftWindowNum}`, number: leftWindowNum, deck: 'lower', row: r, col: 1, price, status: 'available', isSleeper: false, isFemaleOnly: femaleSeats.includes(leftWindowNum) },
+          { id: `${routeId}-${leftAisleNum}`, number: leftAisleNum, deck: 'lower', row: r, col: 2, price, status: 'available', isSleeper: false, isFemaleOnly: femaleSeats.includes(leftAisleNum) },
+          { id: `${routeId}-${rightAisleNum}`, number: rightAisleNum, deck: 'lower', row: r, col: 4, price, status: 'available', isSleeper: false, isFemaleOnly: femaleSeats.includes(rightAisleNum) },
+          { id: `${routeId}-${rightWindowNum}`, number: rightWindowNum, deck: 'lower', row: r, col: 5, price, status: 'available', isSleeper: false, isFemaleOnly: femaleSeats.includes(rightWindowNum) }
+        );
+      }
+      const backSeats = [
+        { num: '47', col: 1 },
+        { num: '48', col: 2 },
+        { num: '49', col: 3 },
+        { num: '46', col: 4 },
+        { num: '45', col: 5 },
+      ];
+      backSeats.forEach(s => {
+        newSeats.push({ id: `${routeId}-${s.num}`, number: s.num, deck: 'lower', row: 12, col: s.col, price, status: 'available', isSleeper: false, isFemaleOnly: false });
+      });
+      return newSeats;
+    } else if (type.includes('58 Seats 3*2') || type.includes('Normal Service') || type.includes('54 Seats 3*2')) {
+      // Ashok Leyland 58 seats: 11 rows of 5 plus 3 rear seats.
+      for (let r = 1; r <= 11; r++) {
+        [1, 2, 3, 5, 6].forEach((c) => {
+          const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+          newSeats.push({ id: `${routeId}-${seatNum}`, number: seatNum, deck: 'lower', row: r, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 3 });
+        });
+      }
+      [1, 2, 3].forEach((c) => {
+        const seatNum = `12${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+        newSeats.push({ id: `${routeId}-${seatNum}`, number: seatNum, deck: 'lower', row: 12, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: false });
+      });
+      return newSeats;
+    } else if (type.includes('54 Seats')) {
+      // Ashok Leyland 54 seats: 13 rows of 4 plus 2 rear seats.
+      for (let r = 1; r <= 13; r++) {
+        [1, 2, 4, 5].forEach((c) => {
+          const seatNum = `${r}${String.fromCharCode(64 + (c > 3 ? c - 1 : c))}`;
+          newSeats.push({ id: `${routeId}-${seatNum}`, number: seatNum, deck: 'lower', row: r, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 2 });
+        });
+      }
+      [1, 2].forEach((c) => {
+        const seatNum = `14${String.fromCharCode(64 + c)}`;
+        newSeats.push({ id: `${routeId}-${seatNum}`, number: seatNum, deck: 'lower', row: 14, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: false });
+      });
+      return newSeats;
+    } else if (type.includes('Yutong')) {
+      // Yutong 2*2 layouts: 12 rows of 4, with 3 extra rear seats for 51.
+      for (let r = 1; r <= 12; r++) {
+        [1, 2, 4, 5].forEach((c) => {
+          const seatNum = `Y${r}${String.fromCharCode(64 + (c > 3 ? c - 1 : c))}`;
+          newSeats.push({ id: `${routeId}-${seatNum}`, number: seatNum, deck: 'lower', row: r, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 2 });
+        });
+      }
+      if (type.includes('51 Seats')) {
+        [1, 2, 3].forEach((c) => {
+          const seatNum = `Y13${String.fromCharCode(64 + c)}`;
+          newSeats.push({ id: `${routeId}-${seatNum}`, number: seatNum, deck: 'lower', row: 13, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: false });
+        });
+      }
+      return newSeats;
+    } else if (type.includes('3*2') || type.includes('Leyland')) {
+      // Lanka Ashok Leyland 57 Seats 3*2
+      const totalRows = 11;
+      for (let r = 1; r <= totalRows; r++) {
+        [1, 2, 3, 5, 6].forEach((c) => {
+          const seatLetter = String.fromCharCode(64 + (c > 4 ? c - 1 : c));
+          const seatNum = `${r}${seatLetter}`;
+          const isFemaleOnly = (r === 2 || r === 3) && c <= 3;
+          newSeats.push({
+            id: `${routeId}-${seatNum}`,
+            number: seatNum,
+            deck: 'lower',
+            row: r,
+            col: c,
+            price: price,
+            status: 'available',
+            isSleeper: false,
+            isFemaleOnly,
+          });
+        });
+      }
+      [1, 2].forEach((c) => {
+        const seatNum = `12${String.fromCharCode(64 + c)}`;
+        newSeats.push({
+          id: `${routeId}-${seatNum}`,
+          number: seatNum,
+          deck: 'lower',
+          row: 12,
+          col: c,
+          price: price,
+          status: 'available',
+          isSleeper: false,
+          isFemaleOnly: false,
+        });
+      });
+      return newSeats;
+    } else if (type.includes('AC Sleeper')) {
+      // AC Sleeper 36 berths (18 lower, 18 upper)
+      ['lower', 'upper'].forEach((deckName) => {
+        const prefix = deckName === 'lower' ? 'L' : 'U';
+        for (let r = 1; r <= 9; r++) {
+          [1, 3].forEach((c) => {
+            const seatNum = `${prefix}${r}${c === 1 ? 'A' : 'B'}`;
+            newSeats.push({
+              id: `${routeId}-${seatNum}`,
+              number: seatNum,
+              deck: deckName as DeckType,
+              row: r,
+              col: c,
+              price: price + (deckName === 'upper' ? 200 : 0),
+              status: 'available',
+              isSleeper: true,
+              isFemaleOnly: r <= 2 && c === 1,
+            });
+          });
+        }
+      });
+      return newSeats;
+    } else {
+      // Standard Volvo 40 seats (2*2 Luxury)
+      for (let r = 1; r <= 10; r++) {
+        [1, 2, 4, 5].forEach((c) => {
+          const seatNum = `V${r}${String.fromCharCode(64 + (c > 3 ? c - 1 : c))}`;
+          newSeats.push({
+            id: `${routeId}-${seatNum}`,
+            number: seatNum,
+            deck: 'lower',
+            row: r,
+            col: c,
+            price: price,
+            status: 'available',
+            isSleeper: false,
+            isFemaleOnly: (r === 2 || r === 3) && c <= 2,
+          });
+        });
+      }
+      return newSeats;
+    }
+  };
+
+  const initialBusType: BusCategory = (route.busType as any) || 'Super Luxury (49 Seats 2*2)';
+  const initialBasePrice: number = route.priceStarting || 2800;
+
+  const [busType, setBusType] = useState<BusCategory>(initialBusType);
+  const [basePrice, setBasePrice] = useState<number>(initialBasePrice);
+  const [seats, setSeats] = useState<Seat[]>(() => {
+    if (route.seats && route.seats.length > 0) {
+      return [...route.seats];
+    }
+    return generatePresetSeats(initialBusType, initialBasePrice, route.id);
+  });
   const [activeDeck, setActiveDeck] = useState<DeckType>('lower');
   const [selectedSeatId, setSelectedSeatId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -30,7 +187,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
 
   // New Seat Form State
   const [newSeatNum, setNewSeatNum] = useState('');
-  const [newSeatPrice, setNewSeatPrice] = useState(route.priceStarting || 1800);
+  const [newSeatPrice, setNewSeatPrice] = useState(route.priceStarting || 2670);
   const [newSeatDeck, setNewSeatDeck] = useState<DeckType>('lower');
   const [newSeatRow, setNewSeatRow] = useState(1);
   const [newSeatCol, setNewSeatCol] = useState(1);
@@ -47,156 +204,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
     setBusType(type);
     setBasePrice(price);
     setSelectedSeatId(null);
-
-    const newSeats: Seat[] = [];
-
-    if (type.includes('54 Seats 3*2')) {
-      // Ashok Leyland 54 seats: 10 rows of 5 plus 4 rear seats.
-      for (let r = 1; r <= 10; r++) {
-        [1, 2, 3, 5, 6].forEach((c) => {
-          const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
-          newSeats.push({ id: `${route.id}-${seatNum}`, number: seatNum, deck: 'lower', row: r, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 3 });
-        });
-      }
-      [1, 2, 3, 5].forEach((c) => {
-        const seatNum = `11${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
-        newSeats.push({ id: `${route.id}-${seatNum}`, number: seatNum, deck: 'lower', row: 12, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: false });
-      });
-    } else if (type.includes('54 Seats')) {
-      // Ashok Leyland 54 seats: 13 rows of 4 plus 2 rear seats.
-      for (let r = 1; r <= 13; r++) {
-        [1, 2, 4, 5].forEach((c) => {
-          const seatNum = `${r}${String.fromCharCode(64 + (c > 3 ? c - 1 : c))}`;
-          newSeats.push({ id: `${route.id}-${seatNum}`, number: seatNum, deck: 'lower', row: r, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 2 });
-        });
-      }
-      [1, 2].forEach((c) => {
-        const seatNum = `14${String.fromCharCode(64 + c)}`;
-        newSeats.push({ id: `${route.id}-${seatNum}`, number: seatNum, deck: 'lower', row: 14, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: false });
-      });
-    } else if (type.includes('Yutong')) {
-      // Yutong 2*2 layouts: 12 rows of 4, with 3 extra rear seats for 51.
-      for (let r = 1; r <= 12; r++) {
-        [1, 2, 4, 5].forEach((c) => {
-          const seatNum = `Y${r}${String.fromCharCode(64 + (c > 3 ? c - 1 : c))}`;
-          newSeats.push({ id: `${route.id}-${seatNum}`, number: seatNum, deck: 'lower', row: r, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 2 });
-        });
-      }
-      if (type.includes('51 Seats')) {
-        [1, 2, 3].forEach((c) => {
-          const seatNum = `Y13${String.fromCharCode(64 + c)}`;
-          newSeats.push({ id: `${route.id}-${seatNum}`, number: seatNum, deck: 'lower', row: 13, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: false });
-        });
-      }
-    } else if (type.includes('3*2') || type.includes('Leyland')) {
-      // Lanka Ashok Leyland 57 Seats 3*2
-      const totalRows = 11;
-      for (let r = 1; r <= totalRows; r++) {
-        [1, 2, 3, 5, 6].forEach((c) => {
-          const seatLetter = String.fromCharCode(64 + (c > 4 ? c - 1 : c));
-          const seatNum = `${r}${seatLetter}`;
-          const isFemaleOnly = (r === 2 || r === 3) && c <= 3;
-          newSeats.push({
-            id: `${route.id}-${seatNum}`,
-            number: seatNum,
-            deck: 'lower',
-            row: r,
-            col: c,
-            price: price,
-            status: 'available',
-            isSleeper: false,
-            isFemaleOnly,
-          });
-        });
-      }
-      // Row 12 back row 2 seats = 57 seats total
-      [1, 2].forEach((c) => {
-        const seatNum = `12${String.fromCharCode(64 + c)}`;
-        newSeats.push({
-          id: `${route.id}-${seatNum}`,
-          number: seatNum,
-          deck: 'lower',
-          row: 12,
-          col: c,
-          price: price,
-          status: 'available',
-          isSleeper: false,
-          isFemaleOnly: false,
-        });
-      });
-    } else if (type.includes('2*2') && !type.includes('Volvo')) {
-      // 57 Seats 2*2 layout
-      const totalRows = 14;
-      for (let r = 1; r <= totalRows; r++) {
-        [1, 2, 4, 5].forEach((c) => {
-          const seatLetter = String.fromCharCode(64 + (c > 3 ? c - 1 : c));
-          const seatNum = `${r}${seatLetter}`;
-          const isFemaleOnly = (r === 2 || r === 3) && c <= 2;
-          newSeats.push({
-            id: `${route.id}-${seatNum}`,
-            number: seatNum,
-            deck: 'lower',
-            row: r,
-            col: c,
-            price: price,
-            status: 'available',
-            isSleeper: false,
-            isFemaleOnly,
-          });
-        });
-      }
-      newSeats.push({
-        id: `${route.id}-15A`,
-        number: '15A',
-        deck: 'lower',
-        row: 15,
-        col: 1,
-        price: price,
-        status: 'available',
-        isSleeper: false,
-        isFemaleOnly: false,
-      });
-    } else if (type.includes('AC Sleeper')) {
-      // AC Sleeper 36 berths (18 lower, 18 upper)
-      ['lower', 'upper'].forEach((deckName) => {
-        const prefix = deckName === 'lower' ? 'L' : 'U';
-        for (let r = 1; r <= 9; r++) {
-          [1, 3].forEach((c) => {
-            const seatNum = `${prefix}${r}${c === 1 ? 'A' : 'B'}`;
-            newSeats.push({
-              id: `${route.id}-${seatNum}`,
-              number: seatNum,
-              deck: deckName as DeckType,
-              row: r,
-              col: c,
-              price: price + (deckName === 'upper' ? 200 : 0),
-              status: 'available',
-              isSleeper: true,
-              isFemaleOnly: r <= 2 && c === 1,
-            });
-          });
-        }
-      });
-    } else {
-      // Standard Volvo 40 seats (2*2 Luxury)
-      for (let r = 1; r <= 10; r++) {
-        [1, 2, 4, 5].forEach((c) => {
-          const seatNum = `V${r}${String.fromCharCode(64 + (c > 3 ? c - 1 : c))}`;
-          newSeats.push({
-            id: `${route.id}-${seatNum}`,
-            number: seatNum,
-            deck: 'lower',
-            row: r,
-            col: c,
-            price: price,
-            status: 'available',
-            isSleeper: false,
-            isFemaleOnly: (r === 2 || r === 3) && c <= 2,
-          });
-        });
-      }
-    }
-
+    const newSeats = generatePresetSeats(type, price, route.id);
     setSeats(newSeats);
   };
 
@@ -325,7 +333,11 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
     rowsMap[s.row].push(s);
   });
   const rowNumbers = Object.keys(rowsMap).map(Number).sort((a, b) => a - b);
-  const is3By2 = busType.includes('3*2') || busType.includes('Leyland');
+  const is3By2 =
+    busType.includes('3*2') ||
+    busType.includes('Leyland') ||
+    busType.includes('Normal Service') ||
+    seats.some((s) => s.col === 6 || /[A-E]$/i.test(s.number));
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fade-in-up">
@@ -349,7 +361,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
           </div>
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -374,67 +386,36 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
             <span className="text-[11px] text-slate-400">Click a preset to reset grid to standard model layout</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <button
               type="button"
-              onClick={() => applyPreset('Ashok Leyland (54 Seats 3*2)', 1800)}
-              className={`p-3 rounded-2xl border text-left text-xs transition-all ${
-                busType.includes('3*2')
-                  ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-sm ring-2 ring-blue-500/20'
+              onClick={() => applyPreset('Super Luxury (49 Seats 2*2)', 2800)}
+              className={`p-3.5 rounded-2xl border text-left text-xs transition-all cursor-pointer ${
+                busType.includes('49 Seats') || busType.includes('Super Luxury')
+                  ? 'bg-blue-50 border-blue-600 text-blue-800 shadow-sm ring-2 ring-blue-500/20'
                   : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
               }`}
             >
-              <div className="font-bold flex items-center gap-1.5 text-slate-800 text-[11px]">
-                <Bus className="w-4 h-4 text-blue-600 flex-shrink-0" /> Ashok Leyland
+              <div className="font-bold flex items-center gap-2 text-slate-800 text-xs">
+                <Bus className="w-4 h-4 text-blue-600 flex-shrink-0" /> Super Luxury Express
               </div>
-                <p className="text-[10px] text-blue-600 font-mono mt-1 font-semibold">54 Seats (3*2 Express)</p>
+              <p className="text-[11px] text-blue-600 font-mono mt-1 font-semibold">Standard 2*2 Luxury Coach (48/49 Seats)</p>
             </button>
 
             <button
               type="button"
-              onClick={() => applyPreset('Ashok Leyland (54 Seats 2*2)', 1800)}
-              className={`p-3 rounded-2xl border text-left text-xs transition-all ${
-                busType.includes('2*2') && !busType.includes('Volvo')
-                  ? 'bg-indigo-50 border-indigo-500 text-indigo-700 shadow-sm ring-2 ring-indigo-500/20'
+              onClick={() => applyPreset('Normal Service (58 Seats 3*2)', 950)}
+              className={`p-3.5 rounded-2xl border text-left text-xs transition-all cursor-pointer ${
+                busType.includes('Normal Service') || busType.includes('58 Seats')
+                  ? 'bg-blue-50 border-blue-600 text-blue-800 shadow-sm ring-2 ring-blue-500/20'
                   : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
               }`}
             >
-              <div className="font-bold flex items-center gap-1.5 text-slate-800 text-[11px]">
-                <Bus className="w-4 h-4 text-indigo-600 flex-shrink-0" /> Ashok Leyland
+              <div className="font-bold flex items-center gap-2 text-slate-800 text-xs">
+                <Bus className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Normal Service (Route 98)
               </div>
-                <p className="text-[10px] text-indigo-600 font-mono mt-1 font-semibold">54 Seats (2*2 Air Bus)</p>
+              <p className="text-[11px] text-emerald-600 font-mono mt-1 font-semibold">Ashok Leyland 3*2 Layout (58 Seats)</p>
             </button>
-
-              <button
-                type="button"
-                onClick={() => applyPreset('Yutong (48 Seats 2*2)', 2200)}
-                className={`p-3 rounded-2xl border text-left text-xs transition-all ${
-                  busType === 'Yutong (48 Seats 2*2)'
-                    ? 'bg-cyan-50 border-cyan-500 text-cyan-700 shadow-sm ring-2 ring-cyan-500/20'
-                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                <div className="font-bold flex items-center gap-1.5 text-slate-800 text-[11px]">
-                  <Bus className="w-4 h-4 text-cyan-600 flex-shrink-0" /> Yutong
-                </div>
-                <p className="text-[10px] text-cyan-600 font-mono mt-1 font-semibold">48 Seats (2*2 Coach)</p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => applyPreset('Yutong (51 Seats 2*2)', 2200)}
-                className={`p-3 rounded-2xl border text-left text-xs transition-all ${
-                  busType === 'Yutong (51 Seats 2*2)'
-                    ? 'bg-teal-50 border-teal-500 text-teal-700 shadow-sm ring-2 ring-teal-500/20'
-                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                <div className="font-bold flex items-center gap-1.5 text-slate-800 text-[11px]">
-                  <Bus className="w-4 h-4 text-teal-600 flex-shrink-0" /> Yutong
-                </div>
-                <p className="text-[10px] text-teal-600 font-mono mt-1 font-semibold">51 Seats (2*2 Coach)</p>
-              </button>
-
           </div>
         </div>
 
@@ -451,12 +432,12 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                 const val = Number(e.target.value);
                 setBasePrice(val);
               }}
-              className="w-24 bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-slate-800 font-mono font-bold"
+              className="w-24 bg-white border border-slate-300 rounded-xl px-3 py-1.5 font-bold font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               type="button"
               onClick={() => bulkSetAllPrices(basePrice)}
-              className="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold text-[11px]"
+              className="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300 font-bold rounded-xl transition-colors cursor-pointer"
               title="Apply this fare to all seats in bus"
             >
               Apply Fare to All Seats
@@ -478,14 +459,14 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
             <button
               type="button"
               onClick={bulkMakeAllAvailable}
-              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-[11px] flex items-center gap-1"
+              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-[11px] flex items-center gap-1 cursor-pointer"
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Clear All Blocks
             </button>
             <button
               type="button"
               onClick={() => setShowAddSeatModal(true)}
-              className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-sm"
+              className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-sm cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" /> Add Custom Seat
             </button>
@@ -501,7 +482,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
             <button
               type="button"
               onClick={() => setActiveDeck('lower')}
-              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeDeck === 'lower'
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -512,7 +493,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
             <button
               type="button"
               onClick={() => setActiveDeck('upper')}
-              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeDeck === 'upper'
                   ? 'bg-indigo-600 text-white shadow-sm'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -532,105 +513,155 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               <span className="font-semibold text-slate-700">
                 Interactive Grid ({activeDeck.toUpperCase()} DECK) — Click seat to inspect & modify properties
               </span>
-              <span className="text-[11px] italic">Front of Bus / Driver Steering Wheel Right</span>
+              <span className="text-[11px] font-semibold text-blue-600">Front Cockpit (Top) • Rear Engine (Bottom)</span>
             </div>
 
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3">
-              {rowNumbers.length === 0 ? (
-                <div className="text-center py-10 text-slate-400 text-xs font-medium">
-                  No seats configured on {activeDeck} deck. Click "Add Custom Seat" above to insert seats.
+            {/* Bus Body Container */}
+            <div className={`bg-slate-50/90 rounded-3xl p-4 border border-slate-200/90 space-y-4 shadow-sm mx-auto transition-all ${
+              is3By2 ? 'max-w-[500px]' : 'max-w-[440px]'
+            }`}>
+              
+              {/* Top Cockpit & Driver Header Bar */}
+              <div className="bg-slate-900 rounded-2xl p-3 text-white flex items-center justify-between text-xs font-bold shadow-md">
+                {/* Entry Door */}
+                <div className="flex items-center gap-2 text-emerald-400 font-extrabold text-[11px] tracking-wider uppercase">
+                  <div className="flex flex-col gap-0.5">
+                    <div className="w-4 h-0.5 bg-emerald-400 rounded-full" />
+                    <div className="w-4 h-0.5 bg-emerald-400/70 rounded-full" />
+                    <div className="w-4 h-0.5 bg-emerald-400/40 rounded-full" />
+                  </div>
+                  <span>ENTRY DOOR</span>
                 </div>
-              ) : (
-                rowNumbers.map(rowNum => {
-                  const rowSeats = rowsMap[rowNum] || [];
-                  const leftSeats = rowSeats.filter(s => is3By2 ? s.col <= 3 : s.col <= 2).sort((a, b) => a.col - b.col);
-                  const rightSeats = rowSeats.filter(s => is3By2 ? s.col >= 5 : s.col >= 4).sort((a, b) => a.col - b.col);
 
-                  return (
-                    <div key={rowNum} className="flex items-center justify-between gap-4 px-2">
-                      {/* Left side seats */}
-                      <div className="flex items-center gap-1.5">
-                        {leftSeats.map(seat => {
-                          const isSelected = selectedSeatId === seat.id;
-                          const hasCustomPrice = seat.price && seat.price !== basePrice;
+                {/* Front Cockpit Badge */}
+                <div className="flex items-center gap-1.5 bg-slate-800/90 border border-slate-700 px-3 py-1 rounded-full text-[10px] font-bold text-slate-200">
+                  <Bus className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Front Cockpit</span>
+                </div>
 
-                          return (
-                            <button
-                              key={seat.id}
-                              type="button"
-                              onClick={() => handleSeatClick(seat.id)}
-                              className={`w-10 h-11 rounded-xl flex flex-col items-center justify-center text-[10px] font-bold border transition-all relative ${
-                                isSelected
-                                  ? 'ring-2 ring-blue-600 ring-offset-1 bg-blue-100 border-blue-500 text-blue-900 shadow-md scale-105 z-10'
-                                  : seat.status === 'booked'
-                                  ? 'bg-slate-200 border-slate-300 text-slate-500'
-                                  : seat.isFemaleOnly
-                                  ? 'bg-pink-100 border-pink-300 text-pink-700 hover:bg-pink-200'
-                                  : 'bg-emerald-100 border-emerald-300 text-emerald-800 hover:bg-emerald-200'
-                              }`}
-                              title={`Seat ${seat.number} • LKR ${seat.price || basePrice} • ${seat.status}`}
-                            >
-                              <span>{seat.number}</span>
-                              {seat.isFemaleOnly ? (
-                                <Shield className="w-3 h-3 text-pink-600 mt-0.5" />
-                              ) : hasCustomPrice ? (
-                                <span className="text-[8px] font-mono text-amber-700">LKR {seat.price}</span>
-                              ) : null}
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      <div className="text-[9px] font-mono font-bold text-slate-300 tracking-wider">AISLE</div>
-
-                      {/* Right side seats */}
-                      <div className="flex items-center gap-1.5">
-                        {rightSeats.map(seat => {
-                          const isSelected = selectedSeatId === seat.id;
-                          const hasCustomPrice = seat.price && seat.price !== basePrice;
-
-                          return (
-                            <button
-                              key={seat.id}
-                              type="button"
-                              onClick={() => handleSeatClick(seat.id)}
-                              className={`w-10 h-11 rounded-xl flex flex-col items-center justify-center text-[10px] font-bold border transition-all relative ${
-                                isSelected
-                                  ? 'ring-2 ring-blue-600 ring-offset-1 bg-blue-100 border-blue-500 text-blue-900 shadow-md scale-105 z-10'
-                                  : seat.status === 'booked'
-                                  ? 'bg-slate-200 border-slate-300 text-slate-500'
-                                  : seat.isFemaleOnly
-                                  ? 'bg-pink-100 border-pink-300 text-pink-700 hover:bg-pink-200'
-                                  : 'bg-emerald-100 border-emerald-300 text-emerald-800 hover:bg-emerald-200'
-                              }`}
-                              title={`Seat ${seat.number} • LKR ${seat.price || basePrice} • ${seat.status}`}
-                            >
-                              <span>{seat.number}</span>
-                              {seat.isFemaleOnly ? (
-                                <Shield className="w-3 h-3 text-pink-600 mt-0.5" />
-                              ) : hasCustomPrice ? (
-                                <span className="text-[8px] font-mono text-amber-700">LKR {seat.price}</span>
-                              ) : null}
-                            </button>
-                          );
-                        })}
-                      </div>
+                {/* Driver Steering Wheel */}
+                <div className="flex items-center gap-2 text-slate-300 font-extrabold text-[11px] tracking-wider uppercase">
+                  <span>DRIVER</span>
+                  <div className="w-7 h-7 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center">
+                    <div className="w-4 h-4 rounded-full border border-dashed border-slate-400 flex items-center justify-center">
+                      <div className="w-1 h-1 bg-blue-400 rounded-full" />
                     </div>
-                  );
-                })
-              )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Seating Matrix */}
+              <div className="relative space-y-2.5 py-1 flex flex-col items-center">
+                {/* Ambient Aisle Strip - positioned at exact aisle location */}
+                <div className={`absolute inset-y-0 pointer-events-none z-0 rounded-full bg-indigo-100/60 border-x border-indigo-200/40 ${
+                  is3By2 ? 'left-[60%] -translate-x-1/2 w-8' : 'left-1/2 -translate-x-1/2 w-9'
+                }`} />
+
+                {rowNumbers.length === 0 ? (
+                  <div className="text-center py-10 text-slate-400 text-xs font-medium">
+                    No seats configured on {activeDeck} deck. Click a preset above or "Add Custom Seat" to insert seats.
+                  </div>
+                ) : (
+                  rowNumbers.map(rowNum => {
+                    const rowSeats = rowsMap[rowNum] || [];
+                    const leftSeats = rowSeats.filter(s => is3By2 ? s.col <= 3 : s.col <= 2).sort((a, b) => a.col - b.col);
+                    const centerSeats = rowSeats.filter(s => !is3By2 && s.col === 3).sort((a, b) => a.col - b.col);
+                    const rightSeats = rowSeats.filter(s => is3By2 ? s.col >= 4 : s.col >= 4).sort((a, b) => a.col - b.col);
+
+                    const renderSeatButton = (seat: Seat) => {
+                      const isSelected = selectedSeatId === seat.id;
+                      const hasCustomPrice = seat.price && seat.price !== basePrice;
+
+                      return (
+                        <button
+                          key={seat.id}
+                          type="button"
+                          onClick={() => handleSeatClick(seat.id)}
+                          className={`w-10 h-12 sm:w-11 sm:h-13 rounded-xl flex flex-col items-center justify-between p-1.5 font-bold transition-all relative z-10 shadow-2xs hover:z-20 cursor-pointer ${
+                            isSelected
+                              ? 'ring-2 ring-blue-600 bg-blue-100 border-2 border-blue-500 text-blue-900 shadow-md scale-105'
+                              : seat.status === 'booked'
+                              ? 'bg-slate-200 border-2 border-slate-300 text-slate-500 opacity-80'
+                              : seat.isFemaleOnly
+                              ? 'bg-pink-50 border-2 border-pink-400 text-pink-700 hover:bg-pink-100 shadow-2xs'
+                              : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-blue-500 hover:bg-blue-50/50'
+                          }`}
+                          title={`Seat ${seat.number} • LKR ${seat.price || basePrice} • ${seat.status}${seat.isFemaleOnly ? ' • Female Priority' : ''}`}
+                        >
+                          {/* Headrest Cushion Bar */}
+                          <div className={`w-full h-1.5 rounded-t-sm ${
+                            isSelected ? 'bg-blue-500' : seat.status === 'booked' ? 'bg-slate-400' : seat.isFemaleOnly ? 'bg-pink-400' : 'bg-slate-200'
+                          }`} />
+
+                          <span className={`text-[11px] sm:text-xs font-black tracking-tight ${seat.isFemaleOnly ? 'text-pink-800' : ''}`}>
+                            {seat.number}
+                          </span>
+
+                          {/* Bottom Accent Bar or Custom Price */}
+                          {hasCustomPrice ? (
+                            <span className="text-[8px] font-mono font-extrabold text-amber-700">LKR {seat.price}</span>
+                          ) : (
+                            <div className={`w-3/4 h-1 rounded-full ${
+                              isSelected ? 'bg-blue-600' : seat.isFemaleOnly ? 'bg-pink-500' : 'bg-blue-500/80'
+                            }`} />
+                          )}
+                        </button>
+                      );
+                    };
+
+                    return (
+                      <div key={rowNum} className="flex items-center justify-between gap-2.5 sm:gap-3 px-1 w-full relative z-10">
+                        {/* Left side seats (3 seats for 3x2, 2 seats for 2x2) */}
+                        <div className="flex items-center gap-1 sm:gap-1.5">
+                          {leftSeats.map(renderSeatButton)}
+                        </div>
+
+                        {/* Center Aisle Spacer */}
+                        <div className="flex items-center justify-center min-w-[28px] sm:min-w-[36px] text-center">
+                          {!is3By2 && centerSeats.length > 0 ? (
+                            <div className="flex items-center gap-1.5">
+                              {centerSeats.map(renderSeatButton)}
+                            </div>
+                          ) : (
+                            <div className="text-[9px] font-mono font-black text-slate-400/60 select-none">│</div>
+                          )}
+                        </div>
+
+                        {/* Right side seats (2 seats for 3x2, 2 seats for 2x2) */}
+                        <div className="flex items-center gap-1 sm:gap-1.5">
+                          {rightSeats.map(renderSeatButton)}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Bottom Rear Engine Footer Bar */}
+              <div className="p-2.5 rounded-2xl bg-slate-100 border border-slate-200 text-center flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                <span className="flex items-center gap-1 text-rose-500">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" /> REAR ENGINE
+                </span>
+                <span>DEWMINA LUXURY COACH</span>
+                <span className="flex items-center gap-1 text-rose-500">
+                  BACK <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                </span>
+              </div>
             </div>
 
             {/* Grid Legend */}
-            <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 pt-1">
+            <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 pt-1 justify-center">
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-300" /> Available
+                <span className="w-3 h-3 rounded bg-white border-2 border-slate-300" /> Available
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-slate-200 border border-slate-300" /> Admin Blocked / Booked
+                <span className="w-3 h-3 rounded bg-pink-50 border-2 border-pink-400" /> Female Reserved (Pink)
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-blue-100 border border-blue-500 ring-2 ring-blue-500" /> Currently Selected
+                <span className="w-3 h-3 rounded bg-slate-200 border-2 border-slate-300" /> Admin Blocked / Booked
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded bg-blue-100 border-2 border-blue-600 ring-2 ring-blue-600" /> Currently Selected
               </span>
             </div>
           </div>
@@ -682,6 +713,18 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                 </div>
 
                 <div className="space-y-2 pt-1 border-t border-slate-200">
+                  <label className="flex items-center justify-between p-2.5 rounded-xl bg-pink-50/70 border border-pink-200 cursor-pointer">
+                    <span className="font-semibold text-pink-900 flex items-center gap-1.5">
+                      <Shield className="w-4 h-4 text-pink-600" /> Female Reserved Priority (Pink)
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={!!selectedSeat.isFemaleOnly}
+                      onChange={(e) => updateSelectedSeatProperty('isFemaleOnly', e.target.checked)}
+                      className="w-4 h-4 accent-pink-600 rounded"
+                    />
+                  </label>
+
                   <label className="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200 cursor-pointer">
                     <span className="font-semibold text-slate-700 flex items-center gap-1.5">
                       <Bus className="w-4 h-4 text-purple-600" /> Sleeper Berth Type

@@ -14,12 +14,14 @@ validateRouter.post('/', async (req: Request, res: Response) => {
     return;
   }
 
-  const cleanPnr = pnr.trim().toUpperCase();
+  const rawPnr = pnr.trim();
+  const matchPnr = rawPnr.match(/PNR[=:]?\s*([A-Z0-9-]+)/i) || rawPnr.match(/(OMNI-[A-Z0-9-]+)/i);
+  const cleanPnr = matchPnr ? matchPnr[1].toUpperCase() : rawPnr.toUpperCase();
 
   try {
     // Match by PNR or by embedded PNR inside QR code data
     const bookingRes = await pool.query(
-      'SELECT * FROM bookings WHERE UPPER(pnr) = $1 OR "qrCodeData" LIKE $2',
+      'SELECT * FROM bookings WHERE UPPER("pnr") = $1 OR "qrCodeData" LIKE $2 OR UPPER("pnr") LIKE $2',
       [cleanPnr, `%${cleanPnr}%`]
     );
 

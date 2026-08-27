@@ -4,6 +4,8 @@ import {
   Heart, PhoneCall, Bus, Mail, 
   ChevronRight, Navigation, CheckCircle2
 } from 'lucide-react';
+import { RealisticBusAnimation } from './RealisticBusAnimation';
+import { AnimatedLogoBadge } from './AnimatedLogoBadge';
 
 export const Footer: React.FC = () => {
   const { goToSearchSchedules, setSearchCriteria, setCurrentView } = useBookingStore();
@@ -26,27 +28,27 @@ export const Footer: React.FC = () => {
   return (
     <footer className="relative bg-gradient-to-b from-slate-50 via-white to-blue-50/40 text-slate-600 text-sm mt-20 overflow-hidden border-t border-slate-200 select-none shadow-inner">
       
-      {/* ── Spotless High-Res Coach Background with Gentle Movement ── */}
+      {/* ── High-Clarity Bus Photo Background ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
         <img
-          src="/yutong-hero.jpg"
-          alt="Dewmina Super Line Coach"
-          className="w-full h-full object-cover object-right md:object-[85%_center] opacity-[0.08] filter blur-[0.5px] scale-105 animate-ken-burns"
+          src="/footer-bus-bg.jpg"
+          alt="Dewmina Super Line Coach Background"
+          className="w-full h-full object-cover object-center opacity-75 filter blur-[1.5px] saturate-[0.75] contrast-105 scale-105 transition-all duration-700 animate-ken-burns"
         />
-        {/* Soft daylight gradient overlay for clean contrast */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-slate-50/60" />
+        {/* Subtle daylight gradient overlay to keep text 100% crisp while keeping photo vivid */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-white/50 to-blue-50/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/75 via-white/20 to-slate-50/20" />
 
-        {/* Ambient Floating Pastel Glow Blobs */}
-        <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-300/15 rounded-full blur-3xl animate-blob-1" />
-        <div className="absolute -bottom-20 right-1/3 w-96 h-96 bg-indigo-300/15 rounded-full blur-3xl animate-blob-2" />
+        {/* Ambient Floating Glow Blobs */}
+        <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl animate-blob-1" />
+        <div className="absolute -bottom-20 right-1/3 w-96 h-96 bg-indigo-400/20 rounded-full blur-3xl animate-blob-2" />
       </div>
 
       {/* ── Top Radiant Glowing Shimmer Bar ── */}
       <div className="relative h-[2px] w-full bg-gradient-to-r from-blue-500 via-indigo-500 via-pink-400 to-emerald-400 bg-[length:300%_100%] animate-gradient-flow" />
 
       {/* ── Subtle Highway Bus Streak Lane Animation ── */}
-      <div className="relative w-full h-5 overflow-hidden border-b border-slate-200/60 bg-blue-50/30 backdrop-blur-xs">
+      <div className="relative w-full h-8 overflow-hidden border-b border-slate-200/60 bg-blue-50/30 backdrop-blur-xs">
         <div className="absolute inset-0 flex items-center">
           {/* Moving Dashed Road Center Line */}
           <div className="w-full flex gap-6 animate-road opacity-30">
@@ -56,10 +58,9 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Gliding Bus Icon Streak */}
-        <div className="absolute top-0.5 left-0 flex items-center gap-1.5 animate-bus-streak pointer-events-none opacity-80">
-          <span className="text-[11px]">🚌</span>
-          <div className="h-0.5 w-20 bg-gradient-to-r from-blue-500 to-transparent rounded-full shadow-[0_0_8px_#3b82f6]" />
+        {/* Gliding Real Luxury Coach Streak */}
+        <div className="absolute top-1 left-0 flex items-center animate-bus-streak pointer-events-none opacity-90">
+          <RealisticBusAnimation />
         </div>
       </div>
 
@@ -73,13 +74,7 @@ export const Footer: React.FC = () => {
               onClick={goToSearchSchedules}
               className="group cursor-pointer inline-flex items-center gap-3.5"
             >
-              <div className="p-2 rounded-2xl bg-white border border-slate-200 group-hover:border-blue-400 group-hover:shadow-md transition-all duration-300 shadow-sm transform group-hover:scale-105">
-                <img
-                  src="/dewmina-logo.png"
-                  alt="Dewmina Super Line"
-                  className="h-10 w-auto object-contain transition-transform duration-300"
-                />
-              </div>
+              <AnimatedLogoBadge size="md" />
               <div>
                 <p className="text-lg font-black text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">
                   Dewmina Super Line
@@ -192,37 +187,6 @@ export const Footer: React.FC = () => {
                     <p className="text-[10px] text-slate-500">Online Inquiries & Support</p>
                   </div>
                 </a>
-              </div>
-            </div>
-
-            {/* Our App Section with Hover Elevation */}
-            <div className="pt-1">
-              <h5 className="text-slate-900 font-bold text-xs uppercase tracking-wider mb-1.5">OUR APP</h5>
-              <p className="text-[11px] text-slate-600 mb-3 leading-relaxed">
-                Book Your Bus Seats Anytime, Anywhere – Download Our App Now!
-              </p>
-              <div className="flex flex-col sm:flex-row lg:flex-col gap-2">
-                {/* Google Play */}
-                <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group max-w-[200px]">
-                  <svg className="w-4 h-4 flex-shrink-0 text-amber-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3.609 1.814L13.792 12 3.61 22.186a1.996 1.996 0 0 1-.61-.39 2.016 2.016 0 0 1-.5-.996V3.2a2.016 2.016 0 0 1 .5-.996c.16-.16.38-.3.609-.39zM15.207 13.414l2.121 2.121-12.728 7.348 10.607-9.469zm0-2.828L4.6 1.117l12.728 7.348-2.121 2.121zm1.414 1.414l3.535 2.04c.884.51.884 1.34 0 1.85l-3.535 2.04-1.414-1.414 1.414-4.516z"/>
-                  </svg>
-                  <div className="leading-tight">
-                    <p className="text-[8px] uppercase tracking-wider text-slate-300 font-medium">Download on the</p>
-                    <p className="text-[11px] font-bold text-white group-hover:text-blue-300">Google Play</p>
-                  </div>
-                </div>
-
-                {/* App Store (Soon) */}
-                <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-400/80 text-white cursor-not-allowed shadow-xs max-w-[200px]">
-                  <svg className="w-4 h-4 flex-shrink-0 text-slate-100" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.75 1.04-1.8 0.92-2.85-.9.04-1.98.6-2.62 1.35-.57.65-1.06 1.71-.93 2.74 1.01.08 2.02-.49 2.63-1.24z"/>
-                  </svg>
-                  <div className="leading-tight">
-                    <p className="text-[8px] uppercase tracking-wider text-slate-100 font-medium">Soon on</p>
-                    <p className="text-[11px] font-bold text-slate-100">App Store</p>
-                  </div>
-                </div>
               </div>
             </div>
 

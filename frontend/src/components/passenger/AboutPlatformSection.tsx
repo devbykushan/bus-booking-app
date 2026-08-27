@@ -73,7 +73,7 @@ export const AboutPlatformSection: React.FC = () => {
   const currentTabInfo = tabContents[activeTab];
 
   return (
-    <section id="about" className="max-w-7xl mx-auto px-4 py-12 select-none">
+    <section id="about" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 select-none">
       <div className="relative overflow-hidden rounded-3xl p-6 sm:p-12 backdrop-blur-2xl bg-gradient-to-br from-white/95 via-slate-50/90 to-blue-50/70 border border-white shadow-2xl shadow-slate-200/80 transition-all">
         
         {/* ── Dynamic Animated Background Glow Blobs ── */}

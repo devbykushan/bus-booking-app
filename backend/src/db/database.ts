@@ -174,6 +174,14 @@ export async function initializeSchema(p: Pool): Promise<void> {
       "createdAt" TEXT NOT NULL,
       FOREIGN KEY ("routeId") REFERENCES routes("id")
     );
+
+    UPDATE routes 
+    SET "busType" = 'Normal Service' 
+    WHERE "busType" LIKE '%Normal Service%' OR "busType" LIKE '%58 Seats%' OR "busType" LIKE '%54 Seats%';
+
+    UPDATE routes 
+    SET "busType" = 'Super Luxury' 
+    WHERE "busType" LIKE '%Super Luxury%';
   `);
 }
 
@@ -185,17 +193,45 @@ export function buildSeats(
   hasUpperDeck: boolean
 ): { id: string; routeId: string; number: string; deck: string; row: number; col: number; price: number; status: string; isSleeper: number; isFemaleOnly: number }[] {
   const seats: ReturnType<typeof buildSeats> = [];
-  const basePrice = busType.includes('Sleeper') ? 2800 : 1800;
+  const basePrice = busType.includes('Sleeper') ? 2800 : busType.includes('Super Luxury') || busType.includes('49 Seats') ? 2670 : 1800;
 
-  if (busType.includes('Ashok Leyland (54 Seats 3*2')) {
-    for (let r = 1; r <= 10; r++) {
+  if (busType.includes('49 Seats') || busType.includes('Super Luxury')) {
+    const femaleSeats = ['15', '19', '20', '23'];
+    for (let r = 1; r <= 11; r++) {
+      const leftWindowNum = ((r - 1) * 4 + 3).toString();
+      const leftAisleNum = ((r - 1) * 4 + 4).toString();
+      const rightAisleNum = ((r - 1) * 4 + 2).toString();
+      const rightWindowNum = ((r - 1) * 4 + 1).toString();
+
+      seats.push(
+        { id: `${routeId}-${leftWindowNum}`, routeId, number: leftWindowNum, deck: 'lower', row: r, col: 1, price: basePrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(leftWindowNum) ? 1 : 0 },
+        { id: `${routeId}-${leftAisleNum}`, routeId, number: leftAisleNum, deck: 'lower', row: r, col: 2, price: basePrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(leftAisleNum) ? 1 : 0 },
+        { id: `${routeId}-${rightAisleNum}`, routeId, number: rightAisleNum, deck: 'lower', row: r, col: 4, price: basePrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(rightAisleNum) ? 1 : 0 },
+        { id: `${routeId}-${rightWindowNum}`, routeId, number: rightWindowNum, deck: 'lower', row: r, col: 5, price: basePrice, status: 'available', isSleeper: 0, isFemaleOnly: femaleSeats.includes(rightWindowNum) ? 1 : 0 }
+      );
+    }
+    const backSeats = [
+      { num: '47', col: 1 },
+      { num: '48', col: 2 },
+      { num: '49', col: 3 },
+      { num: '46', col: 4 },
+      { num: '45', col: 5 },
+    ];
+    backSeats.forEach(s => {
+      seats.push({ id: `${routeId}-${s.num}`, routeId, number: s.num, deck: 'lower', row: 12, col: s.col, price: basePrice, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
+    });
+    return seats;
+  }
+
+  if (busType.includes('58 Seats 3*2') || busType.includes('Normal Service') || busType.includes('54 Seats 3*2') || busType.includes('Ashok Leyland (54 Seats 3*2')) {
+    for (let r = 1; r <= 11; r++) {
       for (const c of [1, 2, 3, 5, 6]) {
         const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
         seats.push({ id: `${routeId}-${seatNum}`, routeId, number: seatNum, deck: 'lower', row: r, col: c, price: basePrice, status: 'available', isSleeper: 0, isFemaleOnly: (r === 2 || r === 3) && c <= 3 ? 1 : 0 });
       }
     }
-    for (const c of [1, 2, 3, 5]) {
-      const seatNum = `11${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
+    for (const c of [1, 2, 3]) {
+      const seatNum = `12${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
       seats.push({ id: `${routeId}-${seatNum}`, routeId, number: seatNum, deck: 'lower', row: 12, col: c, price: basePrice, status: 'available', isSleeper: 0, isFemaleOnly: 0 });
     }
     return seats;
@@ -361,26 +397,48 @@ export async function seedData(p: Pool): Promise<void> {
 
   const routes = [
     {
+      id: 'route-100',
+      operatorId: 'op-dewmina',
+      operatorName: 'Dewmina Super Line',
+      operatorRating: 4.9,
+      busNumber: 'ND-3223 (Normal Service - Route 98)',
+      busType: 'Normal Service',
+      origin: 'Monaragala',
+      destination: 'Colombo',
+      departureTime: '05:00 AM',
+      arrivalTime: '11:30 AM',
+      duration: '6h 30m',
+      priceStarting: 950,
+      hasUpperDeck: 0,
+      amenities: JSON.stringify(['Normal Service A4 Highway', 'Reclining Seats', 'Live GPS Tracking', 'Direct Route 98 Pass']),
+      gpsLat: 6.6828,
+      gpsLng: 80.3992,
+      gpsSpeedKmH: 55,
+      gpsCurrentStop: 'Ratnapura Clock Tower',
+      gpsNextStop: 'Avissawella Bus Terminal',
+      gpsEtaMinutes: 180,
+    },
+    {
       id: 'route-101',
       operatorId: 'op-dewmina',
       operatorName: 'Dewmina Super Line',
       operatorRating: 4.9,
       busNumber: 'ND-7788 (Dewmina Express)',
-      busType: 'Luxury Volvo Multi-Axle',
+      busType: 'Super Luxury',
       origin: 'Monaragala',
       destination: 'Colombo',
       departureTime: '06:30 AM',
-      arrivalTime: '12:30 PM',
-      duration: '6h 00m',
+      arrivalTime: '12:00 PM',
+      duration: '5h 30m',
       priceStarting: 2800,
       hasUpperDeck: 0,
-      amenities: JSON.stringify(['AC', 'Reclining Seats', 'Charging Ports', 'Live GPS Tracking', 'Water Bottle', 'Music']),
+      amenities: JSON.stringify(['Super Luxury AC', 'High-Speed Wi-Fi', 'Reclining Push-Back Seats', 'USB Fast Charging', 'Live GPS Tracking', 'Bottled Water', 'Expressway Direct Pass']),
       gpsLat: 6.8722,
       gpsLng: 81.3507,
-      gpsSpeedKmH: 72,
+      gpsSpeedKmH: 78,
       gpsCurrentStop: 'Monaragala Main Terminal',
       gpsNextStop: 'Wellawaya Clock Tower',
-      gpsEtaMinutes: 360,
+      gpsEtaMinutes: 330,
     },
     {
       id: 'route-102',
@@ -388,21 +446,21 @@ export async function seedData(p: Pool): Promise<void> {
       operatorName: 'Dewmina Super Line',
       operatorRating: 4.9,
       busNumber: 'ND-7789 (Dewmina Night Super)',
-      busType: 'AC Sleeper',
+      busType: 'Super Luxury',
       origin: 'Colombo',
       destination: 'Monaragala',
       departureTime: '09:30 PM',
-      arrivalTime: '03:30 AM',
-      duration: '6h 00m',
+      arrivalTime: '03:00 AM',
+      duration: '5h 30m',
       priceStarting: 3000,
       hasUpperDeck: 1,
-      amenities: JSON.stringify(['AC Sleeper', 'Blanket', 'Charging Ports', 'Live GPS Tracking', 'Night Reading Lamp']),
+      amenities: JSON.stringify(['Super Luxury AC Sleeper', 'High-Speed Wi-Fi', 'Blanket & Pillow', 'USB Charging', 'Live GPS Tracking', 'Night Reading Lamp']),
       gpsLat: 6.9271,
       gpsLng: 79.8612,
       gpsSpeedKmH: 80,
       gpsCurrentStop: 'Colombo Fort Bus Terminal',
-      gpsNextStop: 'Kottawa Interchange',
-      gpsEtaMinutes: 360,
+      gpsNextStop: 'Makumbura Interchange',
+      gpsEtaMinutes: 330,
     },
   ];
 
@@ -417,7 +475,11 @@ export async function seedData(p: Pool): Promise<void> {
           "origin", "destination", "departureTime", "arrivalTime", "duration", "priceStarting",
           "hasUpperDeck", "amenities", "gpsLat", "gpsLng", "gpsSpeedKmH", "gpsCurrentStop", "gpsNextStop", "gpsEtaMinutes"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
-        ON CONFLICT ("id") DO NOTHING
+        ON CONFLICT ("id") DO UPDATE SET
+          "busType" = EXCLUDED."busType",
+          "priceStarting" = EXCLUDED."priceStarting",
+          "amenities" = EXCLUDED."amenities",
+          "duration" = EXCLUDED."duration"
       `, [
         route.id, route.operatorId, route.operatorName, route.operatorRating, route.busNumber, route.busType,
         route.origin, route.destination, route.departureTime, route.arrivalTime, route.duration, route.priceStarting,
@@ -449,19 +511,23 @@ export async function seedData(p: Pool): Promise<void> {
     }
 
     const boardingPoints = [
+      { id: 'bp-100-1', routeId: 'route-100', type: 'boarding', name: 'Monaragala Main Bus Station', time: '05:00 AM', landmark: 'Platform 3', lat: 6.8722, lng: 81.3507 },
+      { id: 'bp-100-2', routeId: 'route-100', type: 'boarding', name: 'Wellawaya Clock Tower', time: '05:40 AM', landmark: 'A4 Highway Junction', lat: 6.7410, lng: 81.1020 },
+      { id: 'bp-100-3', routeId: 'route-100', type: 'boarding', name: 'Balangoda Bus Stand', time: '07:15 AM', landmark: 'Town Terminal', lat: 6.6580, lng: 80.7020 },
+      { id: 'bp-100-4', routeId: 'route-100', type: 'boarding', name: 'Ratnapura Clock Tower', time: '08:30 AM', landmark: 'City Bus Stand', lat: 6.6828, lng: 80.3992 },
+      { id: 'dp-100-1', routeId: 'route-100', type: 'drop', name: 'Avissawella Bus Terminal', time: '09:45 AM', landmark: 'A4 Main Stop', lat: 6.9530, lng: 80.2070 },
+      { id: 'dp-100-2', routeId: 'route-100', type: 'drop', name: 'Colombo Fort Central Bus Stand', time: '11:30 AM', landmark: 'Bastian Mawatha Gate 3', lat: 6.9344, lng: 79.8530 },
+
       { id: 'bp-101-1', routeId: 'route-101', type: 'boarding', name: 'Monaragala Main Bus Station', time: '06:30 AM', landmark: 'Platform 1', lat: 6.8722, lng: 81.3507 },
-      { id: 'bp-101-2', routeId: 'route-101', type: 'boarding', name: 'Wellawaya Town Clock Tower', time: '07:15 AM', landmark: 'Main Junction', lat: 6.7410, lng: 81.1020 },
-      { id: 'bp-101-3', routeId: 'route-101', type: 'boarding', name: 'Ratnapura Central Bus Stand', time: '10:15 AM', landmark: 'Main Stand Gate 2', lat: 6.6828, lng: 80.3992 },
-      { id: 'dp-101-1', routeId: 'route-101', type: 'drop', name: 'Kottawa Highway Interchange', time: '12:00 PM', landmark: 'Exit Gate', lat: 6.8415, lng: 79.9654 },
-      { id: 'dp-101-2', routeId: 'route-101', type: 'drop', name: 'Maharagama Bus Station', time: '12:15 PM', landmark: 'High Level Road', lat: 6.8480, lng: 79.9265 },
-      { id: 'dp-101-3', routeId: 'route-101', type: 'drop', name: 'Colombo Fort Central Bus Stand', time: '12:30 PM', landmark: 'Main Entrance', lat: 6.9344, lng: 79.8530 },
+      { id: 'bp-101-2', routeId: 'route-101', type: 'boarding', name: 'Wellawaya Clock Tower', time: '07:05 AM', landmark: 'A4 Main Junction', lat: 6.7410, lng: 81.1020 },
+      { id: 'bp-101-3', routeId: 'route-101', type: 'boarding', name: 'Thanamalwila Junction', time: '07:45 AM', landmark: 'Express Stop', lat: 6.4380, lng: 81.1328 },
+      { id: 'bp-101-4', routeId: 'route-101', type: 'boarding', name: 'Mattala E01 Highway Entry', time: '08:15 AM', landmark: 'Expressway Interchange', lat: 6.3025, lng: 81.1189 },
+      { id: 'dp-101-1', routeId: 'route-101', type: 'drop', name: 'Makumbura (Kottawa) Multimodal Center', time: '11:45 AM', landmark: 'Expressway Exit Hub', lat: 6.8416, lng: 79.9974 },
+      { id: 'dp-101-2', routeId: 'route-101', type: 'drop', name: 'Colombo Fort Central Bus Stand', time: '12:00 PM', landmark: 'Bastian Mawatha Gate 1', lat: 6.9344, lng: 79.8530 },
 
       { id: 'bp-102-1', routeId: 'route-102', type: 'boarding', name: 'Colombo Fort Bus Terminal', time: '09:30 PM', landmark: 'Bastian Mawatha Gate', lat: 6.9344, lng: 79.8530 },
-      { id: 'bp-102-2', routeId: 'route-102', type: 'boarding', name: 'Kottawa Interchange', time: '10:15 PM', landmark: 'Expressway Entrance', lat: 6.8415, lng: 79.9654 },
-      { id: 'dp-102-1', routeId: 'route-102', type: 'drop', name: 'Monaragala Main Bus Station', time: '03:30 AM', landmark: 'Platform 1', lat: 6.8722, lng: 81.3507 },
-
-      { id: 'bp-103-1', routeId: 'route-103', type: 'boarding', name: 'Monaragala Main Bus Station', time: '01:30 PM', landmark: 'Platform 1', lat: 6.8722, lng: 81.3507 },
-      { id: 'dp-103-1', routeId: 'route-103', type: 'drop', name: 'Colombo Fort Central Bus Stand', time: '07:30 PM', landmark: 'Main Entrance', lat: 6.9344, lng: 79.8530 },
+      { id: 'bp-102-2', routeId: 'route-102', type: 'boarding', name: 'Makumbura (Kottawa) Interchange', time: '10:00 PM', landmark: 'Southern Expressway Entrance', lat: 6.8416, lng: 79.9974 },
+      { id: 'dp-102-1', routeId: 'route-102', type: 'drop', name: 'Monaragala Main Bus Station', time: '03:00 AM', landmark: 'Platform 1', lat: 6.8722, lng: 81.3507 },
     ];
 
     if (boardingPoints.length > 0) {

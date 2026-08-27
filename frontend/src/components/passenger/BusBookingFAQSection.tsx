@@ -83,14 +83,14 @@ export const BusBookingFAQSection: React.FC = () => {
   };
 
   return (
-    <section className="relative max-w-5xl mx-auto px-4 py-12 space-y-10 select-none overflow-hidden">
+    <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8 select-none overflow-hidden">
       
       {/* ── Ambient Floating Background Glow Orbs ── */}
       <div className="absolute top-10 -left-20 w-80 h-80 bg-blue-300/20 rounded-full blur-3xl pointer-events-none animate-blob-1" />
       <div className="absolute bottom-10 -right-20 w-80 h-80 bg-indigo-300/20 rounded-full blur-3xl pointer-events-none animate-blob-2" />
 
-      {/* Section Header */}
-      <div className="relative z-10 text-center space-y-3 max-w-2xl mx-auto">
+      {/* Section Header (Left-aligned) */}
+      <div className="relative z-10 text-left space-y-2.5 max-w-3xl">
         <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-blue-50/90 border border-blue-200 text-blue-700 text-xs font-bold shadow-xs hover:scale-105 transition-transform cursor-default">
           <HelpCircle className="w-4 h-4 text-blue-600 animate-pulse" />
           <span>Frequently Asked Questions</span>
@@ -105,8 +105,8 @@ export const BusBookingFAQSection: React.FC = () => {
         </p>
       </div>
 
-      {/* Category Pills with Smooth Hover Scale */}
-      <div className="relative z-10 flex flex-wrap items-center justify-center gap-2">
+      {/* Category Pills (Left-aligned) */}
+      <div className="relative z-10 flex flex-wrap items-center justify-start gap-2">
         {categories.map((cat) => (
           <button
             key={cat.key}
@@ -114,7 +114,7 @@ export const BusBookingFAQSection: React.FC = () => {
               setActiveCategory(cat.key as any);
               setOpenIndex(0);
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer ${
               activeCategory === cat.key
                 ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 ring-2 ring-blue-400/30'
                 : 'bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 shadow-xs hover:border-blue-300'

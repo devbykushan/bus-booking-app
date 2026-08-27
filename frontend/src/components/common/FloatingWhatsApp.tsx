@@ -23,7 +23,17 @@ const WHATSAPP_CONTACTS = [
 export const FloatingWhatsApp: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Detect when document body is locked by any modal/drawer
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsModalOpen(document.body.style.overflow === 'hidden');
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['style'] });
+    return () => observer.disconnect();
+  }, []);
 
   // Close on outside click
   useEffect(() => {
@@ -43,6 +53,8 @@ export const FloatingWhatsApp: React.FC = () => {
     window.open(url, '_blank', 'noopener,noreferrer');
     setIsOpen(false);
   };
+
+  if (isModalOpen) return null;
 
   return (
     <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end select-none" ref={menuRef}>

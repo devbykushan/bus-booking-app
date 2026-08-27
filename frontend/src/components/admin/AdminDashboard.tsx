@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { RouteDeploymentForm } from './RouteDeploymentForm';
 import { SeatLayoutCustomizerModal } from './SeatLayoutCustomizerModal';
+import { RouteDetailsTimetableEditorModal } from './RouteDetailsTimetableEditorModal';
 import { QRScannerModal } from '../operator/QRScannerModal';
 import { routesApi } from '../../services/api';
 import type { BusRoute } from '../../types/booking';
 import { 
-  TrendingUp, Users, DollarSign, Bus, Shield, Award, BarChart2, 
+  TrendingUp, Users, DollarSign, Bus, Award, BarChart2, 
   SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
-  Trash2, RefreshCw
+  Trash2, RefreshCw, Edit3, Clock, Star, Shield
 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
@@ -19,6 +20,7 @@ export const AdminDashboard: React.FC = () => {
   const [selectedRouteId, setSelectedRouteId] = useState<string>(routes[0]?.id || '');
   const [showSeatBuilder, setShowSeatBuilder] = useState(false);
   const [customizeRoute, setCustomizeRoute] = useState<BusRoute | null>(null);
+  const [editDetailsRoute, setEditDetailsRoute] = useState<BusRoute | null>(null);
   const [deletingRouteId, setDeletingRouteId] = useState<string | null>(null);
   const [confirmDeleteRouteId, setConfirmDeleteRouteId] = useState<string | null>(null);
 
@@ -94,6 +96,15 @@ export const AdminDashboard: React.FC = () => {
               <button
                 onClick={() => {
                   const target = routes.find(r => r.id === selectedRouteId) || routes[0];
+                  if (target) setEditDetailsRoute(target);
+                }}
+                className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left"
+              >
+                <Clock className="w-4 h-4" /> Edit Details & Timetable
+              </button>
+              <button
+                onClick={() => {
+                  const target = routes.find(r => r.id === selectedRouteId) || routes[0];
                   if (target) setCustomizeRoute(target);
                 }}
                 className="w-full px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left"
@@ -129,7 +140,13 @@ export const AdminDashboard: React.FC = () => {
 
           {/* New Bus Deployment Form */}
           {showSeatBuilder && (
-            <RouteDeploymentForm onClose={() => setShowSeatBuilder(false)} />
+            <RouteDeploymentForm 
+              onClose={() => setShowSeatBuilder(false)} 
+              onOpenTimetableEditor={(draftRoute) => {
+                setShowSeatBuilder(false);
+                setEditDetailsRoute(draftRoute);
+              }}
+            />
           )}
 
           {/* Fleet Grid & Passenger Manifest Split Panel */}
@@ -147,29 +164,59 @@ export const AdminDashboard: React.FC = () => {
                     key={r.id}
                     onClick={() => setSelectedRouteId(r.id)}
                     className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                      selectedRouteId === r.id ? 'border-blue-500 bg-blue-50' : 'bg-white border-slate-200 hover:border-slate-300'
+                      selectedRouteId === r.id ? 'border-blue-500 bg-blue-50/70 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h4 className="font-bold text-slate-800 text-sm">{r.busNumber}</h4>
-                        <p className="text-xs text-blue-600">{r.origin} → {r.destination}</p>
-                        <p className="text-[11px] text-slate-500 font-mono mt-0.5">{r.busType}</p>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-bold text-slate-800 text-sm">{r.busNumber}</h4>
+                          <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold flex items-center gap-0.5">
+                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> {r.operatorRating ? Number(r.operatorRating).toFixed(1) : '4.9'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-blue-600 font-semibold">{r.origin} → {r.destination}</p>
+                        <p className="text-[11px] text-slate-500 font-mono mt-0.5">{(r.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}</p>
+                        
+                        <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-600 font-medium">
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-indigo-500" /> {r.departureTime} - {r.arrivalTime}
+                          </span>
+                          <span>•</span>
+                          <span className="font-bold font-mono text-emerald-700">LKR {r.priceStarting?.toLocaleString()}</span>
+                        </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1.5">
+
+                      <div className="flex flex-col items-end gap-1.5 shrink-0">
                         <span className="px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs font-mono font-bold">
                           {r.availableSeatsCount} / {r.totalSeatsCount || r.seats?.length} Seats
                         </span>
-                        <div className="flex items-center gap-1.5">
+                        
+                        <div className="flex items-center gap-1.5 flex-wrap justify-end">
                           <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditDetailsRoute(r);
+                            }}
+                            className="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-sm transition-all hover:scale-105"
+                            title="Edit details, amenities & timetable stops"
+                          >
+                            <Edit3 className="w-3 h-3" /> Details & Timetable
+                          </button>
+
+                          <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               setCustomizeRoute(r);
                             }}
-                            className="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-sm transition-all hover:scale-105"
+                            className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-[11px] font-bold flex items-center gap-1 shadow-sm transition-all hover:scale-105"
+                            title="Customize seating layout"
                           >
-                            <SlidersHorizontal className="w-3 h-3" /> Customize Layout
+                            <SlidersHorizontal className="w-3 h-3" /> Layout
                           </button>
+
                           <button
                             type="button"
                             onClick={(e) => handleDeleteRoute(e, r.id)}
@@ -205,12 +252,23 @@ export const AdminDashboard: React.FC = () => {
                   </h3>
                   <p className="text-xs text-slate-500">{selectedRoute?.busNumber} • {selectedRoute?.origin} → {selectedRoute?.destination}</p>
                 </div>
-                <button
-                  onClick={() => alert('Downloading Passenger Manifest CSV...')}
-                  className="px-3 py-1.5 rounded-xl bg-slate-50 text-blue-600 border border-slate-200 text-xs font-bold flex items-center gap-1.5"
-                >
-                  <Download className="w-3.5 h-3.5" /> CSV Export
-                </button>
+                <div className="flex items-center gap-2">
+                  {selectedRoute && (
+                    <button
+                      type="button"
+                      onClick={() => setEditDetailsRoute(selectedRoute)}
+                      className="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" /> Edit Details & Timetable
+                    </button>
+                  )}
+                  <button
+                    onClick={() => alert('Downloading Passenger Manifest CSV...')}
+                    className="px-3 py-1.5 rounded-xl bg-slate-50 text-blue-600 border border-slate-200 text-xs font-bold flex items-center gap-1.5"
+                  >
+                    <Download className="w-3.5 h-3.5" /> CSV Export
+                  </button>
+                </div>
               </div>
 
               {manifestBookings.length === 0 ? (
@@ -337,7 +395,7 @@ export const AdminDashboard: React.FC = () => {
                         <div>
                           <span className="font-bold text-sm">{r.origin} → {r.destination}</span>
                           <span className="text-xs text-slate-500 font-normal ml-2">({r.operatorName})</span>
-                          <p className="text-[11px] text-blue-600 font-mono">{r.busType} • {total} Seats</p>
+                          <p className="text-[11px] text-blue-600 font-mono">{(r.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()} • {total} Seats</p>
                         </div>
                       </div>
 
@@ -404,6 +462,13 @@ export const AdminDashboard: React.FC = () => {
         <SeatLayoutCustomizerModal
           route={customizeRoute}
           onClose={() => setCustomizeRoute(null)}
+        />
+      )}
+
+      {editDetailsRoute && (
+        <RouteDetailsTimetableEditorModal
+          route={editDetailsRoute}
+          onClose={() => setEditDetailsRoute(null)}
         />
       )}
 

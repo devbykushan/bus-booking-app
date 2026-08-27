@@ -1,32 +1,91 @@
 import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { routesApi } from '../../services/api';
-import type { BusCategory } from '../../types/booking';
-import { LayoutGrid, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import type { BusRoute, BusCategory } from '../../types/booking';
+import { LayoutGrid, CheckCircle2, AlertCircle, RefreshCw, Clock, Zap } from 'lucide-react';
+import { BUS_CLASS_PRESETS } from './RouteDetailsTimetableEditorModal';
+
+const BUS_CLASSES = [
+  { id: 'Super Luxury', label: '✨ Super Luxury Express' },
+  { id: 'Normal Service', label: '🇱🇰 Normal Service (Route 98)' },
+];
 
 interface RouteDeploymentFormProps {
   onClose: () => void;
   onSuccess?: () => void;
+  onOpenTimetableEditor?: (route: BusRoute) => void;
 }
 
-export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClose, onSuccess }) => {
+export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClose, onSuccess, onOpenTimetableEditor }) => {
   const { routes, loadRoutes } = useBookingStore();
 
   const [operatorName, setOperatorName] = useState('Dewmina Super Line');
   const [busNumber, setBusNumber] = useState('ND-8899');
-  const [busType, setBusType] = useState<BusCategory | '__custom__'>('Ashok Leyland (54 Seats 3*2)');
-  const [customBusType, setCustomBusType] = useState('');
+  const [busType, setBusType] = useState<BusCategory>('Super Luxury');
   const [origin, setOrigin] = useState('Monaragala');
   const [destination, setDestination] = useState('Colombo');
   const [departureTime, setDepartureTime] = useState('10:00 AM');
   const [arrivalTime, setArrivalTime] = useState('03:30 PM');
   const [duration, setDuration] = useState('5h 30m');
-  const [priceStarting, setPriceStarting] = useState<number | string>(1800);
+  const [priceStarting, setPriceStarting] = useState<number | string>(2670);
+  const [capacity, setCapacity] = useState<number | string>(49);
+  const [amenities, setAmenities] = useState<string[]>([
+    'AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats', 'Water Bottle', 'Blanket', 'LED TV Screen'
+  ]);
+  const [classNotice, setClassNotice] = useState<string | null>(null);
+  const [showAdvancedStops, setShowAdvancedStops] = useState(false);
+  const [pickupStop1, setPickupStop1] = useState('');
+  const [pickupStop2, setPickupStop2] = useState('');
+  const [dropStop1, setDropStop1] = useState('');
+  const [dropStop2, setDropStop2] = useState('');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const handleOpenTimetableEditor = () => {
+    const draftRoute: BusRoute = {
+      id: `route-${Date.now()}`,
+      operatorId: 'op-custom',
+      operatorName: operatorName.trim() || 'Dewmina Super Line',
+      operatorRating: 4.9,
+      busNumber: busNumber.trim() || 'ND-8899',
+      busType: busType,
+      origin: origin.trim() || 'Monaragala',
+      destination: destination.trim() || 'Colombo',
+      departureTime: departureTime.trim() || '10:00 AM',
+      arrivalTime: arrivalTime.trim() || '03:30 PM',
+      duration: duration.trim() || '5h 30m',
+      priceStarting: Number(priceStarting) || 2670,
+      availableSeatsCount: Number(capacity) || 49,
+      totalSeatsCount: Number(capacity) || 49,
+      hasUpperDeck: busType.includes('Double') || busType.includes('Sleeper'),
+      amenities: amenities.length > 0 ? amenities : ['AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats'],
+      boardingPoints: [
+        { id: 'bp-1', name: pickupStop1.trim() || `${origin.trim()} Main Terminal`, time: departureTime.trim(), landmark: 'Platform 1', lat: 6.8722, lng: 81.3507 },
+        ...(pickupStop2.trim() ? [{ id: 'bp-2', name: pickupStop2.trim(), time: departureTime.trim(), landmark: 'Intermediate Pickup Stop', lat: 6.7410, lng: 81.1020 }] : [])
+      ],
+      dropPoints: [
+        ...(dropStop1.trim() ? [{ id: 'dp-1', name: dropStop1.trim(), time: arrivalTime.trim(), landmark: 'Highway Exit Hub', lat: 6.8416, lng: 79.9974 }] : []),
+        { id: 'dp-2', name: dropStop2.trim() || `${destination.trim()} Fort Station`, time: arrivalTime.trim(), landmark: 'Main Passenger Drop Bay', lat: 6.9344, lng: 79.8510 }
+      ],
+      gpsLocation: {
+        lat: 6.8722,
+        lng: 81.3507,
+        speedKmH: 70,
+        currentStopName: `${origin.trim() || 'Monaragala'} Main Terminal`,
+        nextStopName: pickupStop2.trim() || 'Intermediate Stop',
+        etaMinutes: 330,
+        lastUpdated: 'Just now'
+      },
+      seats: []
+    };
+
+    if (onOpenTimetableEditor) {
+      onOpenTimetableEditor(draftRoute);
+    }
+  };
 
   // Sri Lanka Bus License Plate format validation helper
   // Strictly max 4 digits in number portion, e.g. "ND-8899", "WP ND-8899", "62-1234"
@@ -44,6 +103,38 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
     const platePattern = /^(([A-Za-z]{1,3}|[0-9]{2,3})\s*[- ]\s*[0-9]{1,4}|(WP|CP|SP|NP|EP|NW|NC|UP|SG)[- ]([A-Za-z]{2,3}|[0-9]{2,3})[- ][0-9]{1,4})$/i;
     const generalPattern = /^[A-Za-z0-9\s\-]+[- ]\d{1,4}$/i;
     return platePattern.test(trimmed) || generalPattern.test(trimmed);
+  };
+
+  // Time format helper (12-hour or 24-hour)
+  const isValidTimeFormat = (val: string): boolean => {
+    const trimmed = val.trim();
+    if (!trimmed) return false;
+    const TwelveHourRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s*(AM|PM)$/i;
+    const TwentyFourHourRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    return TwelveHourRegex.test(trimmed) || TwentyFourHourRegex.test(trimmed);
+  };
+
+  // Journey Duration format helper (e.g. 5h 30m, 6h, 45m, 5.5h)
+  const isValidDurationFormat = (val: string): boolean => {
+    const trimmed = val.trim();
+    if (!trimmed) return false;
+    const durationPattern = /^(\d+(\.\d+)?\s*(h|hr|hrs|hours?))?\s*(\d+\s*(m|min|mins|minutes?))?$/i;
+    return durationPattern.test(trimmed) && /\d/.test(trimmed);
+  };
+
+  const handleBusTypeChange = (newType: BusCategory) => {
+    setBusType(newType);
+    const preset = BUS_CLASS_PRESETS[newType];
+    if (preset) {
+      setPriceStarting(preset.defaultPrice);
+      setCapacity(preset.seatsCount);
+      setAmenities([...preset.defaultAmenities]);
+      setDuration(preset.defaultDuration);
+      setClassNotice(
+        `Configured ${preset.shortName}: LKR ${preset.defaultPrice} base fare, ${preset.seatsCount} seats (${preset.layoutDescription}) & ${preset.defaultAmenities.length} default amenities.`
+      );
+      setTimeout(() => setClassNotice(null), 5000);
+    }
   };
 
   // Validate all fields
@@ -71,11 +162,6 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
       errs.busNumber = `Bus ${trimmedBusNum} is already active in the fleet.`;
     }
 
-    // 3. Bus Model
-    if (busType === '__custom__' && !customBusType.trim()) {
-      errs.busType = 'Please enter the custom bus model name.';
-    }
-
     // 4. Origin
     if (!origin.trim()) {
       errs.origin = 'Origin city is required.';
@@ -90,17 +176,28 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
 
     // 6. Departure Time
     if (!departureTime.trim()) {
-      errs.departureTime = 'Departure time is required (e.g., 10:00 AM).';
+      errs.departureTime = 'Departure time is required.';
+    } else if (!isValidTimeFormat(departureTime)) {
+      errs.departureTime = 'Invalid format. Use e.g. 10:00 AM or 14:30.';
     }
 
     // 7. Arrival Time
     if (!arrivalTime.trim()) {
-      errs.arrivalTime = 'Arrival time is required (e.g., 03:30 PM).';
+      errs.arrivalTime = 'Arrival time is required.';
+    } else if (!isValidTimeFormat(arrivalTime)) {
+      errs.arrivalTime = 'Invalid format. Use e.g. 03:30 PM or 17:45.';
+    } else if (
+      isValidTimeFormat(departureTime) &&
+      departureTime.trim().toLowerCase() === arrivalTime.trim().toLowerCase()
+    ) {
+      errs.arrivalTime = 'Arrival time cannot be identical to departure time.';
     }
 
     // 8. Duration
     if (!duration.trim()) {
-      errs.duration = 'Journey duration is required (e.g., 5h 30m).';
+      errs.duration = 'Journey duration is required.';
+    } else if (!isValidDurationFormat(duration)) {
+      errs.duration = 'Invalid duration. Use format like 5h 30m, 6h, or 45m.';
     }
 
     // 9. Base Price
@@ -111,6 +208,20 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
       errs.priceStarting = 'Base price must be at least 500 LKR.';
     } else if (numericPrice > 50000) {
       errs.priceStarting = 'Base price cannot exceed 50,000 LKR.';
+    }
+
+    // 10. Capacity (Total Seats)
+    const numericCapacity = Number(capacity);
+    if (capacity === '' || capacity === null || capacity === undefined) {
+      errs.capacity = 'Capacity (seats) is required.';
+    } else if (isNaN(numericCapacity)) {
+      errs.capacity = 'Capacity must be a valid number.';
+    } else if (!Number.isInteger(numericCapacity)) {
+      errs.capacity = 'Capacity must be a whole number of seats.';
+    } else if (numericCapacity < 10) {
+      errs.capacity = 'Capacity must be at least 10 seats.';
+    } else if (numericCapacity > 100) {
+      errs.capacity = 'Capacity cannot exceed 100 seats.';
     }
 
     setErrors(errs);
@@ -126,9 +237,19 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
       return;
     }
 
-    const selectedBusType = busType === '__custom__' ? customBusType.trim() : busType;
+    const selectedBusType = busType;
     const newId = `route-${Date.now()}`;
     const numericPrice = Number(priceStarting);
+    const numericCap = Number(capacity);
+
+    const bpList = [
+      { name: pickupStop1.trim() || `${origin.trim()} Main Terminal`, time: departureTime.trim(), landmark: 'Main Station Gate', lat: 6.8722, lng: 81.3507 },
+      ...(pickupStop2.trim() ? [{ name: pickupStop2.trim(), time: departureTime.trim(), landmark: 'Intermediate Pickup Stop', lat: 6.7410, lng: 81.1020 }] : [])
+    ];
+    const dpList = [
+      ...(dropStop1.trim() ? [{ name: dropStop1.trim(), time: arrivalTime.trim(), landmark: 'Highway Exit Hub', lat: 6.8416, lng: 79.9974 }] : []),
+      { name: dropStop2.trim() || `${destination.trim()} Fort Station`, time: arrivalTime.trim(), landmark: 'Main Passenger Drop Bay', lat: 6.9344, lng: 79.8510 }
+    ];
 
     setIsSubmitting(true);
     try {
@@ -145,8 +266,12 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
         arrivalTime: arrivalTime.trim(),
         duration: duration.trim(),
         priceStarting: numericPrice,
+        totalSeatsCount: numericCap,
+        availableSeatsCount: numericCap,
         hasUpperDeck: selectedBusType.includes('Double') || selectedBusType.includes('Sleeper'),
-        amenities: ['Wi-Fi', 'AC', 'Live GPS', 'Charging Ports'],
+        amenities: amenities.length > 0 ? amenities : ['Wi-Fi', 'AC', 'Live GPS', 'Charging Ports', 'Reclining Seats'],
+        boardingPoints: bpList,
+        dropPoints: dpList,
       });
 
       await loadRoutes();
@@ -164,13 +289,25 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-3xl border border-blue-200 shadow-sm space-y-4 animate-pop-in">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-3 gap-2">
         <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
           <LayoutGrid className="w-5 h-5 text-blue-600" /> Route & Visual Seat Layout Designer
         </h3>
-        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-          Fleet Deployment Validator
-        </span>
+        <div className="flex items-center gap-2">
+          {onOpenTimetableEditor && (
+            <button
+              type="button"
+              onClick={handleOpenTimetableEditor}
+              className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200 flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+            >
+              <Clock className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Full Timetable & Stops Editor (7+) ➔</span>
+            </button>
+          )}
+          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+            Fleet Deployment Validator
+          </span>
+        </div>
       </div>
 
       {/* Global Server Error Banner */}
@@ -188,6 +325,51 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
           <span>{successMessage}</span>
         </div>
       )}
+
+      {/* Bus Class Selection & Preset Config */}
+      <div className="space-y-2 p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100 text-xs">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <Zap className="w-3.5 h-3.5 text-amber-500" /> Bus Class & Service Profile
+          </label>
+          <span className="text-[11px] font-semibold text-blue-600">Auto-syncs price, layout & amenities</span>
+        </div>
+        <select
+          value={busType}
+          onChange={(e) => handleBusTypeChange(e.target.value as BusCategory)}
+          className="w-full rounded-xl p-2.5 font-bold text-slate-900 bg-white border border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 shadow-xs"
+        >
+          {BUS_CLASSES.map((bc) => (
+            <option key={bc.id} value={bc.id}>
+              {bc.label}
+            </option>
+          ))}
+        </select>
+
+        {classNotice && (
+          <div className="p-2.5 rounded-xl bg-blue-100/60 border border-blue-200 text-blue-800 text-xs font-semibold flex items-center gap-2 animate-fade-in">
+            <Zap className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+            <span>{classNotice}</span>
+          </div>
+        )}
+
+        {BUS_CLASS_PRESETS[busType] && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+            <div className="p-2 rounded-xl bg-white border border-slate-200">
+              <span className="text-[10px] text-slate-400 font-medium block">Capacity</span>
+              <span className="text-xs font-bold text-slate-800 font-mono">{capacity || BUS_CLASS_PRESETS[busType]?.seatsCount || 49} Seats</span>
+            </div>
+            <div className="p-2 rounded-xl bg-white border border-slate-200">
+              <span className="text-[10px] text-slate-400 font-medium block">Default Fare</span>
+              <span className="text-xs font-bold text-blue-600 font-mono">LKR {BUS_CLASS_PRESETS[busType].defaultPrice}</span>
+            </div>
+            <div className="p-2 rounded-xl bg-white border border-slate-200">
+              <span className="text-[10px] text-slate-400 font-medium block">Duration</span>
+              <span className="text-xs font-bold text-slate-800 font-mono">{BUS_CLASS_PRESETS[busType].defaultDuration}</span>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
         
@@ -272,52 +454,6 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
           ) : (
             <p className="text-[10px] text-slate-400 mt-1">
               Format: <span className="font-mono text-slate-500">ND-8899</span> or <span className="font-mono text-slate-500">WP ND-8899</span>
-            </p>
-          )}
-        </div>
-
-        {/* Bus Model & Seating */}
-        <div>
-          <label className="block text-slate-700 font-bold mb-1 text-blue-600">
-            Bus Model & Seating <span className="text-rose-500">*</span>
-          </label>
-          <select
-            value={busType}
-            onChange={(e: any) => {
-              setBusType(e.target.value);
-              if (errors.busType) setErrors(prev => ({ ...prev, busType: '' }));
-            }}
-            className="w-full bg-slate-50 border border-blue-300 rounded-xl p-2.5 text-slate-800 font-bold focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          >
-            <option value="Ashok Leyland (54 Seats 3*2)">🚌 Ashok Leyland (54 Seats 3*2)</option>
-            <option value="Ashok Leyland (54 Seats 2*2)">🚌 Ashok Leyland (54 Seats 2*2)</option>
-            <option value="Lanka Ashok Leyland (57 Seats 3*2)">🚌 Lanka Ashok Leyland (57 Seats 3*2)</option>
-            <option value="Lanka Ashok Leyland (57 Seats 2*2)">🚌 Lanka Ashok Leyland (57 Seats 2*2)</option>
-            <option value="Yutong (48 Seats 2*2)">🚌 Yutong (48 Seats 2*2)</option>
-            <option value="Yutong (51 Seats 2*2)">🚌 Yutong (51 Seats 2*2)</option>
-            <option value="AC Sleeper">🛌 AC Sleeper</option>
-            <option value="Luxury Volvo Multi-Axle">✨ Luxury Volvo Multi-Axle</option>
-            <option value="__custom__">⚙️ Custom Bus Model</option>
-          </select>
-          {busType === '__custom__' && (
-            <input
-              type="text"
-              value={customBusType}
-              onChange={e => {
-                setCustomBusType(e.target.value);
-                if (errors.busType) setErrors(prev => ({ ...prev, busType: '' }));
-              }}
-              placeholder="Enter custom bus model"
-              className={`w-full mt-2 rounded-xl p-2.5 font-semibold text-slate-800 border transition-all ${
-                errors.busType
-                  ? 'bg-rose-50/50 border-rose-400 focus:border-rose-500'
-                  : 'bg-white border-blue-300 focus:border-blue-500'
-              }`}
-            />
-          )}
-          {errors.busType && (
-            <p className="text-[11px] text-rose-600 font-semibold mt-1 flex items-center gap-1">
-              <AlertCircle className="w-3 h-3 flex-shrink-0" /> {errors.busType}
             </p>
           )}
         </div>
@@ -462,7 +598,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
             type="number"
             min={500}
             max={50000}
-            step={50}
+            step="any"
             value={priceStarting}
             onChange={e => {
               setPriceStarting(e.target.value);
@@ -481,6 +617,135 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
           )}
         </div>
 
+        {/* Capacity (Seats) */}
+        <div>
+          <label className="block text-slate-700 font-bold mb-1">
+            Capacity (Seats) <span className="text-rose-500">*</span>
+          </label>
+          <input
+            type="number"
+            min={10}
+            max={100}
+            step={1}
+            value={capacity}
+            onChange={e => {
+              setCapacity(e.target.value);
+              if (errors.capacity) setErrors(prev => ({ ...prev, capacity: '' }));
+            }}
+            placeholder="e.g. 49"
+            className={`w-full rounded-xl p-2.5 font-semibold text-slate-800 border transition-all ${
+              errors.capacity
+                ? 'bg-rose-50/50 border-rose-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-200'
+                : 'bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+            }`}
+          />
+          {errors.capacity && (
+            <p className="text-[11px] text-rose-600 font-semibold mt-1 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3 flex-shrink-0" /> {errors.capacity}
+            </p>
+          )}
+        </div>
+
+      </div>
+
+      {/* Luxury Amenities & Timetable Stops Section */}
+      <div className="pt-3 border-t border-slate-100 space-y-3">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <label className="text-xs font-bold text-slate-800">
+            Luxury Amenities ({amenities.length})
+          </label>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowAdvancedStops(!showAdvancedStops)}
+              className="text-[11px] font-bold text-blue-600 hover:text-blue-700 underline cursor-pointer"
+            >
+              {showAdvancedStops ? 'Hide Timetable Stops' : '+ Custom Timetable Stops (Optional)'}
+            </button>
+            {onOpenTimetableEditor && (
+              <button
+                type="button"
+                onClick={handleOpenTimetableEditor}
+                className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200 cursor-pointer"
+              >
+                <Clock className="w-3 h-3" />
+                <span>Open Timetable & Stops Editor (7+) ➔</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {['AC', 'Wi-Fi', 'Charging Ports', 'Live GPS Tracking', 'Reclining Seats', 'Water Bottle', 'Blanket', 'Music'].map(item => {
+            const isSelected = amenities.includes(item);
+            return (
+              <button
+                key={item}
+                type="button"
+                onClick={() => {
+                  if (isSelected) {
+                    setAmenities(amenities.filter(a => a !== item));
+                  } else {
+                    setAmenities([...amenities, item]);
+                  }
+                }}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all ${
+                  isSelected
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                <CheckCircle2 className={`w-3 h-3 ${isSelected ? 'text-white' : 'text-slate-400'}`} />
+                <span>{item}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {showAdvancedStops && (
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs animate-fade-in">
+            <div>
+              <label className="block text-slate-600 font-bold mb-1">Pickup Stop 1 (Origin)</label>
+              <input
+                type="text"
+                value={pickupStop1}
+                onChange={e => setPickupStop1(e.target.value)}
+                placeholder={`${origin || 'Origin'} Main Bus Stand`}
+                className="w-full rounded-xl p-2 bg-white border border-slate-200 text-slate-800 text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-600 font-bold mb-1">Pickup Stop 2 (Intermediate)</label>
+              <input
+                type="text"
+                value={pickupStop2}
+                onChange={e => setPickupStop2(e.target.value)}
+                placeholder="Wellawaya Clock Tower Junction"
+                className="w-full rounded-xl p-2 bg-white border border-slate-200 text-slate-800 text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-600 font-bold mb-1">Drop Stop 1 (Highway Exit)</label>
+              <input
+                type="text"
+                value={dropStop1}
+                onChange={e => setDropStop1(e.target.value)}
+                placeholder="Kottawa Highway Exit Hub"
+                className="w-full rounded-xl p-2 bg-white border border-slate-200 text-slate-800 text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-600 font-bold mb-1">Drop Stop 2 (Destination)</label>
+              <input
+                type="text"
+                value={dropStop2}
+                onChange={e => setDropStop2(e.target.value)}
+                placeholder={`${destination || 'Destination'} Fort Bus Station`}
+                className="w-full rounded-xl p-2 bg-white border border-slate-200 text-slate-800 text-xs"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">

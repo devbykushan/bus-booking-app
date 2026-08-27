@@ -26,6 +26,47 @@ export type AppView =
   | 'live-tracking'
   | 'admin-panel';
 
+export const VIEW_HASH_MAP: Record<AppView, string> = {
+  'passenger-search': 'home',
+  'schedules-dashboard': 'journeys',
+  'seat-selection': 'seats',
+  'checkout': 'checkout',
+  'ticket-confirmation': 'confirmation',
+  'my-bookings': 'my-tickets',
+  'live-tracking': 'live-gps',
+  'admin-panel': 'admin',
+};
+
+export const HASH_VIEW_MAP: Record<string, AppView> = {
+  'home': 'passenger-search',
+  '': 'passenger-search',
+  '/': 'passenger-search',
+  'search': 'passenger-search',
+  'journeys': 'schedules-dashboard',
+  'schedules': 'schedules-dashboard',
+  'schedules-dashboard': 'schedules-dashboard',
+  'seats': 'seat-selection',
+  'seat-selection': 'seat-selection',
+  'checkout': 'checkout',
+  'confirmation': 'ticket-confirmation',
+  'ticket-confirmation': 'ticket-confirmation',
+  'my-tickets': 'my-bookings',
+  'my-bookings': 'my-bookings',
+  'live-gps': 'live-tracking',
+  'live-tracking': 'live-tracking',
+  'admin': 'admin-panel',
+  'admin-panel': 'admin-panel',
+};
+
+export function getViewFromLocation(): AppView {
+  if (typeof window === 'undefined') return 'passenger-search';
+  const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+  if (hash && HASH_VIEW_MAP[hash]) {
+    return HASH_VIEW_MAP[hash];
+  }
+  return 'passenger-search';
+}
+
 interface BookingStore {
   // Authentication
   currentUser: UserAccount | null;
@@ -42,7 +83,7 @@ interface BookingStore {
 
   // Navigation
   currentView: AppView;
-  setCurrentView: (view: AppView) => void;
+  setCurrentView: (view: AppView, pushHistory?: boolean) => void;
   goToSearchSchedules: () => void;
   goToHome: () => void;
 
@@ -74,7 +115,7 @@ interface BookingStore {
   selectedSeatIds: string[];
   lockExpirySeconds: number;
   lockActive: boolean;
-  toggleSeatSelection: (seatId: string) => Promise<void>;
+  toggleSeatSelection: (seatId: string) => void;
   clearSeatSelection: () => void;
   tickLockTimer: () => void;
 
@@ -133,9 +174,9 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         set({
           currentUser: user,
           userRole: user.role as any,
-          currentView: user.role === 'admin' ? 'admin-panel' : 'passenger-search',
           showAuthModal: false,
         });
+        get().setCurrentView(user.role === 'admin' ? 'admin-panel' : 'passenger-search');
         return { success: true, message: res.message || 'Logged in successfully' };
       }
       return { success: false, message: res.message || 'Login failed' };
@@ -160,9 +201,9 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         set({
           currentUser: user,
           userRole: user.role as any,
-          currentView: user.role === 'admin' ? 'admin-panel' : 'passenger-search',
           showAuthModal: false,
         });
+        get().setCurrentView(user.role === 'admin' ? 'admin-panel' : 'passenger-search');
         return { success: true, message: res.message || 'Registration successful' };
       }
       return { success: false, message: res.message || 'Registration failed' };
@@ -174,22 +215,35 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   logout: () => {
     localStorage.removeItem('dewmina_user');
     localStorage.removeItem('auth_token');
-    set({ currentUser: null, userRole: 'passenger', currentView: 'passenger-search' });
+    set({ currentUser: null, userRole: 'passenger' });
+    get().setCurrentView('passenger-search');
   },
 
   isLoading: false,
   error: null,
   setError: (msg) => set({ error: msg }),
 
-  currentView: 'passenger-search',
-  setCurrentView: (view) => set({ currentView: view }),
-  goToSearchSchedules: () => {
-    set({ currentView: 'schedules-dashboard' });
+  currentView: getViewFromLocation(),
+  setCurrentView: (view, pushHistory = true) => {
+    const current = get().currentView;
+    if (view === current) return;
+
+    if (pushHistory !== false && typeof window !== 'undefined') {
+      const hash = VIEW_HASH_MAP[view] || 'home';
+      window.history.pushState(
+        { view, routeId: get().selectedRoute?.id },
+        '',
+        `#${hash}`
+      );
+    }
+    set({ currentView: view });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   },
+  goToSearchSchedules: () => {
+    get().setCurrentView('schedules-dashboard');
+  },
   goToHome: () => {
-    set({ currentView: 'passenger-search' });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    get().setCurrentView('passenger-search');
   },
 
   userRole: JSON.parse(localStorage.getItem('dewmina_user') || 'null')?.role || 'passenger',
@@ -235,15 +289,19 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   lockExpirySeconds: 480,
   lockActive: false,
 
-  toggleSeatSelection: async (seatId: string) => {
+  toggleSeatSelection: (seatId: string) => {
     const { selectedSeatIds, selectedRoute, sessionId } = get();
     if (!selectedRoute) return;
 
-    let seat = selectedRoute.seats.find((s) => s.id === seatId || s.number === seatId || s.number === seatId.replace(/^0+/, ''));
+    const routeId = selectedRoute.id;
+    const normalizedNum = seatId.replace(`${routeId}-`, '').replace(/^seat-/, '').replace(/^0+/, '');
+    const canonicalId = `${routeId}-${normalizedNum}`;
+
+    let seat = selectedRoute.seats.find((s) => s.id === canonicalId || s.id === seatId || s.number === normalizedNum || s.number === seatId);
     if (!seat) {
       seat = {
-        id: seatId,
-        number: seatId,
+        id: canonicalId,
+        number: normalizedNum,
         row: 1,
         col: 1,
         price: selectedRoute.seats[0]?.price || 3430,
@@ -258,9 +316,9 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
 
     let newSelected: string[];
 
-    if (selectedSeatIds.includes(actualId)) {
-      // Deselect — unlock on backend
-      newSelected = selectedSeatIds.filter((id) => id !== actualId);
+    if (selectedSeatIds.includes(actualId) || selectedSeatIds.includes(seatId) || selectedSeatIds.includes(canonicalId)) {
+      // Deselect — unlock on backend asynchronously
+      newSelected = selectedSeatIds.filter((id) => id !== actualId && id !== seatId && id !== canonicalId);
       seatsApi.unlock({ seatIds: [actualId], sessionId }).catch(() => {});
     } else {
       if (selectedSeatIds.length >= 6) {
@@ -268,16 +326,14 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         return;
       }
 
-      // Try to acquire a server-side seat lock
-      try {
-        await seatsApi.lock({ seatIds: [actualId], routeId: selectedRoute.id, sessionId });
-      } catch (err: any) {
-        // Continue if offline/demo
-      }
-
+      // Optimistic instant selection
       newSelected = [...selectedSeatIds, actualId];
+
+      // Async background server lock (non-blocking)
+      seatsApi.lock({ seatIds: [actualId], routeId: selectedRoute.id, sessionId }).catch(() => {});
     }
 
+    // Instant local state update (0ms lag)
     set({
       selectedSeatIds: newSelected,
       lockActive: newSelected.length > 0,
@@ -356,6 +412,13 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
       return null;
     }
 
+    // Map selectedSeatIds to canonical route-prefixed seat IDs (e.g. "route-101-17")
+    const canonicalSeatIds = selectedSeatIds.map((id: string) => {
+      if (id.startsWith(`${selectedRoute.id}-`)) return id;
+      const num = id.replace(/^[^-]+-/, '').replace(/^seat-/, '').replace(/^0+/, '');
+      return `${selectedRoute.id}-${num}`;
+    });
+
     set({ isLoading: true, error: null });
 
     try {
@@ -363,7 +426,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         routeId: selectedRoute.id,
         boardingPointId: selectedBoardingPoint.id,
         dropPointId: selectedDropPoint.id,
-        seatIds: selectedSeatIds,
+        seatIds: canonicalSeatIds,
         sessionId,
         passenger: {
           fullName: passengerInfo.fullName,
@@ -378,6 +441,20 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         searchDate,
       });
 
+      // Update selectedRoute local seat status so the SeatMap updates immediately with proper gender colors
+      if (selectedRoute) {
+        canonicalSeatIds.forEach(seatId => {
+          const s = selectedRoute.seats.find(st => st.id === seatId || st.number === seatId.split('-').pop());
+          if (s) {
+            s.status = 'booked';
+            (s as any).gender = passengerInfo.gender || 'male';
+            if (passengerInfo.gender === 'female') {
+              (s as any).isFemaleBooked = true;
+            }
+          }
+        });
+      }
+
       // Refresh routes so seat counts update
       const updatedRoutes = await routesApi.getAll();
 
@@ -391,10 +468,10 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         selectedSeatIds: [],
         lockActive: false,
         isLoading: false,
-        currentView: 'ticket-confirmation',
         appliedPromo: '',
         discountRate: 0,
       });
+      get().setCurrentView('ticket-confirmation');
 
       return newBooking;
     } catch (err: any) {
@@ -428,7 +505,10 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   },
 
   trackingRouteId: 'route-101',
-  setTrackingRouteId: (id) => set({ trackingRouteId: id, currentView: 'live-tracking' }),
+  setTrackingRouteId: (id) => {
+    set({ trackingRouteId: id });
+    get().setCurrentView('live-tracking');
+  },
 
   // Localization Implementation
   language: (localStorage.getItem('dewmina_lang') as Language) || 'english',

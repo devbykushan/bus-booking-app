@@ -22,7 +22,6 @@ export const FareBreakdown: React.FC = () => {
   const [promoSuccess, setPromoSuccess] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking' | 'wallet'>('card');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [insuranceSelected, setInsuranceSelected] = useState(true);
 
   if (!selectedRoute || selectedSeatIds.length === 0) {
     return (
@@ -41,9 +40,8 @@ export const FareBreakdown: React.FC = () => {
   const selectedSeats = selectedRoute.seats.filter(s => selectedSeatIds.includes(s.id));
   const baseFare = selectedSeats.reduce((sum, s) => sum + s.price, 0);
   const taxAmount = Number((baseFare * 0.10).toFixed(2));
-  const insuranceAmount = insuranceSelected ? 150 : 0;
   const discountAmount = Number((baseFare * discountRate).toFixed(2));
-  const finalTotal = Number((baseFare + taxAmount + insuranceAmount - discountAmount).toFixed(2));
+  const finalTotal = Number((baseFare + taxAmount - discountAmount).toFixed(2));
 
   const handleApplyPromo = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +63,7 @@ export const FareBreakdown: React.FC = () => {
 
     setIsProcessing(true);
 
-    const booking = await createBooking(paymentMethod, insuranceSelected);
+    const booking = await createBooking(paymentMethod, false);
     setIsProcessing(false);
 
     if (!booking) {
@@ -272,20 +270,6 @@ export const FareBreakdown: React.FC = () => {
               {promoError && <p className="text-[11px] text-rose-500 font-medium">{promoError}</p>}
             </form>
 
-            {/* Travel Insurance Option */}
-            <label className="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer text-xs">
-              <input
-                type="checkbox"
-                checked={insuranceSelected}
-                onChange={(e) => setInsuranceSelected(e.target.checked)}
-                className="mt-0.5 rounded text-blue-600 focus:ring-0"
-              />
-              <div>
-                <span className="font-bold text-slate-800">{t('addInsurance')}</span>
-                <p className="text-[11px] text-slate-500">{t('insuranceSubtitle')}</p>
-              </div>
-            </label>
-
             {/* Itemized Price Table */}
             <div className="space-y-2 text-xs border-t border-slate-200 pt-4">
               <div className="flex justify-between text-slate-600">
@@ -297,13 +281,6 @@ export const FareBreakdown: React.FC = () => {
                 <span>{t('serviceTax')}</span>
                 <span className="font-mono text-slate-800">LKR {taxAmount.toLocaleString()}</span>
               </div>
-
-              {insuranceSelected && (
-                <div className="flex justify-between text-slate-600">
-                  <span>Travel Insurance</span>
-                  <span className="font-mono text-slate-800">LKR 150</span>
-                </div>
-              )}
 
               {discountAmount > 0 && (
                 <div className="flex justify-between text-emerald-600 font-semibold">

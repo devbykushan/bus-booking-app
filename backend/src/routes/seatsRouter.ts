@@ -21,9 +21,28 @@ seatsRouter.post('/lock', async (req: Request, res: Response) => {
   const pool = getPool();
 
   try {
+    // Normalize seat IDs to canonical format
+    const canonicalSeatIds = seatIds.map((id: string) => {
+      if (id.startsWith(`${routeId}-`)) return id;
+      const num = id.replace(/^[^-]+-/, '').replace(/^seat-/, '').replace(/^0+/, '');
+      return `${routeId}-${num}`;
+    });
+
+    // Ensure missing seats are auto-inserted in DB
+    for (const sId of canonicalSeatIds) {
+      const seatNum = sId.replace(`${routeId}-`, '');
+      await pool.query(`
+        INSERT INTO seats ("id", "routeId", "number", "deck", "row", "col", "price", "status", "isSleeper", "isFemaleOnly")
+        VALUES ($1, $2, $3, 'lower', 1, 1, 3430, 'available', 0, 0)
+        ON CONFLICT ("id") DO NOTHING
+      `, [sId, routeId, seatNum]);
+    }
+
     // Check all seats are available or already locked by this session
     const conflicts: string[] = [];
-    for (const seatId of seatIds) {
+    for (let i = 0; i < canonicalSeatIds.length; i++) {
+      const seatId = canonicalSeatIds[i];
+      const rawId = seatIds[i];
       const rowRes = await pool.query('SELECT status FROM seats WHERE "id" = $1', [seatId]);
       const row = rowRes.rows[0];
 
@@ -35,7 +54,7 @@ seatsRouter.post('/lock', async (req: Request, res: Response) => {
         conflicts.push(`${seatId} (already booked)`);
         continue;
       }
-      if (!isSeatAvailable(seatId, sessionId)) {
+      if (!isSeatAvailable(seatId, sessionId) && !isSeatAvailable(rawId, sessionId)) {
         conflicts.push(`${seatId} (locked by another user)`);
       }
     }

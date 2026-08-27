@@ -11,7 +11,6 @@ import {
   MapPin,
   SlidersHorizontal,
   Clock,
-  Sparkles,
   ShieldCheck,
   AlertCircle,
   RotateCcw,
@@ -200,16 +199,20 @@ export const SchedulesDashboard: React.FC = () => {
     routes.forEach((r) => {
       if (r.operatorName) ops.add(r.operatorName);
       if (r.busType) {
-        if (r.busType.toLowerCase().includes('leyland')) ops.add('Ashok Leyland 54');
-        if (r.busType.toLowerCase().includes('yutong')) ops.add('Yutong Luxury');
+        if (r.busType.toLowerCase().includes('leyland') || r.busType.toLowerCase().includes('normal') || r.busType.toLowerCase().includes('non-ac')) {
+          ops.add('Normal Service');
+        }
+        if (r.busType.toLowerCase().includes('yutong') || r.busType.toLowerCase().includes('luxury') || r.busType.toLowerCase().includes('sleeper') || r.busType.toLowerCase().includes('super')) {
+          ops.add('Super Luxury');
+        }
       }
     });
     return [
-      { id: 'all', label: 'All Operators & Coaches' },
-      { id: 'Ashok Leyland', label: 'Ashok Leyland 54' },
-      { id: 'Yutong', label: 'Yutong Luxury' },
+      { id: 'all', label: 'All Classes & Coaches' },
+      { id: 'Normal Service', label: 'Normal Service' },
+      { id: 'Super Luxury', label: 'Super Luxury' },
       ...Array.from(ops)
-        .filter((o) => o !== 'Ashok Leyland 54' && o !== 'Yutong Luxury' && o !== 'Ashok Leyland' && o !== 'Yutong')
+        .filter((o) => o !== 'Normal Service' && o !== 'Super Luxury' && o !== 'Ashok Leyland 54' && o !== 'Yutong Luxury' && o !== 'Ashok Leyland' && o !== 'Yutong')
         .map((o) => ({ id: o, label: o })),
     ];
   }, [routes]);
@@ -262,8 +265,22 @@ export const SchedulesDashboard: React.FC = () => {
   const filteredAndSortedRoutes = useMemo(() => {
     let result = routes.filter((route) => {
       // Bus class / type filter
-      if (busTypeFilter !== 'all' && !route.busType.toLowerCase().includes(busTypeFilter.toLowerCase())) {
-        return false;
+      if (busTypeFilter !== 'all') {
+        const bType = (route.busType || '').toLowerCase();
+        const fType = busTypeFilter.toLowerCase();
+        const opName = (route.operatorName || '').toLowerCase();
+
+        if (fType === 'normal service' || fType === 'ashok leyland') {
+          if (!bType.includes('normal') && !bType.includes('leyland') && !bType.includes('non-ac')) {
+            return false;
+          }
+        } else if (fType === 'super luxury' || fType === 'yutong') {
+          if (!bType.includes('super') && !bType.includes('luxury') && !bType.includes('yutong') && !bType.includes('ac') && !bType.includes('sleeper')) {
+            return false;
+          }
+        } else if (!bType.includes(fType) && !opName.includes(fType)) {
+          return false;
+        }
       }
       // Origin filter
       if (searchOrigin && route.origin.toLowerCase() !== searchOrigin.toLowerCase()) {
@@ -872,12 +889,9 @@ export const SchedulesDashboard: React.FC = () => {
           /* 2-Column Schedule Results + Interactive Map */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Left Side: Bus Cards List */}
-            <div className="lg:col-span-7 space-y-4">
+            <div className="lg:col-span-8 space-y-4">
               <div className="flex items-center justify-between text-xs text-slate-500 font-medium px-1">
                 <span>Showing {filteredAndSortedRoutes.length} available {filteredAndSortedRoutes.length === 1 ? 'coach' : 'coaches'}</span>
-                <span className="flex items-center gap-1 text-emerald-600 font-semibold">
-                  <Sparkles className="w-3.5 h-3.5" /> Guaranteed Seat Lock
-                </span>
               </div>
 
               {filteredAndSortedRoutes.map((route, idx) => {
@@ -903,12 +917,10 @@ export const SchedulesDashboard: React.FC = () => {
             </div>
 
             {/* Right Side: Sticky Interactive Route Map Preview */}
-            <div className="lg:col-span-5 hidden lg:block sticky top-36 space-y-4">
-              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-1 overflow-hidden">
-                {activeRouteForMap && (
-                  <InteractiveRouteMap route={activeRouteForMap as any} />
-                )}
-              </div>
+            <div className="lg:col-span-4 hidden lg:block sticky top-36 space-y-4">
+              {activeRouteForMap && (
+                <InteractiveRouteMap route={activeRouteForMap as any} />
+              )}
 
               {/* Quick Contact & Reassurance Box */}
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-3xl p-5 space-y-3">
