@@ -3,7 +3,7 @@ import type { BusRoute } from '../../types/booking';
 import { useBookingStore } from '../../store/bookingStore';
 import { 
   Star, Clock, ChevronRight, Info, AlertTriangle, 
-  CheckCircle2, MapPin, Edit3
+  CheckCircle2, MapPin, Edit3, Bus
 } from 'lucide-react';
 import { RouteDetailsModal } from './RouteDetailsModal';
 import { RouteTimetableModal } from './RouteTimetableModal';
@@ -76,6 +76,15 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
             <span className="text-xs font-semibold text-slate-600">
               {route.operatorName}
             </span>
+            {route.busNumber && (
+              <>
+                <span className="text-xs text-slate-400">•</span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50/80 text-blue-700 border border-blue-200/80 text-xs font-bold font-mono shadow-xs">
+                  <Bus className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                  <span>{route.busNumber}</span>
+                </span>
+              </>
+            )}
             <span className="text-xs text-slate-400">•</span>
             <span className="text-xs font-medium text-slate-500">
               {(route.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}

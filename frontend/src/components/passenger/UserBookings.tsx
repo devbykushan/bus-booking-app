@@ -1,6 +1,6 @@
 import React from 'react';
 import { useBookingStore } from '../../store/bookingStore';
-import { Ticket, MapPin, XCircle } from 'lucide-react';
+import { Ticket, MapPin, XCircle, Bus } from 'lucide-react';
 
 export const UserBookings: React.FC = () => {
   const { bookings, cancelBooking, setCurrentView, goToSearchSchedules, setTrackingRouteId } = useBookingStore();
@@ -52,8 +52,14 @@ export const UserBookings: React.FC = () => {
               
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="text-base font-bold text-slate-800">{b.operatorName}</span>
+                    {b.busNumber && (
+                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-mono font-bold flex items-center gap-1">
+                        <Bus className="w-3 h-3 text-blue-600" />
+                        {b.busNumber}
+                      </span>
+                    )}
                     <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-mono">
                       PNR: {b.pnr}
                     </span>
