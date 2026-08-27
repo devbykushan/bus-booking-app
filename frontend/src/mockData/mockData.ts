@@ -210,6 +210,44 @@ const generateSeats = (busType: string, hasUpperDeck: boolean = false): Seat[] =
 
 export const MOCK_ROUTES: BusRoute[] = [
   {
+    id: 'route-100',
+    operatorId: 'op-dewmina',
+    operatorName: 'Dewmina Super Line',
+    operatorRating: 4.9,
+    busNumber: 'ND-3223 (Normal Service - Route 98)',
+    busType: 'Normal Service',
+    origin: 'Monaragala',
+    destination: 'Colombo',
+    departureTime: '05:00 AM',
+    arrivalTime: '11:30 AM',
+    duration: '6h 30m',
+    priceStarting: 950,
+    availableSeatsCount: 34,
+    totalSeatsCount: 54,
+    hasUpperDeck: false,
+    amenities: ['Normal Service A4 Highway', 'Reclining Seats', 'Live GPS Tracking', 'Direct Route 98 Pass'],
+    boardingPoints: [
+      { id: 'bp-100-1', name: 'Monaragala Main Bus Terminal', time: '05:00 AM', landmark: 'Platform 3', lat: 6.8722, lng: 81.3507 },
+      { id: 'bp-100-2', name: 'Wellawaya Clock Tower', time: '05:40 AM', landmark: 'A4 Highway Junction', lat: 6.7410, lng: 81.1020 },
+      { id: 'bp-100-3', name: 'Balangoda Bus Stand', time: '07:15 AM', landmark: 'Town Terminal', lat: 6.6580, lng: 80.7020 },
+      { id: 'bp-100-4', name: 'Ratnapura Clock Tower', time: '08:30 AM', landmark: 'City Bus Stand', lat: 6.6828, lng: 80.3992 },
+    ],
+    dropPoints: [
+      { id: 'dp-100-1', name: 'Avissawella Bus Terminal', time: '09:45 AM', landmark: 'A4 Main Stop', lat: 6.9530, lng: 80.2070 },
+      { id: 'dp-100-2', name: 'Colombo Fort (Pettah Bastian Mawatha)', time: '11:30 AM', landmark: 'Central Terminal', lat: 6.9344, lng: 79.8530 },
+    ],
+    gpsLocation: {
+      lat: 6.6828,
+      lng: 80.3992,
+      speedKmH: 55,
+      currentStopName: 'Ratnapura Clock Tower',
+      nextStopName: 'Avissawella Bus Terminal',
+      etaMinutes: 180,
+      lastUpdated: 'Just now'
+    },
+    seats: generateSeats('Ashok Leyland (54 Seats 3*2 Normal Service)', false)
+  },
+  {
     id: 'route-101',
     operatorId: 'op-dewmina',
     operatorName: 'Dewmina Super Line',

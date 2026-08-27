@@ -138,6 +138,19 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
   // Toggle between Normal Service (Route 98) and Expressway (E01)
   const [selectedServiceType, setSelectedServiceType] = React.useState<'normal' | 'expressway'>('normal');
 
+  // Auto-suggest map route service type based on selected bus card
+  useEffect(() => {
+    if (!route) return;
+    const bType = (route.busType || '').toLowerCase();
+    const bNum = (route.busNumber || '').toLowerCase();
+
+    if (bType.includes('normal') || bType.includes('leyland') || bType.includes('non-ac') || bNum.includes('normal') || bNum.includes('route 98')) {
+      setSelectedServiceType('normal');
+    } else if (bType.includes('super') || bType.includes('luxury') || bType.includes('expressway') || bType.includes('yutong') || bType.includes('sleeper') || bType.includes('ac') || bNum.includes('express')) {
+      setSelectedServiceType('expressway');
+    }
+  }, [route?.id, route?.busType, route?.busNumber]);
+
   const originCoord = getCoords(route.origin, route.boardingPoints?.[0]?.lat, route.boardingPoints?.[0]?.lng);
   const destCoord = getCoords(route.destination, route.dropPoints?.[0]?.lat, route.dropPoints?.[0]?.lng);
 
@@ -337,12 +350,18 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
                 <p className="font-extrabold text-slate-800 leading-tight">
                   {selectedServiceType === 'normal' ? 'Route 98 (Monaragala - Colombo)' : (route.busType.toLowerCase().includes('leyland') ? 'Super Luxury' : route.busType)}
                 </p>
-                <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[9px] font-extrabold tracking-wide uppercase">
+                <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold tracking-wide uppercase ${
+                  selectedServiceType === 'normal'
+                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                    : 'bg-blue-100 text-blue-800 border border-blue-200'
+                }`}>
                   {selectedServiceType === 'normal' ? 'Normal Service Only' : 'Super Luxury Only'}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                via Ratnapura • Balangoda • Wellawaya • A4 Road
+              <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
+                {selectedServiceType === 'normal'
+                  ? 'via Ratnapura • Balangoda • Wellawaya • A4 Road'
+                  : 'via Southern Expressway (E01) • Mattala • Makumbura'}
               </p>
             </div>
           </div>
