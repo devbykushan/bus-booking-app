@@ -11,7 +11,6 @@ import {
   MapPin,
   SlidersHorizontal,
   Clock,
-  Sparkles,
   ShieldCheck,
   AlertCircle,
   RotateCcw,
@@ -890,12 +889,9 @@ export const SchedulesDashboard: React.FC = () => {
           /* 2-Column Schedule Results + Interactive Map */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Left Side: Bus Cards List */}
-            <div className="lg:col-span-7 space-y-4">
+            <div className="lg:col-span-8 space-y-4">
               <div className="flex items-center justify-between text-xs text-slate-500 font-medium px-1">
                 <span>Showing {filteredAndSortedRoutes.length} available {filteredAndSortedRoutes.length === 1 ? 'coach' : 'coaches'}</span>
-                <span className="flex items-center gap-1 text-emerald-600 font-semibold">
-                  <Sparkles className="w-3.5 h-3.5" /> Guaranteed Seat Lock
-                </span>
               </div>
 
               {filteredAndSortedRoutes.map((route, idx) => {
@@ -921,12 +917,10 @@ export const SchedulesDashboard: React.FC = () => {
             </div>
 
             {/* Right Side: Sticky Interactive Route Map Preview */}
-            <div className="lg:col-span-5 hidden lg:block sticky top-36 space-y-4">
-              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-1 overflow-hidden">
-                {activeRouteForMap && (
-                  <InteractiveRouteMap route={activeRouteForMap as any} />
-                )}
-              </div>
+            <div className="lg:col-span-4 hidden lg:block sticky top-36 space-y-4">
+              {activeRouteForMap && (
+                <InteractiveRouteMap route={activeRouteForMap as any} />
+              )}
 
               {/* Quick Contact & Reassurance Box */}
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-3xl p-5 space-y-3">

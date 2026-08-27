@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import type { BusRoute } from '../../types/booking';
-import { Bus, ExternalLink, Sparkles, Navigation } from 'lucide-react';
+import { ExternalLink, Sparkles, Navigation } from 'lucide-react';
 
 // Fix default leaflet marker asset paths in Vite
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -40,6 +40,17 @@ const stopIcon = L.divIcon({
          </div>`,
   iconSize: [22, 22],
   iconAnchor: [11, 11],
+});
+
+// Live moving bus marker icon
+const movingBusIcon = L.divIcon({
+  className: 'moving-bus-marker',
+  html: `<div style="background: linear-gradient(135deg, #10b981, #059669); border: 3px solid #ffffff; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(16,185,129,0.75); color: white; font-size: 18px; position: relative;">
+           <span style="display: inline-block;">🚌</span>
+           <span style="position: absolute; top: -1px; right: -1px; width: 10px; height: 10px; background: #22c55e; border: 2px solid white; border-radius: 50%;"></span>
+         </div>`,
+  iconSize: [38, 38],
+  iconAnchor: [19, 19],
 });
 
 // Coordinate presets for Sri Lankan stations
@@ -120,11 +131,20 @@ function getCoords(place: string, defaultLat: number, defaultLng: number): [numb
 const MapBoundsAdjuster: React.FC<{ coords: [number, number][] }> = ({ coords }) => {
   const map = useMap();
   useEffect(() => {
+    map.invalidateSize();
     if (coords && coords.length > 0) {
       const bounds = L.latLngBounds(coords);
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 11 });
+      map.fitBounds(bounds, { padding: [30, 30], maxZoom: 11 });
     }
   }, [coords, map]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [map]);
+
   return null;
 };
 
@@ -198,6 +218,31 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
     polylineCoords = [originCoord, ...genericCoords, destCoord];
   }
 
+  // Animated moving bus progress state
+  const [busProgress, setBusProgress] = React.useState(0.05);
+
+  useEffect(() => {
+    if (!polylineCoords || polylineCoords.length < 2) return;
+    const interval = setInterval(() => {
+      setBusProgress((prev) => {
+        const max = polylineCoords.length - 1;
+        const next = prev + 0.025;
+        return next >= max ? 0 : next;
+      });
+    }, 60);
+    return () => clearInterval(interval);
+  }, [polylineCoords]);
+
+  const currentSegmentIndex = Math.min(Math.floor(busProgress), Math.max(0, polylineCoords.length - 2));
+  const segmentFraction = busProgress - currentSegmentIndex;
+  const startCoord = polylineCoords[currentSegmentIndex] || polylineCoords[0];
+  const endCoord = polylineCoords[currentSegmentIndex + 1] || polylineCoords[polylineCoords.length - 1];
+
+  const movingBusCoord: [number, number] = [
+    startCoord[0] + (endCoord[0] - startCoord[0]) * segmentFraction,
+    startCoord[1] + (endCoord[1] - startCoord[1]) * segmentFraction,
+  ];
+
   // Google Maps directions URL
   const googleMapsUrl = isMonaragalaColomboRoute
     ? selectedServiceType === 'normal'
@@ -206,9 +251,9 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
     : `https://www.google.com/maps/dir/?api=1&origin=${originCoord[0]},${originCoord[1]}&destination=${destCoord[0]},${destCoord[1]}`;
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full sticky top-24 min-h-[480px]">
+    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[500px] w-full">
       {/* Map Header */}
-      <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="p-3.5 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-shrink-0">
         <div>
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -221,7 +266,7 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
                     : 'bg-indigo-100 text-indigo-700 border border-indigo-200'
                 }`}>
                   <Sparkles className="w-3 h-3 text-emerald-600" />
-                  {selectedServiceType === 'normal' ? 'Route 98 (Normal Service - A4 Highway)' : 'Southern Expressway (E01)'}
+                  {selectedServiceType === 'normal' ? 'Route 98 (Normal)' : 'Expressway (E01)'}
                 </span>
               )}
             </h4>
@@ -237,24 +282,24 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
               <button
                 type="button"
                 onClick={() => setSelectedServiceType('normal')}
-                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                className={`px-2 py-0.5 rounded-lg transition-all cursor-pointer ${
                   selectedServiceType === 'normal'
                     ? 'bg-emerald-600 text-white shadow-xs font-black'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                Route 98 (Normal)
+                Route 98
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedServiceType('expressway')}
-                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                className={`px-2 py-0.5 rounded-lg transition-all cursor-pointer ${
                   selectedServiceType === 'expressway'
                     ? 'bg-blue-600 text-white shadow-xs font-black'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                Expressway (E01)
+                Expressway
               </button>
             </div>
           )}
@@ -265,13 +310,13 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
       </div>
 
       {/* Map Canvas */}
-      <div className="relative flex-1 min-h-[380px] w-full">
+      <div className="relative flex-1 w-full h-full min-h-0 overflow-hidden">
         <MapContainer
           center={[(originCoord[0] + destCoord[0]) / 2, (originCoord[1] + destCoord[1]) / 2]}
           zoom={8}
           scrollWheelZoom={false}
           className="w-full h-full z-0"
-          style={{ minHeight: '380px' }}
+          style={{ height: '100%', width: '100%' }}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -285,13 +330,30 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
             positions={polylineCoords}
             pathOptions={{
               color: selectedServiceType === 'normal' ? '#059669' : '#2563eb',
-              weight: 5,
-              opacity: 0.9,
-              dashArray: '8, 8',
+              weight: 6,
+              opacity: 0.95,
+              dashArray: '10, 10',
+              className: 'animated-route-polyline',
               lineCap: 'round',
               lineJoin: 'round',
             }}
           />
+
+          {/* Animated Live Moving Bus Marker */}
+          {movingBusCoord && (
+            <Marker position={movingBusCoord} icon={movingBusIcon}>
+              <Popup>
+                <div className="text-xs p-1 font-sans space-y-1">
+                  <div className="flex items-center gap-1.5 text-emerald-600 font-extrabold">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                    <span>Live Coach En-route</span>
+                  </div>
+                  <p className="text-slate-700 font-bold">{route.operatorName} ({route.busNumber})</p>
+                  <p className="text-slate-500 font-mono text-[11px]">Route: {route.origin} → {route.destination}</p>
+                </div>
+              </Popup>
+            </Marker>
+          )}
 
           {/* Departure Marker */}
           <Marker position={originCoord} icon={originIcon}>
@@ -337,40 +399,13 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
           </Marker>
         </MapContainer>
 
-        {/* Floating Route Summary Overlay */}
-        <div className="absolute bottom-3 left-3 right-3 z-10 bg-white/95 backdrop-blur-md p-3 rounded-2xl border border-slate-200/80 shadow-lg flex items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2.5">
-            <div className={`w-9 h-9 rounded-xl text-white flex items-center justify-center font-bold shadow-md ${
-              selectedServiceType === 'normal' ? 'bg-gradient-to-br from-emerald-600 to-teal-700 shadow-emerald-500/20' : 'bg-gradient-to-br from-blue-600 to-indigo-700 shadow-blue-500/20'
-            }`}>
-              <Bus className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <p className="font-extrabold text-slate-800 leading-tight">
-                  {selectedServiceType === 'normal' ? 'Route 98 (Monaragala - Colombo)' : (route.busType.toLowerCase().includes('leyland') ? 'Super Luxury' : route.busType)}
-                </p>
-                <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold tracking-wide uppercase ${
-                  selectedServiceType === 'normal'
-                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                    : 'bg-blue-100 text-blue-800 border border-blue-200'
-                }`}>
-                  {selectedServiceType === 'normal' ? 'Normal Service Only' : 'Super Luxury Only'}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
-                {selectedServiceType === 'normal'
-                  ? 'via Ratnapura • Balangoda • Wellawaya • A4 Road'
-                  : 'via Southern Expressway (E01) • Mattala • Makumbura'}
-              </p>
-            </div>
-          </div>
-
+        {/* Floating Google Maps Button */}
+        <div className="absolute bottom-3 right-3 z-10">
           <a
             href={googleMapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white font-bold text-[11px] flex items-center gap-1.5 transition-all hover:scale-105 shadow-sm flex-shrink-0"
+            className="px-3.5 py-2 rounded-xl bg-slate-900/90 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 backdrop-blur-md shadow-md transition-all hover:scale-105"
             title="Open Route on Google Maps"
           >
             <span>Google Maps</span>

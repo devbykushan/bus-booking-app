@@ -54,7 +54,10 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
     day: '2-digit',
   });
 
-  const formattedPrice = Number(route.priceStarting || 1800).toLocaleString();
+  const isNormalBus = route.busType?.includes('Normal') || route.busType?.includes('3*2') || route.busType?.includes('Leyland');
+  const isLuxuryBus = route.busType?.includes('Super Luxury') || route.busType?.includes('Luxury');
+  const validatedPriceVal = isNormalBus ? 1160 : isLuxuryBus ? 2670 : (route.priceStarting || 1160);
+  const formattedPrice = Number(validatedPriceVal).toLocaleString();
 
   return (
     <>

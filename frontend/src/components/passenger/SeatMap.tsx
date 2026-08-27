@@ -189,29 +189,91 @@ export const SeatMap: React.FC = () => {
     return travelDate;
   }, [travelDate]);
 
+  // Helper for validated ticket price
+  const validatedSeatPrice = useMemo(() => {
+    if (!selectedRoute) return 1160;
+    const type = selectedRoute.busType || '';
+    if (type.includes('Normal') || type.includes('3*2') || type.includes('Leyland')) {
+      return 1160;
+    }
+    if (type.includes('Super Luxury') || type.includes('Luxury')) {
+      return 2670;
+    }
+    if (type.includes('Sleeper')) {
+      return 2800;
+    }
+    return selectedRoute.priceStarting || 2670;
+  }, [selectedRoute]);
+
   // Seat Calculations
   const selectedSeatsList = useMemo(() => {
     if (!selectedRoute) return [];
     return selectedSeatIds.map(id => {
       const normalized = id.replace('seat-', '').replace(/^0+/, '');
       const existing = selectedRoute.seats.find(s => s.id === id || s.number === normalized || s.number === id);
-      if (existing) return existing;
       return {
         id,
-        number: id.replace('seat-', ''),
-        row: 1,
-        col: 1,
-        price: selectedRoute.seats[0]?.price || 3430,
-        status: 'available' as const,
-        deck: 'lower' as DeckType
+        number: existing?.number || id.replace('seat-', ''),
+        row: existing?.row || 1,
+        col: existing?.col || 1,
+        price: validatedSeatPrice,
+        status: existing?.status || 'available' as const,
+        deck: (existing?.deck || 'lower') as DeckType
       };
     });
-  }, [selectedRoute, selectedSeatIds]);
+  }, [selectedRoute, selectedSeatIds, validatedSeatPrice]);
 
   const baseTotal = selectedSeatsList.reduce((sum, s) => sum + s.price, 0);
   const taxAmount = Number((baseTotal * 0.05).toFixed(2));
   const discountAmount = Number((baseTotal * discountRate).toFixed(2));
   const finalTotal = Math.max(0, baseTotal + taxAmount - discountAmount);
+
+  // Progressive Disclosure Step Calculations
+  const isStep1Done = useMemo(() => {
+    return Boolean(selectedBoardingPoint && selectedDropPoint && travelDate);
+  }, [selectedBoardingPoint, selectedDropPoint, travelDate]);
+
+  const isStep2Unlocked = isStep1Done;
+  const isStep2Done = isStep2Unlocked && isPhoneVerified;
+
+  const isStep3Unlocked = isStep2Done;
+  const isStep3Done = isStep3Unlocked && selectedSeatIds.length > 0;
+
+  const isStep4Unlocked = isStep3Done;
+  const isStep4Done = isStep4Unlocked && Boolean(paymentMethod);
+
+  const isStep5Unlocked = isStep4Done;
+
+  const handleStep1Proceed = () => {
+    if (!selectedBoardingPoint) {
+      setBoardingError('Please select a pickup / boarding location.');
+      return;
+    }
+    if (!selectedDropPoint) {
+      setDropError('Please select a dropping / drop-off location.');
+      return;
+    }
+    setBoardingError(null);
+    setDropError(null);
+    setOpenSection1(false);
+    setOpenSection2(true);
+  };
+
+  const handleStep2Proceed = () => {
+    if (!isPhoneVerified) return;
+    setOpenSection2(false);
+    setIsSeatDrawerOpen(true);
+  };
+
+  const handleStep3Proceed = () => {
+    if (selectedSeatIds.length === 0) return;
+    setOpenSection4(true);
+  };
+
+  const handleStep4Proceed = () => {
+    if (!paymentMethod) return;
+    setOpenSection5(true);
+  };
 
   const handleDateConfirm = () => {
     setSearchCriteria(selectedRoute.origin, selectedRoute.destination, travelDate);
@@ -264,6 +326,8 @@ export const SeatMap: React.FC = () => {
       fullName: currentUser?.name || 'Passenger',
       email: currentUser?.email || 'passenger@dewminasuperline.lk'
     });
+    setOpenSection2(false);
+    setIsSeatDrawerOpen(true);
   };
 
   const handleApplyPromo = (e: React.FormEvent) => {
@@ -451,6 +515,120 @@ export const SeatMap: React.FC = () => {
         </div>
       )}
 
+      {/* ── Visual 5-Step Progress Bar ───────────────────────────────────────── */}
+      <div className="bg-white rounded-3xl border border-slate-200/90 p-4 sm:p-5 shadow-xs animate-fade-in">
+        <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-3 px-1">
+          <span className="text-slate-800 flex items-center gap-2 font-extrabold text-sm sm:text-base">
+            <span>Booking Progress</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-extrabold">
+              {isStep5Unlocked 
+                ? 'Step 5 of 5: Checkout' 
+                : isStep4Unlocked 
+                ? 'Step 4 of 5: Payment Method' 
+                : isStep3Unlocked 
+                ? 'Step 3 of 5: Choose Seat' 
+                : isStep2Unlocked 
+                ? 'Step 2 of 5: Passenger Info' 
+                : 'Step 1 of 5: Locations'}
+            </span>
+          </span>
+          <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+            Fill each step to proceed to the next
+          </span>
+        </div>
+
+        <div className="grid grid-cols-5 gap-1.5 sm:gap-3">
+          {/* Step 1 Pill */}
+          <div className={`p-2.5 rounded-2xl border flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left transition-all ${
+            isStep1Done ? 'bg-emerald-50/80 border-emerald-300 text-emerald-900 shadow-2xs' : 'bg-blue-50/80 border-blue-400 text-blue-900 shadow-xs ring-2 ring-blue-500/10'
+          }`}>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black text-white flex-shrink-0 ${
+              isStep1Done ? 'bg-emerald-600' : 'bg-blue-600'
+            }`}>
+              {isStep1Done ? <Check className="w-3.5 h-3.5 text-white" /> : '1'}
+            </div>
+            <div className="truncate min-w-0">
+              <p className="text-[11px] sm:text-xs font-extrabold truncate">1. Info</p>
+              <p className="text-[9px] text-slate-500 truncate hidden sm:block">Date & Points</p>
+            </div>
+          </div>
+
+          {/* Step 2 Pill */}
+          <div className={`p-2.5 rounded-2xl border flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left transition-all ${
+            isStep2Done 
+              ? 'bg-emerald-50/80 border-emerald-300 text-emerald-900 shadow-2xs' 
+              : isStep2Unlocked 
+              ? 'bg-blue-50/80 border-blue-400 text-blue-900 shadow-xs ring-2 ring-blue-500/10' 
+              : 'bg-slate-50 border-slate-200 text-slate-400 opacity-60'
+          }`}>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 ${
+              isStep2Done ? 'bg-emerald-600 text-white' : isStep2Unlocked ? 'bg-blue-600 text-white' : 'bg-slate-300 text-slate-500'
+            }`}>
+              {isStep2Done ? <Check className="w-3.5 h-3.5 text-white" /> : isStep2Unlocked ? '2' : <Lock className="w-3 h-3" />}
+            </div>
+            <div className="truncate min-w-0">
+              <p className="text-[11px] sm:text-xs font-extrabold truncate">2. Passenger</p>
+              <p className="text-[9px] text-slate-500 truncate hidden sm:block">Phone Verification</p>
+            </div>
+          </div>
+
+          {/* Step 3 Pill */}
+          <div className={`p-2.5 rounded-2xl border flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left transition-all ${
+            isStep3Done 
+              ? 'bg-emerald-50/80 border-emerald-300 text-emerald-900 shadow-2xs' 
+              : isStep3Unlocked 
+              ? 'bg-blue-50/80 border-blue-400 text-blue-900 shadow-xs ring-2 ring-blue-500/10' 
+              : 'bg-slate-50 border-slate-200 text-slate-400 opacity-60'
+          }`}>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 ${
+              isStep3Done ? 'bg-emerald-600 text-white' : isStep3Unlocked ? 'bg-blue-600 text-white' : 'bg-slate-300 text-slate-500'
+            }`}>
+              {isStep3Done ? <Check className="w-3.5 h-3.5 text-white" /> : isStep3Unlocked ? '3' : <Lock className="w-3 h-3" />}
+            </div>
+            <div className="truncate min-w-0">
+              <p className="text-[11px] sm:text-xs font-extrabold truncate">3. Seat</p>
+              <p className="text-[9px] text-slate-500 truncate hidden sm:block">Seat Selection</p>
+            </div>
+          </div>
+
+          {/* Step 4 Pill */}
+          <div className={`p-2.5 rounded-2xl border flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left transition-all ${
+            isStep4Done 
+              ? 'bg-emerald-50/80 border-emerald-300 text-emerald-900 shadow-2xs' 
+              : isStep4Unlocked 
+              ? 'bg-blue-50/80 border-blue-400 text-blue-900 shadow-xs ring-2 ring-blue-500/10' 
+              : 'bg-slate-50 border-slate-200 text-slate-400 opacity-60'
+          }`}>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 ${
+              isStep4Done ? 'bg-emerald-600 text-white' : isStep4Unlocked ? 'bg-blue-600 text-white' : 'bg-slate-300 text-slate-500'
+            }`}>
+              {isStep4Done ? <Check className="w-3.5 h-3.5 text-white" /> : isStep4Unlocked ? '4' : <Lock className="w-3 h-3" />}
+            </div>
+            <div className="truncate min-w-0">
+              <p className="text-[11px] sm:text-xs font-extrabold truncate">4. Payment</p>
+              <p className="text-[9px] text-slate-500 truncate hidden sm:block">IPG / On Board</p>
+            </div>
+          </div>
+
+          {/* Step 5 Pill */}
+          <div className={`p-2.5 rounded-2xl border flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left transition-all ${
+            isStep5Unlocked 
+              ? 'bg-blue-50/80 border-blue-400 text-blue-900 shadow-xs ring-2 ring-blue-500/10' 
+              : 'bg-slate-50 border-slate-200 text-slate-400 opacity-60'
+          }`}>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 ${
+              isStep5Unlocked ? 'bg-blue-600 text-white' : 'bg-slate-300 text-slate-500'
+            }`}>
+              {isStep5Unlocked ? '5' : <Lock className="w-3 h-3" />}
+            </div>
+            <div className="truncate min-w-0">
+              <p className="text-[11px] sm:text-xs font-extrabold truncate">5. Checkout</p>
+              <p className="text-[9px] text-slate-500 truncate hidden sm:block">Summary & Pay</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ── Main 2-Column Responsive Layout ──────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
@@ -464,14 +642,21 @@ export const SeatMap: React.FC = () => {
               className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50/70 transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-600/30 portal-badge-pulse">
-                  1
+                <div className={`w-9 h-9 rounded-full text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-sm transition-all ${
+                  isStep1Done ? 'bg-emerald-600 shadow-emerald-600/30' : 'bg-blue-600 shadow-blue-600/30 portal-badge-pulse'
+                }`}>
+                  {isStep1Done ? <Check className="w-4 h-4 text-white" /> : '1'}
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">
-                    Booking Information
+                  <h3 className="text-base font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors flex items-center gap-2">
+                    <span>Booking Information</span>
+                    {isStep1Done && (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                        Completed ✓
+                      </span>
+                    )}
                   </h3>
-                  <p className="text-xs text-slate-500 font-normal">Fill out the form below to book your seat</p>
+                  <p className="text-xs text-slate-500 font-normal">Fill out travel date & locations</p>
                 </div>
               </div>
               <div className="p-1.5 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
@@ -610,363 +795,436 @@ export const SeatMap: React.FC = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Continue to Step 2 Action Button */}
+                <div className="pt-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleStep1Proceed}
+                    className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                  >
+                    <span>Proceed to Step 2: Passenger Info</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             )}
           </div>
 
           {/* ── STEP 2: Passenger Information ── */}
-          <div className="portal-stagger-2 portal-card-interactive bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
-            <button
-              onClick={() => setOpenSection2(!openSection2)}
-              className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50/70 transition-colors cursor-pointer group"
-            >
-              <div className="flex items-center gap-3.5">
-                <div className={`w-9 h-9 rounded-full text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-sm transition-all ${
-                  isPhoneVerified ? 'bg-emerald-600 shadow-emerald-600/30' : 'bg-blue-600 shadow-blue-600/30 portal-badge-pulse'
-                }`}>
-                  {isPhoneVerified ? <Check className="w-4 h-4 text-white" /> : '2'}
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">
-                    Passenger Information
-                  </h3>
-                  <p className="text-xs text-slate-500 font-normal">Fill out the form below and verify your identity.</p>
-                </div>
-              </div>
-              <div className="p-1.5 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
-                <div className={`transition-transform duration-300 ${openSection2 ? 'rotate-0' : '-rotate-180'}`}>
-                  <ChevronUp className="w-4 h-4" />
-                </div>
-              </div>
-            </button>
-
-            {openSection2 && (
-              <div className="p-5 sm:p-6 pt-1 border-t border-slate-100 space-y-3 animate-fade-in">
-                {/* Phone Verification Row */}
-                <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
-                  <div className="relative">
-                    <select
-                      value={countryCode}
-                      onChange={(e) => setCountryCode(e.target.value)}
-                      className="px-4 py-3 rounded-xl border border-slate-400 bg-white text-slate-800 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer flex-shrink-0 hover:border-slate-500 transition-colors pr-8 appearance-none shadow-2xs"
-                    >
-                      <option value="+94">Sri Lanka (+94)</option>
-                      <option value="+91">India (+91)</option>
-                      <option value="+44">UK (+44)</option>
-                      <option value="+1">USA/Canada (+1)</option>
-                      <option value="+971">UAE (+971)</option>
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          {isStep2Unlocked && (
+            <div className="portal-stagger-2 portal-card-interactive bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden animate-fade-in">
+              <button
+                onClick={() => setOpenSection2(!openSection2)}
+                className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50/70 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className={`w-9 h-9 rounded-full text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-sm transition-all ${
+                    isPhoneVerified ? 'bg-emerald-600 shadow-emerald-600/30' : 'bg-blue-600 shadow-blue-600/30 portal-badge-pulse'
+                  }`}>
+                    {isPhoneVerified ? <Check className="w-4 h-4 text-white" /> : '2'}
                   </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors flex items-center gap-2">
+                      <span>Passenger Information</span>
+                      {isPhoneVerified && (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                          Verified ✓
+                        </span>
+                      )}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-normal">Fill out the form below and verify your identity.</p>
+                  </div>
+                </div>
+                <div className="p-1.5 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
+                  <div className={`transition-transform duration-300 ${openSection2 ? 'rotate-0' : '-rotate-180'}`}>
+                    <ChevronUp className="w-4 h-4" />
+                  </div>
+                </div>
+              </button>
 
-                  <div className="flex-1 relative">
-                    <input
-                      type="tel"
-                      placeholder="Your contact number without leading zero"
-                      value={phoneInput}
-                      onChange={(e) => handlePhoneChange(e.target.value)}
-                      maxLength={countryCode === '+94' ? 9 : 12}
-                      className={`w-full px-4 py-3 rounded-xl border-2 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 transition-all shadow-2xs ${
-                        phoneError 
-                          ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:ring-rose-400 focus:border-rose-500' 
-                          : isPhoneVerified 
-                          ? 'border-emerald-500 bg-emerald-50/20 text-emerald-900 focus:ring-emerald-400 focus:border-emerald-500' 
-                          : 'border-blue-600 bg-white text-slate-800 focus:ring-blue-400 focus:border-blue-600 placeholder:text-slate-400'
+              {openSection2 && (
+                <div className="p-5 sm:p-6 pt-1 border-t border-slate-100 space-y-3 animate-fade-in">
+                  {/* Phone Verification Row */}
+                  <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+                    <div className="relative">
+                      <select
+                        value={countryCode}
+                        onChange={(e) => setCountryCode(e.target.value)}
+                        className="px-4 py-3 rounded-xl border border-slate-400 bg-white text-slate-800 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer flex-shrink-0 hover:border-slate-500 transition-colors pr-8 appearance-none shadow-2xs"
+                      >
+                        <option value="+94">Sri Lanka (+94)</option>
+                        <option value="+91">India (+91)</option>
+                        <option value="+44">UK (+44)</option>
+                        <option value="+1">USA/Canada (+1)</option>
+                        <option value="+971">UAE (+971)</option>
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+
+                    <div className="flex-1 relative">
+                      <input
+                        type="tel"
+                        placeholder="Your contact number without leading zero"
+                        value={phoneInput}
+                        onChange={(e) => handlePhoneChange(e.target.value)}
+                        maxLength={countryCode === '+94' ? 9 : 12}
+                        className={`w-full px-4 py-3 rounded-xl border-2 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 transition-all shadow-2xs ${
+                          phoneError 
+                            ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:ring-rose-400 focus:border-rose-500' 
+                            : isPhoneVerified 
+                            ? 'border-emerald-500 bg-emerald-50/20 text-emerald-900 focus:ring-emerald-400 focus:border-emerald-500' 
+                            : 'border-blue-600 bg-white text-slate-800 focus:ring-blue-400 focus:border-blue-600 placeholder:text-slate-400'
+                        }`}
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleVerifyPhone}
+                      className={`px-7 py-3 rounded-xl font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-1.5 flex-shrink-0 cursor-pointer active:scale-95 ${
+                        isPhoneVerified
+                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20'
+                          : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
                       }`}
-                    />
+                    >
+                      {isPhoneVerified ? <Check className="w-4 h-4 animate-scale-in" /> : null}
+                      <span>{isPhoneVerified ? 'Verified' : 'Verify'}</span>
+                    </button>
                   </div>
 
+                  {/* Validation Feedback Messages */}
+                  {phoneError && (
+                    <p className="text-[11px] font-semibold text-rose-600 pl-1 flex items-center gap-1 animate-fade-in">
+                      <span>⚠️</span> {phoneError}
+                    </p>
+                  )}
+
+                  {isPhoneVerified && !phoneError && (
+                    <div className="space-y-3 pt-1">
+                      <p className="text-[11px] font-semibold text-emerald-700 pl-1 flex items-center gap-1 animate-fade-in">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Number verified ({countryCode} {phoneInput}). Your e-ticket and tracking link will be sent via SMS & WhatsApp.</span>
+                      </p>
+
+                      <div className="pt-2 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={handleStep2Proceed}
+                          className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                        >
+                          <span>Proceed to Step 3: Choose Seat</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── STEP 3: Choose Your Seat ── */}
+          {isStep3Unlocked && (
+            <div className="portal-stagger-3 portal-card-interactive bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden animate-fade-in">
+              {/* Step Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 sm:p-6 gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className={`w-10 h-10 rounded-full text-white font-extrabold text-base flex items-center justify-center flex-shrink-0 shadow-sm transition-all ${
+                    isStep3Done ? 'bg-emerald-600 shadow-emerald-600/30' : 'bg-blue-600 shadow-blue-600/30 portal-badge-pulse'
+                  }`}>
+                    {isStep3Done ? <Check className="w-5 h-5 text-white" /> : '3'}
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-extrabold text-slate-900 leading-tight flex items-center gap-2">
+                      <span>Choose Your Seat</span>
+                      {isStep3Done && (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                          {selectedSeatIds.length} Seat(s) Selected ✓
+                        </span>
+                      )}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500 font-normal">
+                      Click on an available seat to select
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right Side Pill Button: [ Select seat | → ] */}
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    onClick={handleVerifyPhone}
-                    className={`px-7 py-3 rounded-xl font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-1.5 flex-shrink-0 cursor-pointer active:scale-95 ${
-                      isPhoneVerified
-                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20'
-                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
-                    }`}
+                    onClick={() => setIsSeatDrawerOpen(true)}
+                    className="inline-flex items-center rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all transform active:scale-95 overflow-hidden group cursor-pointer"
                   >
-                    {isPhoneVerified ? <Check className="w-4 h-4 animate-scale-in" /> : null}
-                    <span>{isPhoneVerified ? 'Verified' : 'Verify'}</span>
+                    <span className="px-5 py-2.5 sm:py-3">
+                      {selectedSeatIds.length > 0 ? 'Change seats' : 'Select seat'}
+                    </span>
+                    <span className="px-3.5 py-2.5 sm:py-3 bg-blue-700 group-hover:bg-blue-800 border-l border-blue-500/50 flex items-center justify-center transition-colors">
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                    </span>
                   </button>
                 </div>
-
-                {/* Validation Feedback Messages */}
-                {phoneError && (
-                  <p className="text-[11px] font-semibold text-rose-600 pl-1 flex items-center gap-1 animate-fade-in">
-                    <span>⚠️</span> {phoneError}
-                  </p>
-                )}
-
-                {isPhoneVerified && !phoneError && (
-                  <p className="text-[11px] font-semibold text-emerald-700 pl-1 flex items-center gap-1 animate-fade-in">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Number verified ({countryCode} {phoneInput}). Your e-ticket and tracking link will be sent via SMS & WhatsApp.</span>
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* ── STEP 3: Choose Your Seat (Triggers Right Slide-Over Seat Drawer) ── */}
-          <div className="portal-stagger-3 portal-card-interactive bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
-            {/* Step Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 sm:p-6 gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-extrabold text-base flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-600/30">
-                  3
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
-                    Choose Your Seat
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 font-normal">
-                    Click on an available seat to select
-                  </p>
-                </div>
               </div>
 
-              {/* Right Side Pill Button: [ Select seat | → ] */}
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsSeatDrawerOpen(true)}
-                  className="inline-flex items-center rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all transform active:scale-95 overflow-hidden group cursor-pointer"
-                >
-                  <span className="px-5 py-2.5 sm:py-3">
-                    {selectedSeatIds.length > 0 ? 'Change seats' : 'Select seat'}
-                  </span>
-                  <span className="px-3.5 py-2.5 sm:py-3 bg-blue-700 group-hover:bg-blue-800 border-l border-blue-500/50 flex items-center justify-center transition-colors">
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            {/* Selected Seats List & Booking Type (Rendered When Seats are Selected) */}
-            {selectedSeatIds.length > 0 && (
-              <div className="p-5 sm:p-6 pt-0 space-y-6 animate-fade-in border-t border-slate-100">
-                {/* Gender Toast / Warning Banner */}
-                {genderToastMessage && (
-                  <div className="p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-900 font-bold text-xs sm:text-sm flex items-center justify-between shadow-md animate-bounce">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">⚠️</span>
-                      <span>{genderToastMessage}</span>
-                    </div>
-                    <button onClick={() => setGenderToastMessage(null)} className="text-amber-700 hover:text-amber-900 font-black">✕</button>
-                  </div>
-                )}
-
-                {/* List of Selected Seat rows */}
-                <div className="space-y-3 pt-4">
-                  {selectedSeatsList.map((s) => {
-                    const currentGender = seatGenders[s.id] || 'male';
-                    const valErr = getGenderValidationError(s.id, currentGender);
-
-                    return (
-                      <div key={s.id} className="space-y-2 p-3 sm:p-4 rounded-2xl bg-slate-50/80 border border-slate-200/90 shadow-2xs">
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3.5">
-                          <div className="flex items-center gap-2.5 sm:gap-3.5 flex-1 min-w-0">
-                            {/* Seat Box (Mockup Exact Style) */}
-                            <div className="w-[58px] sm:w-[64px] h-[64px] sm:h-[70px] rounded-xl border-[1.5px] border-slate-700 bg-white flex flex-col items-center justify-between p-1.5 shadow-2xs flex-shrink-0">
-                              <span className="text-base sm:text-lg font-extrabold text-slate-900 leading-none pt-0.5">
-                                {s.number}
-                              </span>
-                              <div className="w-5 h-1 rounded-sm border border-slate-700 my-0.5" />
-                              <div className={`w-full h-1.5 rounded-b-md ${currentGender === 'female' ? 'bg-pink-500' : 'bg-blue-600'} mt-auto`} />
-                            </div>
-
-                            {/* Dashed Input for Passenger Name */}
-                            <div className="flex-1 min-w-0">
-                              <input
-                                type="text"
-                                placeholder="Add a passenger name or keep it as your name"
-                                value={seatPassengerNames[s.id] || ''}
-                                onChange={(e) => setSeatPassengerNames(prev => ({ ...prev, [s.id]: e.target.value }))}
-                                className="w-full h-[64px] sm:h-[70px] px-4 sm:px-5 rounded-2xl border border-dashed border-slate-300 bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-xs sm:text-sm font-medium text-slate-800 placeholder:text-slate-400 transition-all outline-none"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                            {/* Price Box */}
-                            <div className="h-[64px] sm:h-[70px] px-4 sm:px-6 rounded-2xl border-2 border-blue-500 bg-white flex items-center justify-center font-extrabold text-blue-600 text-base sm:text-lg flex-shrink-0 tracking-tight shadow-2xs min-w-[100px]">
-                              LKR {s.price || 3430}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Per-Seat Gender Validation Error Warning */}
-                        {valErr && (
-                          <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-xs font-bold flex items-center gap-2 animate-pulse">
-                            <span className="text-sm">⚠️</span>
-                            <span>{valErr}</span>
-                          </div>
-                        )}
+              {/* Selected Seats List & Booking Type (Rendered When Seats are Selected) */}
+              {selectedSeatIds.length > 0 && (
+                <div className="p-5 sm:p-6 pt-0 space-y-6 animate-fade-in border-t border-slate-100">
+                  {/* Gender Toast / Warning Banner */}
+                  {genderToastMessage && (
+                    <div className="p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-900 font-bold text-xs sm:text-sm flex items-center justify-between shadow-md animate-bounce">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">⚠️</span>
+                        <span>{genderToastMessage}</span>
                       </div>
-                    );
-                  })}
-                </div>
-
-                {/* Booking Type Section */}
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">
-                        Booking Type
-                      </h4>
-                      <p className="text-xs text-slate-500 font-normal">
-                        Choose who the ticket is created for.
-                      </p>
+                      <button onClick={() => setGenderToastMessage(null)} className="text-amber-700 hover:text-amber-900 font-black">✕</button>
                     </div>
-                    <span className="px-3.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold">
-                      Sri Lanka only
-                    </span>
+                  )}
+
+                  {/* List of Selected Seat rows */}
+                  <div className="space-y-3 pt-4">
+                    {selectedSeatsList.map((s) => {
+                      const currentGender = seatGenders[s.id] || 'male';
+                      const valErr = getGenderValidationError(s.id, currentGender);
+
+                      return (
+                        <div key={s.id} className="space-y-2 p-3 sm:p-4 rounded-2xl bg-slate-50/80 border border-slate-200/90 shadow-2xs">
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3.5">
+                            <div className="flex items-center gap-2.5 sm:gap-3.5 flex-1 min-w-0">
+                              {/* Seat Box (Mockup Exact Style) */}
+                              <div className="w-[58px] sm:w-[64px] h-[64px] sm:h-[70px] rounded-xl border-[1.5px] border-slate-700 bg-white flex flex-col items-center justify-between p-1.5 shadow-2xs flex-shrink-0">
+                                <span className="text-base sm:text-lg font-extrabold text-slate-900 leading-none pt-0.5">
+                                  {s.number}
+                                </span>
+                                <div className="w-5 h-1 rounded-sm border border-slate-700 my-0.5" />
+                                <div className={`w-full h-1.5 rounded-b-md ${currentGender === 'female' ? 'bg-pink-500' : 'bg-blue-600'} mt-auto`} />
+                              </div>
+
+                              {/* Dashed Input for Passenger Name */}
+                              <div className="flex-1 min-w-0">
+                                <input
+                                  type="text"
+                                  placeholder="Add a passenger name or keep it as your name"
+                                  value={seatPassengerNames[s.id] || ''}
+                                  onChange={(e) => setSeatPassengerNames(prev => ({ ...prev, [s.id]: e.target.value }))}
+                                  className="w-full h-[64px] sm:h-[70px] px-4 sm:px-5 rounded-2xl border border-dashed border-slate-300 bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-xs sm:text-sm font-medium text-slate-800 placeholder:text-slate-400 transition-all outline-none"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                              {/* Price Box */}
+                              <div className="h-[64px] sm:h-[70px] px-4 sm:px-6 rounded-2xl border-2 border-blue-500 bg-white flex items-center justify-center font-extrabold text-blue-600 text-base sm:text-lg flex-shrink-0 tracking-tight shadow-2xs min-w-[100px]">
+                                LKR {s.price || 3430}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Per-Seat Gender Validation Error Warning */}
+                          {valErr && (
+                            <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-xs font-bold flex items-center gap-2 animate-pulse">
+                              <span className="text-sm">⚠️</span>
+                              <span>{valErr}</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
 
-                  {/* Switcher Pill Buttons */}
-                  <div className="p-1.5 bg-slate-100/90 rounded-2xl flex items-center gap-1.5 border border-slate-200/50">
-                    <button
-                      type="button"
-                      onClick={() => setBookingType('myself')}
-                      className={`flex-1 py-3 sm:py-3.5 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                        bookingType === 'myself'
-                          ? 'bg-white border border-blue-400 text-blue-600 shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      <User className="w-4 h-4" />
-                      <span>Book for myself</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBookingType('others')}
-                      className={`flex-1 py-3 sm:py-3.5 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                        bookingType === 'others'
-                          ? 'bg-white border border-blue-400 text-blue-600 shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      <Users className="w-4 h-4" />
-                      <span>Book for others</span>
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            )}
-          </div>
-
-          {/* ── STEP 4: Payment Method & Promo ── */}
-          <div className="portal-stagger-4 portal-card-interactive bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
-            <button
-              onClick={() => setOpenSection4(!openSection4)}
-              className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50/70 transition-colors cursor-pointer group"
-            >
-              <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-600/30 portal-badge-pulse">
-                  4
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">
-                    Payment Method
-                  </h3>
-                  <p className="text-xs text-slate-500 font-normal">Select your payment method from below.</p>
-                </div>
-              </div>
-              <div className="p-1.5 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
-                <div className={`transition-transform duration-300 ${openSection4 ? 'rotate-0' : '-rotate-180'}`}>
-                  <ChevronUp className="w-4 h-4" />
-                </div>
-              </div>
-            </button>
-
-            {openSection4 && (
-              <div className="p-5 sm:p-6 pt-1 border-t border-slate-100 space-y-4 animate-fade-in">
-                
-                {/* Pay By IPG Card (Highlighted Mockup Style) */}
-                <div 
-                  onClick={() => setPaymentMethod('card')}
-                  className={`p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-center gap-4 hover:-translate-y-0.5 ${
-                    paymentMethod === 'card'
-                      ? 'border-blue-600 bg-blue-50/40 shadow-xs ring-2 ring-blue-500/20'
-                      : 'border-slate-200 bg-slate-50/40 hover:bg-white hover:border-slate-300'
-                  }`}
-                >
-                  <div className="w-5 h-5 rounded-full border-2 border-blue-600 flex items-center justify-center">
-                    {paymentMethod === 'card' && <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-scale-in" />}
-                  </div>
-
-                  <div className="flex-1 flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
-                      {/* IPG / Card Gateway Badges */}
-                      <span className="px-2 py-0.5 rounded bg-blue-600 text-white font-black text-[10px] tracking-wider shadow-2xs">
-                        IPG PAY
-                      </span>
-                      <span className="text-xs font-bold text-slate-800">
-                        Pay By IPG (For passengers who would like to pay online.)
+                  {/* Booking Type Section */}
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">
+                          Booking Type
+                        </h4>
+                        <p className="text-xs text-slate-500 font-normal">
+                          Choose who the ticket is created for.
+                        </p>
+                      </div>
+                      <span className="px-3.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold">
+                        Sri Lanka only
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-600">
-                      <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">VISA</span>
-                      <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">MasterCard</span>
-                      <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">LankaQR</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Alternative: Pay On Board / Conductor Cash */}
-                <div 
-                  onClick={() => setPaymentMethod('wallet')}
-                  className={`p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-center gap-4 hover:-translate-y-0.5 ${
-                    paymentMethod === 'wallet'
-                      ? 'border-blue-600 bg-blue-50/40 shadow-xs ring-2 ring-blue-500/20'
-                      : 'border-slate-200 bg-slate-50/40 hover:bg-white hover:border-slate-300'
-                  }`}
-                >
-                  <div className="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center">
-                    {paymentMethod === 'wallet' && <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-scale-in" />}
-                  </div>
-
-                  <div className="flex-1">
-                    <span className="text-xs font-bold text-slate-800">
-                      Pay On Board (Cash to Conductor / At Boarding Point Counter)
-                    </span>
-                    <p className="text-[11px] text-slate-500">Pay directly in cash when boarding the bus.</p>
-                  </div>
-                </div>
-
-                {/* Promo Code & Travel Insurance */}
-                <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Promo Input */}
-                  <form onSubmit={handleApplyPromo} className="space-y-1">
-                    <label className="block text-[11px] font-bold text-slate-700">Have a Promo Code?</label>
-                    <div className="flex gap-1.5">
-                      <input
-                        type="text"
-                        placeholder="e.g. BUS2026"
-                        value={promoInput}
-                        onChange={(e) => setPromoInput(e.target.value)}
-                        className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs uppercase font-mono font-bold focus:outline-none focus:border-blue-500 transition-colors"
-                      />
+                    {/* Switcher Pill Buttons */}
+                    <div className="p-1.5 bg-slate-100/90 rounded-2xl flex items-center gap-1.5 border border-slate-200/50">
                       <button
-                        type="submit"
-                        className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all cursor-pointer active:scale-95"
+                        type="button"
+                        onClick={() => setBookingType('myself')}
+                        className={`flex-1 py-3 sm:py-3.5 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                          bookingType === 'myself'
+                            ? 'bg-white border border-blue-400 text-blue-600 shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
                       >
-                        Apply
+                        <User className="w-4 h-4" />
+                        <span>Book for myself</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBookingType('others')}
+                        className={`flex-1 py-3 sm:py-3.5 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                          bookingType === 'others'
+                            ? 'bg-white border border-blue-400 text-blue-600 shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        <Users className="w-4 h-4" />
+                        <span>Book for others</span>
                       </button>
                     </div>
-                    {promoMessage && (
-                      <p className={`text-[11px] font-semibold animate-fade-in ${promoMessage.type === 'success' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                        {promoMessage.text}
-                      </p>
-                    )}
-                  </form>
-                </div>
+                  </div>
 
-              </div>
-            )}
-          </div>
+                  {/* Continue to Step 4 Action Button */}
+                  <div className="pt-3 flex justify-end border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={handleStep3Proceed}
+                      className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                    >
+                      <span>Proceed to Step 4: Payment Method</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── STEP 4: Payment Method & Promo ── */}
+          {isStep4Unlocked && (
+            <div className="portal-stagger-4 portal-card-interactive bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden animate-fade-in">
+              <button
+                onClick={() => setOpenSection4(!openSection4)}
+                className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50/70 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className={`w-9 h-9 rounded-full text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-sm transition-all ${
+                    isStep4Done ? 'bg-emerald-600 shadow-emerald-600/30' : 'bg-blue-600 shadow-blue-600/30 portal-badge-pulse'
+                  }`}>
+                    {isStep4Done ? <Check className="w-4 h-4 text-white" /> : '4'}
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors flex items-center gap-2">
+                      <span>Payment Method</span>
+                      {isStep4Done && (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                          Selected ✓
+                        </span>
+                      )}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-normal">Select your payment method from below.</p>
+                  </div>
+                </div>
+                <div className="p-1.5 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
+                  <div className={`transition-transform duration-300 ${openSection4 ? 'rotate-0' : '-rotate-180'}`}>
+                    <ChevronUp className="w-4 h-4" />
+                  </div>
+                </div>
+              </button>
+
+              {openSection4 && (
+                <div className="p-5 sm:p-6 pt-1 border-t border-slate-100 space-y-4 animate-fade-in">
+                  
+                  {/* Pay By IPG Card (Highlighted Mockup Style) */}
+                  <div 
+                    onClick={() => setPaymentMethod('card')}
+                    className={`p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-center gap-4 hover:-translate-y-0.5 ${
+                      paymentMethod === 'card'
+                        ? 'border-blue-600 bg-blue-50/40 shadow-xs ring-2 ring-blue-500/20'
+                        : 'border-slate-200 bg-slate-50/40 hover:bg-white hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="w-5 h-5 rounded-full border-2 border-blue-600 flex items-center justify-center">
+                      {paymentMethod === 'card' && <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-scale-in" />}
+                    </div>
+
+                    <div className="flex-1 flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        {/* IPG / Card Gateway Badges */}
+                        <span className="px-2 py-0.5 rounded bg-blue-600 text-white font-black text-[10px] tracking-wider shadow-2xs">
+                          IPG PAY
+                        </span>
+                        <span className="text-xs font-bold text-slate-800">
+                          Pay By IPG (For passengers who would like to pay online.)
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-600">
+                        <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">VISA</span>
+                        <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">MasterCard</span>
+                        <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">LankaQR</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Alternative: Pay On Board / Conductor Cash */}
+                  <div 
+                    onClick={() => setPaymentMethod('wallet')}
+                    className={`p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-center gap-4 hover:-translate-y-0.5 ${
+                      paymentMethod === 'wallet'
+                        ? 'border-blue-600 bg-blue-50/40 shadow-xs ring-2 ring-blue-500/20'
+                        : 'border-slate-200 bg-slate-50/40 hover:bg-white hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center">
+                      {paymentMethod === 'wallet' && <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-scale-in" />}
+                    </div>
+
+                    <div className="flex-1">
+                      <span className="text-xs font-bold text-slate-800">
+                        Pay On Board (Cash to Conductor / At Boarding Point Counter)
+                      </span>
+                      <p className="text-[11px] text-slate-500">Pay directly in cash when boarding the bus.</p>
+                    </div>
+                  </div>
+
+                  {/* Promo Code & Travel Insurance */}
+                  <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Promo Input */}
+                    <form onSubmit={handleApplyPromo} className="space-y-1">
+                      <label className="block text-[11px] font-bold text-slate-700">Have a Promo Code?</label>
+                      <div className="flex gap-1.5">
+                        <input
+                          type="text"
+                          placeholder="e.g. BUS2026"
+                          value={promoInput}
+                          onChange={(e) => setPromoInput(e.target.value)}
+                          className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs uppercase font-mono font-bold focus:outline-none focus:border-blue-500 transition-colors"
+                        />
+                        <button
+                          type="submit"
+                          className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all cursor-pointer active:scale-95"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                      {promoMessage && (
+                        <p className={`text-[11px] font-semibold animate-fade-in ${promoMessage.type === 'success' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {promoMessage.text}
+                        </p>
+                      )}
+                    </form>
+                  </div>
+
+                  <div className="pt-3 flex justify-end border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={handleStep4Proceed}
+                      className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                    >
+                      <span>Proceed to Step 5: Final Review & Checkout</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                </div>
+              )}
+            </div>
+          )}
 
         </div>
 
@@ -975,123 +1233,137 @@ export const SeatMap: React.FC = () => {
         <div className="lg:col-span-4 space-y-5 lg:sticky lg:top-24">
 
           {/* ── CARD 5: Your Booking (Proceed To Checkout) ── */}
-          <div className="portal-stagger-5 portal-card-interactive bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-600/30 portal-badge-pulse">
-                  5
+          {isStep5Unlocked ? (
+            <div className="portal-stagger-5 portal-card-interactive bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden animate-fade-in">
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-600/30 portal-badge-pulse">
+                    5
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 leading-tight">Your Booking</h3>
+                    <p className="text-xs text-slate-500 font-normal">Proceed To Checkout.</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 leading-tight">Your Booking</h3>
-                  <p className="text-xs text-slate-500 font-normal">Proceed To Checkout.</p>
-                </div>
+                <button
+                  onClick={() => setOpenSection5(!openSection5)}
+                  className="p-1.5 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
+                >
+                  <div className={`transition-transform duration-300 ${openSection5 ? 'rotate-0' : '-rotate-180'}`}>
+                    <ChevronUp className="w-4 h-4" />
+                  </div>
+                </button>
               </div>
-              <button
-                onClick={() => setOpenSection5(!openSection5)}
-                className="p-1.5 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
-              >
-                <div className={`transition-transform duration-300 ${openSection5 ? 'rotate-0' : '-rotate-180'}`}>
-                  <ChevronUp className="w-4 h-4" />
-                </div>
-              </button>
-            </div>
 
-            {openSection5 && (
-              <div className="p-5 space-y-4 animate-fade-in">
-                {/* Selected Seats Section */}
-                <div className="space-y-2">
-                  <span className="text-xs font-bold text-slate-800 block">Selected Seats.</span>
-                  
-                  {selectedSeatIds.length === 0 ? (
-                    <div className="p-4 rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-center">
-                      <p className="text-xs text-slate-500">No seats selected yet.</p>
-                      <button
-                        type="button"
-                        onClick={() => setIsSeatDrawerOpen(true)}
-                        className="text-xs font-bold text-blue-600 hover:underline mt-1 inline-block"
-                      >
-                        Choose Seats on Map →
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
-                      {selectedSeatsList.map(s => (
-                        <div key={s.id} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs animate-scale-in">
-                          <span className="font-bold text-slate-800">Seat #{s.number}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-blue-600 font-bold">LKR {s.price.toLocaleString()}</span>
-                            <button
-                              onClick={() => toggleSeatSelection(s.id)}
-                              className="text-slate-400 hover:text-red-500 font-bold transition-colors"
-                            >
-                              ✕
-                            </button>
+              {openSection5 && (
+                <div className="p-5 space-y-4 animate-fade-in">
+                  {/* Selected Seats Section */}
+                  <div className="space-y-2">
+                    <span className="text-xs font-bold text-slate-800 block">Selected Seats.</span>
+                    
+                    {selectedSeatIds.length === 0 ? (
+                      <div className="p-4 rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-center">
+                        <p className="text-xs text-slate-500">No seats selected yet.</p>
+                        <button
+                          type="button"
+                          onClick={() => setIsSeatDrawerOpen(true)}
+                          className="text-xs font-bold text-blue-600 hover:underline mt-1 inline-block"
+                        >
+                          Choose Seats on Map →
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                        {selectedSeatsList.map(s => (
+                          <div key={s.id} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs animate-scale-in">
+                            <span className="font-bold text-slate-800">Seat #{s.number}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-blue-600 font-bold">LKR {s.price.toLocaleString()}</span>
+                              <button
+                                onClick={() => toggleSeatSelection(s.id)}
+                                className="text-slate-400 hover:text-red-500 font-bold transition-colors"
+                              >
+                                ✕
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Price Breakdown */}
-                {selectedSeatIds.length > 0 && (
-                  <div className="space-y-1.5 pt-2 border-t border-slate-100 text-xs text-slate-600 animate-fade-in">
-                    <div className="flex justify-between">
-                      <span>Base Ticket Fare</span>
-                      <span className="font-mono font-semibold text-slate-800">LKR {baseTotal.toLocaleString()}</span>
-                    </div>
-                    {discountRate > 0 && (
-                      <div className="flex justify-between text-emerald-600 font-bold">
-                        <span>Promo Discount ({(discountRate * 100).toFixed(0)}%)</span>
-                        <span className="font-mono">- LKR {discountAmount.toLocaleString()}</span>
+                        ))}
                       </div>
                     )}
                   </div>
-                )}
 
-                {/* Sub Total Royal Blue Bar (Animated Gradient Style) */}
-                <div className="p-3.5 rounded-2xl portal-subtotal-gradient text-white flex items-center justify-between shadow-md">
-                  <span className="text-xs font-bold">
-                    Sub Total ({selectedSeatIds.length} Seats)
-                  </span>
-                  <span className="text-sm font-mono font-black tracking-tight">
-                    LKR {finalTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-
-                {/* Security Badge */}
-                <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 bg-slate-50 p-2 rounded-xl border border-slate-100">
-                  <Lock className="w-3 h-3 text-slate-400" />
-                  <span>Your information is never shared with third parties.</span>
-                </div>
-
-                {/* Proceed To Checkout CTA Button */}
-                <button
-                  type="button"
-                  disabled={isSubmitting || selectedSeatIds.length === 0}
-                  onClick={handleProceedToCheckout}
-                  className={`w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all duration-300 transform active:scale-95 group relative overflow-hidden ${
-                    selectedSeatIds.length > 0 && !isSubmitting
-                      ? 'bg-slate-900 hover:bg-blue-600 text-white cursor-pointer hover:shadow-xl hover:-translate-y-0.5'
-                      : 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
-                  }`}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                      <span>Confirming Booking...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Proceed To Checkout</span>
-                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </>
+                  {/* Price Breakdown */}
+                  {selectedSeatIds.length > 0 && (
+                    <div className="space-y-1.5 pt-2 border-t border-slate-100 text-xs text-slate-600 animate-fade-in">
+                      <div className="flex justify-between">
+                        <span>Base Ticket Fare</span>
+                        <span className="font-mono font-semibold text-slate-800">LKR {baseTotal.toLocaleString()}</span>
+                      </div>
+                      {discountRate > 0 && (
+                        <div className="flex justify-between text-emerald-600 font-bold">
+                          <span>Promo Discount ({(discountRate * 100).toFixed(0)}%)</span>
+                          <span className="font-mono">- LKR {discountAmount.toLocaleString()}</span>
+                        </div>
+                      )}
+                    </div>
                   )}
-                </button>
 
+                  {/* Sub Total Royal Blue Bar (Animated Gradient Style) */}
+                  <div className="p-3.5 rounded-2xl portal-subtotal-gradient text-white flex items-center justify-between shadow-md">
+                    <span className="text-xs font-bold">
+                      Sub Total ({selectedSeatIds.length} Seats)
+                    </span>
+                    <span className="text-sm font-mono font-black tracking-tight">
+                      LKR {finalTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+
+                  {/* Security Badge */}
+                  <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                    <Lock className="w-3 h-3 text-slate-400" />
+                    <span>Your information is never shared with third parties.</span>
+                  </div>
+
+                  {/* Proceed To Checkout CTA Button */}
+                  <button
+                    type="button"
+                    disabled={isSubmitting || selectedSeatIds.length === 0}
+                    onClick={handleProceedToCheckout}
+                    className={`w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all duration-300 transform active:scale-95 group relative overflow-hidden ${
+                      selectedSeatIds.length > 0 && !isSubmitting
+                        ? 'bg-slate-900 hover:bg-blue-600 text-white cursor-pointer hover:shadow-xl hover:-translate-y-0.5'
+                        : 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
+                    }`}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                        <span>Confirming Booking...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Proceed To Checkout</span>
+                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </button>
+
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="bg-slate-50/80 rounded-3xl border-2 border-dashed border-slate-200 p-6 text-center space-y-3 shadow-2xs">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center mx-auto shadow-2xs">
+                <Lock className="w-6 h-6 text-slate-400" />
               </div>
-            )}
-          </div>
+              <div>
+                <h4 className="text-sm font-extrabold text-slate-800">Step 5: Checkout Locked</h4>
+                <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
+                  Complete Steps 1 to 4 to unlock your booking summary & checkout.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* ── Important Notice Card (Mockup Style) ── */}
           <div className="portal-stagger-6 portal-card-interactive rounded-3xl bg-blue-50/80 border border-blue-200/80 p-5 space-y-2.5 text-xs text-blue-950 shadow-2xs hover:border-blue-300 transition-all">
@@ -1172,22 +1444,24 @@ export const SeatMap: React.FC = () => {
                 <div className="border border-blue-500/80 rounded-xl px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50/50 flex items-center gap-2 shadow-2xs">
                   <Crown className="w-4 h-4 text-blue-600 flex-shrink-0" />
                   <div className="text-left leading-tight">
-                    <div className="text-[10px] font-black text-blue-600 tracking-wider uppercase">Economy Luxury</div>
+                    <div className="text-[10px] font-black text-blue-600 tracking-wider uppercase">
+                      {selectedRoute.busType?.includes('Normal') || selectedRoute.busType?.includes('3*2') || selectedRoute.busType?.includes('Leyland') ? 'Normal Service' : 'Super Luxury'}
+                    </div>
                     <div className="text-xs font-black text-slate-900 font-mono">
-                      LKR {selectedRoute.seats[0]?.price || 3430}
+                      LKR {validatedSeatPrice.toLocaleString()}
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* ════ CLEAN MINIMALIST BUS COACH CONTAINER ════ */}
-              <div className="relative rounded-3xl border border-slate-200 bg-slate-50/70 p-3 sm:p-5 shadow-sm overflow-hidden">
+              <div className="relative rounded-3xl border border-slate-200 bg-slate-50/70 p-3 sm:p-5 shadow-sm">
                 
                 {/* ── Minimalist Front Cockpit / Driver Bar ── */}
                 <div className="flex items-center justify-between px-4 py-2.5 bg-white border border-slate-200/90 rounded-2xl mb-4 shadow-2xs">
-                  <div className="flex items-center gap-2 text-xs font-extrabold text-emerald-600">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span>Entrance Door</span>
+                  <div className="flex items-center gap-2 text-xs font-extrabold text-amber-600">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                    <span>Exit Door</span>
                   </div>
 
                   <div className="flex items-center gap-1.5 text-xs font-extrabold text-sky-600 bg-sky-50/70 px-2.5 py-1 rounded-xl border border-sky-200/80">
@@ -1205,18 +1479,19 @@ export const SeatMap: React.FC = () => {
                   <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-10 sm:w-12 pointer-events-none rounded-xl bg-slate-200/40 border-x border-slate-200/60 z-0" />
 
                   {([
-                    { rowNum: 1, left: ['3', '4'], right: ['2', '1'] },
-                    { rowNum: 2, left: ['7', '8'], right: ['6', '5'] },
-                    { rowNum: 3, left: ['11', '12'], right: ['10', '9'] },
-                    { rowNum: 4, left: ['15', '16'], right: ['14', '13'] },
-                    { rowNum: 5, left: ['19', '20'], right: ['18', '17'] },
-                    { rowNum: 6, left: ['23', '24'], right: ['22', '21'] },
-                    { rowNum: 7, left: ['27', '28'], right: ['26', '25'] },
-                    { rowNum: 8, left: ['31', '32'], right: ['30', '29'] },
-                    { rowNum: 9, left: ['35', '36'], right: ['34', '33'] },
-                    { rowNum: 10, left: ['39', '40'], right: ['38', '37'] },
-                    { rowNum: 11, left: ['43', '44'], right: ['42', '41'] },
-                    { rowNum: 12, isRear: true, seats: ['47', '48', '49', '46', '45'] },
+                    { rowNum: 0, left: ['1'], right: [] },
+                    { rowNum: 1, left: ['2', '3'], right: ['4', '5', '6'] },
+                    { rowNum: 2, left: ['7', '8'], right: ['9', '10', '11'] },
+                    { rowNum: 3, left: ['12', '13'], right: ['14', '15', '16'] },
+                    { rowNum: 4, left: ['17', '18'], right: ['19', '20', '21'] },
+                    { rowNum: 5, left: ['22', '23'], right: ['24', '25', '26'] },
+                    { rowNum: 6, left: ['27', '28'], right: ['29', '30', '31'] },
+                    { rowNum: 7, left: ['32', '33'], right: ['34', '35', '36'] },
+                    { rowNum: 8, left: ['37', '38'], right: ['39', '40', '41'] },
+                    { rowNum: 9, left: ['42', '43'], right: ['44', '45', '46'] },
+                    { rowNum: 10, left: [], right: ['47', '48', '49'] },
+                    { rowNum: 11, left: [], right: ['50', '51', '52'] },
+                    { rowNum: 12, isRear: true, seats: ['53', '54', '55', '56', '57', '58'] },
                   ] as Array<{ rowNum: number; left?: string[]; right?: string[]; isRear?: boolean; seats?: string[] }>).map((row, rIdx) => {
                     
                     // Render Rear 5-Seat Bench
@@ -1234,7 +1509,7 @@ export const SeatMap: React.FC = () => {
                               number: seatNumStr,
                               row: 12,
                               col: sIdx + 1,
-                              price: selectedRoute.seats[0]?.price || 3430,
+                              price: selectedRoute.seats[0]?.price || selectedRoute.priceStarting || 1860,
                               status: 'available' as const,
                               deck: 'lower' as DeckType
                             };
@@ -1261,7 +1536,7 @@ export const SeatMap: React.FC = () => {
                                         SEAT #{seatNumStr} • {sIdx === 2 ? 'REAR CENTER' : sIdx === 0 || sIdx === 4 ? 'WINDOW' : 'AISLE'}
                                       </div>
                                       <div className="text-xs font-mono font-extrabold text-emerald-600">
-                                        LKR {seat.price || selectedRoute.seats[0]?.price || 3430}
+                                        LKR {validatedSeatPrice.toLocaleString()}
                                       </div>
                                     </div>
                                     <div className="w-2 h-2 bg-white border-b border-r border-slate-300 rotate-45 -mt-1 shadow-2xs" />
@@ -1318,7 +1593,21 @@ export const SeatMap: React.FC = () => {
                       >
                         {/* Left Column Seats */}
                         <div className="flex items-center gap-1.5 sm:gap-2">
-                          {leftSeats.map((seatNumStr, sIdx) => {
+                          {leftSeats.length === 0 ? (
+                            row.rowNum === 10 ? (
+                              <div className="relative w-[106px] sm:w-[120px] h-[50px] sm:h-[56px]">
+                                <div className="absolute top-0 left-0 w-[106px] sm:w-[120px] h-[112px] sm:h-[126px] z-20 flex items-center justify-center">
+                                  <div className="w-full py-2.5 px-2 rounded-2xl border border-dashed border-emerald-400 bg-emerald-50/90 backdrop-blur-xs flex items-center justify-center gap-1.5 text-[11px] font-extrabold text-emerald-700 shadow-sm">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+                                    <span>Entrance Door</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="w-[106px] sm:w-[120px] h-[50px] sm:h-[56px] pointer-events-none select-none" />
+                            )
+                          ) : (
+                            leftSeats.map((seatNumStr, sIdx) => {
                             const normalizedNum = seatNumStr.replace(/^0+/, '');
                             const existingSeat = selectedRoute.seats.find(s => s.id === `${selectedRoute.id}-${normalizedNum}` || s.number === normalizedNum || s.number === seatNumStr || s.id === seatNumStr);
                             const seat = existingSeat || {
@@ -1326,17 +1615,19 @@ export const SeatMap: React.FC = () => {
                               number: seatNumStr,
                               row: row.rowNum,
                               col: sIdx + 1,
-                              price: selectedRoute.seats[0]?.price || 3430,
+                              price: selectedRoute.seats[0]?.price || selectedRoute.priceStarting || 1860,
                               status: 'available' as const,
                               deck: 'lower' as DeckType
                             };
 
+                            const isNormalService = selectedRoute.busType?.includes('Normal Service') || selectedRoute.busType?.includes('3*2') || selectedRoute.busType?.includes('Leyland');
+                            const isSeat1 = seatNumStr === '1' || normalizedNum === '1';
                             const isSelected = selectedSeatIds.includes(seat.id) || selectedSeatIds.includes(seatNumStr) || selectedSeatIds.includes(normalizedNum);
                             const isBooked = seat.status === 'booked';
                             const isBookedFemale = isBooked && ((seat as any).gender === 'female' || (seat as any).isFemaleBooked);
                             const isBookedMale = isBooked && !isBookedFemale;
                             const isReserved = !isBooked && !isSelected && (seat.isFemaleOnly || seat.status === 'blocked');
-                            const isUnavailable = seat.status === 'unavailable' || seat.status === 'locked';
+                            const isUnavailable = seat.status === 'unavailable' || seat.status === 'locked' || (isNormalService && isSeat1);
 
                             return (
                               <div 
@@ -1347,16 +1638,20 @@ export const SeatMap: React.FC = () => {
                               >
                                 {/* Floating Light Tooltip */}
                                 {hoveredSeatNum === seatNumStr && (
-                                  <div className="absolute -top-11 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
+                                  <div className={`absolute -top-12 z-50 pointer-events-none animate-scale-in flex flex-col ${
+                                    sIdx === 0 ? 'left-0 translate-x-0 items-start' : 'left-1/2 -translate-x-1/2 items-center'
+                                  }`}>
                                     <div className="border border-slate-300 rounded-lg px-2.5 py-1 bg-white text-slate-900 shadow-md whitespace-nowrap text-left leading-tight">
-                                      <div className="text-[10px] font-bold text-blue-600">
-                                        SEAT #{seatNumStr} • {sIdx === 0 ? 'LEFT WINDOW' : 'LEFT AISLE'}
+                                      <div className={`text-[10px] font-bold ${isSeat1 ? 'text-rose-600' : 'text-blue-600'}`}>
+                                        SEAT #{seatNumStr} • {isSeat1 ? 'CREW / CONDUCTOR SEAT (UNAVAILABLE)' : sIdx === 0 ? 'LEFT WINDOW' : 'LEFT AISLE'}
                                       </div>
                                       <div className="text-xs font-mono font-extrabold text-emerald-600">
-                                        LKR {seat.price || selectedRoute.seats[0]?.price || 3430}
+                                        {isSeat1 ? 'NOT FOR BOOKING' : `LKR ${validatedSeatPrice.toLocaleString()}`}
                                       </div>
                                     </div>
-                                    <div className="w-2 h-2 bg-white border-b border-r border-slate-300 rotate-45 -mt-1 shadow-2xs" />
+                                    <div className={`w-2 h-2 bg-white border-b border-r border-slate-300 rotate-45 -mt-1 shadow-2xs ${
+                                      sIdx === 0 ? 'ml-4' : ''
+                                    }`} />
                                   </div>
                                 )}
 
@@ -1395,7 +1690,8 @@ export const SeatMap: React.FC = () => {
                                 </button>
                               </div>
                             );
-                          })}
+                          })
+                        )}
                         </div>
 
                         {/* Minimalist Aisle Space */}
@@ -1411,7 +1707,7 @@ export const SeatMap: React.FC = () => {
                               number: seatNumStr,
                               row: row.rowNum,
                               col: sIdx + 3,
-                              price: selectedRoute.seats[0]?.price || 3430,
+                              price: selectedRoute.seats[0]?.price || selectedRoute.priceStarting || 1860,
                               status: 'available' as const,
                               deck: 'lower' as DeckType
                             };
@@ -1432,16 +1728,20 @@ export const SeatMap: React.FC = () => {
                               >
                                 {/* Floating Light Tooltip */}
                                 {hoveredSeatNum === seatNumStr && (
-                                  <div className="absolute -top-11 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
+                                  <div className={`absolute -top-12 z-50 pointer-events-none animate-scale-in flex flex-col ${
+                                    sIdx === rightSeats.length - 1 ? 'right-0 left-auto translate-x-0 items-end' : 'left-1/2 -translate-x-1/2 items-center'
+                                  }`}>
                                     <div className="border border-slate-300 rounded-lg px-2.5 py-1 bg-white text-slate-900 shadow-md whitespace-nowrap text-left leading-tight">
                                       <div className="text-[10px] font-bold text-blue-600">
-                                        SEAT #{seatNumStr} • {sIdx === 0 ? 'RIGHT AISLE' : 'RIGHT WINDOW'}
+                                        SEAT #{seatNumStr} • {sIdx === 0 ? 'RIGHT AISLE' : sIdx === 1 ? 'RIGHT MIDDLE' : 'RIGHT WINDOW'}
                                       </div>
                                       <div className="text-xs font-mono font-extrabold text-emerald-600">
-                                        LKR {seat.price || selectedRoute.seats[0]?.price || 3430}
+                                        LKR {validatedSeatPrice.toLocaleString()}
                                       </div>
                                     </div>
-                                    <div className="w-2 h-2 bg-white border-b border-r border-slate-300 rotate-45 -mt-1 shadow-2xs" />
+                                    <div className={`w-2 h-2 bg-white border-b border-r border-slate-300 rotate-45 -mt-1 shadow-2xs ${
+                                      sIdx === rightSeats.length - 1 ? 'mr-4' : ''
+                                    }`} />
                                   </div>
                                 )}
 

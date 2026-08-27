@@ -2,7 +2,7 @@ import type { BusRoute, Seat } from '../types/booking';
 
 const generateSeats = (busType: string, hasUpperDeck: boolean = false): Seat[] => {
   const seats: Seat[] = [];
-  const basePrice = busType.includes('Sleeper') ? 2800 : 1800;
+  const basePrice = (busType.includes('Normal Service') || busType.includes('3*2') || busType.includes('Leyland')) ? 1160 : (busType.includes('Super Luxury') || busType.includes('Luxury')) ? 2670 : busType.includes('Sleeper') ? 2800 : 2670;
 
   // Super Luxury 49-seat 2*2 layout (Sri Lanka Express Coach 1-49)
   if (busType.includes('49 Seats') || busType.includes('Super Luxury')) {
@@ -33,92 +33,73 @@ const generateSeats = (busType: string, hasUpperDeck: boolean = false): Seat[] =
     return seats;
   }
 
-  // Ashok Leyland 54-seat 3*2 layout.
-  if (busType.includes('Ashok Leyland (54 Seats 3*2')) {
-    for (let r = 1; r <= 10; r++) {
-      [1, 2, 3, 5, 6].forEach((c) => {
-        const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
-        seats.push({ id: seatNum, number: seatNum, deck: 'lower', row: r, col: c, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 3 });
-      });
-    }
-    [1, 2, 3, 5].forEach((c) => {
-      const seatNum = `11${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
-      seats.push({ id: seatNum, number: seatNum, deck: 'lower', row: 12, col: c, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: false });
+  // Ashok Leyland Normal Service 58-Seat 3*2 layout (Matching exact user diagram)
+  if (busType.includes('Ashok Leyland') || busType.includes('Normal Service') || busType.includes('58 Seats') || busType.includes('54 Seats 3*2') || busType.includes('3*2')) {
+    const femaleSeats = ['7', '8', '9', '10', '11', '12', '13', '14', '15', '16'];
+    const bookedSeats = ['3', '15', '22', '31'];
+
+    // Row 0: Top left single seat #1 (Mandatory Unavailable for Crew/Conductor)
+    seats.push({
+      id: '1', number: '1', deck: 'lower', row: 0, col: 1, price: basePrice,
+      status: 'unavailable', isSleeper: false, isFemaleOnly: false
     });
-    return seats;
-  }
 
-  // Ashok Leyland 54-seat 2*2 layout.
-  if (busType.includes('Ashok Leyland (54 Seats')) {
-    for (let r = 1; r <= 13; r++) {
-      [1, 2, 4, 5].forEach((c) => {
-        const seatNum = `${r}${String.fromCharCode(64 + (c > 3 ? c - 1 : c))}`;
-        seats.push({ id: seatNum, number: seatNum, deck: 'lower', row: r, col: c, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 2 });
-      });
-    }
-    [1, 2].forEach((c) => {
-      const seatNum = `14${String.fromCharCode(64 + c)}`;
-      seats.push({ id: seatNum, number: seatNum, deck: 'lower', row: 14, col: c, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: false });
-    });
-    return seats;
-  }
-
-  // Yutong 48- or 51-seat 2*2 layout.
-  if (busType.includes('Yutong')) {
-    for (let r = 1; r <= 12; r++) {
-      [1, 2, 4, 5].forEach((c) => {
-        const seatNum = `Y${r}${String.fromCharCode(64 + (c > 3 ? c - 1 : c))}`;
-        seats.push({ id: seatNum, number: seatNum, deck: 'lower', row: r, col: c, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 2 });
-      });
-    }
-    if (busType.includes('51 Seats')) {
-      [1, 2, 3].forEach((c) => {
-        const seatNum = `Y13${String.fromCharCode(64 + c)}`;
-        seats.push({ id: seatNum, number: seatNum, deck: 'lower', row: 13, col: c, price: basePrice, status: 'available', isSleeper: false, isFemaleOnly: false });
-      });
-    }
-    return seats;
-  }
-
-  // Legacy Lanka Ashok Leyland 57-seat 3*2 model.
-  if (busType.includes('3*2') || busType.includes('Leyland')) {
-    const totalRows = 11;
-    for (let r = 1; r <= totalRows; r++) {
-      const cols = [1, 2, 3, 5, 6];
-      cols.forEach((c) => {
-        const isFemaleOnly = (r === 2 || r === 3) && (c === 1 || c === 2 || c === 3);
-        const seatLetter = String.fromCharCode(64 + (c > 4 ? c - 1 : c));
-        const seatNum = `${r}${seatLetter}`;
-        const isBooked = (r === 1 && c === 1) || (r === 3 && c === 5) || (r === 6 && c === 2);
-
+    // Rows 1-9: 2 seats left (cols 1, 2), 3 seats right (cols 4, 5, 6)
+    let currentNum = 2;
+    for (let r = 1; r <= 9; r++) {
+      [1, 2, 4, 5, 6].forEach((c) => {
+        const numStr = currentNum.toString();
         seats.push({
-          id: seatNum,
-          number: seatNum,
+          id: numStr,
+          number: numStr,
           deck: 'lower',
           row: r,
           col: c,
           price: basePrice,
-          status: isBooked ? 'booked' : 'available',
+          status: bookedSeats.includes(numStr) ? 'booked' : 'available',
           isSleeper: false,
-          isFemaleOnly,
+          isFemaleOnly: femaleSeats.includes(numStr)
         });
+        currentNum++;
       });
     }
-    // Row 12: 2 seats for 57 seats total
-    [1, 2].forEach((c) => {
-      const seatNum = `12${String.fromCharCode(64 + c)}`;
+
+    // Rows 10 & 11: 3 seats right only (cols 4, 5, 6 - left side is door/stairwell gap)
+    for (let r = 10; r <= 11; r++) {
+      [4, 5, 6].forEach((c) => {
+        const numStr = currentNum.toString();
+        seats.push({
+          id: numStr,
+          number: numStr,
+          deck: 'lower',
+          row: r,
+          col: c,
+          price: basePrice,
+          status: 'available',
+          isSleeper: false,
+          isFemaleOnly: false
+        });
+        currentNum++;
+      });
+    }
+
+    // Row 12: 6 seats across the back wall (cols 1, 2, 3, 4, 5, 6)
+    [1, 2, 3, 4, 5, 6].forEach((c) => {
+      const numStr = currentNum.toString();
       seats.push({
-        id: seatNum,
-        number: seatNum,
+        id: numStr,
+        number: numStr,
         deck: 'lower',
         row: 12,
         col: c,
         price: basePrice,
         status: 'available',
         isSleeper: false,
-        isFemaleOnly: false,
+        isFemaleOnly: false
       });
+      currentNum++;
     });
+
     return seats;
   }
 
@@ -221,7 +202,7 @@ export const MOCK_ROUTES: BusRoute[] = [
     departureTime: '05:00 AM',
     arrivalTime: '11:30 AM',
     duration: '6h 30m',
-    priceStarting: 950,
+    priceStarting: 1160,
     availableSeatsCount: 34,
     totalSeatsCount: 54,
     hasUpperDeck: false,
@@ -259,7 +240,7 @@ export const MOCK_ROUTES: BusRoute[] = [
     departureTime: '06:30 AM',
     arrivalTime: '12:30 PM',
     duration: '5h 30m',
-    priceStarting: 2800,
+    priceStarting: 2670,
     availableSeatsCount: 22,
     totalSeatsCount: 36,
     hasUpperDeck: false,

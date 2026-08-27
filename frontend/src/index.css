@@ -1690,6 +1690,26 @@
   transform: scale(1.2) translateY(-4px);
 }
 
+/* Leaflet Animated Flowing Route Line */
+.animated-route-polyline {
+  stroke-dasharray: 12, 12;
+  animation: polylineFlow 1.2s linear infinite;
+}
+
+@keyframes polylineFlow {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.moving-bus-marker {
+  transition: transform 0.1s linear;
+  filter: drop-shadow(0 4px 12px rgba(16, 185, 129, 0.5));
+}
+
 /* ─── BUS CLASS FILTER PILL ANIMATIONS ────────────────────────────────────────── */
 
 @keyframes filterTilt {

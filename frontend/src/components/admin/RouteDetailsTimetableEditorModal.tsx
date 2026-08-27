@@ -74,7 +74,7 @@ export const BUS_CLASS_PRESETS: Record<string, BusClassPreset> = {
     shortName: 'Normal Service (Route 98)',
     seatsCount: 58,
     layoutDescription: '58 Seats (3×2 Standard Leyland Layout)',
-    defaultPrice: 950,
+    defaultPrice: 1160,
     defaultDuration: '7h 30m',
     defaultAmenities: [
       'Live GPS Tracking',
@@ -116,7 +116,7 @@ export const BUS_CLASS_PRESETS: Record<string, BusClassPreset> = {
     shortName: 'Normal Service (Route 98)',
     seatsCount: 58,
     layoutDescription: '58 Seats (3×2 Standard Leyland Layout)',
-    defaultPrice: 950,
+    defaultPrice: 1160,
     defaultDuration: '7h 30m',
     defaultAmenities: [
       'Live GPS Tracking',
@@ -135,7 +135,7 @@ export const BUS_CLASS_PRESETS: Record<string, BusClassPreset> = {
     shortName: 'Normal Service (Route 98)',
     seatsCount: 58,
     layoutDescription: '58 Seats (3×2 Standard Leyland Layout)',
-    defaultPrice: 950,
+    defaultPrice: 1160,
     defaultDuration: '7h 30m',
     defaultAmenities: [
       'Live GPS Tracking',
