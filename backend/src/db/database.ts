@@ -77,6 +77,23 @@ export async function initDb(): Promise<void> {
   await initializeSchema(p);
   await seedData(p);
   await seedUsers(p);
+  try {
+    await p.query(`UPDATE bookings SET "qrCodeData" = CONCAT('PNR:', "pnr") WHERE "qrCodeData" LIKE '%dewminasuperline.lk%'`);
+    await p.query(`
+      UPDATE seats s
+      SET "price" = r."priceStarting"
+      FROM routes r
+      WHERE s."routeId" = r."id" AND (s."price" = 3430 OR s."price" = 1800 OR s."price" > r."priceStarting" * 1.5);
+    `);
+    await p.query(`
+      UPDATE bookings b
+      SET "baseFare" = r."priceStarting",
+          "taxAmount" = ROUND(r."priceStarting" * 0.10, 2),
+          "totalFare" = ROUND(r."priceStarting" * 1.10, 2)
+      FROM routes r
+      WHERE b."routeId" = r."id" AND b."baseFare" > (r."priceStarting" * 1.5);
+    `);
+  } catch (_) {}
 }
 
 export async function initializeSchema(p: Pool): Promise<void> {
@@ -190,10 +207,11 @@ export async function initializeSchema(p: Pool): Promise<void> {
 export function buildSeats(
   routeId: string,
   busType: string,
-  hasUpperDeck: boolean
+  hasUpperDeck: boolean,
+  routePrice?: number
 ): { id: string; routeId: string; number: string; deck: string; row: number; col: number; price: number; status: string; isSleeper: number; isFemaleOnly: number }[] {
   const seats: ReturnType<typeof buildSeats> = [];
-  const basePrice = busType.includes('Sleeper') ? 2800 : busType.includes('Super Luxury') || busType.includes('49 Seats') ? 2670 : 1800;
+  const basePrice = routePrice || (busType.includes('Normal Service') ? 950 : busType.includes('Sleeper') ? 3000 : busType.includes('Super Luxury') ? 2800 : 1500);
 
   if (busType.includes('49 Seats') || busType.includes('Super Luxury')) {
     const femaleSeats = ['15', '19', '20', '23'];
@@ -490,7 +508,7 @@ export async function seedData(p: Pool): Promise<void> {
 
     const allSeats: any[] = [];
     for (const route of routes) {
-      allSeats.push(...buildSeats(route.id, route.busType, route.hasUpperDeck === 1));
+      allSeats.push(...buildSeats(route.id, route.busType, route.hasUpperDeck === 1, route.priceStarting));
     }
 
     if (allSeats.length > 0) {

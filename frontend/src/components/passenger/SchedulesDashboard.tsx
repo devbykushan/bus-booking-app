@@ -94,7 +94,21 @@ export const SchedulesDashboard: React.FC = () => {
   // Search modify draft state
   const [modOrigin, setModOrigin] = useState(searchOrigin);
   const [modDestination, setModDestination] = useState(searchDestination);
-  const [modDate, setModDate] = useState(searchDate || todayStr);
+  const [modDate, setModDate] = useState(() => {
+    const now = toISODateString(new Date());
+    return (!searchDate || searchDate < now) ? now : searchDate;
+  });
+
+  // Auto-heal past search dates
+  useEffect(() => {
+    const now = toISODateString(new Date());
+    if (searchDate < now) {
+      setSearchCriteria(searchOrigin, searchDestination, now);
+    }
+    if (modDate < now) {
+      setModDate(now);
+    }
+  }, [todayStr]);
 
   // Horizontal scrollable dates state (Strictly 1 week / 7 days advance booking)
   const dateScrollRef = useRef<HTMLDivElement>(null);

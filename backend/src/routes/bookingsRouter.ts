@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { getPool } from '../db/database';
 import { isSeatLockedBySession, unlockSeats } from '../locks/seatLocks';
+import { sendWhatsAppETicket } from '../services/wahaService';
 import { v4 as uuidv4 } from 'uuid';
 
 export const bookingsRouter = Router();
@@ -130,7 +131,7 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
         INSERT INTO seats ("id", "routeId", "number", "deck", "row", "col", "price", "status", "isSleeper", "isFemaleOnly")
         VALUES ($1, $2, $3, 'lower', 1, 1, $4, 'available', 0, 0)
         ON CONFLICT ("id") DO NOTHING
-      `, [sId, routeId, seatNum, route.priceStarting || 3430]);
+      `, [sId, routeId, seatNum, route.priceStarting || 950]);
     }
 
     // Verify seats belong to the chosen route
@@ -182,7 +183,8 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
 
     const pnr = `OMNI-${Math.floor(10000 + Math.random() * 90000)}`;
     const bookingId = `BK-${uuidv4().slice(0, 8).toUpperCase()}`;
-    const qrCodeData = `https://dewminasuperline.lk/validate?pnr=${pnr}&pass=${encodeURIComponent(passenger.fullName)}`;
+    const origin = req.headers.origin || 'http://localhost:5173';
+    const qrCodeData = `${origin}/#validate?pnr=${pnr}&pass=${encodeURIComponent(passenger.fullName)}`;
     const departureDate = searchDate || new Date().toISOString().split('T')[0];
 
     const client = await pool.connect();
@@ -225,6 +227,23 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
 
     const newBookingRes = await pool.query('SELECT * FROM bookings WHERE "id" = $1', [bookingId]);
     const formatted = await formatBooking(newBookingRes.rows[0], pool);
+
+    // Non-blocking trigger for WhatsApp E-Ticket sending via WAHA
+    sendWhatsAppETicket({
+      pnr,
+      passengerName: passenger.fullName,
+      passengerPhone: passenger.phone,
+      busNumber: route.busNumber || 'ND-3223',
+      busType: route.busType || 'Normal Service',
+      origin: route.origin || 'Monaragala',
+      destination: route.destination || 'Colombo',
+      departureDate,
+      departureTime: route.departureTime || '05:00 AM',
+      seatNumbers: seatIds.map((id: string) => id.replace(/^[^-]+-/, '').replace(/^seat-/, '')),
+      totalFare,
+      paymentMethod: paymentMethod || 'card',
+    }).catch(err => console.error('[WAHA Async Error]', err));
+
     res.status(201).json(formatted);
   } catch (err: any) {
     res.status(500).json({ error: err.message });

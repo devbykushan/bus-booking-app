@@ -73,6 +73,7 @@ export const Navbar: React.FC = () => {
   const handleNavItemClick = (view: string) => {
     const requiresAuth = view === 'live-tracking' || view === 'my-bookings';
     if (requiresAuth && !currentUser) {
+      setCurrentView(view as any);
       setMobileOpen(false);
       setShowAuthModal(true);
       return;

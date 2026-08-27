@@ -276,9 +276,9 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
           {isMonaragalaColomboRoute && (
-            <div className="flex items-center bg-slate-200/80 p-0.5 rounded-xl text-[10px] font-extrabold">
+            <div className="flex items-center bg-slate-200/80 p-0.5 rounded-xl text-[10px] font-extrabold flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setSelectedServiceType('normal')}
@@ -303,8 +303,9 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
               </button>
             </div>
           )}
-          <div className="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-[11px] font-bold font-mono">
-            {selectedServiceType === 'normal' && isMonaragalaColomboRoute ? '6h 30m' : route.duration}
+          <div className="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-[11px] font-extrabold font-mono whitespace-nowrap flex-shrink-0 flex items-center gap-1 border border-blue-200">
+            <span>⏱️</span>
+            <span>{selectedServiceType === 'normal' && isMonaragalaColomboRoute ? '6h 30m' : route.duration}</span>
           </div>
         </div>
       </div>

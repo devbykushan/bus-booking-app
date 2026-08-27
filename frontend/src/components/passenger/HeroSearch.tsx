@@ -56,7 +56,19 @@ export const HeroSearch: React.FC = () => {
 
   const [origin, setOrigin] = useState(searchOrigin);
   const [destination, setDestination] = useState(searchDestination);
-  const [date, setDate] = useState(searchDate || todayStr);
+  const [date, setDate] = useState(() => {
+    const now = toISODateString(new Date());
+    return (!searchDate || searchDate < now) ? now : searchDate;
+  });
+
+  // Auto-heal past dates when today's date changes or component renders
+  React.useEffect(() => {
+    const now = toISODateString(new Date());
+    if (!date || date < now) {
+      setDate(now);
+      setSearchCriteria(origin, destination, now);
+    }
+  }, [todayStr]);
 
   const handleSwap = () => {
     const temp = origin;
@@ -64,13 +76,33 @@ export const HeroSearch: React.FC = () => {
     setDestination(temp);
   };
 
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    const now = toISODateString(new Date());
+    if (!val || val < now) {
+      setDate(now);
+      setSearchCriteria(origin, destination, now);
+    } else if (val > maxDateStr) {
+      setDate(maxDateStr);
+      setSearchCriteria(origin, destination, maxDateStr);
+    } else {
+      setDate(val);
+      setSearchCriteria(origin, destination, val);
+    }
+  };
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (date < todayStr || date > maxDateStr) {
-      alert('Advance seat bookings are only allowed up to 1 week (7 days) in advance.');
-      return;
+    const now = toISODateString(new Date());
+    let targetDate = date;
+    if (!date || date < now) {
+      targetDate = now;
+      setDate(now);
+    } else if (date > maxDateStr) {
+      targetDate = maxDateStr;
+      setDate(maxDateStr);
     }
-    setSearchCriteria(origin, destination, date);
+    setSearchCriteria(origin, destination, targetDate);
     setCurrentView('schedules-dashboard');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -270,7 +302,7 @@ export const HeroSearch: React.FC = () => {
                   value={date}
                   min={todayStr}
                   max={maxDateStr}
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={handleDateChange}
                   className="w-full bg-transparent text-slate-900 font-extrabold text-sm focus:outline-none cursor-pointer"
                 />
               </div>

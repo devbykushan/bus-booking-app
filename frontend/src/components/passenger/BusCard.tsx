@@ -16,7 +16,7 @@ interface BusCardProps {
 }
 
 export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRoute }) => {
-  const { setSelectedRoute, setCurrentView, searchDate, userRole, currentUser } = useBookingStore();
+  const { setSelectedRoute, setCurrentView, searchDate, userRole, currentUser, setShowAuthModal } = useBookingStore();
   const isAdmin = userRole === 'admin' || currentUser?.role === 'admin';
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -25,6 +25,10 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
 
   const handleSelectSeats = () => {
     setSelectedRoute(route);
+    if (!currentUser) {
+      setShowAuthModal(true);
+      return;
+    }
     setCurrentView('seat-selection');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

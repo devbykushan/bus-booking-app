@@ -257,8 +257,11 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   soloFemaleOnly: false,
   busTypeFilter: 'all',
 
-  setSearchCriteria: (origin, dest, date) =>
-    set({ searchOrigin: origin, searchDestination: dest, searchDate: date }),
+  setSearchCriteria: (origin, dest, date) => {
+    const today = new Date().toISOString().split('T')[0];
+    const validDate = (!date || date < today) ? today : date;
+    set({ searchOrigin: origin, searchDestination: dest, searchDate: validDate });
+  },
   setSoloFemaleOnly: (val) => set({ soloFemaleOnly: val }),
   setBusTypeFilter: (val) => set({ busTypeFilter: val }),
 
@@ -304,7 +307,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         number: normalizedNum,
         row: 1,
         col: 1,
-        price: selectedRoute.seats[0]?.price || 3430,
+        price: selectedRoute.seats[0]?.price || selectedRoute.priceStarting || 950,
         status: 'available',
         deck: 'lower'
       };

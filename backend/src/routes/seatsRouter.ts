@@ -33,7 +33,8 @@ seatsRouter.post('/lock', async (req: Request, res: Response) => {
       const seatNum = sId.replace(`${routeId}-`, '');
       await pool.query(`
         INSERT INTO seats ("id", "routeId", "number", "deck", "row", "col", "price", "status", "isSleeper", "isFemaleOnly")
-        VALUES ($1, $2, $3, 'lower', 1, 1, 3430, 'available', 0, 0)
+        SELECT $1, $2, $3, 'lower', 1, 1, COALESCE(r."priceStarting", 950), 'available', 0, 0
+        FROM routes r WHERE r."id" = $2
         ON CONFLICT ("id") DO NOTHING
       `, [sId, routeId, seatNum]);
     }

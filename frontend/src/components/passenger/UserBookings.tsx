@@ -3,7 +3,7 @@ import { useBookingStore } from '../../store/bookingStore';
 import { Ticket, MapPin, XCircle, Bus } from 'lucide-react';
 
 export const UserBookings: React.FC = () => {
-  const { bookings, cancelBooking, setCurrentView, goToSearchSchedules, setTrackingRouteId } = useBookingStore();
+  const { bookings, cancelBooking, setCurrentView, goToSearchSchedules, setTrackingRouteId, currentUser, setShowAuthModal } = useBookingStore();
 
   const handleTrack = (routeId: string) => {
     setTrackingRouteId(routeId);
@@ -15,6 +15,62 @@ export const UserBookings: React.FC = () => {
       cancelBooking(pnr);
     }
   };
+
+  if (!currentUser) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-12 space-y-6 animate-fade-in-up">
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 md:p-12 text-center border border-slate-200 shadow-xl space-y-6 relative overflow-hidden">
+          <div className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center mx-auto shadow-sm animate-pulse-glow">
+            <Ticket className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-2 max-w-md mx-auto">
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+              Sign In Required to View Your Tickets
+            </h2>
+            <p className="text-xs text-slate-500 leading-relaxed font-medium">
+              Please sign in to your passenger account or register a new account to access your active bus seat reservations, PNR details, live GPS tracking, and printable PDF e-tickets.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <button
+              onClick={() => setShowAuthModal(true)}
+              className="w-full sm:w-auto px-8 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-xs shadow-lg shadow-blue-500/25 transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              Sign In or Register Account
+            </button>
+            <button
+              onClick={goToSearchSchedules}
+              className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-200 transition-colors cursor-pointer"
+            >
+              Search Bus Routes
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const userBookings = React.useMemo(() => {
+    if (!currentUser) return [];
+    if (currentUser.role === 'admin') return bookings;
+
+    const userEmail = (currentUser.email || '').trim().toLowerCase();
+    const userPhone = (currentUser.phone || '').trim().replace(/[\s-]/g, '');
+    const userName = (currentUser.name || '').trim().toLowerCase();
+
+    return bookings.filter(b => {
+      const bEmail = (b.passenger?.email || '').trim().toLowerCase();
+      const bPhone = (b.passenger?.phone || '').trim().replace(/[\s-]/g, '');
+      const bName = (b.passenger?.fullName || '').trim().toLowerCase();
+
+      if (userEmail && bEmail === userEmail) return true;
+      if (userPhone && bPhone && (bPhone === userPhone || bPhone.endsWith(userPhone.slice(-9)))) return true;
+      if (userName && bName === userName) return true;
+      return false;
+    });
+  }, [bookings, currentUser]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
@@ -34,10 +90,10 @@ export const UserBookings: React.FC = () => {
         </button>
       </div>
 
-      {bookings.length === 0 ? (
+      {userBookings.length === 0 ? (
         <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm space-y-4">
           <Ticket className="w-12 h-12 text-slate-400 mx-auto" />
-          <p className="text-slate-500 text-sm">No active bookings found.</p>
+          <p className="text-slate-500 text-sm">No active bookings found for your account ({currentUser.name}).</p>
           <button
             onClick={goToSearchSchedules}
             className="px-6 py-2.5 bg-blue-600 text-white font-bold text-xs rounded-xl shadow-sm"
@@ -47,7 +103,7 @@ export const UserBookings: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {bookings.map((b) => (
+          {userBookings.map((b) => (
             <div key={b.id} className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-blue-200 transition-all space-y-4 shadow-sm">
               
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
