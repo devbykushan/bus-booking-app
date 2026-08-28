@@ -1,6 +1,6 @@
 import React from 'react';
 import { useBookingStore } from '../../store/bookingStore';
-import { Ticket, MapPin, XCircle, Bus } from 'lucide-react';
+import { Ticket, MapPin, XCircle, Bus, Clock } from 'lucide-react';
 
 export const UserBookings: React.FC = () => {
   const { bookings, cancelBooking, setCurrentView, goToSearchSchedules, setTrackingRouteId, currentUser, setShowAuthModal } = useBookingStore();
@@ -10,8 +10,32 @@ export const UserBookings: React.FC = () => {
     setCurrentView('live-tracking');
   };
 
-  const handleCancel = (pnr: string) => {
-    if (confirm(`Are you sure you want to cancel booking PNR ${pnr}? Full refund will be credited.`)) {
+  const getCancellationInfo = (createdAtStr?: string, isAdmin?: boolean) => {
+    if (isAdmin) return { canCancel: true, text: 'Admin Override', remainingMs: Infinity };
+    if (!createdAtStr) return { canCancel: true, text: '', remainingMs: Infinity };
+
+    const createdTime = new Date(createdAtStr).getTime();
+    const now = Date.now();
+    const fourHoursMs = 4 * 60 * 60 * 1000;
+    const diffMs = fourHoursMs - (now - createdTime);
+
+    if (diffMs <= 0) {
+      return { canCancel: false, text: 'Cancellation window expired (> 4h)', remainingMs: 0 };
+    }
+
+    const totalMins = Math.floor(diffMs / (1000 * 60));
+    const hrs = Math.floor(totalMins / 60);
+    const mins = totalMins % 60;
+    const timeStr = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+    return { canCancel: true, text: `${timeStr} left to cancel`, remainingMs: diffMs };
+  };
+
+  const handleCancel = (pnr: string, canCancel: boolean, text: string) => {
+    if (!canCancel) {
+      alert(`❌ CANCEL NOT PERMITTED\n\nBookings can only be cancelled within 4 hours of booking.\n\nReason: ${text}`);
+      return;
+    }
+    if (confirm(`Are you sure you want to cancel booking PNR ${pnr}?\n\nCancellation is permitted within 4 hours of booking.`)) {
       cancelBooking(pnr);
     }
   };
@@ -169,14 +193,29 @@ export const UserBookings: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2 text-xs">
-                  {b.bookingStatus === 'confirmed' && (
-                    <button
-                      onClick={() => handleCancel(b.pnr)}
-                      className="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-rose-50 text-rose-600 border border-slate-200 hover:border-rose-200 transition-colors flex items-center gap-1 font-semibold"
-                    >
-                      <XCircle className="w-3.5 h-3.5" /> Cancel Booking
-                    </button>
-                  )}
+                  {b.bookingStatus === 'confirmed' && (() => {
+                    const cancelInfo = getCancellationInfo(b.createdAt, currentUser?.role === 'admin');
+                    return cancelInfo.canCancel ? (
+                      <button
+                        onClick={() => handleCancel(b.pnr, cancelInfo.canCancel, cancelInfo.text)}
+                        className="px-3.5 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-300 transition-all flex items-center gap-1.5 font-bold shadow-xs cursor-pointer active:scale-95"
+                        title={cancelInfo.text ? `Cancellation active (${cancelInfo.text})` : 'Cancel booking'}
+                      >
+                        <XCircle className="w-4 h-4 text-rose-600" />
+                        <span>Cancel Booking</span>
+                        {cancelInfo.text && cancelInfo.text !== 'Admin Override' && (
+                          <span className="text-[10px] font-mono bg-rose-200/60 text-rose-800 px-1.5 py-0.5 rounded-md ml-0.5">
+                            {cancelInfo.text}
+                          </span>
+                        )}
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-400 text-xs font-semibold" title="Bookings can only be cancelled within 4 hours of booking creation.">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Cancel Expired (&gt;4h)</span>
+                      </div>
+                    );
+                  })()}
 
                   <button
                     onClick={() => handleTrack(b.routeId)}

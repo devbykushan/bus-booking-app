@@ -25,7 +25,7 @@ export const BusBookingFAQSection: React.FC = () => {
     {
       category: 'seats',
       question: 'What is the seat locking feature and how does it prevent double-booking?',
-      answer: 'When you tap on any available seat on our interactive 2D seat map, the system locks that seat exclusively for your session for 8 minutes. During this window, no other passenger can select or purchase your seat, completely eliminating duplicate bookings.',
+      answer: 'When you tap on any available seat on our interactive 2D seat map, the system locks that seat exclusively for your session for 10 minutes. During this window, no other passenger can select or purchase your seat, completely eliminating duplicate bookings.',
       icon: Armchair,
     },
     {
