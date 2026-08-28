@@ -76,7 +76,7 @@ seatsRouter.post('/lock', async (req: Request, res: Response) => {
       success: true,
       lockedSeatIds: seatIds,
       lockExpiresInSeconds: remaining,
-      message: `${seatIds.length} seat(s) locked for 8 minutes.`,
+      message: `${seatIds.length} seat(s) locked for 10 minutes.`,
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message });

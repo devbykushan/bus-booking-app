@@ -170,7 +170,7 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
 
     // Calculate fares
     const baseFare = seats.reduce((sum: number, s: any) => sum + Number(s.price), 0);
-    const taxAmount = Number((baseFare * 0.10).toFixed(2));
+    const taxAmount = 0; // Removed extra tax surcharge (0% tax)
     const insuranceAmount = insuranceSelected ? 1.50 : 0;
 
     let discountRate = 0;
@@ -179,7 +179,7 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
     else if (promo === 'SAVE10') discountRate = 0.10;
     const discountAmount = Number((baseFare * discountRate).toFixed(2));
 
-    const totalFare = Number((baseFare + taxAmount + insuranceAmount - discountAmount).toFixed(2));
+    const totalFare = Number((baseFare + insuranceAmount - discountAmount).toFixed(2));
 
     const pnr = `OMNI-${Math.floor(10000 + Math.random() * 90000)}`;
     const bookingId = `BK-${uuidv4().slice(0, 8).toUpperCase()}`;
@@ -266,6 +266,20 @@ bookingsRouter.patch('/:pnr/cancel', async (req: Request, res: Response) => {
     if (booking.bookingStatus === 'cancelled') {
       res.status(400).json({ error: 'Booking is already cancelled' });
       return;
+    }
+
+    // 4-Hour Cancellation Window Validation for Passengers
+    const isAdmin = req.query.adminOverride === 'true';
+    if (!isAdmin && booking.createdAt) {
+      const createdTime = new Date(booking.createdAt).getTime();
+      const now = Date.now();
+      const hoursPassed = (now - createdTime) / (1000 * 60 * 60);
+      if (hoursPassed > 4) {
+        res.status(400).json({
+          error: 'Cancellation window expired. Bookings can only be cancelled within 4 hours of booking.',
+        });
+        return;
+      }
     }
 
     const seatIds: string[] = typeof booking.seatIds === 'string' ? JSON.parse(booking.seatIds || '[]') : (booking.seatIds || []);

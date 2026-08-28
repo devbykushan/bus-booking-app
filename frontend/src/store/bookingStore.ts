@@ -327,14 +327,14 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
       selectedSeatIds: [],
       selectedBoardingPoint: route?.boardingPoints?.[0] ?? null,
       selectedDropPoint: route?.dropPoints?.[0] ?? null,
-      lockExpirySeconds: 480,
+      lockExpirySeconds: 600,
       lockActive: false,
     }),
   addBusRoute: (newRoute) =>
     set((state) => ({ routes: [newRoute, ...state.routes] })),
 
   selectedSeatIds: [],
-  lockExpirySeconds: 480,
+  lockExpirySeconds: 600,
   lockActive: false,
 
   toggleSeatSelection: (seatId: string) => {
@@ -385,7 +385,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     set({
       selectedSeatIds: newSelected,
       lockActive: newSelected.length > 0,
-      lockExpirySeconds: 480,
+      lockExpirySeconds: 600,
     });
   },
 
@@ -394,7 +394,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     if (selectedSeatIds.length > 0) {
       seatsApi.unlock({ seatIds: selectedSeatIds, sessionId }).catch(() => {});
     }
-    set({ selectedSeatIds: [], lockActive: false, lockExpirySeconds: 480 });
+    set({ selectedSeatIds: [], lockActive: false, lockExpirySeconds: 600 });
   },
 
   tickLockTimer: () => {
@@ -402,7 +402,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     if (!lockActive) return;
     if (lockExpirySeconds <= 1) {
       get().clearSeatSelection();
-      alert('Seat hold expired! Please re-select your seats.');
+      alert('Seat hold expired! Your 10-minute hold window has elapsed. Please re-select your seats.');
     } else {
       set({ lockExpirySeconds: lockExpirySeconds - 1 });
     }

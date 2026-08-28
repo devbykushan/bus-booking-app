@@ -224,9 +224,8 @@ export const SeatMap: React.FC = () => {
   }, [selectedRoute, selectedSeatIds, validatedSeatPrice]);
 
   const baseTotal = selectedSeatsList.reduce((sum, s) => sum + s.price, 0);
-  const taxAmount = Number((baseTotal * 0.05).toFixed(2));
   const discountAmount = Number((baseTotal * discountRate).toFixed(2));
-  const finalTotal = Math.max(0, baseTotal + taxAmount - discountAmount);
+  const finalTotal = Math.max(0, baseTotal - discountAmount);
 
   // Progressive Disclosure Step Calculations
   const isStep1Done = useMemo(() => {

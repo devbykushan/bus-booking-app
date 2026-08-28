@@ -4,7 +4,7 @@ import type { SeatLock } from '../types';
 // This mirrors a Redis TTL cache for concurrency control
 export const seatLocks = new Map<string, SeatLock>();
 
-const LOCK_TTL_MS = 8 * 60 * 1000; // 8 minutes
+const LOCK_TTL_MS = 10 * 60 * 1000; // 10 minutes (600 seconds)
 
 // Clean up expired locks every 60 seconds
 setInterval(() => {

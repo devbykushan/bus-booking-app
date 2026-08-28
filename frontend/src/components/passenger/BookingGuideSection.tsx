@@ -21,7 +21,7 @@ export const BookingGuideSection: React.FC = () => {
     {
       stepNumber: '02',
       title: 'Select Seat with Concurrency Lock',
-      description: 'Pick your exact window or aisle seat on our interactive 2D layout. Your selected seat is held securely for 8 minutes.',
+      description: 'Pick your exact window or aisle seat on our interactive 2D layout. Your selected seat is held securely for 10 minutes.',
       icon: Armchair,
       badge: 'Step 2: Reserve',
       badgeColor: 'bg-indigo-50 text-indigo-600 border-indigo-200',

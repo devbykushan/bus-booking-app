@@ -39,9 +39,9 @@ export const FareBreakdown: React.FC = () => {
 
   const selectedSeats = selectedRoute.seats.filter(s => selectedSeatIds.includes(s.id));
   const baseFare = selectedSeats.reduce((sum, s) => sum + s.price, 0);
-  const taxAmount = Number((baseFare * 0.10).toFixed(2));
+  const taxAmount = 0; // Removed extra tax surcharge
   const discountAmount = Number((baseFare * discountRate).toFixed(2));
-  const finalTotal = Number((baseFare + taxAmount - discountAmount).toFixed(2));
+  const finalTotal = Number((baseFare - discountAmount).toFixed(2));
 
   const handleApplyPromo = (e: React.FormEvent) => {
     e.preventDefault();
@@ -279,7 +279,7 @@ export const FareBreakdown: React.FC = () => {
 
               <div className="flex justify-between text-slate-600">
                 <span>{t('serviceTax')}</span>
-                <span className="font-mono text-slate-800">LKR {taxAmount.toLocaleString()}</span>
+                <span className="font-mono text-slate-800">LKR {taxAmount} (0%)</span>
               </div>
 
               {discountAmount > 0 && (
