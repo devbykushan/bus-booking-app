@@ -7,7 +7,6 @@ import {
   ChevronUp, ChevronDown, Lock, CheckCircle2, Info,
   ArrowRight, Crown, X, User, Users
 } from 'lucide-react';
-import { CustomDatePicker } from '../common/CustomDatePicker';
 
 export const SeatMap: React.FC = () => {
   const { 
@@ -673,19 +672,19 @@ export const SeatMap: React.FC = () => {
                   <label className="block text-xs font-bold text-slate-800">
                     Confirm Travel Date
                   </label>
-                  <div className="flex gap-2 items-center">
-                    <div className="flex-1">
-                      <CustomDatePicker
-                        label="Travel Date"
-                        value={travelDate}
-                        minDate={new Date().toISOString().split('T')[0]}
-                        onChange={(newDate) => {
-                          setTravelDate(newDate);
-                          setDateError(null);
-                        }}
-                        theme="blue"
-                      />
-                    </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="date"
+                      value={travelDate}
+                      min={new Date().toISOString().split('T')[0]}
+                      onChange={(e) => {
+                        setTravelDate(e.target.value);
+                        setDateError(null);
+                      }}
+                      className={`flex-1 px-4 py-2.5 rounded-xl border text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-inner ${
+                        dateError ? 'border-rose-400 bg-rose-50/40 text-rose-900' : 'border-slate-200 bg-slate-50/60 text-slate-800 focus:bg-white'
+                      }`}
+                    />
                     <button
                       type="button"
                       onClick={() => {

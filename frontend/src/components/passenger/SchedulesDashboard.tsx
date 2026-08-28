@@ -3,7 +3,6 @@ import { useBookingStore } from '../../store/bookingStore';
 import { BusCard } from './BusCard';
 import { InteractiveRouteMap } from './InteractiveRouteMap';
 import type { BusRoute } from '../../types/booking';
-import { CustomDatePicker } from '../common/CustomDatePicker';
 import {
   Bus,
   ArrowLeft,
@@ -524,14 +523,20 @@ export const SchedulesDashboard: React.FC = () => {
                   </div>
 
                   {/* Date */}
-                  <div className="md:col-span-3">
-                    <CustomDatePicker
-                      label={t('journeyDate')}
+                  <div className="md:col-span-3 bg-slate-50 border border-slate-200 rounded-2xl p-3 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-100 transition-all group/date">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5 mb-1.5">
+                      <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-amber-100/70 border border-amber-300 text-amber-600 shadow-xs transition-transform duration-300 group-hover/date:scale-110">
+                        <Calendar className="w-3.5 h-3.5 animate-date-icon relative z-10" />
+                      </span>
+                      <span className="font-extrabold">{t('journeyDate')}</span>
+                    </label>
+                    <input
+                      type="date"
                       value={modDate}
-                      minDate={todayStr}
-                      maxDate={maxDateStr}
-                      onChange={(newDate) => setModDate(newDate)}
-                      theme="blue"
+                      min={todayStr}
+                      max={maxDateStr}
+                      onChange={(e) => setModDate(e.target.value)}
+                      className="w-full bg-transparent text-slate-900 font-bold text-sm focus:outline-none cursor-pointer"
                     />
                   </div>
                 </div>
