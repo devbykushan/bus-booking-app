@@ -3,6 +3,7 @@ import { useBookingStore } from '../../store/bookingStore';
 import { BusCard } from './BusCard';
 import { InteractiveRouteMap } from './InteractiveRouteMap';
 import type { BusRoute } from '../../types/booking';
+import { CustomDatePicker } from '../common/CustomDatePicker';
 import {
   Bus,
   ArrowLeft,
@@ -22,7 +23,6 @@ import {
   ChevronDown,
   Check
 } from 'lucide-react';
-import { CustomDatePicker } from '../common/CustomDatePicker';
 
 const CITIES = [
   'Monaragala', 'Colombo', 'Kandy', 'Galle',
@@ -523,7 +523,7 @@ export const SchedulesDashboard: React.FC = () => {
                     </select>
                   </div>
 
-                  {/* Custom Real-Time Date Picker */}
+                  {/* Date */}
                   <div className="md:col-span-3">
                     <CustomDatePicker
                       label={t('journeyDate')}

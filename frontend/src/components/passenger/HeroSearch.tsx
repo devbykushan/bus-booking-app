@@ -77,7 +77,7 @@ export const HeroSearch: React.FC = () => {
     setDestination(temp);
   };
 
-  const onDateSelect = (val: string) => {
+  const handleDateChange = (val: string) => {
     const now = toISODateString(new Date());
     if (!val || val < now) {
       setDate(now);
@@ -286,14 +286,14 @@ export const HeroSearch: React.FC = () => {
                 </select>
               </div>
 
-              {/* Custom Real-Time Date Picker */}
+              {/* Date */}
               <div className="md:col-span-3">
                 <CustomDatePicker
                   label={t('journeyDate')}
                   value={date}
                   minDate={todayStr}
                   maxDate={maxDateStr}
-                  onChange={onDateSelect}
+                  onChange={handleDateChange}
                   theme="amber"
                 />
               </div>

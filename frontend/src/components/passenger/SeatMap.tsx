@@ -676,6 +676,7 @@ export const SeatMap: React.FC = () => {
                   <div className="flex gap-2 items-center">
                     <div className="flex-1">
                       <CustomDatePicker
+                        label="Travel Date"
                         value={travelDate}
                         minDate={new Date().toISOString().split('T')[0]}
                         onChange={(newDate) => {
@@ -696,7 +697,7 @@ export const SeatMap: React.FC = () => {
                         setDateError(null);
                         handleDateConfirm();
                       }}
-                      className="px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer flex-shrink-0 active:scale-95 hover:shadow-md"
+                      className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer flex-shrink-0 active:scale-95 hover:shadow-md"
                     >
                       Confirm
                     </button>
