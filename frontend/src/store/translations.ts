@@ -104,6 +104,24 @@ export const translations = {
     insuranceSubtitle: 'Covers trip delays, baggage loss & medical emergencies.',
     totalPayable: 'Total Payable',
     securePaymentText: 'Pay & Generate E-Ticket',
+
+    // Passenger Settings
+    passengerSettings: 'Passenger Settings',
+    profileInformation: 'Profile & Account Details',
+    changeUsername: 'Change Username / Full Name',
+    usernameLabel: 'Full Name / Username',
+    phoneLabelSettings: 'Mobile / WhatsApp Phone',
+    saveProfile: 'Save Profile Changes',
+    changePasswordTitle: 'Security & Password Change',
+    currentPasswordLabel: 'Current Password',
+    newPasswordLabel: 'New Password',
+    confirmPasswordLabel: 'Confirm New Password',
+    updatePassword: 'Update Password',
+    accountEmail: 'Registered Email',
+    accountRole: 'Account Role',
+    passwordsDoNotMatch: 'New password and confirm password do not match.',
+    profileUpdatedSuccess: 'Profile updated successfully!',
+    passwordChangedSuccess: 'Password changed successfully!',
   },
   sinhala: {
     // Navbar
@@ -210,6 +228,24 @@ export const translations = {
     insuranceSubtitle: 'ගමන් ප්‍රමාදයන්, ගමන් මලු අහිමිවීම් සහ හදිසි වෛද්‍ය ප්‍රතිකාර ආවරණය කරයි.',
     totalPayable: 'ගෙවිය යුතු මුළු මුදල',
     securePaymentText: 'ගෙවා ප්‍රවේශපත්‍රය ලබාගන්න',
+
+    // Passenger Settings
+    passengerSettings: 'මගී සැකසුම්',
+    profileInformation: 'ප්‍රොෆයිල් සහ ගිණුම් විස්තර',
+    changeUsername: 'පරිශීලක නාමය / සම්පූර්ණ නම වෙනස් කරන්න',
+    usernameLabel: 'සම්පූර්ණ නම / පරිශීලක නාමය',
+    phoneLabelSettings: 'දුරකථන / WhatsApp අංකය',
+    saveProfile: 'වෙනස්කම් සුරකින්න',
+    changePasswordTitle: 'ආරක්ෂාව සහ මුරපදය වෙනස් කිරීම',
+    currentPasswordLabel: 'වත්මන් මුරපදය',
+    newPasswordLabel: 'නව මුරපදය',
+    confirmPasswordLabel: 'නව මුරපදය තහවුරු කරන්න',
+    updatePassword: 'මුරපදය යාවත්කාලීන කරන්න',
+    accountEmail: 'ලියාපදිංචි විද්‍යුත් තැපෑල',
+    accountRole: 'ගිණුම් වර්ගය',
+    passwordsDoNotMatch: 'නව මුරපදය සහ තහවුරු කිරීමේ මුරපදය ගැලපෙන්නේ නැත.',
+    profileUpdatedSuccess: 'ප්‍රොෆයිලය සාර්ථකව යාවත්කාලීන කරන ලදී!',
+    passwordChangedSuccess: 'මුරපදය සාර්ථකව වෙනස් කරන ලදී!',
   },
   tamil: {
     // Navbar
@@ -316,6 +352,24 @@ export const translations = {
     insuranceSubtitle: 'பயண தாமதங்கள், சாமான்கள் இழப்பு மற்றும் மருத்துவ அவசரநிலைகளை உள்ளடக்கியது.',
     totalPayable: 'மொத்த செலுத்த வேண்டிய தொகை',
     securePaymentText: 'செலுத்தி ஈ-டிக்கெட்டை உருவாக்கவும்',
+
+    // Passenger Settings
+    passengerSettings: 'பயணிகள் அமைப்புகள்',
+    profileInformation: 'சுயவிவரம் மற்றும் கணக்கு விவரங்கள்',
+    changeUsername: 'பயனர்பெயர் / முழு பெயரை மாற்றவும்',
+    usernameLabel: 'முழு பெயர் / பயனர்பெயர்',
+    phoneLabelSettings: 'தொலைபேசி / வாட்ஸ்அப் எண்',
+    saveProfile: 'மாற்றங்களை சேமிக்கவும்',
+    changePasswordTitle: 'பாதுகாப்பு மற்றும் கடவுச்சொல் மாற்றம்',
+    currentPasswordLabel: 'தற்போதைய கடவுச்சொல்',
+    newPasswordLabel: 'புதிய கடவுச்சொல்',
+    confirmPasswordLabel: 'புதிய கடவுச்சொல்லை உறுதிப்படுத்தவும்',
+    updatePassword: 'கடவுச்சொல்லை புதுப்பிக்கவும்',
+    accountEmail: 'பதிவு செய்யப்பட்ட மின்னஞ்சல்',
+    accountRole: 'கணக்கு பங்கு',
+    passwordsDoNotMatch: 'புதிய கடவுச்சொல்லும் உறுதிப்படுத்தல் கடவுச்சொல்லும் பொருந்தவில்லை.',
+    profileUpdatedSuccess: 'சுயவிவரம் வெற்றிகரமாக புதுப்பிக்கப்பட்டது!',
+    passwordChangedSuccess: 'கடவுச்சொல் வெற்றிகரமாக மாற்றப்பட்டது!',
   }
 };
 

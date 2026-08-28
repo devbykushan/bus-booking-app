@@ -153,19 +153,30 @@ authRouter.post('/login', async (req: Request, res: Response) => {
 });
 
 /**
+ * Helper to extract userId from Bearer token (format: token-<userId>-<timestamp>)
+ */
+function getUserIdFromToken(authHeader?: string): string | null {
+  if (!authHeader) return null;
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+  if (!token) return null;
+  if (token.startsWith('token-')) {
+    const raw = token.slice(6);
+    const lastDash = raw.lastIndexOf('-');
+    if (lastDash > 0) {
+      return raw.slice(0, lastDash);
+    }
+    return raw;
+  }
+  return token;
+}
+
+/**
  * GET /api/auth/me
- * Fetch current user info by token or ID
+ * Fetch current user info by token
  */
 authRouter.get('/me', async (req: Request, res: Response) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      return res.status(401).json({ error: 'Authorization header missing.' });
-    }
-
-    const token = authHeader.replace(/^Bearer\s+/i, '');
-    const parts = token.split('-');
-    const userId = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : null;
+    const userId = getUserIdFromToken(req.headers.authorization);
 
     if (!userId) {
       return res.status(401).json({ error: 'Invalid authentication token.' });
@@ -186,4 +197,124 @@ authRouter.get('/me', async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Failed to fetch user profile.' });
   }
 });
+
+const NAME_REGEX = /^[a-zA-Z\s.'-]+$/;
+
+/**
+ * PUT /api/auth/profile
+ * Update user's name / username and phone number
+ */
+authRouter.put('/profile', async (req: Request, res: Response) => {
+  try {
+    const userId = getUserIdFromToken(req.headers.authorization);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication token missing or invalid.' });
+    }
+
+    const { name, phone } = req.body;
+    if (!name || typeof name !== 'string' || name.trim().length < 3) {
+      return res.status(400).json({ error: 'Full name / username must be at least 3 characters long.' });
+    }
+
+    if (name.trim().length > 50) {
+      return res.status(400).json({ error: 'Full name / username cannot exceed 50 characters.' });
+    }
+
+    if (!NAME_REGEX.test(name.trim())) {
+      return res.status(400).json({ error: 'Name can only contain letters, spaces, dots, hyphens, and apostrophes.' });
+    }
+
+    const cleanName = name.trim();
+    let cleanPhone = phone ? String(phone).trim() : null;
+    if (cleanPhone) {
+      const stripped = cleanPhone.replace(/[\s-]/g, '');
+      if (!SL_PHONE_REGEX.test(stripped)) {
+        return res.status(400).json({ error: 'Please enter a valid Sri Lankan mobile number (07XXXXXXXX).' });
+      }
+      cleanPhone = stripped.startsWith('0') ? `+94${stripped.substring(1)}` : stripped;
+    }
+
+    const updated = await dbQuery(
+      `UPDATE users
+       SET "name" = $1, "phone" = $2
+       WHERE "id" = $3
+       RETURNING "id", "name", "email", "role", "phone", "createdAt"`,
+      [cleanName, cleanPhone, userId]
+    );
+
+    if (updated.rows.length === 0) {
+      return res.status(404).json({ error: 'User account not found.' });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Profile details updated successfully.',
+      user: updated.rows[0],
+    });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    return res.status(500).json({ error: 'Failed to update profile due to a server error.' });
+  }
+});
+
+/**
+ * PUT /api/auth/change-password
+ * Change current user's password
+ */
+authRouter.put('/change-password', async (req: Request, res: Response) => {
+  try {
+    const userId = getUserIdFromToken(req.headers.authorization);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication token missing or invalid.' });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || typeof currentPassword !== 'string') {
+      return res.status(400).json({ error: 'Current password is required.' });
+    }
+
+    if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters long.' });
+    }
+
+    if (newPassword.length > 64) {
+      return res.status(400).json({ error: 'New password cannot exceed 64 characters.' });
+    }
+
+    if (currentPassword === newPassword) {
+      return res.status(400).json({ error: 'New password must be different from the current password.' });
+    }
+
+    // Fetch current user password hash
+    const result = await dbQuery(
+      'SELECT "password" FROM users WHERE "id" = $1',
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User account not found.' });
+    }
+
+    const user = result.rows[0];
+    const isMatch = verifyPassword(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Incorrect current password.' });
+    }
+
+    const newHashedPassword = hashPassword(newPassword);
+    await dbQuery(
+      'UPDATE users SET "password" = $1 WHERE "id" = $2',
+      [newHashedPassword, userId]
+    );
+
+    return res.json({
+      success: true,
+      message: 'Password changed successfully.',
+    });
+  } catch (error) {
+    console.error('Error changing password:', error);
+    return res.status(500).json({ error: 'Failed to change password due to a server error.' });
+  }
+});
+
 

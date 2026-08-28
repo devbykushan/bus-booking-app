@@ -14,6 +14,7 @@ import { FareBreakdown } from './components/passenger/FareBreakdown';
 import { TicketModal } from './components/passenger/TicketModal';
 import { LiveMap } from './components/passenger/LiveMap';
 import { UserBookings } from './components/passenger/UserBookings';
+import { PassengerSettings } from './components/passenger/PassengerSettings';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
 import { Bus, AlertCircle, Wifi, RefreshCw } from 'lucide-react';
@@ -189,6 +190,7 @@ export function App() {
             {currentView === 'ticket-confirmation' && <TicketModal />}
             {currentView === 'live-tracking' && <LiveMap />}
             {currentView === 'my-bookings' && <UserBookings />}
+            {currentView === 'passenger-settings' && <PassengerSettings />}
           </div>
         )}
       </main>
