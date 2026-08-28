@@ -37,12 +37,27 @@ export const translations = {
     Ratnapura: 'Ratnapura',
     Matara: 'Matara',
 
-    // Bus Card
+    // Bus Card & Extra UI
     startingFrom: 'Starting from',
     seatsLeft: 'seats left',
     viewSeats: 'View Seats',
     directRoute: 'Direct Route',
     upperLowerDeck: 'Double Deck (Upper & Lower)',
+    departure: 'Departure',
+    arrival: 'Arrival',
+    bookNow: 'Book Now',
+    details: 'Details',
+    timetable: 'Timetable',
+    certified: 'Certified',
+    perPassenger: 'per passenger seat',
+    midnightJourney: 'Midnight Journey',
+    backToHome: 'Back to Home',
+    modifySearch: 'Modify Search',
+    closeSearchPanel: 'Close Search Panel',
+    busesFound: 'Buses Found',
+    busFound: 'Bus Found',
+    availableSchedules: 'Available Bus Schedules Dashboard',
+    officialPortal: 'Official Dewmina Super Line Booking Portal',
     
     // Seat Map
     selectBoardingPoint: 'Select Boarding Point',
@@ -128,12 +143,27 @@ export const translations = {
     Ratnapura: 'රත්නපුර',
     Matara: 'මාතර',
 
-    // Bus Card
+    // Bus Card & Extra UI
     startingFrom: 'ආරම්භක මිල',
     seatsLeft: 'ආසන ඉතිරිව ඇත',
     viewSeats: 'ආසන බලන්න',
     directRoute: 'ඍජු ගමන් මාර්ගය',
     upperLowerDeck: 'දෙමහල් බස් රථ (ඉහළ සහ පහළ)',
+    departure: 'පිටත්වීම',
+    arrival: 'ළඟාවීම',
+    bookNow: 'වෙන් කරන්න',
+    details: 'විස්තර',
+    timetable: 'කාලසටහන',
+    certified: 'සහතික කළ',
+    perPassenger: 'එක් මගියෙකු සඳහා',
+    midnightJourney: 'මධ්‍යම රාත්‍රී ගමන',
+    backToHome: 'මුල් පිටුවට',
+    modifySearch: 'සෙවීම වෙනස් කරන්න',
+    closeSearchPanel: 'සෙවුම් පැනලය වසන්න',
+    busesFound: 'බස් රථ හමු විය',
+    busFound: 'බස් රථයක් හමු විය',
+    availableSchedules: 'ලබා ගත හැකි බස් කාලසටහන්',
+    officialPortal: 'නිල දෙව්මිණ සුපර් ලයින් ප්‍රවේශපත්‍ර ද්වාරය',
 
     // Seat Map
     selectBoardingPoint: 'පිටත්වන ස්ථානය තෝරන්න',
@@ -219,12 +249,27 @@ export const translations = {
     Ratnapura: 'இரத்தினபுரி',
     Matara: 'மாத்தறை',
 
-    // Bus Card
+    // Bus Card & Extra UI
     startingFrom: 'ஆரம்ப விலை',
     seatsLeft: 'இருக்கைகள் உள்ளன',
     viewSeats: 'இருக்கைகளைப் பார்க்க',
     directRoute: 'நேரடி பாதை',
     upperLowerDeck: 'இரட்டை அடுக்கு பஸ் (மேல் & கீழ்)',
+    departure: 'புறப்படும் இடம்',
+    arrival: 'இறங்கும் இடம்',
+    bookNow: 'முன்பதிவு செய்',
+    details: 'விவரங்கள்',
+    timetable: 'அட்டவணை',
+    certified: 'சான்றளிக்கப்பட்ட',
+    perPassenger: 'ஒரு பயணியின் இருக்கைக்கு',
+    midnightJourney: 'நள்ளிரவு பயணம்',
+    backToHome: 'முகப்புக்குத் திரும்புக',
+    modifySearch: 'தேடலை மாற்றுக',
+    closeSearchPanel: 'தேடல் பேனலை மூடு',
+    busesFound: 'பஸ்கள் கண்டறியப்பட்டன',
+    busFound: 'பஸ் கண்டறியப்பட்டது',
+    availableSchedules: 'கிடைக்கும் பஸ் அட்டவணைகள்',
+    officialPortal: 'அதிகாரப்பூர்வ தெவ்மிண சூப்பர் லைன் முன்பதிவு போர்டல்',
 
     // Seat Map
     selectBoardingPoint: 'ஏறும் இடத்தை தேர்வு செய்யவும்',
