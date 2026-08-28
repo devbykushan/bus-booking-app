@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import {
-  MapPin, Calendar, ArrowRightLeft, Search,
+  MapPin, ArrowRightLeft, Search,
   Shield, Filter, Clock, Star, ChevronDown
 } from 'lucide-react';
 import { RealisticBusAnimation } from '../common/RealisticBusAnimation';
+import { CustomDatePicker } from '../common/CustomDatePicker';
 
 const CITIES = [
   'Monaragala', 'Colombo', 'Kandy', 'Galle',
@@ -76,8 +77,7 @@ export const HeroSearch: React.FC = () => {
     setDestination(temp);
   };
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
+  const onDateSelect = (val: string) => {
     const now = toISODateString(new Date());
     if (!val || val < now) {
       setDate(now);
@@ -286,24 +286,15 @@ export const HeroSearch: React.FC = () => {
                 </select>
               </div>
 
-              {/* Date */}
-              <div className="md:col-span-3 relative bg-white/90 backdrop-blur rounded-2xl p-4
-                              border border-white/50 focus-within:border-amber-400 focus-within:ring-4
-                              focus-within:ring-amber-400/20 transition-all duration-300 shadow-sm
-                              hover:shadow-amber-200/40 hover:shadow-md group/date">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5 mb-1.5">
-                  <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-amber-50 border border-amber-200/80 text-amber-600 shadow-xs transition-transform duration-300 group-hover/date:scale-110 group-hover/date:rotate-6">
-                    <Calendar className="w-3.5 h-3.5 animate-date-icon relative z-10" />
-                  </span>
-                  <span className="font-extrabold">{t('journeyDate')}</span>
-                </label>
-                <input
-                  type="date"
+              {/* Custom Real-Time Date Picker */}
+              <div className="md:col-span-3">
+                <CustomDatePicker
+                  label={t('journeyDate')}
                   value={date}
-                  min={todayStr}
-                  max={maxDateStr}
-                  onChange={handleDateChange}
-                  className="w-full bg-transparent text-slate-900 font-extrabold text-sm focus:outline-none cursor-pointer"
+                  minDate={todayStr}
+                  maxDate={maxDateStr}
+                  onChange={onDateSelect}
+                  theme="amber"
                 />
               </div>
             </div>
