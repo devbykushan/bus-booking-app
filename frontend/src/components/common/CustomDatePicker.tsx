@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Sparkles, Clock, Check } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, ChevronDown, Sparkles, Clock, Check } from 'lucide-react';
 import { useBookingStore } from '../../store/bookingStore';
 
 interface CustomDatePickerProps {
@@ -139,31 +139,6 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
     setIsOpen(false);
   };
 
-  // Formatted display text
-  const getFormattedDisplayText = () => {
-    if (!value) return 'Select Date';
-    const parts = value.split('-').map(Number);
-    const d = new Date(parts[0], parts[1] - 1, parts[2]);
-
-    const isToday = value === todayStr;
-
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
-    const isTomorrow = value === toISOStringLocal(tomorrow);
-
-    let prefix = '';
-    if (isToday) prefix = language === 'sinhala' ? 'අද (' : language === 'tamil' ? 'இன்று (' : 'Today (';
-    else if (isTomorrow) prefix = language === 'sinhala' ? 'හෙට (' : language === 'tamil' ? 'நாளை (' : 'Tomorrow (';
-
-    const monthNames = language === 'sinhala' ? MONTH_NAMES_SI : language === 'tamil' ? MONTH_NAMES_TA : MONTH_NAMES_EN;
-    const monthStr = monthNames[d.getMonth()];
-    const dayNum = d.getDate();
-    const yearNum = d.getFullYear();
-
-    const formatted = `${monthStr} ${dayNum}, ${yearNum}`;
-    return prefix ? `${prefix}${formatted})` : formatted;
-  };
-
   const monthNames = language === 'sinhala' ? MONTH_NAMES_SI : language === 'tamil' ? MONTH_NAMES_TA : MONTH_NAMES_EN;
   const weekdays = language === 'sinhala' ? WEEKDAYS_SI : language === 'tamil' ? WEEKDAYS_TA : WEEKDAYS_EN;
 
@@ -184,55 +159,40 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       {/* Trigger Button */}
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full bg-white/90 border rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2 cursor-pointer transition-all duration-300 shadow-xs hover:shadow-md group/picker ${
+        className={`w-full bg-white border rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-3 cursor-pointer transition-all duration-300 shadow-xs hover:shadow-md group/picker ${
           isOpen
             ? theme === 'blue'
               ? 'border-blue-500 ring-4 ring-blue-500/20 shadow-blue-200/50'
               : 'border-amber-400 ring-4 ring-amber-400/20 shadow-amber-200/50'
-            : 'border-slate-200/90 hover:border-amber-400/80 bg-white'
+            : 'border-slate-200 hover:border-amber-400 bg-white'
         }`}
       >
-        <div className="flex items-center gap-2.5 truncate">
-          <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover/picker:scale-110 group-hover/picker:rotate-3 ${
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover/picker:scale-110 group-hover/picker:rotate-3 ${
             theme === 'blue' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-amber-50 text-amber-600 border border-amber-200'
           }`}>
-            <CalendarIcon className="w-4 h-4" />
+            <CalendarIcon className="w-4.5 h-4.5" />
           </div>
-          <div className="flex flex-col text-left truncate">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-              {value === todayStr ? '● Real-time Today' : 'Selected Date'}
+
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight font-mono whitespace-nowrap">
+              {value}
             </span>
-            <span className="text-sm font-extrabold text-slate-900 truncate">
-              {getFormattedDisplayText()}
-            </span>
+
+            {value === todayStr && (
+              <span className="px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-black uppercase flex-shrink-0">
+                {language === 'sinhala' ? 'අද' : language === 'tamil' ? 'இன்று' : 'Today'}
+              </span>
+            )}
+            {value === tomorrowStr && (
+              <span className="px-2 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-black uppercase flex-shrink-0">
+                {language === 'sinhala' ? 'හෙට' : language === 'tamil' ? 'நாளை' : 'Tomorrow'}
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Quick Date Chips inside trigger */}
-        <div className="hidden sm:flex items-center gap-1.5 flex-shrink-0">
-          <button
-            type="button"
-            onClick={(e) => selectQuickShortcut(0, e)}
-            className={`px-2 py-1 rounded-lg text-[10px] font-extrabold transition-all cursor-pointer ${
-              value === todayStr
-                ? 'bg-amber-500 text-white shadow-xs'
-                : 'bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-900 border border-slate-200/60'
-            }`}
-          >
-            Today
-          </button>
-          <button
-            type="button"
-            onClick={(e) => selectQuickShortcut(1, e)}
-            className={`px-2 py-1 rounded-lg text-[10px] font-extrabold transition-all cursor-pointer ${
-              value === tomorrowStr
-                ? 'bg-amber-500 text-white shadow-xs'
-                : 'bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-900 border border-slate-200/60'
-            }`}
-          >
-            Tomorrow
-          </button>
-        </div>
+        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 flex-shrink-0 ${isOpen ? 'rotate-180 text-amber-500' : ''}`} />
       </div>
 
       {/* Custom Animated Calendar Dropdown Popup */}
