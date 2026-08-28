@@ -14,6 +14,7 @@ import { FareBreakdown } from './components/passenger/FareBreakdown';
 import { TicketModal } from './components/passenger/TicketModal';
 import { LiveMap } from './components/passenger/LiveMap';
 import { UserBookings } from './components/passenger/UserBookings';
+import { PassengerSettings } from './components/passenger/PassengerSettings';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
 import { Bus, AlertCircle, Wifi, RefreshCw } from 'lucide-react';
@@ -81,7 +82,7 @@ export function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // On app start: ping backend health, then load data
+  // On app start: ping backend health, then load data and check for scanned QR validation parameters
   useEffect(() => {
     (async () => {
       try {
@@ -89,6 +90,19 @@ export function App() {
         if (!res.ok) throw new Error('Backend not healthy');
         setBackendReady(true);
         await Promise.all([loadRoutes(), loadBookings()]);
+
+        // Check if app was opened via scanned QR code URL (e.g. #validate?pnr=OMNI-12345 or ?pnr=OMNI-12345)
+        const fullUrl = window.location.href;
+        const match = fullUrl.match(/pnr=([A-Z0-9-]+)/i);
+        if (match && match[1]) {
+          const pnr = match[1].toUpperCase();
+          const valRes = await useBookingStore.getState().validateTicketByPNR(pnr);
+          if (valRes.success) {
+            alert(`✅ TICKET VALIDATED SUCCESSFULLY!\n\nPassenger: ${valRes.booking?.passenger?.fullName || 'Confirmed'}\nPNR Code: ${pnr}\nSeats: ${valRes.booking?.seats?.join(', ') || 'Reserved'}\nStatus: ${valRes.message}`);
+          } else {
+            alert(`❌ TICKET VALIDATION FAILED\n\nPNR Code: ${pnr}\nReason: ${valRes.message}`);
+          }
+        }
       } catch {
         setBackendError(true);
       }
@@ -176,6 +190,7 @@ export function App() {
             {currentView === 'ticket-confirmation' && <TicketModal />}
             {currentView === 'live-tracking' && <LiveMap />}
             {currentView === 'my-bookings' && <UserBookings />}
+            {currentView === 'passenger-settings' && <PassengerSettings />}
           </div>
         )}
       </main>

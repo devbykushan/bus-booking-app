@@ -14,7 +14,7 @@ interface RouteDetailsModalProps {
 }
 
 export const RouteDetailsModal: React.FC<RouteDetailsModalProps> = ({ route, onClose, onBookNow, onEdit }) => {
-  const { userRole, currentUser } = useBookingStore();
+  const { userRole, currentUser, setShowAuthModal } = useBookingStore();
   const isAdmin = userRole === 'admin' || currentUser?.role === 'admin';
 
   return (
@@ -172,6 +172,10 @@ export const RouteDetailsModal: React.FC<RouteDetailsModalProps> = ({ route, onC
             <button
               onClick={() => {
                 onClose();
+                if (!currentUser) {
+                  setShowAuthModal(true);
+                  return;
+                }
                 onBookNow();
               }}
               className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs shadow-md transition-all hover:scale-105"

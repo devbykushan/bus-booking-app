@@ -16,7 +16,7 @@ interface BusCardProps {
 }
 
 export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRoute }) => {
-  const { setSelectedRoute, setCurrentView, searchDate, userRole, currentUser } = useBookingStore();
+  const { setSelectedRoute, setCurrentView, searchDate, userRole, currentUser, setShowAuthModal, language, t } = useBookingStore();
   const isAdmin = userRole === 'admin' || currentUser?.role === 'admin';
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -25,6 +25,10 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
 
   const handleSelectSeats = () => {
     setSelectedRoute(route);
+    if (!currentUser) {
+      setShowAuthModal(true);
+      return;
+    }
     setCurrentView('seat-selection');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -37,8 +41,9 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
   })();
 
   // Format date display
+  const dateLocale = language === 'sinhala' ? 'si-LK' : language === 'tamil' ? 'ta-LK' : 'en-US';
   const departureDateObj = searchDate ? new Date(searchDate) : new Date();
-  const depDateString = departureDateObj.toLocaleDateString('en-US', {
+  const depDateString = departureDateObj.toLocaleDateString(dateLocale, {
     weekday: 'short',
     year: 'numeric',
     month: '2-digit',
@@ -47,7 +52,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
 
   const nextDayDateObj = new Date(departureDateObj);
   nextDayDateObj.setDate(nextDayDateObj.getDate() + 1);
-  const arrDateString = nextDayDateObj.toLocaleDateString('en-US', {
+  const arrDateString = nextDayDateObj.toLocaleDateString(dateLocale, {
     weekday: 'short',
     year: 'numeric',
     month: '2-digit',
@@ -71,9 +76,9 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
-              <span className="text-blue-600">{route.origin}</span>
+              <span className="text-blue-600">{t(route.origin)}</span>
               <span className="text-slate-400 font-normal">→</span>
-              <span className="text-indigo-600">{route.destination}</span>
+              <span className="text-indigo-600">{t(route.destination)}</span>
             </h3>
             <span className="text-xs text-slate-400">•</span>
             <span className="text-xs font-semibold text-slate-600">
@@ -97,7 +102,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs font-bold">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Certified</span>
+              <span>{t('certified')}</span>
             </span>
 
             <div className="flex items-center gap-1 text-slate-700 text-xs font-bold font-mono">
@@ -121,10 +126,10 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
             </p>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200/60 text-[10px] font-extrabold uppercase tracking-wider">
               <MapPin className="w-2.5 h-2.5 animate-from-icon text-blue-600" />
-              DEPARTURE
+              {t('departure')}
             </span>
             <p className="text-sm font-bold text-slate-800 pt-0.5">
-              {route.origin}
+              {t(route.origin)}
             </p>
             <p className="text-xs text-slate-400 font-mono">
               {depDateString}
@@ -159,10 +164,10 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
             </p>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200/60 text-[10px] font-extrabold uppercase tracking-wider">
               <MapPin className="w-2.5 h-2.5 animate-to-icon text-indigo-600" />
-              ARRIVAL
+              {t('arrival')}
             </span>
             <p className="text-sm font-bold text-slate-800 pt-0.5">
-              {route.destination}
+              {t(route.destination)}
             </p>
             <div className="text-xs font-mono">
               {isMidnightJourney ? (
@@ -184,7 +189,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
               <span className="text-xs font-bold text-indigo-600 ml-1.5 font-mono uppercase">
                 LKR
               </span>
-              <p className="text-[11px] text-slate-500 mt-0.5">per passenger seat</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">{t('perPassenger')}</p>
             </div>
           </div>
 
@@ -195,7 +200,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
           <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-700 text-xs font-medium flex items-center gap-2 mb-4 animate-fade-in">
             <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-600" />
             <span>
-              <strong className="font-bold">Midnight Journey</strong> — This journey starts before midnight and continues into the next day. Please plan accordingly.
+              <strong className="font-bold">{t('midnightJourney')}</strong> — This journey starts before midnight and continues into the next day. Please plan accordingly.
             </span>
           </div>
         )}
@@ -212,7 +217,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
               className="px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200 flex items-center gap-1.5 transition-colors"
             >
               <Info className="w-3.5 h-3.5 text-slate-500" />
-              <span>Details</span>
+              <span>{t('details')}</span>
             </button>
 
             <button
@@ -224,7 +229,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
               className="px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200 flex items-center gap-1.5 transition-colors"
             >
               <Clock className="w-3.5 h-3.5 text-slate-500" />
-              <span>Timetable</span>
+              <span>{t('timetable')}</span>
             </button>
 
             {isAdmin && (
@@ -251,7 +256,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
             }}
             className="px-6 py-2.5 rounded-2xl bg-slate-900 hover:bg-blue-600 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md transition-all transform hover:scale-105 active:scale-95"
           >
-            <span>Book Now</span>
+            <span>{t('bookNow')}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>

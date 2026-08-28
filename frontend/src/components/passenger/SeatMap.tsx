@@ -1015,7 +1015,7 @@ export const SeatMap: React.FC = () => {
                             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                               {/* Price Box */}
                               <div className="h-[64px] sm:h-[70px] px-4 sm:px-6 rounded-2xl border-2 border-blue-500 bg-white flex items-center justify-center font-extrabold text-blue-600 text-base sm:text-lg flex-shrink-0 tracking-tight shadow-2xs min-w-[100px]">
-                                LKR {s.price || 3430}
+                                LKR {s.price || selectedRoute?.priceStarting || 950}
                               </div>
                             </div>
                           </div>

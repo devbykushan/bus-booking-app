@@ -7,7 +7,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
-  const { login, register } = useBookingStore();
+  const { login, register, selectedRoute, currentView, setCurrentView } = useBookingStore();
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [role, setRole] = useState<'passenger' | 'admin'>('passenger');
@@ -112,6 +112,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
         const res = await login(email, password, role);
         if (res.success) {
           onClose();
+          if (selectedRoute) {
+            setCurrentView('seat-selection');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
         } else {
           setErrorMsg(res.message);
           setShakeError(true);
@@ -120,6 +124,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
         const res = await register(name, email, password, role, role === 'passenger' ? normalizedPhone : undefined);
         if (res.success) {
           onClose();
+          if (selectedRoute) {
+            setCurrentView('seat-selection');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
         } else {
           setErrorMsg(res.message);
           setShakeError(true);
@@ -185,6 +193,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
               <X className="w-5 h-5" />
             </button>
           </div>
+
+          {/* Booking or My Tickets Auth Notice */}
+          {selectedRoute ? (
+            <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold shadow-xs animate-fade-in-up">
+              <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
+              <span>
+                Please <strong className="font-extrabold text-amber-950">sign in</strong> or <strong className="font-extrabold text-amber-950">register an account</strong> to book seats for <strong className="text-blue-700">{selectedRoute.origin} → {selectedRoute.destination}</strong> ({selectedRoute.busNumber}).
+              </span>
+            </div>
+          ) : currentView === 'my-bookings' ? (
+            <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-semibold shadow-xs animate-fade-in-up">
+              <Lock className="w-4 h-4 text-blue-600 flex-shrink-0" />
+              <span>
+                Please <strong className="font-extrabold text-blue-950">sign in</strong> or <strong className="font-extrabold text-blue-950">register an account</strong> to view your active bus tickets and booking history.
+              </span>
+            </div>
+          ) : null}
 
           {/* Role Selector with Sliding Indicator */}
           <div className="relative flex p-1 rounded-2xl bg-slate-100/80 backdrop-blur-sm text-xs font-bold border border-slate-200/50">

@@ -37,12 +37,27 @@ export const translations = {
     Ratnapura: 'Ratnapura',
     Matara: 'Matara',
 
-    // Bus Card
+    // Bus Card & Extra UI
     startingFrom: 'Starting from',
     seatsLeft: 'seats left',
     viewSeats: 'View Seats',
     directRoute: 'Direct Route',
     upperLowerDeck: 'Double Deck (Upper & Lower)',
+    departure: 'Departure',
+    arrival: 'Arrival',
+    bookNow: 'Book Now',
+    details: 'Details',
+    timetable: 'Timetable',
+    certified: 'Certified',
+    perPassenger: 'per passenger seat',
+    midnightJourney: 'Midnight Journey',
+    backToHome: 'Back to Home',
+    modifySearch: 'Modify Search',
+    closeSearchPanel: 'Close Search Panel',
+    busesFound: 'Buses Found',
+    busFound: 'Bus Found',
+    availableSchedules: 'Available Bus Schedules Dashboard',
+    officialPortal: 'Official Dewmina Super Line Booking Portal',
     
     // Seat Map
     selectBoardingPoint: 'Select Boarding Point',
@@ -89,6 +104,24 @@ export const translations = {
     insuranceSubtitle: 'Covers trip delays, baggage loss & medical emergencies.',
     totalPayable: 'Total Payable',
     securePaymentText: 'Pay & Generate E-Ticket',
+
+    // Passenger Settings
+    passengerSettings: 'Passenger Settings',
+    profileInformation: 'Profile & Account Details',
+    changeUsername: 'Change Username / Full Name',
+    usernameLabel: 'Full Name / Username',
+    phoneLabelSettings: 'Mobile / WhatsApp Phone',
+    saveProfile: 'Save Profile Changes',
+    changePasswordTitle: 'Security & Password Change',
+    currentPasswordLabel: 'Current Password',
+    newPasswordLabel: 'New Password',
+    confirmPasswordLabel: 'Confirm New Password',
+    updatePassword: 'Update Password',
+    accountEmail: 'Registered Email',
+    accountRole: 'Account Role',
+    passwordsDoNotMatch: 'New password and confirm password do not match.',
+    profileUpdatedSuccess: 'Profile updated successfully!',
+    passwordChangedSuccess: 'Password changed successfully!',
   },
   sinhala: {
     // Navbar
@@ -128,12 +161,27 @@ export const translations = {
     Ratnapura: 'රත්නපුර',
     Matara: 'මාතර',
 
-    // Bus Card
+    // Bus Card & Extra UI
     startingFrom: 'ආරම්භක මිල',
     seatsLeft: 'ආසන ඉතිරිව ඇත',
     viewSeats: 'ආසන බලන්න',
     directRoute: 'ඍජු ගමන් මාර්ගය',
     upperLowerDeck: 'දෙමහල් බස් රථ (ඉහළ සහ පහළ)',
+    departure: 'පිටත්වීම',
+    arrival: 'ළඟාවීම',
+    bookNow: 'වෙන් කරන්න',
+    details: 'විස්තර',
+    timetable: 'කාලසටහන',
+    certified: 'සහතික කළ',
+    perPassenger: 'එක් මගියෙකු සඳහා',
+    midnightJourney: 'මධ්‍යම රාත්‍රී ගමන',
+    backToHome: 'මුල් පිටුවට',
+    modifySearch: 'සෙවීම වෙනස් කරන්න',
+    closeSearchPanel: 'සෙවුම් පැනලය වසන්න',
+    busesFound: 'බස් රථ හමු විය',
+    busFound: 'බස් රථයක් හමු විය',
+    availableSchedules: 'ලබා ගත හැකි බස් කාලසටහන්',
+    officialPortal: 'නිල දෙව්මිණ සුපර් ලයින් ප්‍රවේශපත්‍ර ද්වාරය',
 
     // Seat Map
     selectBoardingPoint: 'පිටත්වන ස්ථානය තෝරන්න',
@@ -180,6 +228,24 @@ export const translations = {
     insuranceSubtitle: 'ගමන් ප්‍රමාදයන්, ගමන් මලු අහිමිවීම් සහ හදිසි වෛද්‍ය ප්‍රතිකාර ආවරණය කරයි.',
     totalPayable: 'ගෙවිය යුතු මුළු මුදල',
     securePaymentText: 'ගෙවා ප්‍රවේශපත්‍රය ලබාගන්න',
+
+    // Passenger Settings
+    passengerSettings: 'මගී සැකසුම්',
+    profileInformation: 'ප්‍රොෆයිල් සහ ගිණුම් විස්තර',
+    changeUsername: 'පරිශීලක නාමය / සම්පූර්ණ නම වෙනස් කරන්න',
+    usernameLabel: 'සම්පූර්ණ නම / පරිශීලක නාමය',
+    phoneLabelSettings: 'දුරකථන / WhatsApp අංකය',
+    saveProfile: 'වෙනස්කම් සුරකින්න',
+    changePasswordTitle: 'ආරක්ෂාව සහ මුරපදය වෙනස් කිරීම',
+    currentPasswordLabel: 'වත්මන් මුරපදය',
+    newPasswordLabel: 'නව මුරපදය',
+    confirmPasswordLabel: 'නව මුරපදය තහවුරු කරන්න',
+    updatePassword: 'මුරපදය යාවත්කාලීන කරන්න',
+    accountEmail: 'ලියාපදිංචි විද්‍යුත් තැපෑල',
+    accountRole: 'ගිණුම් වර්ගය',
+    passwordsDoNotMatch: 'නව මුරපදය සහ තහවුරු කිරීමේ මුරපදය ගැලපෙන්නේ නැත.',
+    profileUpdatedSuccess: 'ප්‍රොෆයිලය සාර්ථකව යාවත්කාලීන කරන ලදී!',
+    passwordChangedSuccess: 'මුරපදය සාර්ථකව වෙනස් කරන ලදී!',
   },
   tamil: {
     // Navbar
@@ -219,12 +285,27 @@ export const translations = {
     Ratnapura: 'இரத்தினபுரி',
     Matara: 'மாத்தறை',
 
-    // Bus Card
+    // Bus Card & Extra UI
     startingFrom: 'ஆரம்ப விலை',
     seatsLeft: 'இருக்கைகள் உள்ளன',
     viewSeats: 'இருக்கைகளைப் பார்க்க',
     directRoute: 'நேரடி பாதை',
     upperLowerDeck: 'இரட்டை அடுக்கு பஸ் (மேல் & கீழ்)',
+    departure: 'புறப்படும் இடம்',
+    arrival: 'இறங்கும் இடம்',
+    bookNow: 'முன்பதிவு செய்',
+    details: 'விவரங்கள்',
+    timetable: 'அட்டவணை',
+    certified: 'சான்றளிக்கப்பட்ட',
+    perPassenger: 'ஒரு பயணியின் இருக்கைக்கு',
+    midnightJourney: 'நள்ளிரவு பயணம்',
+    backToHome: 'முகப்புக்குத் திரும்புக',
+    modifySearch: 'தேடலை மாற்றுக',
+    closeSearchPanel: 'தேடல் பேனலை மூடு',
+    busesFound: 'பஸ்கள் கண்டறியப்பட்டன',
+    busFound: 'பஸ் கண்டறியப்பட்டது',
+    availableSchedules: 'கிடைக்கும் பஸ் அட்டவணைகள்',
+    officialPortal: 'அதிகாரப்பூர்வ தெவ்மிண சூப்பர் லைன் முன்பதிவு போர்டல்',
 
     // Seat Map
     selectBoardingPoint: 'ஏறும் இடத்தை தேர்வு செய்யவும்',
@@ -271,6 +352,24 @@ export const translations = {
     insuranceSubtitle: 'பயண தாமதங்கள், சாமான்கள் இழப்பு மற்றும் மருத்துவ அவசரநிலைகளை உள்ளடக்கியது.',
     totalPayable: 'மொத்த செலுத்த வேண்டிய தொகை',
     securePaymentText: 'செலுத்தி ஈ-டிக்கெட்டை உருவாக்கவும்',
+
+    // Passenger Settings
+    passengerSettings: 'பயணிகள் அமைப்புகள்',
+    profileInformation: 'சுயவிவரம் மற்றும் கணக்கு விவரங்கள்',
+    changeUsername: 'பயனர்பெயர் / முழு பெயரை மாற்றவும்',
+    usernameLabel: 'முழு பெயர் / பயனர்பெயர்',
+    phoneLabelSettings: 'தொலைபேசி / வாட்ஸ்அப் எண்',
+    saveProfile: 'மாற்றங்களை சேமிக்கவும்',
+    changePasswordTitle: 'பாதுகாப்பு மற்றும் கடவுச்சொல் மாற்றம்',
+    currentPasswordLabel: 'தற்போதைய கடவுச்சொல்',
+    newPasswordLabel: 'புதிய கடவுச்சொல்',
+    confirmPasswordLabel: 'புதிய கடவுச்சொல்லை உறுதிப்படுத்தவும்',
+    updatePassword: 'கடவுச்சொல்லை புதுப்பிக்கவும்',
+    accountEmail: 'பதிவு செய்யப்பட்ட மின்னஞ்சல்',
+    accountRole: 'கணக்கு பங்கு',
+    passwordsDoNotMatch: 'புதிய கடவுச்சொல்லும் உறுதிப்படுத்தல் கடவுச்சொல்லும் பொருந்தவில்லை.',
+    profileUpdatedSuccess: 'சுயவிவரம் வெற்றிகரமாக புதுப்பிக்கப்பட்டது!',
+    passwordChangedSuccess: 'கடவுச்சொல் வெற்றிகரமாக மாற்றப்பட்டது!',
   }
 };
 

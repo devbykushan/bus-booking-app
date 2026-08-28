@@ -44,8 +44,6 @@ export const TicketModal: React.FC = () => {
 💺 *Reserved Seats:* ${booking.seats.map(s => s.number).join(', ')}
 💳 *Total Paid:* LKR ${booking.totalFare.toLocaleString()}
 
-📍 *Live Bus GPS Telemetry & Tracking:* https://dewminasuperline.lk/track/${booking.routeId}
-
 Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
   };
 
@@ -113,15 +111,14 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
     setIsValidatingQr(false);
   };
 
-  const qrCodeValue = booking.qrCodeData?.startsWith('http')
-    ? booking.qrCodeData
-    : `https://dewminasuperline.lk/validate?pnr=${booking.pnr}&pass=${encodeURIComponent(booking.passenger.fullName)}`;
+  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173';
+  const qrCodeValue = `${currentOrigin}/#validate?pnr=${booking.pnr}&pass=${encodeURIComponent(booking.passenger.fullName)}`;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       
       {/* Confirmation Banner */}
-      <div className="p-6 rounded-3xl border border-emerald-200 bg-emerald-50 text-center space-y-3 shadow-sm">
+      <div className="no-print p-6 rounded-3xl border border-emerald-200 bg-emerald-50 text-center space-y-3 shadow-sm">
         <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
           <CheckCircle2 className="w-8 h-8" />
         </div>
@@ -135,7 +132,7 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
       </div>
 
       {/* Automatic WhatsApp Alert Dispatch Banner */}
-      <div className={`p-4 rounded-2xl flex items-center justify-between text-xs font-bold shadow-sm border transition-all ${
+      <div className={`no-print p-4 rounded-2xl flex items-center justify-between text-xs font-bold shadow-sm border transition-all ${
         autoSendBlocked
           ? 'bg-amber-50 border-amber-300 text-amber-900 animate-pulse'
           : 'bg-emerald-600 text-white border-emerald-500'
@@ -166,7 +163,7 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
 
       {/* WhatsApp Toast Notification */}
       {sentToast && (
-        <div className="p-4 rounded-2xl bg-emerald-700 text-white font-bold text-xs flex items-center justify-between shadow-lg animate-fade-in-up">
+        <div className="no-print p-4 rounded-2xl bg-emerald-700 text-white font-bold text-xs flex items-center justify-between shadow-lg animate-fade-in-up">
           <div className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-emerald-200" />
             <span>WhatsApp launched! Ticket confirmation message sent to +{formatWhatsAppPhone(booking.passenger.phone)}.</span>
@@ -179,7 +176,7 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
       <div id="printable-ticket" className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm relative overflow-hidden space-y-6">
         
         {/* Top Ticket Header */}
-        <div className="flex flex-col md:flex-row items-center justify-between border-b border-slate-200 pb-6 gap-4">
+        <div className="ticket-header flex flex-col md:flex-row items-center justify-between border-b border-slate-200 pb-6 gap-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-extrabold text-xl shadow-sm">
               <Bus className="w-7 h-7 text-white" />
@@ -199,7 +196,7 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
         </div>
 
         {/* Journey Details Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200 text-xs">
+        <div className="journey-grid grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200 text-xs">
           
           <div className="space-y-1">
             <span className="text-blue-600 uppercase tracking-wider text-[10px] font-bold flex items-center gap-1.5">
@@ -266,18 +263,18 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
           {/* Right Dynamic Interactive QR Code */}
           <div
             onClick={handleScanValidateQR}
-            className="md:col-span-4 flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/20 shadow-2xs text-slate-950 space-y-2 cursor-pointer transition-all group relative"
+            className="qr-container md:col-span-4 flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/20 shadow-2xs text-slate-950 space-y-2 cursor-pointer transition-all group relative"
             title="Click to validate QR Code PNR status"
           >
             <div className="relative flex items-center justify-center">
-              <QRCodeSVG value={qrCodeValue} size={135} level="H" />
+              <QRCodeSVG value={qrCodeValue} size={135} level="H" includeMargin={true} />
               {isValidatingQr && (
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-xs flex items-center justify-center rounded-lg">
                   <span className="w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
                 </div>
               )}
             </div>
-            <span className="font-mono text-[10px] font-bold tracking-widest text-slate-500 group-hover:text-emerald-600 uppercase flex items-center gap-1 transition-colors">
+            <span className="font-mono text-[10px] font-bold tracking-widest text-slate-500 group-hover:text-emerald-600 uppercase flex items-center gap-1 transition-colors no-print">
               <CheckCircle2 className="w-3 h-3 text-emerald-500" /> SCAN / CLICK TO VALIDATE
             </span>
           </div>
@@ -287,7 +284,7 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
       </div>
 
       {/* Action Buttons Row */}
-      <div className="flex flex-wrap items-center justify-center gap-4">
+      <div className="no-print flex flex-wrap items-center justify-center gap-4">
         
         <button
           onClick={handlePrint}
@@ -335,7 +332,7 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
 
       {/* Live QR Validation Status Result Modal */}
       {qrValidationResult && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+        <div className="no-print fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white p-6 rounded-3xl max-w-md w-full border border-slate-200 space-y-4 shadow-2xl text-center animate-pop-in">
             <div className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto ${
               qrValidationResult.success ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'
@@ -366,7 +363,7 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
 
       {/* WhatsApp Dispatcher Modal (For custom number or message preview) */}
       {showWhatsAppModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+        <div className="no-print fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white p-6 rounded-3xl max-w-lg w-full border border-slate-200 space-y-5 shadow-2xl animate-pop-in">
             
             {/* Modal Header */}

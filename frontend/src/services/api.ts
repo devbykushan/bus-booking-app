@@ -130,6 +130,28 @@ export const authApi = {
   /** Get authenticated user profile */
   getMe: (token: string): Promise<{ user: any }> =>
     apiFetch('/auth/me', { headers: { Authorization: `Bearer ${token}` } }),
+
+  /** Update user name / username and phone */
+  updateProfile: (
+    token: string,
+    payload: { name: string; phone?: string }
+  ): Promise<{ success: boolean; message: string; user: any }> =>
+    apiFetch('/auth/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    }),
+
+  /** Change user password */
+  changePassword: (
+    token: string,
+    payload: { currentPassword: string; newPassword: string }
+  ): Promise<{ success: boolean; message: string }> =>
+    apiFetch('/auth/change-password', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    }),
 };
 
 // ─── Health Check ─────────────────────────────────────────────────────────────

@@ -94,7 +94,21 @@ export const SchedulesDashboard: React.FC = () => {
   // Search modify draft state
   const [modOrigin, setModOrigin] = useState(searchOrigin);
   const [modDestination, setModDestination] = useState(searchDestination);
-  const [modDate, setModDate] = useState(searchDate || todayStr);
+  const [modDate, setModDate] = useState(() => {
+    const now = toISODateString(new Date());
+    return (!searchDate || searchDate < now) ? now : searchDate;
+  });
+
+  // Auto-heal past search dates
+  useEffect(() => {
+    const now = toISODateString(new Date());
+    if (searchDate < now) {
+      setSearchCriteria(searchOrigin, searchDestination, now);
+    }
+    if (modDate < now) {
+      setModDate(now);
+    }
+  }, [todayStr]);
 
   // Horizontal scrollable dates state (Strictly 1 week / 7 days advance booking)
   const dateScrollRef = useRef<HTMLDivElement>(null);
@@ -357,12 +371,12 @@ export const SchedulesDashboard: React.FC = () => {
               className="inline-flex items-center gap-2 text-xs font-semibold text-blue-200 hover:text-white bg-white/10 hover:bg-white/15 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/15 transition-all duration-200 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Home</span>
+              <span>{t('backToHome')}</span>
             </button>
 
             <div className="flex items-center gap-2 text-xs text-blue-200/80">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Official Dewmina Super Line Booking Portal</span>
+              <span>{t('officialPortal')}</span>
             </div>
           </div>
 
@@ -371,7 +385,7 @@ export const SchedulesDashboard: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-mono font-bold tracking-widest text-blue-300 uppercase">
                 <Bus className="w-4 h-4 text-blue-400" />
-                <span>Available Bus Schedules Dashboard</span>
+                <span>{t('availableSchedules')}</span>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
@@ -381,7 +395,7 @@ export const SchedulesDashboard: React.FC = () => {
                       <span className="absolute -inset-0.5 rounded-lg bg-blue-400/30 animate-from-beacon pointer-events-none" />
                       <MapPin className="w-3.5 h-3.5 animate-from-icon relative z-10 text-blue-400" />
                     </span>
-                    <span>{searchOrigin}</span>
+                    <span>{t(searchOrigin)}</span>
                   </span>
                   <span className="text-blue-400 font-light flex items-center gap-1 px-1">
                     <span className="w-6 sm:w-10 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full animate-route-flow" />
@@ -392,7 +406,7 @@ export const SchedulesDashboard: React.FC = () => {
                       <span className="absolute -inset-0.5 rounded-lg bg-indigo-400/30 animate-to-beacon pointer-events-none" />
                       <MapPin className="w-3.5 h-3.5 animate-to-icon relative z-10 text-indigo-400" />
                     </span>
-                    <span>{searchDestination}</span>
+                    <span>{t(searchDestination)}</span>
                   </span>
                 </h1>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-bold">
@@ -401,7 +415,7 @@ export const SchedulesDashboard: React.FC = () => {
                 </span>
                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  {filteredAndSortedRoutes.length} {filteredAndSortedRoutes.length === 1 ? 'Bus Found' : 'Buses Found'}
+                  {filteredAndSortedRoutes.length} {filteredAndSortedRoutes.length === 1 ? t('busFound') : t('busesFound')}
                 </span>
               </div>
             </div>
@@ -418,7 +432,7 @@ export const SchedulesDashboard: React.FC = () => {
                 }`}
               >
                 <SlidersHorizontal className="w-4 h-4" />
-                <span>{isModifyOpen ? 'Close Search Panel' : 'Modify Search'}</span>
+                <span>{isModifyOpen ? t('closeSearchPanel') : t('modifySearch')}</span>
               </button>
             </div>
           </div>

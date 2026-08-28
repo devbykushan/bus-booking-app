@@ -24,7 +24,8 @@ export type AppView =
   | 'ticket-confirmation'
   | 'my-bookings'
   | 'live-tracking'
-  | 'admin-panel';
+  | 'admin-panel'
+  | 'passenger-settings';
 
 export const VIEW_HASH_MAP: Record<AppView, string> = {
   'passenger-search': 'home',
@@ -35,6 +36,7 @@ export const VIEW_HASH_MAP: Record<AppView, string> = {
   'my-bookings': 'my-tickets',
   'live-tracking': 'live-gps',
   'admin-panel': 'admin',
+  'passenger-settings': 'settings',
 };
 
 export const HASH_VIEW_MAP: Record<string, AppView> = {
@@ -56,6 +58,8 @@ export const HASH_VIEW_MAP: Record<string, AppView> = {
   'live-tracking': 'live-tracking',
   'admin': 'admin-panel',
   'admin-panel': 'admin-panel',
+  'settings': 'passenger-settings',
+  'passenger-settings': 'passenger-settings',
 };
 
 export function getViewFromLocation(): AppView {
@@ -73,6 +77,8 @@ interface BookingStore {
   login: (email: string, pass: string, role?: 'passenger' | 'admin') => Promise<{ success: boolean; message: string }>;
   register: (name: string, email: string, pass: string, role?: 'passenger' | 'admin', phone?: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
+  updateProfile: (name: string, phone?: string) => Promise<{ success: boolean; message: string }>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
   showAuthModal: boolean;
   setShowAuthModal: (val: boolean) => void;
 
@@ -219,6 +225,45 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     get().setCurrentView('passenger-search');
   },
 
+  updateProfile: async (name, phone) => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return { success: false, message: 'Not authenticated.' };
+    try {
+      const res = await authApi.updateProfile(token, { name, phone });
+      if (res.success && res.user) {
+        const currentUser = get().currentUser;
+        const updatedUser: UserAccount = {
+          ...currentUser,
+          id: res.user.id,
+          name: res.user.name,
+          email: res.user.email,
+          role: res.user.role,
+          phone: res.user.phone,
+        };
+        localStorage.setItem('dewmina_user', JSON.stringify(updatedUser));
+        set({ currentUser: updatedUser });
+        return { success: true, message: res.message || 'Profile updated successfully.' };
+      }
+      return { success: false, message: res.message || 'Update failed.' };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Profile update error.' };
+    }
+  },
+
+  changePassword: async (currentPassword, newPassword) => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return { success: false, message: 'Not authenticated.' };
+    try {
+      const res = await authApi.changePassword(token, { currentPassword, newPassword });
+      if (res.success) {
+        return { success: true, message: res.message || 'Password changed successfully.' };
+      }
+      return { success: false, message: res.message || 'Password change failed.' };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Password change error.' };
+    }
+  },
+
   isLoading: false,
   error: null,
   setError: (msg) => set({ error: msg }),
@@ -257,8 +302,11 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   soloFemaleOnly: false,
   busTypeFilter: 'all',
 
-  setSearchCriteria: (origin, dest, date) =>
-    set({ searchOrigin: origin, searchDestination: dest, searchDate: date }),
+  setSearchCriteria: (origin, dest, date) => {
+    const today = new Date().toISOString().split('T')[0];
+    const validDate = (!date || date < today) ? today : date;
+    set({ searchOrigin: origin, searchDestination: dest, searchDate: validDate });
+  },
   setSoloFemaleOnly: (val) => set({ soloFemaleOnly: val }),
   setBusTypeFilter: (val) => set({ busTypeFilter: val }),
 
@@ -304,7 +352,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         number: normalizedNum,
         row: 1,
         col: 1,
-        price: selectedRoute.seats[0]?.price || 3430,
+        price: selectedRoute.seats[0]?.price || selectedRoute.priceStarting || 950,
         status: 'available',
         deck: 'lower'
       };
