@@ -8,7 +8,7 @@ import { RealisticBusAnimation } from './RealisticBusAnimation';
 import { AnimatedLogoBadge } from './AnimatedLogoBadge';
 
 export const Footer: React.FC = () => {
-  const { goToSearchSchedules, setSearchCriteria, setCurrentView } = useBookingStore();
+  const { goToSearchSchedules, setSearchCriteria, setCurrentView, currentUser, userRole, setUserRole, setShowAuthModal } = useBookingStore();
   const [currentSocialIndex, setCurrentSocialIndex] = useState<0 | 1>(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -369,7 +369,21 @@ export const Footer: React.FC = () => {
               <button onClick={goToSearchSchedules} className="hover:text-blue-600 transition-colors">Book Buses</button>
               <button onClick={() => setCurrentView('live-tracking')} className="hover:text-blue-600 transition-colors flex items-center gap-1">Live GPS <span className="text-[9px] font-black uppercase text-amber-700 bg-amber-100 px-1 py-0.2 rounded border border-amber-200">Soon</span></button>
               <button onClick={() => setCurrentView('my-bookings')} className="hover:text-blue-600 transition-colors">My Tickets</button>
-              <button onClick={() => setCurrentView('admin-panel')} className="hover:text-blue-600 transition-colors">Operator Portal</button>
+              <button
+                onClick={() => {
+                  if (currentUser?.role === 'admin' || userRole === 'admin') {
+                    setUserRole('admin');
+                    setCurrentView('admin-panel');
+                  } else if (currentUser) {
+                    setCurrentView('admin-panel');
+                  } else {
+                    setShowAuthModal(true);
+                  }
+                }}
+                className="hover:text-blue-600 transition-colors cursor-pointer"
+              >
+                Operator Portal
+              </button>
             </div>
         </div>
 
