@@ -221,7 +221,7 @@ export const UserBookings: React.FC = () => {
                     onClick={() => handleTrack(b.routeId)}
                     className="px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 transition-colors flex items-center gap-1.5 font-bold"
                   >
-                    <MapPin className="w-3.5 h-3.5 text-blue-600" /> Track Live GPS
+                    <MapPin className="w-3.5 h-3.5 text-blue-600" /> Track Live GPS <span className="text-[10px] text-amber-700 font-black uppercase bg-amber-100 px-1.5 py-0.5 rounded border border-amber-200">Soon</span>
                   </button>
                 </div>
               </div>

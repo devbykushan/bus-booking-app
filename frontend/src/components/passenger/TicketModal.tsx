@@ -318,7 +318,7 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
           }}
           className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm flex items-center gap-2 transition-all cursor-pointer"
         >
-          <MapPin className="w-4 h-4 text-white" /> {t('trackBus')}
+          <MapPin className="w-4 h-4 text-white" /> {t('trackBus')} <span className="text-[9px] font-black uppercase bg-amber-400 text-amber-950 px-1.5 py-0.5 rounded">Soon</span>
         </button>
 
         <button

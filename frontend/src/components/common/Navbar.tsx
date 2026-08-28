@@ -137,6 +137,13 @@ export const Navbar: React.FC = () => {
                     >
                       <Icon className={`w-4 h-4 ${active ? 'text-white' : 'text-slate-500 group-hover:text-slate-900'}`} />
                       <span>{t(item.translationKey)}</span>
+                      {item.key === 'live-tracking' && (
+                        <span className={`px-1.5 py-0.5 text-[9px] font-black uppercase rounded-md tracking-wider ${
+                          active ? 'bg-white/20 text-white border border-white/30' : 'bg-amber-100 text-amber-700 border border-amber-200/70'
+                        }`}>
+                          Soon
+                        </span>
+                      )}
                     </button>
                   );
                 })}
@@ -329,6 +336,13 @@ export const Navbar: React.FC = () => {
                   >
                     <Icon className="w-4 h-4" />
                     <span>{t(item.translationKey)}</span>
+                    {item.key === 'live-tracking' && (
+                      <span className={`ml-auto px-2 py-0.5 text-[10px] font-black uppercase rounded-md tracking-wider ${
+                        active ? 'bg-white/20 text-white border border-white/30' : 'bg-amber-100 text-amber-700 border border-amber-200/70'
+                      }`}>
+                        Soon
+                      </span>
+                    )}
                   </button>
                 );
               })}
