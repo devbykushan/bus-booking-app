@@ -1,9 +1,9 @@
 import React from 'react';
 import { useBookingStore } from '../../store/bookingStore';
-import { Ticket, MapPin, XCircle, Bus, Clock } from 'lucide-react';
+import { Ticket, MapPin, XCircle, Bus, Clock, Download } from 'lucide-react';
 
 export const UserBookings: React.FC = () => {
-  const { bookings, cancelBooking, setCurrentView, goToSearchSchedules, setTrackingRouteId, currentUser, setShowAuthModal } = useBookingStore();
+  const { bookings, cancelBooking, setCurrentView, goToSearchSchedules, setTrackingRouteId, currentUser, setShowAuthModal, setLatestConfirmedBooking } = useBookingStore();
 
   const handleTrack = (routeId: string) => {
     setTrackingRouteId(routeId);
@@ -192,13 +192,27 @@ export const UserBookings: React.FC = () => {
                   Boarding: <strong>{b.boardingPoint.name}</strong> ({b.boardingPoint.time})
                 </div>
 
-                <div className="flex items-center gap-2 text-xs">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  {b.bookingStatus === 'confirmed' && (
+                    <button
+                      onClick={() => {
+                        setLatestConfirmedBooking(b);
+                        setCurrentView('ticket-confirmation');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                    >
+                      <Download className="w-3.5 h-3.5 text-white" />
+                      <span>Download E-Ticket</span>
+                    </button>
+                  )}
+
                   {b.bookingStatus === 'confirmed' && (() => {
                     const cancelInfo = getCancellationInfo(b.createdAt, currentUser?.role === 'admin');
                     return cancelInfo.canCancel ? (
                       <button
                         onClick={() => handleCancel(b.pnr, cancelInfo.canCancel, cancelInfo.text)}
-                        className="px-3.5 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-300 transition-all flex items-center gap-1.5 font-bold shadow-xs cursor-pointer active:scale-95"
+                        className="px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-300 transition-all flex items-center gap-1.5 font-bold shadow-xs cursor-pointer active:scale-95"
                         title={cancelInfo.text ? `Cancellation active (${cancelInfo.text})` : 'Cancel booking'}
                       >
                         <XCircle className="w-4 h-4 text-rose-600" />
@@ -210,7 +224,7 @@ export const UserBookings: React.FC = () => {
                         )}
                       </button>
                     ) : (
-                      <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-400 text-xs font-semibold" title="Bookings can only be cancelled within 4 hours of booking creation.">
+                      <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-400 text-xs font-semibold" title="Bookings can only be cancelled within 4 hours of booking creation.">
                         <Clock className="w-3.5 h-3.5 text-slate-400" />
                         <span>Cancel Expired (&gt;4h)</span>
                       </div>
