@@ -149,6 +149,49 @@ export const SeatMap: React.FC = () => {
     };
   }, [isSeatDrawerOpen]);
 
+  // Real-time live seat map update polling (every 2.5 seconds)
+  useEffect(() => {
+    if (!selectedRoute) return;
+
+    let isMounted = true;
+    const fetchLiveRouteStatus = async () => {
+      try {
+        const res = await fetch(`/api/routes/${selectedRoute.id}`);
+        if (res.ok && isMounted) {
+          const liveRoute: BusRoute = await res.json();
+          if (liveRoute && liveRoute.seats) {
+            useBookingStore.setState(state => {
+              if (!state.selectedRoute || state.selectedRoute.id !== selectedRoute.id) return {};
+              return {
+                selectedRoute: {
+                  ...state.selectedRoute,
+                  seats: liveRoute.seats,
+                  availableSeatsCount: liveRoute.availableSeatsCount,
+                }
+              };
+            });
+
+            const nowBooked = liveRoute.seats.filter(s => s.status === 'booked').map(s => s.id);
+            const newlyBooked = selectedSeatIds.filter(id => nowBooked.includes(id) || nowBooked.includes(`${selectedRoute.id}-${id.replace(/^[^-]+-/, '')}`));
+            if (newlyBooked.length > 0) {
+              setSelectedSeatIds(prev => prev.filter(id => !newlyBooked.includes(id)));
+              setGenderToastMessage(`Seat(s) ${newlyBooked.map(id => id.replace(/^[^-]+-/, '')).join(', ')} were just booked in real-time by another passenger.`);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Real-time seat map polling warning:', err);
+      }
+    };
+
+    fetchLiveRouteStatus();
+    const interval = setInterval(fetchLiveRouteStatus, 2500);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [selectedRoute?.id, selectedSeatIds]);
+
   if (!selectedRoute) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-4">

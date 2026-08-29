@@ -361,8 +361,15 @@ export const AdminDashboard: React.FC = () => {
                   <button
                     onClick={() => {
                       const csvContent = "data:text/csv;charset=utf-8," 
-                        + ["PNR,Passenger Name,Phone,Seats,Fare,Status"].join(",") + "\n"
-                        + manifestBookings.map(b => `${b.pnr},"${b.passengerName}",${b.passengerPhone},"${b.seatNumbers?.join(';')}",${b.totalFare},${b.bookingStatus}`).join("\n");
+                        + ["PNR,Passenger Name,Gender,Phone,Seat Count,Seat Numbers,Fare,Status"].join(",") + "\n"
+                        + manifestBookings.map(b => {
+                            const seatsList = (b.seatNumbers && b.seatNumbers.length > 0) ? b.seatNumbers.join(';') : (b.seats && b.seats.length > 0) ? b.seats.map(s => s.number || s.id).join(';') : 'Assigned';
+                            const count = (b.seats && b.seats.length > 0) ? b.seats.length : (b.seatNumbers && b.seatNumbers.length > 0) ? b.seatNumbers.length : 1;
+                            const g = b.passenger?.gender || (b as any).gender || 'Unspecified';
+                            const name = b.passenger?.fullName || (b as any).passengerName || 'Passenger';
+                            const phone = b.passenger?.phone || (b as any).passengerPhone || '';
+                            return `${b.pnr},"${name}",${g},${phone},${count},"${seatsList}",${b.totalFare},${b.bookingStatus}`;
+                          }).join("\n");
                       const encodedUri = encodeURI(csvContent);
                       const link = document.createElement("a");
                       link.setAttribute("href", encodedUri);
@@ -371,7 +378,7 @@ export const AdminDashboard: React.FC = () => {
                       link.click();
                       document.body.removeChild(link);
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                    className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" /> Export Manifest
                   </button>
@@ -384,22 +391,73 @@ export const AdminDashboard: React.FC = () => {
                   <p className="text-sm font-semibold">No passenger bookings recorded for this route yet.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 overflow-x-auto">
-                  {manifestBookings.map(b => (
-                    <div key={b.id} className="py-3 flex items-center justify-between gap-4 text-xs">
-                      <div>
-                        <p className="font-bold text-slate-800">{b.passengerName}</p>
-                        <p className="text-slate-500 text-[11px]">PNR: <span className="font-mono font-bold text-blue-600">{b.pnr}</span> • {b.passengerPhone}</p>
-                      </div>
+                <div className="space-y-3 overflow-x-auto">
+                  {manifestBookings.map(b => {
+                    const seatNumsList = (b.seatNumbers && b.seatNumbers.length > 0) 
+                      ? b.seatNumbers 
+                      : (b.seats && b.seats.length > 0) 
+                      ? b.seats.map(s => s.number || s.id.replace(/^.*-/, '')) 
+                      : ['Assigned'];
 
-                      <div className="text-right">
-                        <span className="font-mono font-bold text-slate-800">
-                          Seat(s): {b.seatNumbers?.join(', ') || 'Assigned'}
-                        </span>
-                        <p className="text-[11px] text-slate-500">LKR {b.totalFare.toLocaleString()}</p>
+                    const formattedSeatNumbers = seatNumsList.join(', ');
+                    const seatCount = (b.seats && b.seats.length > 0) 
+                      ? b.seats.length 
+                      : (b.seatNumbers && b.seatNumbers.length > 0) 
+                      ? b.seatNumbers.length 
+                      : 1;
+
+                    const passengerName = b.passenger?.fullName || (b as any).passengerName || 'Passenger';
+                    const passengerPhone = b.passenger?.phone || (b as any).passengerPhone || 'N/A';
+                    const gender = b.passenger?.gender || (b as any).gender || 'female';
+
+                    return (
+                      <div key={b.id} className="p-3.5 rounded-2xl bg-slate-50/80 hover:bg-slate-100/90 border border-slate-200/80 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                        
+                        {/* Passenger Name, PNR, Phone & Gender */}
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="font-extrabold text-slate-900 text-sm">{passengerName}</p>
+
+                            {/* Gender Badge (Male ♂️ / Female ♀️) */}
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                              gender === 'female'
+                                ? 'bg-pink-50 text-pink-700 border-pink-200'
+                                : gender === 'male'
+                                ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                : 'bg-slate-100 text-slate-700 border-slate-200'
+                            }`}>
+                              {gender === 'female' ? '♀ Female' : gender === 'male' ? '♂ Male' : '👤 Passenger'}
+                            </span>
+
+                            {/* Booked Seat Count Badge */}
+                            <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold">
+                              {seatCount} {seatCount === 1 ? 'Seat' : 'Seats'}
+                            </span>
+                          </div>
+
+                          <p className="text-slate-500 text-[11px] font-mono flex items-center gap-2">
+                            <span>PNR: <strong className="text-blue-600 font-bold">{b.pnr}</strong></span>
+                            <span>•</span>
+                            <span>{passengerPhone}</span>
+                          </p>
+                        </div>
+
+                        {/* Seat Numbers & Total Price */}
+                        <div className="text-left sm:text-right space-y-1 shrink-0">
+                          <div className="flex items-center sm:justify-end gap-1.5">
+                            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Seat(s):</span>
+                            <span className="font-mono font-black text-slate-900 text-sm bg-white px-2.5 py-1 rounded-xl border border-slate-300 shadow-2xs">
+                              {formattedSeatNumbers}
+                            </span>
+                          </div>
+                          <p className="text-[11px] font-bold font-mono text-emerald-600">
+                            LKR {(b.totalFare || 0).toLocaleString()}
+                          </p>
+                        </div>
+
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
