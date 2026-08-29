@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { routesApi } from '../../services/api';
 import type { BusRoute, Seat, BusCategory, DeckType, SeatStatus } from '../../types/booking';
 import { 
   LayoutGrid, Save, X, Shield, Bus, RefreshCw, Plus, Trash2, Edit3, 
-  CheckCircle2, DollarSign, Layers, Sliders, Settings2
+  CheckCircle2, DollarSign, Layers, Sliders, Settings2, Zap
 } from 'lucide-react';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) => {
-  const { loadRoutes } = useBookingStore();
+  const { loadRoutes, setSelectedRoute, selectedRoute } = useBookingStore();
 
   const generatePresetSeats = (type: BusCategory | string, price: number, routeId: string): Seat[] => {
     const newSeats: Seat[] = [];
@@ -45,18 +45,71 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
         newSeats.push({ id: `${routeId}-${s.num}`, number: s.num, deck: 'lower', row: 12, col: s.col, price, status: 'available', isSleeper: false, isFemaleOnly: false });
       });
       return newSeats;
-    } else if (type.includes('58 Seats 3*2') || type.includes('Normal Service') || type.includes('54 Seats 3*2')) {
-      // Ashok Leyland 58 seats: 11 rows of 5 plus 3 rear seats.
-      for (let r = 1; r <= 11; r++) {
-        [1, 2, 3, 5, 6].forEach((c) => {
-          const seatNum = `${r}${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
-          newSeats.push({ id: `${routeId}-${seatNum}`, number: seatNum, deck: 'lower', row: r, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: (r === 2 || r === 3) && c <= 3 });
+    } else if (type.includes('58 Seats') || type.includes('Normal Service') || type.includes('54 Seats 3*2') || type.includes('3*2') || type.includes('Leyland')) {
+      // Ashok Leyland 58 seats numeric layout (1 to 58) matching diagram
+      const femaleSeats = ['2', '3', '7', '8'];
+
+      // Row 0: Top Left Seat #1
+      newSeats.push({
+        id: `${routeId}-1`, number: '1', deck: 'lower', row: 0, col: 1, price, status: 'available', isSleeper: false, isFemaleOnly: false
+      });
+
+      // Rows 1 to 9: 2 left (cols 1,2) and 3 right (cols 4,5,6)
+      let currentNum = 2;
+      for (let r = 1; r <= 9; r++) {
+        [1, 2, 4, 5, 6].forEach((c) => {
+          const numStr = currentNum.toString();
+          newSeats.push({
+            id: `${routeId}-${numStr}`,
+            number: numStr,
+            deck: 'lower',
+            row: r,
+            col: c,
+            price,
+            status: 'available',
+            isSleeper: false,
+            isFemaleOnly: femaleSeats.includes(numStr),
+          });
+          currentNum++;
         });
       }
-      [1, 2, 3].forEach((c) => {
-        const seatNum = `12${String.fromCharCode(64 + (c > 4 ? c - 1 : c))}`;
-        newSeats.push({ id: `${routeId}-${seatNum}`, number: seatNum, deck: 'lower', row: 12, col: c, price, status: 'available', isSleeper: false, isFemaleOnly: false });
+
+      // Rows 10 & 11: 3 right seats only (cols 4,5,6)
+      for (let r = 10; r <= 11; r++) {
+        [4, 5, 6].forEach((c) => {
+          const numStr = currentNum.toString();
+          newSeats.push({
+            id: `${routeId}-${numStr}`,
+            number: numStr,
+            deck: 'lower',
+            row: r,
+            col: c,
+            price,
+            status: 'available',
+            isSleeper: false,
+            isFemaleOnly: false,
+          });
+          currentNum++;
+        });
+      }
+
+      // Row 12: 6 rear seats (cols 1,2,3,4,5,6)
+      [1, 2, 3, 4, 5, 6].forEach((c) => {
+        const numStr = currentNum.toString();
+        newSeats.push({
+          id: `${routeId}-${numStr}`,
+          number: numStr,
+          deck: 'lower',
+          row: 12,
+          col: c,
+          price,
+          status: 'available',
+          isSleeper: false,
+          isFemaleOnly: false,
+        });
+        currentNum++;
       });
+
       return newSeats;
     } else if (type.includes('54 Seats')) {
       // Ashok Leyland 54 seats: 13 rows of 4 plus 2 rear seats.
@@ -166,16 +219,47 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
     }
   };
 
+  // Helper to validate and normalize seats array for route layout
+  const getNormalizedSeats = (rawSeats: Seat[], currentBusType: string, price: number, routeId: string): Seat[] => {
+    let baseLayoutSeats: Seat[];
+    
+    const isNormalService = currentBusType.includes('Normal Service') || currentBusType.includes('58 Seats') || currentBusType.includes('3*2') || currentBusType.includes('Leyland');
+    const isSuperLuxury = currentBusType.includes('Super Luxury') || currentBusType.includes('49 Seats');
+
+    if (!rawSeats || rawSeats.length === 0) {
+      baseLayoutSeats = generatePresetSeats(currentBusType, price, routeId);
+    } else if (isNormalService && (rawSeats.some(s => /[A-Za-z]/.test(s.number)) || rawSeats.length !== 58)) {
+      baseLayoutSeats = generatePresetSeats('Normal Service (58 Seats 3*2)', price, routeId);
+    } else if (isSuperLuxury && rawSeats.length !== 49) {
+      baseLayoutSeats = generatePresetSeats('Super Luxury Express (49 Seats 2*2)', price, routeId);
+    } else {
+      baseLayoutSeats = rawSeats;
+    }
+
+    // Merge real-time booked status from rawSeats if available
+    if (rawSeats && rawSeats.length > 0) {
+      const bookedSet = new Set(rawSeats.filter(s => s.status === 'booked').map(s => s.number || s.id.replace(/^[^-]+-/, '')));
+      if (bookedSet.size > 0) {
+        return baseLayoutSeats.map(s => {
+          const num = s.number || s.id.replace(/^[^-]+-/, '');
+          if (bookedSet.has(num)) {
+            return { ...s, status: 'booked' };
+          }
+          return s;
+        });
+      }
+    }
+
+    return baseLayoutSeats;
+  };
+
   const initialBusType: BusCategory = (route.busType as any) || 'Super Luxury (49 Seats 2*2)';
   const initialBasePrice: number = route.priceStarting || 2800;
 
   const [busType, setBusType] = useState<BusCategory>(initialBusType);
   const [basePrice, setBasePrice] = useState<number>(initialBasePrice);
   const [seats, setSeats] = useState<Seat[]>(() => {
-    if (route.seats && route.seats.length > 0) {
-      return [...route.seats];
-    }
-    return generatePresetSeats(initialBusType, initialBasePrice, route.id);
+    return getNormalizedSeats(route.seats || [], initialBusType, initialBasePrice, route.id);
   });
   const [activeDeck, setActiveDeck] = useState<DeckType>('lower');
   const [selectedSeatId, setSelectedSeatId] = useState<string | null>(null);
@@ -184,6 +268,38 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showAddSeatModal, setShowAddSeatModal] = useState(false);
+  const [isLiveSyncing, setIsLiveSyncing] = useState(false);
+
+  // Fetch real-time live route seat data on mount & periodic polling
+  const fetchLiveRouteData = async (isSilent = false) => {
+    if (!isSilent) setIsLiveSyncing(true);
+    try {
+      const res = await fetch(`/api/routes/${route.id}`);
+      if (res.ok) {
+        const liveRoute: BusRoute = await res.json();
+        if (liveRoute) {
+          const effectiveBusType = liveRoute.busType || route.busType || initialBusType;
+          const effectivePrice = liveRoute.priceStarting || route.priceStarting || initialBasePrice;
+          const normalized = getNormalizedSeats(liveRoute.seats || [], effectiveBusType, effectivePrice, route.id);
+          setSeats(normalized);
+          if (liveRoute.busType) setBusType(liveRoute.busType);
+          if (liveRoute.priceStarting) setBasePrice(liveRoute.priceStarting);
+        }
+      }
+    } catch (err) {
+      console.warn('Real-time seat layout fetch failed:', err);
+    } finally {
+      if (!isSilent) setIsLiveSyncing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLiveRouteData();
+    const timer = setInterval(() => {
+      fetchLiveRouteData(true);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [route.id]);
 
   // New Seat Form State
   const [newSeatNum, setNewSeatNum] = useState('');
@@ -288,7 +404,18 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
       }
 
       await loadRoutes();
-      setFeedbackMsg({ type: 'success', text: `Seat layout deployed for ${route.busNumber}! (${seats.length} seats active)` });
+
+      const updatedRoute: BusRoute = {
+        ...route,
+        busType,
+        priceStarting: basePrice,
+        seats,
+      };
+      if (selectedRoute && selectedRoute.id === route.id) {
+        setSelectedRoute(updatedRoute);
+      }
+
+      setFeedbackMsg({ type: 'success', text: `⚡ Real-Time Live Seat Layout deployed & synced for ${route.busNumber}! (${seats.length} seats active)` });
       setTimeout(() => {
         onClose();
       }, 800);
@@ -351,8 +478,9 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                 <LayoutGrid className="w-6 h-6 text-blue-600" />
                 Comprehensive Seat Layout Customizer
               </h3>
-              <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 font-bold text-xs">
-                Admin & Operator Control
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs flex items-center gap-1.5 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                ⚡ Real-Time Live Sync
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-1">
@@ -377,46 +505,19 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
           </div>
         )}
 
-        {/* Bus Model & Seating Presets Selection */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-              1. Choose Bus Model & Seating Preset Template
-            </label>
-            <span className="text-[11px] text-slate-400">Click a preset to reset grid to standard model layout</span>
+        {/* Bus Model & Real-Time Auto-Matched Category Banner */}
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-blue-50/80 border border-blue-200 text-xs">
+          <div className="flex items-center gap-2 font-bold text-blue-900">
+            <Bus className="w-4.5 h-4.5 text-blue-600 shrink-0" />
+            <span>Auto-Loaded Bus Category:</span>
+            <span className="px-3 py-1 rounded-xl bg-white border border-blue-300 font-extrabold text-blue-800 shadow-2xs">
+              {busType || route.busType}
+            </span>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <button
-              type="button"
-              onClick={() => applyPreset('Super Luxury (49 Seats 2*2)', 2800)}
-              className={`p-3.5 rounded-2xl border text-left text-xs transition-all cursor-pointer ${
-                busType.includes('49 Seats') || busType.includes('Super Luxury')
-                  ? 'bg-blue-50 border-blue-600 text-blue-800 shadow-sm ring-2 ring-blue-500/20'
-                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <div className="font-bold flex items-center gap-2 text-slate-800 text-xs">
-                <Bus className="w-4 h-4 text-blue-600 flex-shrink-0" /> Super Luxury Express
-              </div>
-              <p className="text-[11px] text-blue-600 font-mono mt-1 font-semibold">Standard 2*2 Luxury Coach (48/49 Seats)</p>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => applyPreset('Normal Service (58 Seats 3*2)', 950)}
-              className={`p-3.5 rounded-2xl border text-left text-xs transition-all cursor-pointer ${
-                busType.includes('Normal Service') || busType.includes('58 Seats')
-                  ? 'bg-blue-50 border-blue-600 text-blue-800 shadow-sm ring-2 ring-blue-500/20'
-                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <div className="font-bold flex items-center gap-2 text-slate-800 text-xs">
-                <Bus className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Normal Service (Route 98)
-              </div>
-              <p className="text-[11px] text-emerald-600 font-mono mt-1 font-semibold">Ashok Leyland 3*2 Layout (58 Seats)</p>
-            </button>
-          </div>
+          <span className="text-[11px] font-bold text-slate-600 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            Real-Time Auto-Selected ({seats.length} Seats Layout)
+          </span>
         </div>
 
         {/* Global Toolbar & Statistics */}
@@ -610,16 +711,16 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                     };
 
                     return (
-                      <div key={rowNum} className="flex items-center justify-between gap-2.5 sm:gap-3 px-1 w-full relative z-10">
+                      <div key={rowNum} className="flex flex-wrap items-center justify-between gap-2 sm:gap-2.5 px-1 w-full relative z-10">
                         {/* Left side seats (3 seats for 3x2, 2 seats for 2x2) */}
-                        <div className="flex items-center gap-1 sm:gap-1.5">
+                        <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 max-w-[210px]">
                           {leftSeats.map(renderSeatButton)}
                         </div>
 
                         {/* Center Aisle Spacer */}
-                        <div className="flex items-center justify-center min-w-[28px] sm:min-w-[36px] text-center">
+                        <div className="flex items-center justify-center min-w-[20px] sm:min-w-[28px] text-center shrink-0">
                           {!is3By2 && centerSeats.length > 0 ? (
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex flex-wrap items-center justify-center gap-1.5">
                               {centerSeats.map(renderSeatButton)}
                             </div>
                           ) : (
@@ -628,7 +729,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                         </div>
 
                         {/* Right side seats (2 seats for 3x2, 2 seats for 2x2) */}
-                        <div className="flex items-center gap-1 sm:gap-1.5">
+                        <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 max-w-[210px]">
                           {rightSeats.map(renderSeatButton)}
                         </div>
                       </div>
