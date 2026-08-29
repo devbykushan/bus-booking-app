@@ -152,6 +152,18 @@ export const authApi = {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(payload),
     }),
+
+  /** Fetch all registered users for Admin User Management Dashboard */
+  getAllUsers: (): Promise<{ success: boolean; totalCount: number; users: any[] }> =>
+    apiFetch('/auth/users'),
+
+  /** Change or toggle user role (passenger <-> admin) */
+  updateUserRole: (id: string, role: 'passenger' | 'admin'): Promise<any> =>
+    apiFetch(`/auth/users/${id}/role`, { method: 'PUT', body: JSON.stringify({ role }) }),
+
+  /** Delete a registered user account */
+  deleteUser: (id: string): Promise<any> =>
+    apiFetch(`/auth/users/${id}`, { method: 'DELETE' }),
 };
 
 // ─── Health Check ─────────────────────────────────────────────────────────────

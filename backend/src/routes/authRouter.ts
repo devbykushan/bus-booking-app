@@ -328,4 +328,93 @@ authRouter.put('/change-password', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /api/auth/users
+ * Fetch all registered users for Admin User Management Dashboard
+ */
+authRouter.get('/users', async (_req: Request, res: Response) => {
+  try {
+    const result = await dbQuery(
+      `SELECT u.id, u.name, u.email, u.role, u.phone, u."createdAt",
+              COUNT(b.id) as "totalBookings"
+       FROM users u
+       LEFT JOIN bookings b ON LOWER(u.email) = LOWER(b."passengerEmail")
+       GROUP BY u.id, u.name, u.email, u.role, u.phone, u."createdAt"
+       ORDER BY u."createdAt" DESC`
+    );
+
+    const users = result.rows.map((row) => ({
+      ...row,
+      totalBookings: parseInt(row.totalBookings || '0', 10),
+    }));
+
+    return res.json({
+      success: true,
+      totalCount: users.length,
+      users,
+    });
+  } catch (error) {
+    console.error('Error fetching registered users list:', error);
+    return res.status(500).json({ error: 'Failed to fetch registered users list.' });
+  }
+});
+
+/**
+ * PUT /api/auth/users/:id/role
+ * Admin endpoint to toggle or change user role (passenger <-> admin)
+ */
+authRouter.put('/users/:id/role', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    if (!role || (role !== 'admin' && role !== 'passenger')) {
+      return res.status(400).json({ error: 'Invalid role specified. Role must be "passenger" or "admin".' });
+    }
+
+    const updated = await dbQuery(
+      `UPDATE users SET "role" = $1 WHERE "id" = $2 RETURNING "id", "name", "email", "role", "phone", "createdAt"`,
+      [role, id]
+    );
+
+    if (updated.rows.length === 0) {
+      return res.status(404).json({ error: 'User account not found.' });
+    }
+
+    return res.json({
+      success: true,
+      message: `User role updated to ${role} successfully.`,
+      user: updated.rows[0],
+    });
+  } catch (error) {
+    console.error('Error updating user role:', error);
+    return res.status(500).json({ error: 'Failed to update user role.' });
+  }
+});
+
+/**
+ * DELETE /api/auth/users/:id
+ * Admin endpoint to delete a registered user account
+ */
+authRouter.delete('/users/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const deleted = await dbQuery('DELETE FROM users WHERE "id" = $1 RETURNING "id", "name", "email"', [id]);
+
+    if (deleted.rows.length === 0) {
+      return res.status(404).json({ error: 'User account not found or already deleted.' });
+    }
+
+    return res.json({
+      success: true,
+      message: `User account (${deleted.rows[0].email}) deleted successfully.`,
+      user: deleted.rows[0],
+    });
+  } catch (error) {
+    console.error('Error deleting user account:', error);
+    return res.status(500).json({ error: 'Failed to delete user account.' });
+  }
+});
+
+
 

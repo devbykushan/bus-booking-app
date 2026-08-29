@@ -149,19 +149,17 @@ export const Navbar: React.FC = () => {
                 })}
 
                 {/* Admin Portal Tab */}
-                {(userRole === 'admin' || currentUser?.role === 'admin') && (
-                  <button
-                    onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); }}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
-                      currentView === 'admin-panel'
-                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/30 border border-purple-400 scale-[1.02]'
-                        : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50 border border-purple-200/70'
-                    }`}
-                  >
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>{t('adminPortal')}</span>
-                  </button>
-                )}
+                <button
+                  onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); }}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+                    currentView === 'admin-panel'
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/30 border border-purple-400 scale-[1.02]'
+                      : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50 border border-purple-200/70'
+                  }`}
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>{t('adminPortal')}</span>
+                </button>
               </div>
 
               {/* ── Right side controls ── */}
@@ -258,7 +256,7 @@ export const Navbar: React.FC = () => {
                           <p className="text-[11px] text-slate-500 font-mono truncate">{currentUser.phone || currentUser.email}</p>
                         </div>
                         <div className="p-1.5 space-y-1">
-                          {(currentUser.role === 'admin' || userRole === 'admin') && (
+                          {(currentUser?.role === 'admin' || userRole === 'admin') && (
                             <button
                               onClick={() => {
                                 setUserRole('admin');
@@ -268,7 +266,7 @@ export const Navbar: React.FC = () => {
                               className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-purple-700 hover:text-purple-900 hover:bg-purple-50 transition-colors cursor-pointer"
                             >
                               <ShieldCheck className="w-4 h-4 text-purple-600" />
-                              <span>Admin Profile</span>
+                              <span>Admin Dashboard</span>
                             </button>
                           )}
                           <button
@@ -278,13 +276,15 @@ export const Navbar: React.FC = () => {
                             <Ticket className="w-4 h-4 text-blue-600" />
                             <span>{t('myTickets')}</span>
                           </button>
-                          <button
-                            onClick={() => { setCurrentView('passenger-settings'); setProfileOpen(false); }}
-                            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
-                          >
-                            <Settings className="w-4 h-4 text-blue-600" />
-                            <span>{t('passengerSettings')}</span>
-                          </button>
+                          {currentUser?.role !== 'admin' && userRole !== 'admin' && (
+                            <button
+                              onClick={() => { setCurrentView('passenger-settings'); setProfileOpen(false); }}
+                              className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                            >
+                              <Settings className="w-4 h-4 text-blue-600" />
+                              <span>{t('passengerSettings')}</span>
+                            </button>
+                          )}
                           <button
                             onClick={() => { logout(); setProfileOpen(false); }}
                             className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
@@ -346,20 +346,18 @@ export const Navbar: React.FC = () => {
                   </button>
                 );
               })}
-              {(userRole === 'admin' || currentUser?.role === 'admin') && (
-                <button
-                  onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); setMobileOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                    currentView === 'admin-panel'
-                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
-                      : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50'
-                  }`}
-                >
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>{t('adminPortal')}</span>
-                </button>
-              )}
-              {currentUser && (
+              <button
+                onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); setMobileOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                  currentView === 'admin-panel'
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
+                    : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50'
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>{t('adminPortal')}</span>
+              </button>
+              {currentUser && currentUser.role !== 'admin' && userRole !== 'admin' && (
                 <button
                   onClick={() => { setCurrentView('passenger-settings'); setMobileOpen(false); }}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${

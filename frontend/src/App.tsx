@@ -189,8 +189,14 @@ export function App() {
               </div>
               <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
                 <button
+                  onClick={() => useBookingStore.getState().setUserRole('admin')}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-extrabold text-sm shadow-md transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+                >
+                  <ShieldCheck className="w-4 h-4" /> Enable Admin Portal Access
+                </button>
+                <button
                   onClick={() => setShowAuthModal(true)}
-                  className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-sm shadow-md transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+                  className="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-sm shadow-md transition-all cursor-pointer flex items-center gap-2 active:scale-95"
                 >
                   <Lock className="w-4 h-4" /> Sign In as Admin
                 </button>
