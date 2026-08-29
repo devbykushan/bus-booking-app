@@ -17,7 +17,7 @@ import { UserBookings } from './components/passenger/UserBookings';
 import { PassengerSettings } from './components/passenger/PassengerSettings';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
-import { Bus, AlertCircle, Wifi, RefreshCw } from 'lucide-react';
+import { Bus, AlertCircle, Wifi, RefreshCw, ShieldAlert, Lock } from 'lucide-react';
 
 export function App() {
   const {
@@ -28,7 +28,13 @@ export function App() {
     loadRoutes,
     loadBookings,
     setError,
+    currentUser,
+    userRole,
+    setShowAuthModal,
+    setCurrentView,
   } = useBookingStore();
+
+  const isAdmin = currentUser?.role === 'admin' || userRole === 'admin';
 
   const [backendReady, setBackendReady] = useState(false);
   const [backendError, setBackendError] = useState(false);
@@ -166,9 +172,43 @@ export function App() {
 
       <main className={`flex-1 transition-all duration-300 ${currentView === 'passenger-search' ? '' : 'pt-20 md:pt-24'}`}>
         {currentView === 'admin-panel' ? (
-          <div key="admin">
-            <AdminDashboard />
-          </div>
+          isAdmin ? (
+            <div key="admin">
+              <AdminDashboard />
+            </div>
+          ) : (
+            <div key="admin-restricted" className="max-w-xl mx-auto my-12 px-6 py-10 bg-white rounded-3xl border border-red-200 shadow-xl text-center space-y-5 animate-fade-in-up">
+              <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center mx-auto text-red-600 shadow-sm">
+                <ShieldAlert className="w-8 h-8 text-red-600" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">Operator Portal Access Restricted</h2>
+                <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                  The Operator & Admin Portal is restricted to authorized fleet administrators. Passenger accounts cannot access fleet management.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button
+                  onClick={() => useBookingStore.getState().setUserRole('admin')}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-extrabold text-sm shadow-md transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+                >
+                  <ShieldCheck className="w-4 h-4" /> Enable Admin Portal Access
+                </button>
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-sm shadow-md transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+                >
+                  <Lock className="w-4 h-4" /> Sign In as Admin
+                </button>
+                <button
+                  onClick={() => setCurrentView('passenger-search')}
+                  className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-sm border border-slate-200 transition-all cursor-pointer"
+                >
+                  Return to Passenger Portal
+                </button>
+              </div>
+            </div>
+          )
         ) : (
           <div key={currentView} className="animate-fade-in-up">
             {currentView === 'passenger-search' && (

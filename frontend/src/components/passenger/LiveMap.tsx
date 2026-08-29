@@ -1,167 +1,220 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useBookingStore } from '../../store/bookingStore';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
-import L from 'leaflet';
-import { MapPin, Navigation, Clock, Gauge, ArrowLeft, ExternalLink } from 'lucide-react';
-
-const busIcon = L.divIcon({
-  className: 'custom-bus-marker',
-  html: `<div style="background-color: #2563eb; border: 3px solid #ffffff; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);">
-           <span style="color: white; font-weight: bold; font-size: 16px;">🚌</span>
-         </div>`,
-  iconSize: [36, 36],
-  iconAnchor: [18, 18],
-});
-
-const stopIcon = L.divIcon({
-  className: 'custom-stop-marker',
-  html: `<div style="background-color: #4f46e5; border: 2px solid #ffffff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(79, 70, 229, 0.4);">
-           <span style="color: white; font-weight: bold; font-size: 10px;">📍</span>
-         </div>`,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12],
-});
+import { MapPin, ArrowLeft, Radio, ShieldCheck, Zap, Bell, Navigation, Sparkles, Ticket } from 'lucide-react';
 
 export const LiveMap: React.FC = () => {
-  const { routes, trackingRouteId, goToSearchSchedules } = useBookingStore();
-
+  const { routes, trackingRouteId, goToSearchSchedules, setCurrentView, language } = useBookingStore();
   const activeRoute = routes.find(r => r.id === trackingRouteId) || routes[0];
 
-  const [simulatedGps, setSimulatedGps] = useState(activeRoute.gpsLocation);
+  const content = {
+    english: {
+      title: 'Live GPS Satellite Telemetry',
+      badge: 'COMING SOON',
+      subtitle: 'Real-time GPS bus tracking for passengers is currently under hardware deployment across our Sri Lanka fleet.',
+      desc: 'We are equipping all Dewmina Super Line coaches with high-precision satellite telemetry transponders. Once active, you will be able to track your bus in real time, view exact arrival ETAs at your boarding stop, and get live route updates.',
+      featuresHeading: 'What to Expect when Live GPS Launches',
+      backBtn: 'Back to Journeys',
+      myTicketsBtn: 'View My Tickets',
+      features: [
+        {
+          title: 'Sub-Second Live Tracking',
+          desc: 'High-frequency satellite telemetry updating exact bus coordinates every few seconds on an interactive route map.',
+          icon: Radio,
+          color: 'from-blue-500/20 to-cyan-500/20 text-blue-400 border-blue-500/30'
+        },
+        {
+          title: 'Precision Boarding ETAs',
+          desc: 'Traffic-aware estimated arrival times computed dynamically for your specific boarding stop.',
+          icon: Navigation,
+          color: 'from-indigo-500/20 to-purple-500/20 text-indigo-400 border-indigo-500/30'
+        },
+        {
+          title: 'WhatsApp & SMS Proximity Alerts',
+          desc: 'Automated notification alerts dispatched directly to your mobile phone when your coach is 15 minutes away.',
+          icon: Bell,
+          color: 'from-emerald-500/20 to-teal-500/20 text-emerald-400 border-emerald-500/30'
+        },
+        {
+          title: 'Speed & Fleet Safety Telemetry',
+          desc: 'Enforced speed tracking and driver telemetry monitoring to ensure maximum passenger comfort and road safety.',
+          icon: ShieldCheck,
+          color: 'from-amber-500/20 to-orange-500/20 text-amber-400 border-amber-500/30'
+        }
+      ]
+    },
+    sinhala: {
+      title: 'සජීවී GPS රථ ලුහුබැඳීම',
+      badge: 'ළඟදීම පැමිණේ',
+      subtitle: 'මගීන් සඳහා සජීවී GPS බස් ලුහුබැඳීමේ පද්ධතිය දැනට අපගේ බස් රථ සමූහයේ සක්‍රිය කරමින් පවතී.',
+      desc: 'දෙව්මිණ සුපර් ලයින් හි සියලුම බස් රථ සඳහා අධි-තත්වයේ උපග්‍රහණ GPS සම්ප්‍රේෂක සවි කරමින් පවතී. එය සක්‍රිය වූ පසු, ඔබට බස් රථයේ තත්‍ය කාලීන පිහිටීම, පැමිණීමේ නිශ්චිත වේලාව (ETA) සහ වේගය ඔබගේ ජංගම දුරකථනයෙන්ම නැරඹිය හැක.',
+      featuresHeading: 'GPS පද්ධතියෙන් ඔබට ලැබෙන පහසුකම්',
+      backBtn: 'ගමන් වාර වෙත',
+      myTicketsBtn: 'මගේ ප්‍රවේශපත්',
+      features: [
+        {
+          title: 'තත්‍ය කාලීන උපග්‍රහණ ලුහුබැඳීම',
+          desc: 'තත්පර ගණනකින් යාවත්කාලීන වන නිවැරදි GPS සිතියම් සටහන්.',
+          icon: Radio,
+          color: 'from-blue-500/20 to-cyan-500/20 text-blue-400 border-blue-500/30'
+        },
+        {
+          title: 'නිවැරදි පැමිණීමේ වේලාවන් (ETA)',
+          desc: 'ඔබගේ බෝඩිං නැවතුමට බස් රථය පැමිණෙන නිශ්චිත වේලාව.',
+          icon: Navigation,
+          color: 'from-indigo-500/20 to-purple-500/20 text-indigo-400 border-indigo-500/30'
+        },
+        {
+          title: 'WhatsApp සහ SMS පණිවිඩ',
+          desc: 'බස් රථය ඔබගේ නැවතුමට විනාඩි 15 කට පෙර ස්වයංක්‍රීයව ලැබෙන SMS/WhatsApp පණිවිඩ.',
+          icon: Bell,
+          color: 'from-emerald-500/20 to-teal-500/20 text-emerald-400 border-emerald-500/30'
+        },
+        {
+          title: 'රියදුරු සහ වේග ආරක්ෂාව',
+          desc: 'මගී ආරක්ෂාව උදෙසා පාලනය වන වේගයන් සහ නිරන්තර අධීක්ෂණය.',
+          icon: ShieldCheck,
+          color: 'from-amber-500/20 to-orange-500/20 text-amber-400 border-amber-500/30'
+        }
+      ]
+    },
+    tamil: {
+      title: 'நேரடி ஜிபிஎஸ் பிளீட் கண்காணிப்பு',
+      badge: 'விரைவில்',
+      subtitle: 'பயணிகளுக்கான நேரடி ஜிபிஎஸ் பஸ் கண்காணிப்பு முறை தற்போது எங்கள் பஸ்களில் நிறுவப்பட்டு வருகிறது.',
+      desc: 'எங்கள் அனைத்து பஸ்களிலும் துல்லியமான ஜிபிஎஸ் டிராக்கர்கள் பொருத்தப்பட்டு வருகின்றன. இது பயன்பாட்டிற்கு வந்ததும், பஸ்ஸின் நேரடி இருப்பிடம், வருகை நேரம் (ETA) மற்றும் வேகத்தை உங்கள் மொபைலில் நேரடியாகப் பார்க்கலாம்.',
+      featuresHeading: 'நேரடி ஜிபிஎஸ் வழங்கும் நன்மைகள்',
+      backBtn: 'பயணங்களுக்குத் திரும்பு',
+      myTicketsBtn: 'என் டிக்கெட்டுகள்',
+      features: [
+        {
+          title: 'நேரடி ஜிபிஎஸ் டிராக்கிங்',
+          desc: 'சில நொடிகளுக்கு ஒருமுறை புதுப்பிக்கப்படும் துல்லியமான மேப் தகவல்கள்.',
+          icon: Radio,
+          color: 'from-blue-500/20 to-cyan-500/20 text-blue-400 border-blue-500/30'
+        },
+        {
+          title: 'துல்லியமான வருகை நேரம் (ETA)',
+          desc: 'உங்கள் போர்டிங் நிறுத்தத்திற்கு பஸ் வரும் சரியான நேரம்.',
+          icon: Navigation,
+          color: 'from-indigo-500/20 to-purple-500/20 text-indigo-400 border-indigo-500/30'
+        },
+        {
+          title: 'WhatsApp & SMS எச்சரிக்கைகள்',
+          desc: 'பஸ் உங்கள் நிறுத்தத்திற்கு 15 நிமிடங்களுக்கு முன் தானியங்கி எஸ்எம்எஸ்/வாட்ஸ்அப் எச்சரிக்கை.',
+          icon: Bell,
+          color: 'from-emerald-500/20 to-teal-500/20 text-emerald-400 border-emerald-500/30'
+        },
+        {
+          title: 'வேகம் மற்றும் பாதுகாப்பு',
+          desc: 'பயணிகளின் பாதுகாப்பிற்கான நேரடி வேகக் கண்காணிப்பு.',
+          icon: ShieldCheck,
+          color: 'from-amber-500/20 to-orange-500/20 text-amber-400 border-amber-500/30'
+        }
+      ]
+    }
+  };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSimulatedGps(prev => ({
-        ...prev,
-        lat: prev.lat + (Math.random() - 0.5) * 0.002,
-        lng: prev.lng + (Math.random() - 0.5) * 0.002,
-        speedKmH: Math.floor(75 + Math.random() * 20),
-        lastUpdated: 'Just now'
-      }));
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const boardingStop = activeRoute.boardingPoints[0];
-
-  const polylineCoords: [number, number][] = [
-    [boardingStop.lat, boardingStop.lng],
-    [simulatedGps.lat, simulatedGps.lng],
-    [activeRoute.dropPoints[0].lat, activeRoute.dropPoints[0].lng]
-  ];
-
-  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${boardingStop.lat},${boardingStop.lng}`;
+  const currentLangContent = content[language as keyof typeof content] || content.english;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-      
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+    <div className="max-w-5xl mx-auto px-4 py-8 space-y-8 animate-fade-in-up">
+      {/* Top Header Nav */}
+      <div className="flex items-center justify-between">
         <button
           onClick={goToSearchSchedules}
-          className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors text-sm font-medium"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-blue-600 hover:border-blue-200 transition-all font-bold text-xs shadow-xs cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Passenger Portal
+          <ArrowLeft className="w-4 h-4" /> {currentLangContent.backBtn}
         </button>
 
-        <div className="text-left sm:text-right">
-          <h2 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-            Live GPS Fleet Tracking
-          </h2>
-          <p className="text-xs text-blue-600 font-medium">
-            {activeRoute.operatorName} • {activeRoute.busNumber}
+        {activeRoute && (
+          <div className="text-right">
+            <span className="text-xs text-slate-500 font-semibold">{activeRoute.origin} ➔ {activeRoute.destination}</span>
+            <p className="text-xs font-bold text-blue-600">{activeRoute.operatorName} ({activeRoute.busNumber})</p>
+          </div>
+        )}
+      </div>
+
+      {/* Main Glassmorphic Hero Card */}
+      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 p-8 sm:p-12 text-white shadow-2xl border border-slate-800">
+        {/* Decorative background glow accents */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col items-center text-center space-y-6 max-w-3xl mx-auto">
+          {/* Animated GPS Icon & Badge */}
+          <div className="relative">
+            <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full opacity-40 blur-lg animate-pulse" />
+            <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 border border-blue-400/40 flex items-center justify-center shadow-xl">
+              <MapPin className="w-10 h-10 text-white animate-bounce" />
+            </div>
+          </div>
+
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/30 text-amber-300 text-xs font-extrabold tracking-wider uppercase">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>{currentLangContent.badge}</span>
+          </div>
+
+          <div className="space-y-3">
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-blue-200">
+              {currentLangContent.title}
+            </h1>
+            <p className="text-base sm:text-lg text-blue-200/90 font-medium max-w-2xl leading-relaxed">
+              {currentLangContent.subtitle}
+            </p>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-300/80 max-w-xl leading-relaxed bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+            {currentLangContent.desc}
           </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <button
+              onClick={goToSearchSchedules}
+              className="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm shadow-lg shadow-blue-600/30 transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+            >
+              <Zap className="w-4 h-4 text-white" />
+              {currentLangContent.backBtn}
+            </button>
+            <button
+              onClick={() => setCurrentView('my-bookings')}
+              className="px-6 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-extrabold text-sm border border-white/20 backdrop-blur-md transition-all cursor-pointer flex items-center gap-2"
+            >
+              <Ticket className="w-4 h-4 text-blue-300" />
+              {currentLangContent.myTicketsBtn}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Telemetry Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-1">
-          <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1 uppercase">
-            <Gauge className="w-3.5 h-3.5 text-blue-500" /> Current Speed
-          </span>
-          <p className="text-xl font-extrabold text-slate-800 font-mono">{simulatedGps.speedKmH} <span className="text-xs font-normal text-slate-400">km/h</span></p>
-        </div>
+      {/* Feature Highlights Grid */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-extrabold text-slate-800 tracking-tight text-center">
+          {currentLangContent.featuresHeading}
+        </h3>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-1">
-          <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1 uppercase">
-            <Navigation className="w-3.5 h-3.5 text-indigo-500" /> Current Location
-          </span>
-          <p className="text-sm font-bold text-slate-800 truncate">{simulatedGps.currentStopName}</p>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-1">
-          <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1 uppercase">
-            <MapPin className="w-3.5 h-3.5 text-amber-500" /> Next Stop
-          </span>
-          <p className="text-sm font-bold text-slate-800 truncate">{simulatedGps.nextStopName}</p>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-1">
-          <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1 uppercase">
-            <Clock className="w-3.5 h-3.5 text-pink-500" /> Boarding Stop ETA
-          </span>
-          <p className="text-xl font-extrabold text-blue-600 font-mono">~{simulatedGps.etaMinutes} <span className="text-xs font-normal text-slate-400">mins</span></p>
-        </div>
-
-      </div>
-
-      {/* Map Viewport */}
-      <div className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm relative">
-        
-        <div className="absolute top-4 right-4 z-20">
-          <a
-            href={googleMapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 rounded-xl bg-white/90 text-blue-600 hover:text-blue-700 border border-slate-200 text-xs font-bold shadow-md flex items-center gap-2 backdrop-blur-md transition-all"
-          >
-            <span>Open Boarding Stop in Google Maps</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
-        </div>
-
-        <div className="h-[450px] w-full">
-          <MapContainer
-            center={[simulatedGps.lat, simulatedGps.lng]}
-            zoom={10}
-            scrollWheelZoom={true}
-            style={{ height: '100%', width: '100%', borderRadius: '1.5rem' }}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-
-            <Marker position={[simulatedGps.lat, simulatedGps.lng]} icon={busIcon}>
-              <Popup>
-                <div className="text-xs p-1">
-                  <strong>{activeRoute.operatorName}</strong><br />
-                  Bus: {activeRoute.busNumber}<br />
-                  Speed: {simulatedGps.speedKmH} km/h
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {currentLangContent.features.map((f, idx) => {
+            const Icon = f.icon;
+            return (
+              <div
+                key={idx}
+                className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex items-start gap-4"
+              >
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.color} border flex items-center justify-center flex-shrink-0 shadow-xs`}>
+                  <Icon className="w-6 h-6" />
                 </div>
-              </Popup>
-            </Marker>
-
-            <Marker position={[boardingStop.lat, boardingStop.lng]} icon={stopIcon}>
-              <Popup>
-                <div className="text-xs p-1">
-                  <strong>Boarding Stop: {boardingStop.name}</strong><br />
-                  Time: {boardingStop.time}<br />
-                  Landmark: {boardingStop.landmark}
+                <div className="space-y-1 text-left">
+                  <h4 className="font-extrabold text-slate-800 text-sm">{f.title}</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed font-normal">{f.desc}</p>
                 </div>
-              </Popup>
-            </Marker>
-
-            <Polyline positions={polylineCoords} color="#2563eb" weight={4} dashArray="8, 8" />
-          </MapContainer>
+              </div>
+            );
+          })}
         </div>
-
       </div>
-
     </div>
   );
 };
+

@@ -142,6 +142,7 @@ interface BookingStore {
   bookings: Booking[];
   loadBookings: () => Promise<void>;
   latestConfirmedBooking: Booking | null;
+  setLatestConfirmedBooking: (b: Booking | null) => void;
   createBooking: (
     paymentMethod: 'card' | 'upi' | 'netbanking' | 'wallet',
     insuranceSelected: boolean,
@@ -449,6 +450,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     }
   },
   latestConfirmedBooking: null,
+  setLatestConfirmedBooking: (b) => set({ latestConfirmedBooking: b }),
 
   createBooking: async (paymentMethod, insuranceSelected) => {
     const {

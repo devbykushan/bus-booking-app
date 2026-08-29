@@ -965,7 +965,7 @@ export const SchedulesDashboard: React.FC = () => {
               color: 'text-blue-600 bg-blue-50 border-blue-200',
             },
             {
-              title: 'Live GPS Tracking',
+              title: 'Live GPS Tracking (Coming Soon)',
               desc: 'Track coach location on the road with real-time waypoint estimates.',
               icon: MapPin,
               color: 'text-indigo-600 bg-indigo-50 border-indigo-200',
