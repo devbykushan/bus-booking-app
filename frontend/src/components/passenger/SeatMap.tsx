@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useBookingStore } from '../../store/bookingStore';
-import type { DeckType } from '../../types/booking';
+import type { BusRoute, DeckType, Seat } from '../../types/booking';
 import { 
   ArrowLeft, Clock, Check, Armchair, ChevronRight, 
   ChevronUp, ChevronDown, Lock, CheckCircle2, Info,
@@ -171,10 +171,12 @@ export const SeatMap: React.FC = () => {
               };
             });
 
-            const nowBooked = liveRoute.seats.filter(s => s.status === 'booked').map(s => s.id);
+            const nowBooked = liveRoute.seats.filter((s: Seat) => s.status === 'booked').map((s: Seat) => s.id);
             const newlyBooked = selectedSeatIds.filter(id => nowBooked.includes(id) || nowBooked.includes(`${selectedRoute.id}-${id.replace(/^[^-]+-/, '')}`));
             if (newlyBooked.length > 0) {
-              setSelectedSeatIds(prev => prev.filter(id => !newlyBooked.includes(id)));
+              useBookingStore.setState(state => ({
+                selectedSeatIds: state.selectedSeatIds.filter(id => !newlyBooked.includes(id))
+              }));
               setGenderToastMessage(`Seat(s) ${newlyBooked.map(id => id.replace(/^[^-]+-/, '')).join(', ')} were just booked in real-time by another passenger.`);
             }
           }

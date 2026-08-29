@@ -315,14 +315,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
   // Check if current configuration has upper deck seats
   const hasUpperDeck = seats.some(s => s.deck === 'upper') || busType.includes('Sleeper') || busType.includes('Double');
 
-  // Generate preset layouts
-  const applyPreset = (type: BusCategory, price: number) => {
-    setBusType(type);
-    setBasePrice(price);
-    setSelectedSeatId(null);
-    const newSeats = generatePresetSeats(type, price, route.id);
-    setSeats(newSeats);
-  };
+
 
   // Toggle seat status on quick grid click
   const handleSeatClick = (seatId: string) => {
@@ -478,9 +471,11 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                 <LayoutGrid className="w-6 h-6 text-blue-600" />
                 Comprehensive Seat Layout Customizer
               </h3>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs flex items-center gap-1.5 shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                ⚡ Real-Time Live Sync
+              <span className={`px-2.5 py-0.5 rounded-full border font-bold text-xs flex items-center gap-1.5 shadow-2xs ${
+                isLiveSyncing ? 'bg-amber-50 text-amber-800 border-amber-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+              }`}>
+                <Zap className={`w-3.5 h-3.5 ${isLiveSyncing ? 'text-amber-600 animate-spin' : 'text-emerald-600 animate-pulse'}`} />
+                <span>{isLiveSyncing ? 'Syncing...' : 'Real-Time Live Sync'}</span>
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-1">
