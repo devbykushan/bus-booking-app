@@ -134,10 +134,22 @@ authRouter.post('/login', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
-    // 3. Verify role if requested
+    // 3. Verify strict role matching between requested login tab and actual user account role
     if (role === 'admin' && dbUser.role !== 'admin') {
       return res.status(403).json({
-        error: 'Access denied. Your account does not have administrator privileges.',
+        error: 'Access denied. Your account does not have administrator privileges. Please switch to the "Passenger" tab to sign in.',
+      });
+    }
+
+    if (role === 'passenger' && dbUser.role === 'admin') {
+      return res.status(403).json({
+        error: 'This is an Administrator account. Please switch to the "Admin & Staff" tab to sign in.',
+      });
+    }
+
+    if (role && role !== dbUser.role) {
+      return res.status(403).json({
+        error: `Account role mismatch. This account is registered as ${dbUser.role.toUpperCase()}. Please select the correct login tab.`,
       });
     }
 
