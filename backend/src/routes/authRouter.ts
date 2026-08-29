@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { dbQuery, hashPassword, verifyPassword } from '../db/database';
+import { sendAccountCreationEmail } from '../services/emailService';
 
 export const authRouter = Router();
 
@@ -65,6 +66,16 @@ authRouter.post('/register', async (req: Request, res: Response) => {
       [userId, cleanName, cleanEmail, hashedPassword, cleanRole, cleanPhone, createdAt]
     );
 
+    // Send account creation confirmation email (asynchronous to avoid blocking registration response)
+    sendAccountCreationEmail({
+      email: cleanEmail,
+      name: cleanName,
+      role: cleanRole,
+      phone: cleanPhone || undefined,
+    }).catch((err) => {
+      console.error('[AuthRouter] Error triggering account creation email:', err);
+    });
+
     const token = `token-${userId}-${Date.now()}`;
     const user = {
       id: userId,
@@ -77,7 +88,7 @@ authRouter.post('/register', async (req: Request, res: Response) => {
 
     return res.status(201).json({
       success: true,
-      message: 'Account registered successfully.',
+      message: 'Account created successfully! A confirmation email has been sent to your email address.',
       token,
       user,
     });
