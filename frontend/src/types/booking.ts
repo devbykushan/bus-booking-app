@@ -112,6 +112,10 @@ export interface Booking {
   bookingStatus: 'confirmed' | 'cancelled' | 'boarded';
   qrCodeData: string;
   createdAt: string;
+  seatNumbers?: string[];
+  passengerName?: string;
+  passengerPhone?: string;
+  gender?: string;
 }
 
 export interface UserAccount {

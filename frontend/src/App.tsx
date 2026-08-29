@@ -17,7 +17,7 @@ import { UserBookings } from './components/passenger/UserBookings';
 import { PassengerSettings } from './components/passenger/PassengerSettings';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
-import { Bus, AlertCircle, Wifi, RefreshCw, ShieldAlert, Lock } from 'lucide-react';
+import { Bus, AlertCircle, Wifi, RefreshCw, ShieldAlert, ShieldCheck, Lock } from 'lucide-react';
 
 export function App() {
   const {

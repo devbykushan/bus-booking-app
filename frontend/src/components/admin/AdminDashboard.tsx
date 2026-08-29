@@ -9,8 +9,8 @@ import type { BusRoute } from '../../types/booking';
 import { 
   TrendingUp, Users, DollarSign, Bus, Award, BarChart2, 
   SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
-  Trash2, RefreshCw, Edit3, Clock, Star, Shield, Search,
-  Filter, Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2
+  Trash2, RefreshCw, Edit3, Clock, Star, Search,
+  Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2
 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
@@ -335,8 +335,8 @@ export const AdminDashboard: React.FC = () => {
                     </div>
 
                     <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                      <span>LKR {(r.fare || 0).toLocaleString()}</span>
-                      <span className="font-mono">{r.seats?.filter(s => s.isBooked).length || 0}/{r.seats?.length || 49} Booked</span>
+                      <span>LKR {(r.priceStarting || 0).toLocaleString()}</span>
+                      <span className="font-mono">{r.seats?.filter(s => s.status === 'booked').length || 0}/{r.seats?.length || 49} Booked</span>
                     </div>
                   </div>
                 ))}
