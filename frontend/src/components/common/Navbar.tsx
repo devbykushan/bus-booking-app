@@ -148,18 +148,20 @@ export const Navbar: React.FC = () => {
                   );
                 })}
 
-                {/* Admin Portal Tab */}
-                <button
-                  onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); }}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
-                    currentView === 'admin-panel'
-                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/30 border border-purple-400 scale-[1.02]'
-                      : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50 border border-purple-200/70'
-                  }`}
-                >
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>{t('adminPortal')}</span>
-                </button>
+                {/* Admin Portal Tab (Only visible to verified Admins) */}
+                {(userRole === 'admin' || currentUser?.role === 'admin') && (
+                  <button
+                    onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); }}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      currentView === 'admin-panel'
+                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/30 border border-purple-400 scale-[1.02]'
+                        : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50 border border-purple-200/70'
+                    }`}
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>{t('adminPortal')}</span>
+                  </button>
+                )}
               </div>
 
               {/* ── Right side controls ── */}
@@ -346,17 +348,19 @@ export const Navbar: React.FC = () => {
                   </button>
                 );
               })}
-              <button
-                onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); setMobileOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                  currentView === 'admin-panel'
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
-                    : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50'
-                }`}
-              >
-                <ShieldCheck className="w-4 h-4" />
-                <span>{t('adminPortal')}</span>
-              </button>
+              {(userRole === 'admin' || currentUser?.role === 'admin') && (
+                <button
+                  onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); setMobileOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    currentView === 'admin-panel'
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
+                      : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50'
+                  }`}
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>{t('adminPortal')}</span>
+                </button>
+              )}
               {currentUser && currentUser.role !== 'admin' && userRole !== 'admin' && (
                 <button
                   onClick={() => { setCurrentView('passenger-settings'); setMobileOpen(false); }}
