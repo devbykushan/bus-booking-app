@@ -288,11 +288,12 @@ Thank you for choosing OmniBus!
         host,
         port,
         secure,
+        family: 4,
         auth: {
           user,
           pass,
         },
-      });
+      } as any);
 
       const info = await transporter.sendMail({
         from: fromAddress,
