@@ -113,3 +113,60 @@ Thank you for choosing Dewmina Super Line! Have a safe & comfortable journey! �
     return false;
   }
 }
+
+/**
+ * Send WhatsApp OTP verification code via WAHA API
+ */
+export async function sendWhatsAppOtp(phone: string, otp: string): Promise<boolean> {
+  const wahaApiUrl = process.env.WAHA_API_URL || 'http://localhost:3000';
+  const session = process.env.WAHA_SESSION || 'default';
+  const isEnabled = process.env.WAHA_ENABLED !== 'false';
+
+  const chatId = formatSriLankanPhone(phone);
+  const otpMessage = 
+`🔐 *Dewmina Super Line* — Verification Code 🔐
+
+Your WhatsApp verification OTP code is:
+👉 *${otp}* 👈
+
+This code is valid for 10 minutes.
+Enter this OTP on the booking screen to confirm your identity and proceed with your bus seat booking.
+
+_If you did not request this verification code, please ignore this message._`;
+
+  console.log(`[WAHA Service] Generated OTP ${otp} for WhatsApp: ${phone} (${chatId})`);
+
+  if (!isEnabled) {
+    console.log('[WAHA Service] WhatsApp notifications are disabled via WAHA_ENABLED=false');
+    return true;
+  }
+
+  try {
+    const endpoint = `${wahaApiUrl.replace(/\/$/, '')}/api/sendText`;
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        session,
+        chatId,
+        text: otpMessage,
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.warn(`[WAHA Service] WAHA HTTP ${response.status} when sending OTP:`, errText);
+      return false;
+    }
+
+    const data = await response.json();
+    console.log(`[WAHA Service] WhatsApp OTP sent successfully to ${chatId}:`, data);
+    return true;
+  } catch (error: any) {
+    console.warn('[WAHA Service] WAHA connection unavailable (will proceed in dev mode):', error?.message || error);
+    return false;
+  }
+}
+

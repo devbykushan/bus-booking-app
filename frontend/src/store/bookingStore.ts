@@ -353,7 +353,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         number: normalizedNum,
         row: 1,
         col: 1,
-        price: selectedRoute.seats[0]?.price || selectedRoute.priceStarting || 950,
+        price: selectedRoute.seats[0]?.price || selectedRoute.priceStarting || 1157,
         status: 'available',
         deck: 'lower'
       };
