@@ -93,6 +93,10 @@ interface BookingStore {
   goToSearchSchedules: () => void;
   goToHome: () => void;
 
+  // Theme
+  theme: 'light' | 'dark';
+  setTheme: (theme: 'light' | 'dark') => void;
+
   // Role switching
   userRole: 'passenger' | 'admin';
   setUserRole: (role: 'passenger' | 'admin') => void;
@@ -164,6 +168,17 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   currentUser: JSON.parse(localStorage.getItem('dewmina_user') || 'null'),
   showAuthModal: false,
   setShowAuthModal: (val) => set({ showAuthModal: val }),
+
+  theme: (localStorage.getItem('dewmina_theme') as 'light' | 'dark') || 'light',
+  setTheme: (theme) => {
+    localStorage.setItem('dewmina_theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    set({ theme });
+  },
 
   login: async (email, password, role) => {
     try {

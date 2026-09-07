@@ -356,7 +356,7 @@ export const SchedulesDashboard: React.FC = () => {
     : 'Today';
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 pb-20">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 dark:text-slate-100 pb-20 transition-colors duration-300">
       {/* ── Top Hero Banner for Dashboard ── */}
       <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white pt-24 pb-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden shadow-lg">
         {/* Ambient glow effects */}
@@ -427,7 +427,7 @@ export const SchedulesDashboard: React.FC = () => {
                 onClick={() => setIsModifyOpen(!isModifyOpen)}
                 className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 cursor-pointer shadow-md ${
                   isModifyOpen
-                    ? 'bg-white text-slate-900 border border-white'
+                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-white dark:border-slate-700'
                     : 'bg-blue-600 hover:bg-blue-500 text-white border border-blue-400/30 hover:shadow-blue-500/30'
                 }`}
               >
@@ -439,17 +439,17 @@ export const SchedulesDashboard: React.FC = () => {
 
           {/* ── Collapsible Modify Search Drawer ── */}
           {isModifyOpen && (
-            <div className="animate-fade-in-up bg-white rounded-3xl p-5 md:p-6 shadow-2xl text-slate-800 border border-slate-200">
+            <div className="animate-fade-in-up bg-white dark:bg-slate-800 dark:border-slate-700 rounded-3xl p-5 md:p-6 shadow-2xl text-slate-800 dark:text-slate-100 border border-slate-200">
               <form onSubmit={handleApplyModifiedSearch} className="space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2 text-slate-800 font-bold text-sm">
+                  <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-bold text-sm">
                     <Search className="w-4 h-4 text-blue-600" />
                     <span>Update Route & Travel Date</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setIsModifyOpen(false)}
-                    className="text-xs text-slate-400 hover:text-slate-700 font-medium"
+                    className="text-xs text-slate-400 hover:text-slate-700 dark:text-slate-200 font-medium"
                   >
                     Cancel
                   </button>
@@ -457,7 +457,7 @@ export const SchedulesDashboard: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
                   {/* Origin */}
-                  <div className="md:col-span-4 bg-slate-50 border border-slate-200 rounded-2xl p-3 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all group/from">
+                  <div className="md:col-span-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all group/from">
                     <label className="text-[11px] font-bold uppercase tracking-wider text-blue-600 flex items-center justify-between gap-1 mb-1.5">
                       <span className="flex items-center gap-1.5">
                         <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-blue-100/70 border border-blue-300 text-blue-600 shadow-xs transition-transform duration-300 group-hover/from:scale-110">
@@ -473,7 +473,7 @@ export const SchedulesDashboard: React.FC = () => {
                     <select
                       value={modOrigin}
                       onChange={(e) => setModOrigin(e.target.value)}
-                      className="w-full bg-transparent text-slate-900 font-bold text-sm focus:outline-none cursor-pointer"
+                      className="w-full bg-transparent text-slate-900 dark:text-white font-bold text-sm focus:outline-none cursor-pointer"
                     >
                       {CITIES.map((c) => (
                         <option key={c} value={c}>
@@ -496,7 +496,7 @@ export const SchedulesDashboard: React.FC = () => {
                   </div>
 
                   {/* Destination */}
-                  <div className="md:col-span-4 bg-slate-50 border border-slate-200 rounded-2xl p-3 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 transition-all group/to">
+                  <div className="md:col-span-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 transition-all group/to">
                     <label className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 flex items-center justify-between gap-1 mb-1.5">
                       <span className="flex items-center gap-1.5">
                         <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-indigo-100/70 border border-indigo-300 text-indigo-600 shadow-xs transition-transform duration-300 group-hover/to:scale-110">
@@ -512,7 +512,7 @@ export const SchedulesDashboard: React.FC = () => {
                     <select
                       value={modDestination}
                       onChange={(e) => setModDestination(e.target.value)}
-                      className="w-full bg-transparent text-slate-900 font-bold text-sm focus:outline-none cursor-pointer"
+                      className="w-full bg-transparent text-slate-900 dark:text-white font-bold text-sm focus:outline-none cursor-pointer"
                     >
                       {CITIES.map((c) => (
                         <option key={c} value={c}>
@@ -523,7 +523,7 @@ export const SchedulesDashboard: React.FC = () => {
                   </div>
 
                   {/* Date */}
-                  <div className="md:col-span-3 bg-slate-50 border border-slate-200 rounded-2xl p-3 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-100 transition-all group/date">
+                  <div className="md:col-span-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-100 transition-all group/date">
                     <label className="text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5 mb-1.5">
                       <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-amber-100/70 border border-amber-300 text-amber-600 shadow-xs transition-transform duration-300 group-hover/date:scale-110">
                         <Calendar className="w-3.5 h-3.5 animate-date-icon relative z-10" />
@@ -536,7 +536,7 @@ export const SchedulesDashboard: React.FC = () => {
                       min={todayStr}
                       max={maxDateStr}
                       onChange={(e) => setModDate(e.target.value)}
-                      className="w-full bg-transparent text-slate-900 font-bold text-sm focus:outline-none cursor-pointer"
+                      className="w-full bg-transparent text-slate-900 dark:text-white font-bold text-sm focus:outline-none cursor-pointer"
                     />
                   </div>
                 </div>
@@ -557,12 +557,12 @@ export const SchedulesDashboard: React.FC = () => {
       </div>
 
       {/* ── Toolbar: Date Strip, Class Filter, Time of Day, and Sorting in Order ── */}
-      <div className="bg-white border-b border-slate-200 shadow-sm sticky top-16 md:top-[72px] z-30">
+      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm sticky top-16 md:top-[72px] z-30 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
           <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-3 relative">
             
             {/* 1. Date Carousel Strip with Vibrant Sliding Indicator & Rich Colors */}
-            <div className="inline-flex items-center bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl p-1 shadow-xs max-w-full sm:max-w-[440px] md:max-w-[520px] lg:max-w-[580px] relative">
+            <div className="inline-flex items-center bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-700/90 rounded-2xl p-1 shadow-xs max-w-full sm:max-w-[440px] md:max-w-[520px] lg:max-w-[580px] relative">
               {/* Left Scroll Button */}
               <button
                 type="button"
@@ -571,7 +571,7 @@ export const SchedulesDashboard: React.FC = () => {
                 className={`group p-1.5 sm:p-2 rounded-xl transition-all duration-200 flex-shrink-0 z-10 ${
                   !canScrollLeft
                     ? 'opacity-30 cursor-not-allowed text-slate-300'
-                    : 'text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 cursor-pointer active:scale-85 hover:shadow-xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 cursor-pointer active:scale-85 hover:shadow-xs'
                 }`}
                 aria-label="Scroll dates left"
                 title="Scroll previous dates"
@@ -623,7 +623,7 @@ export const SchedulesDashboard: React.FC = () => {
                           ? 'opacity-40 cursor-not-allowed text-slate-400'
                           : isSelected
                           ? 'text-white font-extrabold cursor-default drop-shadow-xs'
-                          : 'text-slate-700 font-semibold hover:text-indigo-600 hover:bg-indigo-50/70 hover:scale-105 hover:-translate-y-0.5 active:scale-95 cursor-pointer'
+                          : 'text-slate-700 dark:text-slate-200 font-semibold hover:text-indigo-600 hover:bg-indigo-50/70 hover:scale-105 hover:-translate-y-0.5 active:scale-95 cursor-pointer'
                       }`}
                     >
                       {item.label}
@@ -640,7 +640,7 @@ export const SchedulesDashboard: React.FC = () => {
                 className={`group p-1.5 sm:p-2 rounded-xl transition-all duration-200 flex-shrink-0 z-10 ${
                   !canScrollRight
                     ? 'opacity-30 cursor-not-allowed text-slate-300'
-                    : 'text-slate-800 hover:text-indigo-600 hover:bg-indigo-50 cursor-pointer active:scale-85 hover:shadow-xs'
+                    : 'text-slate-800 dark:text-slate-100 hover:text-indigo-600 hover:bg-indigo-50 cursor-pointer active:scale-85 hover:shadow-xs'
                 }`}
                 aria-label="Scroll dates right"
                 title="Scroll next dates"
@@ -664,7 +664,7 @@ export const SchedulesDashboard: React.FC = () => {
                   className={`filter-btn-animate flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold cursor-pointer select-none ${
                     operatorOpen || busTypeFilter !== 'all'
                       ? 'bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-300 text-indigo-700 shadow-sm ring-2 ring-indigo-500/20'
-                      : 'bg-white hover:bg-indigo-50/60 border-slate-200 text-indigo-600 hover:border-indigo-200 shadow-xs'
+                      : 'bg-white dark:bg-slate-800 hover:bg-indigo-50/60 border-slate-200 text-indigo-600 hover:border-indigo-200 shadow-xs'
                   }`}
                 >
                   {busTypeFilter !== 'all' && (
@@ -675,7 +675,7 @@ export const SchedulesDashboard: React.FC = () => {
                 </button>
 
                 {operatorOpen && (
-                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 rounded-2xl border border-slate-200/90 shadow-2xl p-1.5 z-50 animate-popover-in">
+                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 dark:bg-slate-800/95 rounded-2xl border border-slate-200/90 shadow-2xl p-1.5 z-50 animate-popover-in">
                     <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100/80 flex items-center justify-between">
                       <span>Select Operator / Class</span>
                       {busTypeFilter !== 'all' && (
@@ -696,7 +696,7 @@ export const SchedulesDashboard: React.FC = () => {
                             className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all duration-150 cursor-pointer ${
                               isSelected
                                 ? 'bg-indigo-50 text-indigo-700 font-bold translate-x-0.5 shadow-xs'
-                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'
+                                : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'
                             }`}
                           >
                             <span>{opt.label}</span>
@@ -721,7 +721,7 @@ export const SchedulesDashboard: React.FC = () => {
                   className={`filter-btn-animate animate-clock-pulse group flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold cursor-pointer select-none ${
                     timeOpen || timeFilter !== 'all'
                       ? 'bg-gradient-to-r from-sky-50 to-blue-50 border-blue-300 text-blue-700 shadow-sm ring-2 ring-blue-500/20'
-                      : 'bg-white hover:bg-sky-50/60 border-slate-200 text-slate-700 hover:border-sky-200 shadow-xs'
+                      : 'bg-white dark:bg-slate-800 hover:bg-sky-50/60 border-slate-200 text-slate-700 dark:text-slate-200 hover:border-sky-200 shadow-xs'
                   }`}
                 >
                   <Clock className={`clock-icon w-3.5 h-3.5 transition-colors duration-200 ${timeFilter !== 'all' ? 'text-blue-600' : 'text-slate-400 group-hover:text-blue-500'}`} />
@@ -741,7 +741,7 @@ export const SchedulesDashboard: React.FC = () => {
                 </button>
 
                 {timeOpen && (
-                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 rounded-2xl border border-slate-200/90 shadow-2xl p-1.5 z-50 animate-popover-in">
+                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 dark:bg-slate-800/95 rounded-2xl border border-slate-200/90 shadow-2xl p-1.5 z-50 animate-popover-in">
                     <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100/80 flex items-center justify-between">
                       <span>Departure Window</span>
                       {timeFilter !== 'all' && (
@@ -767,7 +767,7 @@ export const SchedulesDashboard: React.FC = () => {
                             className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all duration-150 cursor-pointer ${
                               isSelected
                                 ? 'bg-blue-50 text-blue-700 font-bold translate-x-0.5 shadow-xs'
-                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'
+                                : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'
                             }`}
                           >
                             <span>{tItem.label}</span>
@@ -792,11 +792,11 @@ export const SchedulesDashboard: React.FC = () => {
                   className={`filter-btn-animate flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold cursor-pointer select-none ${
                     sortOpen || sortBy !== 'departure-asc'
                       ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-300 text-amber-900 shadow-sm ring-2 ring-amber-500/20'
-                      : 'bg-white hover:bg-amber-50/50 border-slate-200 text-slate-700 hover:border-amber-200 shadow-xs'
+                      : 'bg-white dark:bg-slate-800 hover:bg-amber-50/50 border-slate-200 text-slate-700 dark:text-slate-200 hover:border-amber-200 shadow-xs'
                   }`}
                 >
                   <span className="text-slate-400 font-normal">Sort:</span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-slate-800 dark:text-slate-100">
                     {sortBy === 'departure-asc'
                       ? 'Earliest'
                       : sortBy === 'departure-desc'
@@ -813,7 +813,7 @@ export const SchedulesDashboard: React.FC = () => {
                 </button>
 
                 {sortOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 rounded-2xl border border-slate-200/90 shadow-2xl p-1.5 z-50 animate-popover-in">
+                  <div className="absolute right-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 dark:bg-slate-800/95 rounded-2xl border border-slate-200/90 shadow-2xl p-1.5 z-50 animate-popover-in">
                     <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100/80">
                       Sort Schedules
                     </div>
@@ -838,7 +838,7 @@ export const SchedulesDashboard: React.FC = () => {
                             className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all duration-150 cursor-pointer ${
                               isSelected
                                 ? 'bg-amber-50 text-amber-900 font-bold translate-x-0.5 shadow-xs'
-                                : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'
+                                : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'
                             }`}
                           >
                             <span>{sItem.label}</span>
@@ -872,13 +872,13 @@ export const SchedulesDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
         {filteredAndSortedRoutes.length === 0 ? (
           /* Empty State */
-          <div className="bg-white p-12 md:p-16 rounded-3xl border border-slate-200 shadow-sm text-center max-w-2xl mx-auto space-y-5 animate-fade-in-up">
+          <div className="bg-white dark:bg-slate-800 p-12 md:p-16 rounded-3xl border border-slate-200 shadow-sm text-center max-w-2xl mx-auto space-y-5 animate-fade-in-up">
             <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-500 flex items-center justify-center mx-auto">
               <AlertCircle className="w-8 h-8" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-xl font-bold text-slate-800">No Bus Schedules Match Your Selection</h3>
-              <p className="text-sm text-slate-500">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">No Bus Schedules Match Your Selection</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
                 We couldn't find any available buses for <strong>{searchOrigin} → {searchDestination}</strong> with the current filter settings.
               </p>
             </div>
@@ -892,7 +892,7 @@ export const SchedulesDashboard: React.FC = () => {
               </button>
               <button
                 onClick={() => setIsModifyOpen(true)}
-                className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-5 py-2.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
+                className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs px-5 py-2.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
               >
                 <Search className="w-4 h-4" />
                 <span>Change Route / Date</span>
@@ -904,7 +904,7 @@ export const SchedulesDashboard: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Left Side: Bus Cards List */}
             <div className="lg:col-span-8 space-y-4">
-              <div className="flex items-center justify-between text-xs text-slate-500 font-medium px-1">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium px-1">
                 <span>Showing {filteredAndSortedRoutes.length} available {filteredAndSortedRoutes.length === 1 ? 'coach' : 'coaches'}</span>
               </div>
 
@@ -943,8 +943,8 @@ export const SchedulesDashboard: React.FC = () => {
                     <PhoneCall className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-slate-800">Need Immediate Help?</h4>
-                    <p className="text-xs text-slate-500">Call Dewmina Dispatch: +94 (0) 55 227 6890</p>
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">Need Immediate Help?</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Call Dewmina Dispatch: +94 (0) 55 227 6890</p>
                   </div>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
@@ -987,14 +987,14 @@ export const SchedulesDashboard: React.FC = () => {
             return (
               <div
                 key={i}
-                className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex items-start gap-3.5 hover:border-slate-300 transition-all"
+                className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 shadow-sm flex items-start gap-3.5 hover:border-slate-300 transition-all"
               >
                 <div className={`p-2.5 rounded-2xl border ${feat.color} flex-shrink-0`}>
                   <Icon className="w-5 h-5" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-xs font-bold text-slate-800">{feat.title}</h4>
-                  <p className="text-[11px] text-slate-500 leading-relaxed">{feat.desc}</p>
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100">{feat.title}</h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">{feat.desc}</p>
                 </div>
               </div>
             );

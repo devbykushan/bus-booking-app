@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { AuthModal } from './AuthModal';
-import { Bus, MapPin, Ticket, Clock, ShieldCheck, LogOut, LogIn, Menu, X, ChevronDown, Globe, Route, Settings } from 'lucide-react';
+import { Bus, MapPin, Ticket, Clock, ShieldCheck, LogOut, LogIn, Menu, X, ChevronDown, Globe, Route, Settings, Moon, Sun } from 'lucide-react';
 import { AnimatedLogoBadge } from './AnimatedLogoBadge';
 
 export const Navbar: React.FC = () => {
@@ -21,6 +21,8 @@ export const Navbar: React.FC = () => {
     setShowAuthModal,
     language,
     setLanguage,
+    theme,
+    setTheme,
     t
   } = useBookingStore();
 
@@ -102,8 +104,8 @@ export const Navbar: React.FC = () => {
           ref={navRef}
           className={`w-full transition-all duration-500 border-b backdrop-blur-2xl ${
             scrolled
-              ? 'bg-white/98 border-slate-200 shadow-md shadow-slate-900/10'
-              : 'bg-white/90 border-slate-200/80 shadow-sm shadow-slate-900/5'
+              ? 'bg-white/98 dark:bg-slate-950/98 border-slate-200 dark:border-slate-800 shadow-md shadow-slate-900/10 dark:shadow-black/50'
+              : 'bg-white/90 dark:bg-slate-950/90 border-slate-200/80 dark:border-slate-800/80 shadow-sm shadow-slate-900/5 dark:shadow-black/30'
           }`}
         >
           {/* Subtle vibrant top accent line */}
@@ -179,6 +181,19 @@ export const Navbar: React.FC = () => {
                     </span>
                   </div>
                 )}
+
+                {/* Theme Toggle */}
+                <button
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="flex items-center justify-center w-9 h-9 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200/90 dark:border-slate-700 rounded-2xl transition-all duration-200 cursor-pointer shadow-xs text-slate-700 dark:text-slate-200 font-extrabold"
+                  title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="w-4 h-4" />
+                  ) : (
+                    <Moon className="w-4 h-4" />
+                  )}
+                </button>
 
                 {/* Language Selector */}
                 <div className="relative" ref={langRef}>

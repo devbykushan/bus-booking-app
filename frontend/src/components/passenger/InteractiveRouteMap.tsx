@@ -251,13 +251,13 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
     : `https://www.google.com/maps/dir/?api=1&origin=${originCoord[0]},${originCoord[1]}&destination=${destCoord[0]},${destCoord[1]}`;
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[500px] w-full">
+    <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors duration-300 overflow-hidden flex flex-col h-[500px] w-full">
       {/* Map Header */}
-      <div className="p-3.5 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-shrink-0">
+      <div className="p-3.5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex transition-colors duration-300 flex-col sm:flex-row sm:items-center justify-between gap-3 flex-shrink-0">
         <div>
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+            <h4 className="text-xs font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
               <span>Interactive Route Map</span>
               {isMonaragalaColomboRoute && (
                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold flex items-center gap-1 ${

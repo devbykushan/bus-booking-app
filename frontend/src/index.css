@@ -1,10 +1,11 @@
 @import 'leaflet/dist/leaflet.css';
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   body {
-    background-color: #f8fafc;
-    color: #0f172a;
+    @apply bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100;
     min-height: 100vh;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     overflow-x: hidden;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { QRCodeSVG } from 'qrcode.react';
-import { CheckCircle2, Printer, MapPin, MessageSquare, Bus, Clock, Calendar, Send, Copy, Check, ExternalLink, X, Smartphone, Settings2, Zap } from 'lucide-react';
+import { CheckCircle2, Printer, MapPin, MessageSquare, Bus, Clock, Calendar, Send, Copy, Check, ExternalLink, X, Smartphone, Settings2, Zap, Download } from 'lucide-react';
 
 export const TicketModal: React.FC = () => {
   const { latestConfirmedBooking, setCurrentView, goToSearchSchedules, setTrackingRouteId, validateTicketByPNR, t } = useBookingStore();
@@ -29,6 +29,10 @@ export const TicketModal: React.FC = () => {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadImage = () => {
+    window.print(); // Fallback to print which allows 'Save as PDF'
   };
 
   const getWhatsAppMessageText = () => {
@@ -74,20 +78,7 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
       hasAutoSent.current = true;
       const rawPhone = booking.passenger.phone || '';
       if (rawPhone) {
-        const cleanPhone = formatWhatsAppPhone(rawPhone);
-        const textMsg = getWhatsAppMessageText();
-        const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(textMsg)}`;
-        
-        try {
-          const win = window.open(whatsappUrl, '_blank');
-          if (!win || win.closed || typeof win.closed === 'undefined') {
-            setAutoSendBlocked(true);
-          } else {
-            setSentToast(true);
-          }
-        } catch (e) {
-          setAutoSendBlocked(true);
-        }
+        setAutoSendBlocked(true);
       }
     }
   }, [booking?.id]);
@@ -291,6 +282,13 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
           className="px-6 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm border border-slate-200 flex items-center gap-2 transition-all shadow-sm cursor-pointer"
         >
           <Printer className="w-4 h-4 text-slate-500" /> {t('printTicket')}
+        </button>
+
+        <button
+          onClick={handleDownloadImage}
+          className="px-6 py-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-sm border border-blue-200 flex items-center gap-2 transition-all shadow-sm cursor-pointer"
+        >
+          <Download className="w-4 h-4 text-blue-600" /> Download as Image
         </button>
 
         {/* 1-Click WhatsApp Direct Auto Send Button */}

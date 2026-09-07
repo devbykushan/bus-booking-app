@@ -221,26 +221,26 @@ export const HeroSearch: React.FC = () => {
             <div className="relative grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
 
               {/* Origin */}
-              <div className="md:col-span-4 relative bg-white/90 backdrop-blur rounded-2xl p-4
-                              border border-white/50 focus-within:border-blue-400 focus-within:ring-4
+              <div className="md:col-span-4 relative bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-2xl p-4
+                              border border-white/50 dark:border-slate-700 focus-within:border-blue-400 focus-within:ring-4
                               focus-within:ring-blue-400/20 transition-all duration-300 shadow-sm
-                              hover:shadow-blue-200/40 hover:shadow-md group/from">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-blue-600 flex items-center justify-between gap-1.5 mb-1.5">
+                              hover:shadow-blue-200/40 dark:hover:shadow-black/40 hover:shadow-md group/from">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center justify-between gap-1.5 mb-1.5">
                   <span className="flex items-center gap-1.5">
-                    <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-blue-50 border border-blue-200/80 text-blue-600 shadow-xs transition-transform duration-300 group-hover/from:scale-110 group-hover/from:-translate-y-0.5">
-                      <span className="absolute -inset-0.5 rounded-md bg-blue-400/30 animate-from-beacon pointer-events-none" />
+                    <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-900/50 border border-blue-200/80 dark:border-blue-700 text-blue-600 dark:text-blue-400 shadow-xs transition-transform duration-300 group-hover/from:scale-110 group-hover/from:-translate-y-0.5">
+                      <span className="absolute -inset-0.5 rounded-md bg-blue-400/30 dark:bg-blue-500/30 animate-from-beacon pointer-events-none" />
                       <MapPin className="w-3.5 h-3.5 animate-from-icon relative z-10" />
                     </span>
                     <span className="font-extrabold">{t('from')}</span>
                   </span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-100/70 text-blue-700 font-semibold normal-case">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-100/70 dark:bg-blue-900/70 text-blue-700 dark:text-blue-300 font-semibold normal-case">
                     Origin
                   </span>
                 </label>
                 <select
                   value={origin}
                   onChange={(e) => setOrigin(e.target.value)}
-                  className="w-full bg-transparent text-slate-900 font-extrabold text-base focus:outline-none cursor-pointer"
+                  className="w-full bg-transparent text-slate-900 dark:text-slate-100 font-extrabold text-base focus:outline-none cursor-pointer"
                 >
                   {CITIES.map(c => <option key={c} value={c}>{t(c)}</option>)}
                 </select>
@@ -261,26 +261,26 @@ export const HeroSearch: React.FC = () => {
               </div>
 
               {/* Destination */}
-              <div className="md:col-span-4 relative bg-white/90 backdrop-blur rounded-2xl p-4
-                              border border-white/50 focus-within:border-indigo-400 focus-within:ring-4
-                              focus-within:ring-indigo-400/20 transition-all duration-300 shadow-sm
-                              hover:shadow-indigo-200/40 hover:shadow-md group/to">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 flex items-center justify-between gap-1.5 mb-1.5">
+              <div className="md:col-span-4 relative bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-2xl p-4
+                              border border-white/50 dark:border-slate-700 focus-within:border-blue-400 focus-within:ring-4
+                              focus-within:ring-blue-400/20 transition-all duration-300 shadow-sm
+                              hover:shadow-blue-200/40 dark:hover:shadow-black/40 hover:shadow-md group/to">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center justify-between gap-1.5 mb-1.5">
                   <span className="flex items-center gap-1.5">
-                    <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-indigo-50 border border-indigo-200/80 text-indigo-600 shadow-xs transition-transform duration-300 group-hover/to:scale-110 group-hover/to:-translate-y-0.5">
-                      <span className="absolute -inset-0.5 rounded-md bg-indigo-400/30 animate-to-beacon pointer-events-none" />
+                    <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-900/50 border border-blue-200/80 dark:border-blue-700 text-blue-600 dark:text-blue-400 shadow-xs transition-transform duration-300 group-hover/to:scale-110 group-hover/to:-translate-y-0.5">
+                      <span className="absolute -inset-0.5 rounded-md bg-blue-400/30 dark:bg-blue-500/30 animate-to-beacon pointer-events-none" />
                       <MapPin className="w-3.5 h-3.5 animate-to-icon relative z-10" />
                     </span>
                     <span className="font-extrabold">{t('to')}</span>
                   </span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-indigo-100/70 text-indigo-700 font-semibold normal-case">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-100/70 dark:bg-blue-900/70 text-blue-700 dark:text-blue-300 font-semibold normal-case">
                     Destination
                   </span>
                 </label>
                 <select
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
-                  className="w-full bg-transparent text-slate-900 font-extrabold text-base focus:outline-none cursor-pointer"
+                  className="w-full bg-transparent text-slate-900 dark:text-slate-100 font-extrabold text-base focus:outline-none cursor-pointer"
                 >
                   {CITIES.map(c => <option key={c} value={c}>{t(c)}</option>)}
                 </select>
