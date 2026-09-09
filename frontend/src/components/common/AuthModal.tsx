@@ -136,7 +136,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
         } else if (regStep === 3) {
           const res = await register(name, email, password, otp, role, phone);
           if (res.success) {
-            onClose();
+            setRegistrationSuccess(true);
           }
         }
       }
