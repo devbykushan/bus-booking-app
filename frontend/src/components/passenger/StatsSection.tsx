@@ -108,21 +108,26 @@ const StatCard: React.FC<{ stat: StatItem; isVisible: boolean }> = ({ stat, isVi
 
   return (
     <div
-      className={`stat-card-hover bg-white p-5 rounded-2xl border ${stat.borderColor} ${stat.bgColor}
-                  flex flex-col items-center text-center space-y-2 shadow-sm cursor-default`}
+      className={`relative bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 rounded-2xl p-5 
+                  flex flex-col items-center justify-center text-center shadow-xs hover:shadow-md 
+                  transition-all duration-500 ease-out transform group
+                  ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
     >
-      <div className={`p-3 rounded-xl ${stat.bgColor} border ${stat.borderColor} transition-transform duration-300 group-hover:rotate-6`}>
-        {stat.icon}
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-slate-50/50 dark:from-slate-800 dark:to-slate-900/50 rounded-2xl pointer-events-none" />
+      
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-110 ${stat.bgColor} ${stat.color} dark:bg-slate-700/50 shadow-sm border ${stat.borderColor} dark:border-slate-600 relative`}>
+        <div className="absolute inset-0 rounded-2xl bg-white/40 dark:bg-black/20" />
+        <div className="relative z-10">{stat.icon}</div>
       </div>
-      <div className="space-y-0.5">
-        <h4
-          className={`text-2xl md:text-3xl font-extrabold font-mono tracking-tight ${stat.color}`}
-          style={{ animation: isVisible ? 'numberTick 0.4s ease-out forwards' : 'none' }}
-        >
-          {count.toLocaleString()}{stat.suffix}
-        </h4>
-        <p className="text-xs text-slate-500 font-medium">{stat.label}</p>
+      
+      <div className="flex items-baseline gap-0.5 mb-1 relative z-10">
+        <span className={`text-3xl sm:text-4xl font-black tabular-nums tracking-tight ${stat.color} dark:text-white drop-shadow-sm`}>
+          {count.toLocaleString()}
+        </span>
+        <span className={`text-xl sm:text-2xl font-bold ${stat.color} dark:text-slate-300`}>{stat.suffix}</span>
       </div>
+      
+      <span className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 relative z-10">{stat.label}</span>
     </div>
   );
 };

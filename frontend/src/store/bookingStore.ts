@@ -75,7 +75,8 @@ interface BookingStore {
   // Authentication
   currentUser: UserAccount | null;
   login: (email: string, pass: string, role?: 'passenger' | 'admin') => Promise<{ success: boolean; message: string }>;
-  register: (name: string, email: string, pass: string, role?: 'passenger' | 'admin', phone?: string) => Promise<{ success: boolean; message: string }>;
+  sendOtp: (name: string, email: string) => Promise<{ success: boolean; message: string }>;
+  register: (name: string, email: string, pass: string, otp: string, role?: 'passenger' | 'admin', phone?: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   updateProfile: (name: string, phone?: string) => Promise<{ success: boolean; message: string }>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
@@ -92,6 +93,10 @@ interface BookingStore {
   setCurrentView: (view: AppView, pushHistory?: boolean) => void;
   goToSearchSchedules: () => void;
   goToHome: () => void;
+
+  // Theme
+  theme: 'light' | 'dark';
+  setTheme: (theme: 'light' | 'dark') => void;
 
   // Role switching
   userRole: 'passenger' | 'admin';
@@ -165,6 +170,17 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   showAuthModal: false,
   setShowAuthModal: (val) => set({ showAuthModal: val }),
 
+  theme: (localStorage.getItem('dewmina_theme') as 'light' | 'dark') || 'light',
+  setTheme: (theme) => {
+    localStorage.setItem('dewmina_theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    set({ theme });
+  },
+
   login: async (email, password, role) => {
     try {
       const res = await authApi.login({ email, password, role });
@@ -192,25 +208,21 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     }
   },
 
-  register: async (name, email, password, role, phone) => {
+  sendOtp: async (name, email) => {
     try {
-      const res = await authApi.register({ name, email, password, role, phone });
+      const res = await authApi.sendOtp({ name, email });
+      return { success: res.success, message: res.message || 'OTP sent successfully' };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Failed to send OTP' };
+    }
+  },
+
+  register: async (name, email, password, otp, role, phone) => {
+    try {
+      const res = await authApi.register({ name, email, password, otp, role, phone });
       if (res.success && res.user) {
-        const user: UserAccount = {
-          id: res.user.id,
-          name: res.user.name,
-          email: res.user.email,
-          role: res.user.role,
-          phone: res.user.phone,
-        };
-        localStorage.setItem('dewmina_user', JSON.stringify(user));
-        localStorage.setItem('auth_token', res.token);
-        set({
-          currentUser: user,
-          userRole: user.role as any,
-          showAuthModal: false,
-        });
-        get().setCurrentView(user.role === 'admin' ? 'admin-panel' : 'passenger-search');
+        // Do not auto-login the user after registration as per the new requirement.
+        // Just return success so the UI can show a confirmation.
         return { success: true, message: res.message || 'Registration successful' };
       }
       return { success: false, message: res.message || 'Registration failed' };

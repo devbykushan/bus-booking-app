@@ -54,6 +54,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
       busType: busType,
       origin: origin.trim() || 'Monaragala',
       destination: destination.trim() || 'Colombo',
+      departureDate: new Date().toISOString().split('T')[0],
       departureTime: departureTime.trim() || '10:00 AM',
       arrivalTime: arrivalTime.trim() || '03:30 PM',
       duration: duration.trim() || '5h 30m',

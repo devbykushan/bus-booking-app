@@ -6,6 +6,7 @@ import { bookingsRouter } from './routes/bookingsRouter';
 import { seatsRouter } from './routes/seatsRouter';
 import { validateRouter } from './routes/validateRouter';
 import { authRouter } from './routes/authRouter';
+import timetablesRouter from './routes/timetablesRouter';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -29,6 +30,7 @@ app.use('/api/routes', routesRouter);
 app.use('/api/bookings', bookingsRouter);
 app.use('/api/seats', seatsRouter);
 app.use('/api/validate-ticket', validateRouter);
+app.use('/api/timetables', timetablesRouter);
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

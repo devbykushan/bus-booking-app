@@ -7,10 +7,12 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
-  const { login, register, selectedRoute, currentView, setCurrentView } = useBookingStore();
+  const { login, register, sendOtp, selectedRoute, currentView, setCurrentView } = useBookingStore();
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [role, setRole] = useState<'passenger' | 'admin'>('passenger');
+  const [otpMode, setOtpMode] = useState(false);
+  const [otp, setOtp] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -19,6 +21,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const [shakeError, setShakeError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
   // Real-time validation touched states
   const [nameTouched, setNameTouched] = useState(false);
@@ -63,6 +66,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     setPhoneTouched(false);
     setEmailTouched(false);
     setPasswordTouched(false);
+    setOtpMode(false);
+    setOtp('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -121,16 +126,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
           setShakeError(true);
         }
       } else {
-        const res = await register(name, email, password, role, role === 'passenger' ? normalizedPhone : undefined);
-        if (res.success) {
-          onClose();
-          if (selectedRoute) {
-            setCurrentView('seat-selection');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (!otpMode) {
+          const res = await sendOtp(name, email);
+          if (res.success) {
+            setOtpMode(true);
+            setErrorMsg('');
+          } else {
+            setErrorMsg(res.message);
+            setShakeError(true);
           }
         } else {
-          setErrorMsg(res.message);
-          setShakeError(true);
+          if (!otp || otp.length !== 6) {
+            setErrorMsg('Please enter the 6-digit OTP.');
+            setShakeError(true);
+            setIsSubmitting(false);
+            return;
+          }
+          const res = await register(name, email, password, otp, role, role === 'passenger' ? normalizedPhone : undefined);
+          if (res.success) {
+            setRegistrationSuccess(true);
+            setOtpMode(false);
+            setOtp('');
+          } else {
+            setErrorMsg(res.message);
+            setShakeError(true);
+          }
         }
       }
     } catch (err: any) {
@@ -194,230 +214,296 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             </button>
           </div>
 
-          {/* Booking or My Tickets Auth Notice */}
-          {selectedRoute ? (
-            <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold shadow-xs animate-fade-in-up">
-              <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
-              <span>
-                Please <strong className="font-extrabold text-amber-950">sign in</strong> or <strong className="font-extrabold text-amber-950">register an account</strong> to book seats for <strong className="text-blue-700">{selectedRoute.origin} → {selectedRoute.destination}</strong> ({selectedRoute.busNumber}).
-              </span>
-            </div>
-          ) : currentView === 'my-bookings' ? (
-            <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-semibold shadow-xs animate-fade-in-up">
-              <Lock className="w-4 h-4 text-blue-600 flex-shrink-0" />
-              <span>
-                Please <strong className="font-extrabold text-blue-950">sign in</strong> or <strong className="font-extrabold text-blue-950">register an account</strong> to view your active bus tickets and booking history.
-              </span>
-            </div>
-          ) : null}
-
-          {/* Role Selector with Sliding Indicator */}
-          <div className="relative flex p-1 rounded-2xl bg-slate-100/80 backdrop-blur-sm text-xs font-bold border border-slate-200/50">
-            <div
-              className="absolute top-1 bottom-1 rounded-xl bg-white shadow-sm transition-all duration-300 ease-out"
-              style={{
-                left: role === 'passenger' ? '4px' : 'calc(50% + 2px)',
-                width: 'calc(50% - 6px)',
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => handleRoleChange('passenger')}
-              className={`relative z-10 flex-1 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-                role === 'passenger' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <UserCheck className="w-4 h-4" /> Passenger
-            </button>
-            <button
-              type="button"
-              onClick={() => handleRoleChange('admin')}
-              className={`relative z-10 flex-1 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-                role === 'admin' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4 text-indigo-600" /> Admin & Staff
-            </button>
-          </div>
-
-          {/* Error Message (floats in) */}
-          {errorMsg && (
-            <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-semibold shadow-sm animate-fade-in-up">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-500" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-
-            {/* Full Name (register only) */}
-            {mode === 'register' && (
-              <div className="animate-fade-in-up" style={{ animationDelay: '80ms' }}>
-                <label className="block text-slate-600 mb-1.5 font-semibold">Full Name</label>
-                <div className={inputRingClass(nameTouched, isNameValid(name), shakeError && !isNameValid(name))}>
-                  <User className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(nameTouched, isNameValid(name))}`} />
-                  <input
-                    ref={nameRef}
-                    type="text"
-                    placeholder="e.g. Kushan Perera"
-                    value={name}
-                    onBlur={() => setNameTouched(true)}
-                    onChange={(e) => { setName(e.target.value); if (!nameTouched) setNameTouched(true); }}
-                    className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400"
-                    required
-                  />
-                  {nameTouched && (
-                    isNameValid(name)
-                      ? <span className="text-emerald-500 font-bold ml-1 text-sm animate-fade-in-up">✓</span>
-                      : <AlertCircle className="w-4 h-4 text-rose-500 ml-1 animate-fade-in-up" />
-                  )}
-                </div>
-                {nameTouched && !isNameValid(name) && (
-                  <div className="mt-1 text-[10px] text-rose-500 font-semibold animate-fade-in-up pl-1">
-                    Name must be at least 3 characters.
-                  </div>
-                )}
+          {registrationSuccess ? (
+            <div className="text-center py-6 animate-fade-in-up space-y-4">
+              <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4 shadow-sm">
+                <span className="text-emerald-500 text-3xl font-bold">✓</span>
               </div>
-            )}
-
-            {/* Mobile Number (passenger registration only) */}
-            {mode === 'register' && role === 'passenger' && (
-              <div className="animate-fade-in-up" style={{ animationDelay: '140ms' }}>
-                <label className="block text-slate-600 mb-1.5 font-semibold">Mobile Number</label>
-                <div className={inputRingClass(phoneTouched, isPhoneValid(phone), shakeError && !isPhoneValid(phone))}>
-                  <Phone className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(phoneTouched, isPhoneValid(phone))}`} />
-                  <input
-                    ref={phoneRef}
-                    type="tel"
-                    inputMode="tel"
-                    placeholder="07XXXXXXXX"
-                    value={phone}
-                    maxLength={phone.startsWith('+') ? 12 : 10}
-                    onBlur={() => setPhoneTouched(true)}
-                    onChange={(e) => handlePhoneInputChange(e.target.value)}
-                    className="w-full bg-transparent text-slate-800 text-xs font-mono tracking-wide focus:outline-none placeholder-slate-400"
-                    required
-                  />
-                  {phoneTouched && (
-                    isPhoneValid(phone)
-                      ? <span className="text-emerald-500 font-bold ml-1 text-sm animate-fade-in-up">✓</span>
-                      : <AlertCircle className="w-4 h-4 text-rose-500 ml-1 animate-fade-in-up" />
-                  )}
-                </div>
-                {phoneTouched && !isPhoneValid(phone) && (
-                  <div className="mt-1 text-[10px] text-rose-500 font-semibold animate-fade-in-up pl-1">
-                    {phone.length > 0 && phone.length < 10 && !phone.startsWith('+')
-                      ? `Must be exactly 10 digits (entered ${phone.length}/10).`
-                      : 'Must be a valid Sri Lankan mobile number starting with 070, 071, 072, 074, 075, 076, 077, or 078.'}
-                  </div>
-                )}
+              <h3 className="text-xl font-bold text-slate-800">Your account created successfully</h3>
+              <p className="text-sm text-slate-500 max-w-xs mx-auto">
+                A confirmation email has been sent to your email address. Please log in to continue.
+              </p>
+              <div className="pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRegistrationSuccess(false);
+                    setMode('login');
+                    setPassword('');
+                    setPasswordTouched(false);
+                  }}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all"
+                >
+                  Continue to Login
+                </button>
               </div>
-            )}
-
-            {/* Email */}
-            <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '200ms' : '80ms' }}>
-              <label className="block text-slate-600 mb-1.5 font-semibold">Email Address</label>
-              <div className={inputRingClass(emailTouched, isEmailValid(email), shakeError && !isEmailValid(email))}>
-                <Mail className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(emailTouched, isEmailValid(email))}`} />
-                <input
-                  ref={emailRef}
-                  type="email"
-                  placeholder={role === 'admin' ? 'admin@dewminasuperline.lk' : 'passenger@dewminasuperline.lk'}
-                  value={email}
-                  onBlur={() => setEmailTouched(true)}
-                  onChange={(e) => { setEmail(e.target.value); if (!emailTouched) setEmailTouched(true); }}
-                  className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400"
-                  required
-                />
-                {emailTouched && (
-                  isEmailValid(email)
-                    ? <span className="text-emerald-500 font-bold ml-1 text-sm animate-fade-in-up">✓</span>
-                    : <AlertCircle className="w-4 h-4 text-rose-500 ml-1 animate-fade-in-up" />
-                )}
-              </div>
-              {emailTouched && !isEmailValid(email) && (
-                <div className="mt-1 text-[10px] text-rose-500 font-semibold animate-fade-in-up pl-1">
-                  Please enter a valid email address.
-                </div>
-              )}
             </div>
+          ) : (
+            <>
+              {/* Booking or My Tickets Auth Notice */}
+              {selectedRoute ? (
+                <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold shadow-xs animate-fade-in-up">
+                  <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                  <span>
+                    Please <strong className="font-extrabold text-amber-950">sign in</strong> or <strong className="font-extrabold text-amber-950">register an account</strong> to book seats for <strong className="text-blue-700">{selectedRoute.origin} → {selectedRoute.destination}</strong> ({selectedRoute.busNumber}).
+                  </span>
+                </div>
+              ) : currentView === 'my-bookings' ? (
+                <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-semibold shadow-xs animate-fade-in-up">
+                  <Lock className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span>
+                    Please <strong className="font-extrabold text-blue-950">sign in</strong> or <strong className="font-extrabold text-blue-950">register an account</strong> to view your active bus tickets and booking history.
+                  </span>
+                </div>
+              ) : null}
 
-            {/* Password */}
-            <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '260ms' : '140ms' }}>
-              <label className="block text-slate-600 mb-1.5 font-semibold">Password</label>
-              <div className={inputRingClass(passwordTouched, isPasswordValid(password), shakeError && !isPasswordValid(password))}>
-                <Lock className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(passwordTouched, isPasswordValid(password))}`} />
-                <input
-                  ref={passwordRef}
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={password}
-                  onBlur={() => setPasswordTouched(true)}
-                  onChange={(e) => { setPassword(e.target.value); if (!passwordTouched) setPasswordTouched(true); }}
-                  className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400 pr-8"
-                  required
+              {/* Role Selector with Sliding Indicator */}
+              <div className="relative flex p-1 rounded-2xl bg-slate-100/80 backdrop-blur-sm text-xs font-bold border border-slate-200/50">
+                <div
+                  className="absolute top-1 bottom-1 rounded-xl bg-white shadow-sm transition-all duration-300 ease-out"
+                  style={{
+                    left: role === 'passenger' ? '4px' : 'calc(50% + 2px)',
+                    width: 'calc(50% - 6px)',
+                  }}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors"
-                  tabIndex={-1}
+                  onClick={() => handleRoleChange('passenger')}
+                  className={`relative z-10 flex-1 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                    role === 'passenger' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'
+                  }`}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  <UserCheck className="w-4 h-4" /> Passenger
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleRoleChange('admin')}
+                  className={`relative z-10 flex-1 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                    role === 'admin' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <ShieldCheck className="w-4 h-4 text-indigo-600" /> Admin & Staff
                 </button>
               </div>
-              {passwordTouched && !isPasswordValid(password) && (
-                <div className="mt-1 text-[10px] text-rose-500 font-semibold animate-fade-in-up pl-1">
-                  Password must be at least 6 characters long.
+
+              {/* Error Message (floats in) */}
+              {errorMsg && (
+                <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-semibold shadow-sm animate-fade-in-up">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-500" />
+                  <span>{errorMsg}</span>
                 </div>
               )}
-            </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 ${
-                isSubmitting ? 'opacity-70 cursor-wait' : ''
-              }`}
-            >
-              {isSubmitting ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                  </svg>
-                  Processing...
-                </>
-              ) : mode === 'login' ? (
-                `Sign In as ${role === 'admin' ? 'Admin' : 'Passenger'}`
-              ) : (
-                'Register Account'
-              )}
-            </button>
-          </form>
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-4 text-xs">
 
-          {/* Switch Mode */}
-          <div className="text-center pt-1 border-t border-slate-100/60">
-            <button
-              type="button"
-              onClick={() => {
-                setMode(mode === 'login' ? 'register' : 'login');
-                setErrorMsg('');
-                setNameTouched(false);
-                setPhoneTouched(false);
-                setEmailTouched(false);
-                setPasswordTouched(false);
-              }}
-              className="text-xs text-blue-600 hover:text-blue-800 transition-colors font-semibold"
-            >
-              {mode === 'login'
-                ? <>Don't have an account? <span className="underline decoration-blue-400 decoration-2 underline-offset-2">Register here</span></>
-                : <>Already have an account? <span className="underline decoration-blue-400 decoration-2 underline-offset-2">Sign in</span></>
-              }
-            </button>
-          </div>
+                {/* OTP Input (Only in OTP Mode) */}
+                {otpMode && (
+                  <div className="animate-fade-in-up" style={{ animationDelay: '80ms' }}>
+                    <label className="block text-slate-600 mb-1.5 font-semibold">Enter OTP</label>
+                    <div className="relative flex items-center rounded-xl border py-2.5 px-3 transition-all border-blue-300 bg-blue-50/30">
+                      <Lock className="w-4 h-4 mr-2.5 transition-colors text-blue-500" />
+                      <input
+                        type="text"
+                        placeholder="123456"
+                        value={otp}
+                        maxLength={6}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                        className="w-full bg-transparent text-slate-800 text-xs font-mono tracking-widest focus:outline-none placeholder-slate-400"
+                        required
+                      />
+                    </div>
+                    <div className="mt-1 text-[10px] text-blue-600 font-semibold pl-1">
+                      Please enter the 6-digit code sent to your email.
+                    </div>
+                  </div>
+                )}
 
+                {/* Full Name (register only) */}
+                {mode === 'register' && !otpMode && (
+                  <div className="animate-fade-in-up" style={{ animationDelay: '80ms' }}>
+                    <label className="block text-slate-600 mb-1.5 font-semibold">Full Name</label>
+                    <div className={inputRingClass(nameTouched, isNameValid(name), shakeError && !isNameValid(name))}>
+                      <User className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(nameTouched, isNameValid(name))}`} />
+                      <input
+                        ref={nameRef}
+                        type="text"
+                        placeholder="e.g. Kushan Perera"
+                        value={name}
+                        onBlur={() => setNameTouched(true)}
+                        onChange={(e) => { setName(e.target.value); if (!nameTouched) setNameTouched(true); }}
+                        className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400"
+                        required
+                      />
+                      {nameTouched && (
+                        isNameValid(name)
+                          ? <span className="text-emerald-500 font-bold ml-1 text-sm animate-fade-in-up">✓</span>
+                          : <AlertCircle className="w-4 h-4 text-rose-500 ml-1 animate-fade-in-up" />
+                      )}
+                    </div>
+                    {nameTouched && !isNameValid(name) && (
+                      <div className="mt-1 text-[10px] text-rose-500 font-semibold animate-fade-in-up pl-1">
+                        Name must be at least 3 characters.
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Mobile Number (passenger registration only) */}
+                {mode === 'register' && role === 'passenger' && !otpMode && (
+                  <div className="animate-fade-in-up" style={{ animationDelay: '140ms' }}>
+                    <label className="block text-slate-600 mb-1.5 font-semibold">Mobile Number</label>
+                    <div className={inputRingClass(phoneTouched, isPhoneValid(phone), shakeError && !isPhoneValid(phone))}>
+                      <Phone className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(phoneTouched, isPhoneValid(phone))}`} />
+                      <input
+                        ref={phoneRef}
+                        type="tel"
+                        inputMode="tel"
+                        placeholder="07XXXXXXXX"
+                        value={phone}
+                        maxLength={phone.startsWith('+') ? 12 : 10}
+                        onBlur={() => setPhoneTouched(true)}
+                        onChange={(e) => handlePhoneInputChange(e.target.value)}
+                        className="w-full bg-transparent text-slate-800 text-xs font-mono tracking-wide focus:outline-none placeholder-slate-400"
+                        required
+                      />
+                      {phoneTouched && (
+                        isPhoneValid(phone)
+                          ? <span className="text-emerald-500 font-bold ml-1 text-sm animate-fade-in-up">✓</span>
+                          : <AlertCircle className="w-4 h-4 text-rose-500 ml-1 animate-fade-in-up" />
+                      )}
+                    </div>
+                    {phoneTouched && !isPhoneValid(phone) && (
+                      <div className="mt-1 text-[10px] text-rose-500 font-semibold animate-fade-in-up pl-1">
+                        {phone.length > 0 && phone.length < 10 && !phone.startsWith('+')
+                          ? `Must be exactly 10 digits (entered ${phone.length}/10).`
+                          : 'Must be a valid Sri Lankan mobile number starting with 070, 071, 072, 074, 075, 076, 077, or 078.'}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Email */}
+                {!otpMode && <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '200ms' : '80ms' }}>
+                  <label className="block text-slate-600 mb-1.5 font-semibold">Email Address</label>
+                  <div className={inputRingClass(emailTouched, isEmailValid(email), shakeError && !isEmailValid(email))}>
+                    <Mail className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(emailTouched, isEmailValid(email))}`} />
+                    <input
+                      ref={emailRef}
+                      type="email"
+                      placeholder={role === 'admin' ? 'admin@dewminasuperline.lk' : 'passenger@dewminasuperline.lk'}
+                      value={email}
+                      onBlur={() => setEmailTouched(true)}
+                      onChange={(e) => { setEmail(e.target.value); if (!emailTouched) setEmailTouched(true); }}
+                      className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400"
+                      required
+                    />
+                    {emailTouched && (
+                      isEmailValid(email)
+                        ? <span className="text-emerald-500 font-bold ml-1 text-sm animate-fade-in-up">✓</span>
+                        : <AlertCircle className="w-4 h-4 text-rose-500 ml-1 animate-fade-in-up" />
+                    )}
+                  </div>
+                  {emailTouched && !isEmailValid(email) && (
+                    <div className="mt-1 text-[10px] text-rose-500 font-semibold animate-fade-in-up pl-1">
+                      Please enter a valid email address.
+                    </div>
+                  )}
+                </div>}
+
+                {/* Password */}
+                {!otpMode && <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '260ms' : '140ms' }}>
+                  <label className="block text-slate-600 mb-1.5 font-semibold">Password</label>
+                  <div className={inputRingClass(passwordTouched, isPasswordValid(password), shakeError && !isPasswordValid(password))}>
+                    <Lock className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(passwordTouched, isPasswordValid(password))}`} />
+                    <input
+                      ref={passwordRef}
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      value={password}
+                      onBlur={() => setPasswordTouched(true)}
+                      onChange={(e) => { setPassword(e.target.value); if (!passwordTouched) setPasswordTouched(true); }}
+                      className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400 pr-8"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {passwordTouched && !isPasswordValid(password) && (
+                    <div className="mt-1 text-[10px] text-rose-500 font-semibold animate-fade-in-up pl-1">
+                      Password must be at least 6 characters long.
+                    </div>
+                  )}
+                </div>}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 ${
+                    isSubmitting ? 'opacity-70 cursor-wait' : ''
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                      </svg>
+                      Processing...
+                    </>
+                  ) : mode === 'login' ? (
+                    `Sign In as ${role === 'admin' ? 'Admin' : 'Passenger'}`
+                  ) : otpMode ? (
+                    'Verify & Create Account'
+                  ) : (
+                    'Send OTP'
+                  )}
+                </button>
+              </form>
+
+              {/* Switch Mode */}
+              <div className="text-center pt-1 border-t border-slate-100/60">
+                {otpMode ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOtpMode(false);
+                      setOtp('');
+                    }}
+                    className="text-xs text-slate-500 hover:text-slate-800 transition-colors font-semibold"
+                  >
+                    Entered wrong email? <span className="underline decoration-slate-400 decoration-2 underline-offset-2">Change Email</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode(mode === 'login' ? 'register' : 'login');
+                      setErrorMsg('');
+                      setNameTouched(false);
+                      setPhoneTouched(false);
+                      setEmailTouched(false);
+                      setPasswordTouched(false);
+                      setOtpMode(false);
+                      setOtp('');
+                    }}
+                    className="text-xs text-blue-600 hover:text-blue-800 transition-colors font-semibold"
+                  >
+                    {mode === 'login'
+                      ? <>Don't have an account? <span className="underline decoration-blue-400 decoration-2 underline-offset-2">Register here</span></>
+                      : <>Already have an account? <span className="underline decoration-blue-400 decoration-2 underline-offset-2">Sign in</span></>
+                    }
+                  </button>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

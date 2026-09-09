@@ -5,11 +5,20 @@ import { seatLocks } from '../locks/seatLocks';
 export const routesRouter = Router();
 
 // ─── GET /api/routes ──────────────────────────────────────────────────────────
-routesRouter.get('/', async (_req: Request, res: Response) => {
+routesRouter.get('/', async (req: Request, res: Response) => {
   const pool = getPool();
+  const dateFilter = req.query.date as string;
 
   try {
-    const rawRoutesRes = await pool.query('SELECT * FROM routes ORDER BY "operatorName"');
+    let query = 'SELECT * FROM routes';
+    let params: any[] = [];
+    if (dateFilter) {
+      query += ' WHERE "departureDate" = $1';
+      params.push(dateFilter);
+    }
+    query += ' ORDER BY "operatorName"';
+    
+    const rawRoutesRes = await pool.query(query, params);
     const rawRoutes = rawRoutesRes.rows;
 
     const routes = await Promise.all(

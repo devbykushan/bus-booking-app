@@ -343,3 +343,110 @@ Thank you for choosing OmniBus!
     return false;
   }
 }
+
+/**
+ * Sends OTP email for account verification
+ */
+export async function sendOTPEmail(email: string, name: string, otp: string): Promise<boolean> {
+  if (!email) {
+    console.warn('[Email Service] Cannot send OTP email: email address is missing');
+    return false;
+  }
+
+  const fromAddress = process.env.EMAIL_FROM || '"OmniBus Sri Lanka" <no-reply@omnibus.lk>';
+  const subject = `Your OmniBus Registration OTP Code: ${otp}`;
+
+  const textBody = `
+Dear ${name},
+
+Your One-Time Password (OTP) for OmniBus registration is: ${otp}
+
+This code will expire in 10 minutes. Please do not share this code with anyone.
+
+Thank you!
+  `.trim();
+
+  const htmlBody = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your OTP Code</title>
+  <style>
+    body { font-family: sans-serif; background-color: #f1f5f9; padding: 20px; color: #1e293b; }
+    .container { max-width: 500px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    .otp { font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #2563eb; background: #eff6ff; padding: 15px; border-radius: 8px; margin: 20px 0; display: inline-block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Verify Your Email</h2>
+    <p>Hello ${name},</p>
+    <p>Please use the following OTP to complete your OmniBus registration:</p>
+    <div class="otp">${otp}</div>
+    <p>This code will expire in 10 minutes.</p>
+    <p>If you did not request this, please ignore this email.</p>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  // 1. Resend
+  if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim()) {
+    try {
+      const apiKey = process.env.RESEND_API_KEY.trim();
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: process.env.EMAIL_FROM || 'OmniBus LK <onboarding@resend.dev>',
+          to: [email],
+          subject,
+          html: htmlBody,
+          text: textBody,
+        }),
+      });
+      if (res.ok) return true;
+    } catch (err) {
+      console.error('[Email Service] Resend OTP error:', err);
+    }
+  }
+
+  // 2. SMTP
+  const host = process.env.SMTP_HOST;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  if (host && user && pass) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host,
+        port: Number(process.env.SMTP_PORT) || 587,
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: { user, pass },
+      } as any);
+      await transporter.sendMail({ from: fromAddress, to: email, subject, text: textBody, html: htmlBody });
+      return true;
+    } catch (err) {
+      console.error('[Email Service] SMTP OTP error:', err);
+    }
+  }
+
+  // 3. Fallback
+  try {
+    const testAccount = await nodemailer.createTestAccount();
+    const testTransporter = nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false,
+      auth: { user: testAccount.user, pass: testAccount.pass },
+    });
+    const info = await testTransporter.sendMail({ from: fromAddress, to: email, subject, text: textBody, html: htmlBody });
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    console.log('[Email Service] OTP Ethereal Preview: ', previewUrl);
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}

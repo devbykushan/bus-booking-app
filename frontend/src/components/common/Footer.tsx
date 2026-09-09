@@ -26,7 +26,7 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="relative bg-gradient-to-b from-slate-50 via-white to-blue-50/40 text-slate-600 text-sm mt-20 overflow-hidden border-t border-slate-200 select-none shadow-inner">
+    <footer className="relative bg-gradient-to-b from-slate-50 via-white to-blue-50/40 text-slate-600 text-sm mt-20 pb-24 md:pb-8 overflow-hidden border-t border-slate-200 select-none shadow-inner">
       
       {/* ── High-Clarity Bus Photo Background ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">

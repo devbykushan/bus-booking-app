@@ -68,14 +68,16 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
     <>
       <div 
         onClick={() => onFocusRoute && onFocusRoute(route)}
-        className={`bg-white rounded-3xl p-6 border transition-all duration-300 relative shadow-sm hover:shadow-md cursor-pointer group/card ${
-          isSelected ? 'border-blue-500 ring-2 ring-blue-100 bg-blue-50/20' : 'border-slate-200/90 hover:border-slate-300'
+        className={`bg-white dark:bg-slate-800 rounded-3xl p-6 border transition-all duration-300 relative shadow-sm hover:shadow-md cursor-pointer group/card ${
+          isSelected
+            ? 'border-blue-500 shadow-blue-500/20 ring-4 ring-blue-500/10'
+            : 'border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500/50'
         }`}
       >
         {/* ── Top Header Row ────────────────────────────────────────────── */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
               <span className="text-blue-600">{t(route.origin)}</span>
               <span className="text-slate-400 font-normal">→</span>
               <span className="text-indigo-600">{t(route.destination)}</span>
@@ -94,7 +96,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
               </>
             )}
             <span className="text-xs text-slate-400">•</span>
-            <span className="text-xs font-medium text-slate-500">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
               {(route.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}
             </span>
           </div>
@@ -128,7 +130,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
               <MapPin className="w-2.5 h-2.5 animate-from-icon text-blue-600" />
               {t('departure')}
             </span>
-            <p className="text-sm font-bold text-slate-800 pt-0.5">
+            <p className="text-sm font-bold text-slate-800 dark:text-slate-100 pt-0.5">
               {t(route.origin)}
             </p>
             <p className="text-xs text-slate-400 font-mono">
@@ -166,7 +168,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
               <MapPin className="w-2.5 h-2.5 animate-to-icon text-indigo-600" />
               {t('arrival')}
             </span>
-            <p className="text-sm font-bold text-slate-800 pt-0.5">
+            <p className="text-sm font-bold text-slate-800 dark:text-slate-100 pt-0.5">
               {t(route.destination)}
             </p>
             <div className="text-xs font-mono">
@@ -189,7 +191,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
               <span className="text-xs font-bold text-indigo-600 ml-1.5 font-mono uppercase">
                 LKR
               </span>
-              <p className="text-[11px] text-slate-500 mt-0.5">{t('perPassenger')}</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{t('perPassenger')}</p>
             </div>
           </div>
 
@@ -214,9 +216,9 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
                 e.stopPropagation();
                 setShowDetailsModal(true);
               }}
-              className="px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200 flex items-center gap-1.5 transition-colors"
+              className="px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200 flex items-center gap-1.5 transition-colors"
             >
-              <Info className="w-3.5 h-3.5 text-slate-500" />
+              <Info className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>{t('details')}</span>
             </button>
 
@@ -226,9 +228,9 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
                 e.stopPropagation();
                 setShowTimetableModal(true);
               }}
-              className="px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200 flex items-center gap-1.5 transition-colors"
+              className="px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200 flex items-center gap-1.5 transition-colors"
             >
-              <Clock className="w-3.5 h-3.5 text-slate-500" />
+              <Clock className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>{t('timetable')}</span>
             </button>
 

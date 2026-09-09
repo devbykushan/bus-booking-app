@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { AuthModal } from './AuthModal';
-import { Bus, MapPin, Ticket, Clock, ShieldCheck, LogOut, LogIn, Menu, X, ChevronDown, Globe, Route, Settings } from 'lucide-react';
+import { Bus, MapPin, Ticket, Clock, ShieldCheck, LogOut, LogIn, ChevronDown, Globe, Route, Settings, Moon, Sun } from 'lucide-react';
 import { AnimatedLogoBadge } from './AnimatedLogoBadge';
 
 export const Navbar: React.FC = () => {
@@ -21,10 +21,12 @@ export const Navbar: React.FC = () => {
     setShowAuthModal,
     language,
     setLanguage,
+    theme,
+    setTheme,
     t
   } = useBookingStore();
 
-  const [mobileOpen, setMobileOpen] = useState(false);
+  
   const [scrolled, setScrolled] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
@@ -74,25 +76,25 @@ export const Navbar: React.FC = () => {
     const requiresAuth = view === 'live-tracking' || view === 'my-bookings';
     if (requiresAuth && !currentUser) {
       setCurrentView(view as any);
-      setMobileOpen(false);
+      
       setShowAuthModal(true);
       return;
     }
 
     if (view === 'passenger-search') {
       goToHome();
-      setMobileOpen(false);
+      
       return;
     }
 
     if (view === 'schedules-dashboard') {
       goToSearchSchedules();
-      setMobileOpen(false);
+      
       return;
     }
 
     setCurrentView(view as any);
-    setMobileOpen(false);
+    
   };
 
   return (
@@ -102,8 +104,8 @@ export const Navbar: React.FC = () => {
           ref={navRef}
           className={`w-full transition-all duration-500 border-b backdrop-blur-2xl ${
             scrolled
-              ? 'bg-white/98 border-slate-200 shadow-md shadow-slate-900/10'
-              : 'bg-white/90 border-slate-200/80 shadow-sm shadow-slate-900/5'
+              ? 'bg-white/98 dark:bg-slate-950/98 border-slate-200 dark:border-slate-800 shadow-md shadow-slate-900/10 dark:shadow-black/50'
+              : 'bg-white/90 dark:bg-slate-950/90 border-slate-200/80 dark:border-slate-800/80 shadow-sm shadow-slate-900/5 dark:shadow-black/30'
           }`}
         >
           {/* Subtle vibrant top accent line */}
@@ -114,7 +116,7 @@ export const Navbar: React.FC = () => {
               
               {/* ── Brand Logo with Cinematic Animated Video-Like Badge ── */}
               <div
-                onClick={() => { goToHome(); setMobileOpen(false); }}
+                onClick={() => { goToHome();  }}
                 className="cursor-pointer flex items-center gap-3"
               >
                 <AnimatedLogoBadge size="md" />
@@ -179,6 +181,19 @@ export const Navbar: React.FC = () => {
                     </span>
                   </div>
                 )}
+
+                {/* Theme Toggle */}
+                <button
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="flex items-center justify-center w-9 h-9 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200/90 dark:border-slate-700 rounded-2xl transition-all duration-200 cursor-pointer shadow-xs text-slate-700 dark:text-slate-200 font-extrabold"
+                  title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="w-4 h-4" />
+                  ) : (
+                    <Moon className="w-4 h-4" />
+                  )}
+                </button>
 
                 {/* Language Selector */}
                 <div className="relative" ref={langRef}>
@@ -308,75 +323,41 @@ export const Navbar: React.FC = () => {
                   </button>
                 )}
 
-                {/* Mobile hamburger button */}
-                <button
-                  onClick={() => setMobileOpen(!mobileOpen)}
-                  className="md:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 cursor-pointer transition-colors"
-                >
-                  {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                </button>
+                
               </div>
 
             </div>
           </div>
 
-          {/* ── Mobile Menu Dropdown ── */}
-          {mobileOpen && (
-            <div className="md:hidden bg-white/98 border-t border-slate-200 px-4 py-3 space-y-1.5 animate-fade-in-up backdrop-blur-2xl shadow-xl">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.activeOn);
-                return (
-                  <button
-                    key={item.key}
-                    onClick={() => handleNavItemClick(item.key)}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                      active
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{t(item.translationKey)}</span>
-                    {item.key === 'live-tracking' && (
-                      <span className={`ml-auto px-2 py-0.5 text-[10px] font-black uppercase rounded-md tracking-wider ${
-                        active ? 'bg-white/20 text-white border border-white/30' : 'bg-amber-100 text-amber-700 border border-amber-200/70'
-                      }`}>
-                        Soon
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-              {(userRole === 'admin' || currentUser?.role === 'admin') && (
-                <button
-                  onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); setMobileOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                    currentView === 'admin-panel'
-                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
-                      : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50'
-                  }`}
-                >
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>{t('adminPortal')}</span>
-                </button>
-              )}
-              {currentUser && currentUser.role !== 'admin' && userRole !== 'admin' && (
-                <button
-                  onClick={() => { setCurrentView('passenger-settings'); setMobileOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                    currentView === 'passenger-settings'
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
-                  }`}
-                >
-                  <Settings className="w-4 h-4" />
-                  <span>{t('passengerSettings')}</span>
-                </button>
-              )}
-            </div>
-          )}
-        </nav>
+          </nav>
+      </div>
+
+      {/* ── Mobile Bottom Navigation Bar ── */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-safe transition-colors duration-300">
+        <div className="flex items-center justify-around px-2 py-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.activeOn);
+            return (
+              <button
+                key={item.key}
+                onClick={() => handleNavItemClick(item.key)}
+                className={`flex flex-col items-center justify-center w-16 gap-1 p-1 rounded-xl transition-all ${
+                  active
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
+              >
+                <Icon className={`w-5 h-5 ${active ? 'fill-blue-100 dark:fill-blue-900/50' : ''}`} />
+                <span className="text-[10px] font-bold text-center leading-tight truncate w-full">
+                  {t(item.translationKey)}
+                </span>
+              </button>
+            );
+          })}
+          
+          
+        </div>
       </div>
 
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}

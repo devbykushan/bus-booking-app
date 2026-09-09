@@ -39,6 +39,16 @@ export function App() {
   const [backendReady, setBackendReady] = useState(false);
   const [backendError, setBackendError] = useState(false);
 
+  // Initialize theme
+  useEffect(() => {
+    const theme = useBookingStore.getState().theme;
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
   // Sync browser history state and handle browser Back / Forward buttons
   useEffect(() => {
     const rawHash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
@@ -158,7 +168,7 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-blue-500 selection:text-white overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 antialiased selection:bg-blue-500 selection:text-white overflow-x-hidden transition-colors duration-300">
       <Navbar />
 
       {/* Global API error banner */}
@@ -170,7 +180,7 @@ export function App() {
         </div>
       )}
 
-      <main className={`flex-1 transition-all duration-300 ${currentView === 'passenger-search' ? '' : 'pt-20 md:pt-24'}`}>
+      <main className={`flex-1 transition-all duration-300 pb-20 md:pb-0 ${currentView === 'passenger-search' ? '' : 'pt-20 md:pt-24'}`}>
         {currentView === 'admin-panel' ? (
           isAdmin ? (
             <div key="admin">
@@ -214,7 +224,7 @@ export function App() {
             {currentView === 'passenger-search' && (
               <div>
                 <HeroSearch />
-                <div className="bg-slate-50 py-10">
+                <div className="bg-slate-50 dark:bg-slate-900/50 py-10 transition-colors duration-300">
                   <StatsSection />
                 </div>
                 <ServicesSection />

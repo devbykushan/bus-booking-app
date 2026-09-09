@@ -194,17 +194,38 @@ export const UserBookings: React.FC = () => {
 
                 <div className="flex flex-wrap items-center gap-2 text-xs">
                   {b.bookingStatus === 'confirmed' && (
-                    <button
-                      onClick={() => {
-                        setLatestConfirmedBooking(b);
-                        setCurrentView('ticket-confirmation');
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
-                      className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
-                    >
-                      <Download className="w-3.5 h-3.5 text-white" />
-                      <span>Download E-Ticket</span>
-                    </button>
+                    <>
+                      <button
+                        onClick={() => {
+                          setLatestConfirmedBooking(b);
+                          setCurrentView('ticket-confirmation');
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 transition-colors flex items-center gap-1.5 font-bold shadow-xs cursor-pointer active:scale-95"
+                      >
+                        <Bus className="w-3.5 h-3.5 text-blue-600" />
+                        <span>View Ticket</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          const text = `🚌 DEWMINA SUPER LINE - E-TICKET 🚌\n\n🎟️ PNR Code: ${b.pnr}\n👤 Passenger: ${b.passenger.fullName}\n🚍 Bus: ${b.operatorName} • ${b.busNumber} (${b.busType})\n🛣️ Route: ${b.origin} ➔ ${b.destination}\n📅 Departure Date: ${b.departureDate}\n⏰ Departure Time: ${b.departureTime}\n📍 Boarding Point: ${b.boardingPoint.name} (${b.boardingPoint.time})\n💺 Reserved Seats: ${b.seats.map(s => s.number).join(', ')}\n💳 Total Paid: LKR ${b.totalFare.toLocaleString()}\n\nThank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
+                          const blob = new Blob([text], { type: 'text/plain' });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `E-Ticket-${b.pnr}.txt`;
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                          URL.revokeObjectURL(url);
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                      >
+                        <Download className="w-3.5 h-3.5 text-white" />
+                        <span>Download</span>
+                      </button>
+                    </>
                   )}
 
                   {b.bookingStatus === 'confirmed' && (() => {
