@@ -131,7 +131,7 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
         INSERT INTO seats ("id", "routeId", "number", "deck", "row", "col", "price", "status", "isSleeper", "isFemaleOnly")
         VALUES ($1, $2, $3, 'lower', 1, 1, $4, 'available', 0, 0)
         ON CONFLICT ("id") DO NOTHING
-      `, [sId, routeId, seatNum, route.priceStarting || 950]);
+      `, [sId, routeId, seatNum, route.priceStarting || 1157]);
     }
 
     // Verify seats belong to the chosen route

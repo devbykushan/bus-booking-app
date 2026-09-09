@@ -211,12 +211,19 @@ export async function initializeSchema(p: Pool): Promise<void> {
     );
 
     UPDATE routes 
-    SET "busType" = 'Normal Service' 
-    WHERE "busType" LIKE '%Normal Service%' OR "busType" LIKE '%58 Seats%' OR "busType" LIKE '%54 Seats%';
+    SET "busType" = 'Normal Service', "priceStarting" = 1157 
+    WHERE "busType" LIKE '%Normal Service%' OR "busType" LIKE '%58 Seats%' OR "busType" LIKE '%54 Seats%' OR "busNumber" LIKE '%Route 98%' OR "busNumber" LIKE '%ND-3223%';
 
     UPDATE routes 
     SET "busType" = 'Super Luxury' 
     WHERE "busType" LIKE '%Super Luxury%';
+
+    UPDATE seats 
+    SET "price" = 1157 
+    WHERE "routeId" IN (
+      SELECT "id" FROM routes 
+      WHERE "busType" LIKE '%Normal%' OR "busNumber" LIKE '%Route 98%' OR "busNumber" LIKE '%ND-3223%'
+    );
   `);
 }
 
@@ -229,7 +236,7 @@ export function buildSeats(
   routePrice?: number
 ): { id: string; routeId: string; number: string; deck: string; row: number; col: number; price: number; status: string; isSleeper: number; isFemaleOnly: number }[] {
   const seats: ReturnType<typeof buildSeats> = [];
-  const basePrice = routePrice || (busType.includes('Normal Service') ? 950 : busType.includes('Sleeper') ? 3000 : busType.includes('Super Luxury') ? 2800 : 1500);
+  const basePrice = routePrice || (busType.includes('Normal Service') ? 1157 : busType.includes('Sleeper') ? 3000 : busType.includes('Super Luxury') ? 2800 : 1500);
 
   if (busType.includes('49 Seats') || busType.includes('Super Luxury')) {
     const femaleSeats = ['15', '19', '20', '23'];
