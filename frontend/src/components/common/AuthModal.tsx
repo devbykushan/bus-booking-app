@@ -7,10 +7,11 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
-  const { login, register, sendOtp, selectedRoute, currentView, setCurrentView } = useBookingStore();
+  const { login, register, sendOtp, selectedRoute, currentView}  = useBookingStore();
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [role, setRole] = useState<'passenger' | 'admin'>('passenger');
+  const [regStep, setRegStep] = useState(1);
   const [otpMode, setOtpMode] = useState(false);
   const [otp, setOtp] = useState('');
   const [email, setEmail] = useState('');
@@ -34,6 +35,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const phoneRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const otpRef = useRef<HTMLInputElement>(null);
 
   // Validation helpers
   const isEmailValid = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
@@ -45,7 +47,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     if (/^\+947[01245678]\d{7}$/.test(clean)) return true;
     return false;
   };
-  const normalizedPhone = phone.replace(/[\s-]/g, '').replace(/^0/, '+94');
 
   const handlePhoneInputChange = (raw: string) => {
     if (!phoneTouched) setPhoneTouched(true);
@@ -70,7 +71,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     setOtp('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
     setErrorMsg('');
@@ -83,31 +84,38 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     setPasswordTouched(true);
 
     // Front-end validation
-    if (mode === 'register' && !isNameValid(name)) {
+    if (mode === 'register' && regStep === 1 && !isNameValid(name)) {
       setShakeError(true);
       setErrorMsg('Full name must be at least 3 characters.');
       nameRef.current?.focus();
       return;
     }
 
-    if (mode === 'register' && role === 'passenger' && !isPhoneValid(phone)) {
+    if (mode === 'register' && regStep === 1 && role === 'passenger' && !isPhoneValid(phone)) {
       setShakeError(true);
-      setErrorMsg('Enter a valid Sri Lankan mobile number (07XXXXXXXX).');
+      setErrorMsg('Please enter a valid 10-digit mobile number.');
       phoneRef.current?.focus();
       return;
     }
 
-    if (!isEmailValid(email)) {
+    if (!isEmailValid(email) && (mode === 'login' || regStep === 1)) {
       setShakeError(true);
       setErrorMsg('Please enter a valid email address.');
       emailRef.current?.focus();
       return;
     }
 
-    if (!isPasswordValid(password)) {
+    if (!isPasswordValid(password) && (mode === 'login' || regStep === 3)) {
       setShakeError(true);
-      setErrorMsg('Password must be at least 6 characters.');
+      setErrorMsg('Password must be at least 6 characters long.');
       passwordRef.current?.focus();
+      return;
+    }
+
+    if (mode === 'register' && regStep === 2 && otp.length !== 6) {
+      setShakeError(true);
+      setErrorMsg('Please enter the 6-digit OTP.');
+      otpRef.current?.focus();
       return;
     }
 
@@ -117,45 +125,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
         const res = await login(email, password, role);
         if (res.success) {
           onClose();
-          if (selectedRoute) {
-            setCurrentView('seat-selection');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        } else {
-          setErrorMsg(res.message);
-          setShakeError(true);
         }
       } else {
-        if (!otpMode) {
-          const res = await sendOtp(name, email);
+        if (regStep === 1) {
+          await sendOtp(name, email);
+          setRegStep(2);
+        } else if (regStep === 2) {
+          await useBookingStore.getState().verifyEmailOtp(email, otp);
+          setRegStep(3);
+        } else if (regStep === 3) {
+          const res = await register(name, email, password, otp, role, phone);
           if (res.success) {
-            setOtpMode(true);
-            setErrorMsg('');
-          } else {
-            setErrorMsg(res.message);
-            setShakeError(true);
-          }
-        } else {
-          if (!otp || otp.length !== 6) {
-            setErrorMsg('Please enter the 6-digit OTP.');
-            setShakeError(true);
-            setIsSubmitting(false);
-            return;
-          }
-          const res = await register(name, email, password, otp, role, role === 'passenger' ? normalizedPhone : undefined);
-          if (res.success) {
-            setRegistrationSuccess(true);
-            setOtpMode(false);
-            setOtp('');
-          } else {
-            setErrorMsg(res.message);
-            setShakeError(true);
+            onClose();
           }
         }
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'An unexpected error occurred.');
       setShakeError(true);
+      // The error is already handled by the store, which updates the `error` state.
+      // But if there's a local error, we can set it:
+      // setErrorMsg(err.message || 'Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -298,7 +287,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
               <form onSubmit={handleSubmit} className="space-y-4 text-xs">
 
                 {/* OTP Input (Only in OTP Mode) */}
-                {otpMode && (
+                {mode === 'register' && regStep === 2 && (
                   <div className="animate-fade-in-up" style={{ animationDelay: '80ms' }}>
                     <label className="block text-slate-600 mb-1.5 font-semibold">Enter OTP</label>
                     <div className="relative flex items-center rounded-xl border py-2.5 px-3 transition-all border-blue-300 bg-blue-50/30">
@@ -384,7 +373,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 )}
 
                 {/* Email */}
-                {!otpMode && <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '200ms' : '80ms' }}>
+                {(mode === 'login' || (mode === 'register' && regStep === 1)) && <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '200ms' : '80ms' }}>
                   <label className="block text-slate-600 mb-1.5 font-semibold">Email Address</label>
                   <div className={inputRingClass(emailTouched, isEmailValid(email), shakeError && !isEmailValid(email))}>
                     <Mail className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(emailTouched, isEmailValid(email))}`} />
@@ -412,7 +401,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 </div>}
 
                 {/* Password */}
-                {!otpMode && <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '260ms' : '140ms' }}>
+                {(mode === 'login' || (mode === 'register' && regStep === 1)) && <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '260ms' : '140ms' }}>
                   <label className="block text-slate-600 mb-1.5 font-semibold">Password</label>
                   <div className={inputRingClass(passwordTouched, isPasswordValid(password), shakeError && !isPasswordValid(password))}>
                     <Lock className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(passwordTouched, isPasswordValid(password))}`} />
@@ -459,21 +448,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                     </>
                   ) : mode === 'login' ? (
                     `Sign In as ${role === 'admin' ? 'Admin' : 'Passenger'}`
-                  ) : otpMode ? (
-                    'Verify & Create Account'
-                  ) : (
+                  ) : regStep === 1 ? (
                     'Send OTP'
+                  ) : regStep === 2 ? (
+                    'Verify OTP'
+                  ) : (
+                    'Create Account'
                   )}
                 </button>
               </form>
 
               {/* Switch Mode */}
               <div className="text-center pt-1 border-t border-slate-100/60">
-                {otpMode ? (
+                {regStep === 2 ? (
                   <button
                     type="button"
                     onClick={() => {
-                      setOtpMode(false);
+                      setRegStep(1);
                       setOtp('');
                     }}
                     className="text-xs text-slate-500 hover:text-slate-800 transition-colors font-semibold"
@@ -490,7 +481,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                       setPhoneTouched(false);
                       setEmailTouched(false);
                       setPasswordTouched(false);
-                      setOtpMode(false);
+                      setRegStep(1);
                       setOtp('');
                     }}
                     className="text-xs text-blue-600 hover:text-blue-800 transition-colors font-semibold"

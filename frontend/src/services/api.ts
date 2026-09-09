@@ -110,6 +110,11 @@ export const validateApi = {
 
 export const authApi = {
   /** Send OTP for account registration */
+  verifyEmailOtp: (payload: { email: string; otp: string }): Promise<{ success: boolean; message: string }> =>
+    apiFetch('/auth/verify-email-otp', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
   sendOtp: (payload: { name: string; email: string }): Promise<{ success: boolean; message: string }> =>
     apiFetch('/auth/send-otp', { method: 'POST', body: JSON.stringify(payload) }),
 
