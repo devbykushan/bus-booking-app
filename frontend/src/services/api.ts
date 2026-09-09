@@ -26,7 +26,7 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const routesApi = {
   /** Fetch all bus routes with seats, boarding points, and GPS */
-  getAll: (): Promise<any[]> => apiFetch('/routes'),
+  getAll: (date?: string): Promise<any[]> => apiFetch(`/routes${date ? `?date=${date}` : ''}`),
 
   /** Fetch a single route by ID */
   getById: (id: string): Promise<any> => apiFetch(`/routes/${id}`),
@@ -34,6 +34,18 @@ export const routesApi = {
   /** Add a new bus route (Operator feature) */
   create: (routeData: any): Promise<any> =>
     apiFetch('/routes', { method: 'POST', body: JSON.stringify(routeData) }),
+
+  /** Update an existing bus route's details and timetable */
+  update: (id: string, routeData: any): Promise<any> =>
+    apiFetch(`/routes/${id}`, { method: 'PUT', body: JSON.stringify(routeData) }),
+
+  /** Remove all seats from a route while keeping its schedule available */
+  deleteLayout: (id: string): Promise<any> =>
+    apiFetch(`/routes/${id}/layout`, { method: 'DELETE' }),
+
+  /** Delete a bus route entirely from fleet */
+  delete: (id: string): Promise<any> =>
+    apiFetch(`/routes/${id}`, { method: 'DELETE' }),
 };
 
 // ─── Bookings API ─────────────────────────────────────────────────────────────
@@ -94,8 +106,69 @@ export const validateApi = {
     apiFetch('/validate-ticket', { method: 'POST', body: JSON.stringify({ pnr }) }),
 };
 
+// ─── Authentication API ───────────────────────────────────────────────────────
+
+export const authApi = {
+  /** Register a new user account against Neon PostgreSQL */
+  register: (payload: {
+    name: string;
+    email: string;
+    password: string;
+    role?: 'passenger' | 'admin';
+    phone?: string;
+  }): Promise<{ success: boolean; message: string; token: string; user: any }> =>
+    apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
+
+  /** Log in to an existing account */
+  login: (payload: {
+    email: string;
+    password: string;
+    role?: 'passenger' | 'admin';
+  }): Promise<{ success: boolean; message: string; token: string; user: any }> =>
+    apiFetch('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
+
+  /** Get authenticated user profile */
+  getMe: (token: string): Promise<{ user: any }> =>
+    apiFetch('/auth/me', { headers: { Authorization: `Bearer ${token}` } }),
+
+  /** Update user name / username and phone */
+  updateProfile: (
+    token: string,
+    payload: { name: string; phone?: string }
+  ): Promise<{ success: boolean; message: string; user: any }> =>
+    apiFetch('/auth/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    }),
+
+  /** Change user password */
+  changePassword: (
+    token: string,
+    payload: { currentPassword: string; newPassword: string }
+  ): Promise<{ success: boolean; message: string }> =>
+    apiFetch('/auth/change-password', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    }),
+
+  /** Fetch all registered users for Admin User Management Dashboard */
+  getAllUsers: (): Promise<{ success: boolean; totalCount: number; users: any[] }> =>
+    apiFetch('/auth/users'),
+
+  /** Change or toggle user role (passenger <-> admin) */
+  updateUserRole: (id: string, role: 'passenger' | 'admin'): Promise<any> =>
+    apiFetch(`/auth/users/${id}/role`, { method: 'PUT', body: JSON.stringify({ role }) }),
+
+  /** Delete a registered user account */
+  deleteUser: (id: string): Promise<any> =>
+    apiFetch(`/auth/users/${id}`, { method: 'DELETE' }),
+};
+
 // ─── Health Check ─────────────────────────────────────────────────────────────
 
 export const healthApi = {
   ping: (): Promise<{ status: string; timestamp: string }> => apiFetch('/health'),
 };
+

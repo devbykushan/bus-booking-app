@@ -1,22 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { AuthModal } from './AuthModal';
-import { Bus, MapPin, Ticket, Clock, ShieldCheck, User, LogOut, LogIn } from 'lucide-react';
+import { Bus, MapPin, Ticket, Clock, ShieldCheck, LogOut, LogIn, ChevronDown, Globe, Route, Settings, Moon, Sun } from 'lucide-react';
+import { AnimatedLogoBadge } from './AnimatedLogoBadge';
 
 export const Navbar: React.FC = () => {
   const { 
     currentView, 
     setCurrentView, 
+    goToHome,
+    goToSearchSchedules,
     currentUser,
     userRole, 
     setUserRole, 
     logout,
     lockActive, 
     lockExpirySeconds,
-    selectedSeatIds 
+    selectedSeatIds,
+    showAuthModal,
+    setShowAuthModal,
+    language,
+    setLanguage,
+    theme,
+    setTheme,
+    t
   } = useBookingStore();
 
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  
+  const [scrolled, setScrolled] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  
+  const profileRef = useRef<HTMLDivElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+
+  // Track scroll
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Close profile and language dropdowns on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (profileRef.current && !profileRef.current.contains(target)) {
+        setProfileOpen(false);
+      }
+      if (langRef.current && !langRef.current.contains(target)) {
+        setLangOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const formatTimer = (secs: number) => {
     const mins = Math.floor(secs / 60);
@@ -24,121 +63,336 @@ export const Navbar: React.FC = () => {
     return `${mins}:${s < 10 ? '0' : ''}${s}`;
   };
 
+  const navItems = [
+    { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
+    { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
+    { key: 'live-tracking', translationKey: 'liveGps', icon: MapPin, activeOn: ['live-tracking'] },
+    { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
+  ];
+
+  const isActive = (activeOn: string[]) => activeOn.includes(currentView);
+
+  const handleNavItemClick = (view: string) => {
+    const requiresAuth = view === 'live-tracking' || view === 'my-bookings';
+    if (requiresAuth && !currentUser) {
+      setCurrentView(view as any);
+      
+      setShowAuthModal(true);
+      return;
+    }
+
+    if (view === 'passenger-search') {
+      goToHome();
+      
+      return;
+    }
+
+    if (view === 'schedules-dashboard') {
+      goToSearchSchedules();
+      
+      return;
+    }
+
+    setCurrentView(view as any);
+    
+  };
+
   return (
     <>
-      <nav className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm px-4 lg:px-8 py-3 transition-all">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          
-          {/* Brand Logo */}
-          <div 
-            onClick={() => setCurrentView('passenger-search')}
-            className="flex items-center gap-3 cursor-pointer group"
-          >
-            <img
-              src="/dewmina-logo.png"
-              alt="Dewmina Super Line Logo"
-              className="h-14 md:h-16 w-auto object-contain group-hover:scale-105 transition-transform"
-            />
-          </div>
+      <div className="fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300">
+        <nav
+          ref={navRef}
+          className={`w-full transition-all duration-500 border-b backdrop-blur-2xl ${
+            scrolled
+              ? 'bg-white/98 dark:bg-slate-950/98 border-slate-200 dark:border-slate-800 shadow-md shadow-slate-900/10 dark:shadow-black/50'
+              : 'bg-white/90 dark:bg-slate-950/90 border-slate-200/80 dark:border-slate-800/80 shadow-sm shadow-slate-900/5 dark:shadow-black/30'
+          }`}
+        >
+          {/* Subtle vibrant top accent line */}
+          <div className="h-[2px] w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-500 shadow-[0_0_8px_rgba(59,130,246,0.3)]" />
 
-          {/* Real-time Seat Hold Bar if active */}
-          {lockActive && selectedSeatIds.length > 0 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium animate-pulse">
-              <Clock className="w-4 h-4 text-amber-500" />
-              <span>Seats Locked ({selectedSeatIds.join(', ')}):</span>
-              <span className="font-mono font-bold text-amber-600">{formatTimer(lockExpirySeconds)}</span>
-            </div>
-          )}
-
-          {/* Navigation Links & User Authentication */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm font-medium">
-            
-            <button
-              onClick={() => setCurrentView('passenger-search')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-                currentView === 'passenger-search' || currentView === 'seat-selection'
-                  ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
-              }`}
-            >
-              <Bus className="w-4 h-4" />
-              <span>Find Buses</span>
-            </button>
-
-            <button
-              onClick={() => setCurrentView('live-tracking')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-                currentView === 'live-tracking'
-                  ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
-              }`}
-            >
-              <MapPin className="w-4 h-4 text-blue-500" />
-              <span>Live GPS Tracker</span>
-            </button>
-
-            <button
-              onClick={() => setCurrentView('my-bookings')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-                currentView === 'my-bookings'
-                  ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
-              }`}
-            >
-              <Ticket className="w-4 h-4" />
-              <span>My Tickets</span>
-            </button>
-
-            {/* Admin Portal Tab (Available when logged in as admin or role set to admin) */}
-            {(userRole === 'admin' || currentUser?.role === 'admin') && (
-              <button
-                onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); }}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-bold transition-all ${
-                  currentView === 'admin-panel'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200'
-                }`}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="flex items-center justify-between h-16 md:h-[72px]">
+              
+              {/* ── Brand Logo with Cinematic Animated Video-Like Badge ── */}
+              <div
+                onClick={() => { goToHome();  }}
+                className="cursor-pointer flex items-center gap-3"
               >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Admin & Fleet Portal</span>
-              </button>
-            )}
+                <AnimatedLogoBadge size="md" />
+              </div>
 
-            {/* User Account Login / Profile Status */}
-            {currentUser ? (
-              <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-                <div className="flex items-center gap-2 bg-slate-100 px-3 py-1 rounded-xl text-xs">
-                  <User className="w-4 h-4 text-blue-600" />
-                  <span className="font-bold text-slate-800 truncate max-w-[120px]">{currentUser.name}</span>
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-mono font-bold ${
-                    currentUser.role === 'admin' ? 'bg-indigo-100 text-indigo-700' : 'bg-blue-100 text-blue-700'
-                  }`}>
-                    {currentUser.role}
-                  </span>
+              {/* ── Desktop Navigation Links ── */}
+              <div className="hidden md:flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/90 p-1.5 rounded-2xl backdrop-blur-md">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.activeOn);
+                  return (
+                    <button
+                      key={item.key}
+                      onClick={() => handleNavItemClick(item.key)}
+                      className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+                        active
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 border border-blue-500 scale-[1.02]'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-white shadow-2xs hover:shadow-xs'
+                      }`}
+                    >
+                      <Icon className={`w-4 h-4 ${active ? 'text-white' : 'text-slate-500 group-hover:text-slate-900'}`} />
+                      <span>{t(item.translationKey)}</span>
+                      {item.key === 'live-tracking' && (
+                        <span className={`px-1.5 py-0.5 text-[9px] font-black uppercase rounded-md tracking-wider ${
+                          active ? 'bg-white/20 text-white border border-white/30' : 'bg-amber-100 text-amber-700 border border-amber-200/70'
+                        }`}>
+                          Soon
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+
+                {/* Admin Portal Tab (Only visible to verified Admins) */}
+                {(userRole === 'admin' || currentUser?.role === 'admin') && (
+                  <button
+                    onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); }}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      currentView === 'admin-panel'
+                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/30 border border-purple-400 scale-[1.02]'
+                        : 'text-purple-700 hover:text-purple-900 hover:bg-purple-50 border border-purple-200/70'
+                    }`}
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>{t('adminPortal')}</span>
+                  </button>
+                )}
+              </div>
+
+              {/* ── Right side controls ── */}
+              <div className="flex items-center gap-2.5">
+
+                {/* Seat hold countdown badge */}
+                {lockActive && selectedSeatIds.length > 0 && (
+                  <div className="flex items-center gap-2 bg-amber-50 border border-amber-300 text-amber-800 px-3 py-1.5 rounded-2xl shadow-xs animate-pulse">
+                    <Clock className="w-3.5 h-3.5 text-amber-600" />
+                    <span className="text-xs font-semibold hidden sm:inline">
+                      {selectedSeatIds.length} {t('held')}
+                    </span>
+                    <span className="font-mono font-black text-xs tabular-nums text-amber-900">
+                      {formatTimer(lockExpirySeconds)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Theme Toggle */}
+                <button
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="flex items-center justify-center w-9 h-9 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200/90 dark:border-slate-700 rounded-2xl transition-all duration-200 cursor-pointer shadow-xs text-slate-700 dark:text-slate-200 font-extrabold"
+                  title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="w-4 h-4" />
+                  ) : (
+                    <Moon className="w-4 h-4" />
+                  )}
+                </button>
+
+                {/* Language Selector */}
+                <div className="relative" ref={langRef}>
+                  <button
+                    onClick={() => setLangOpen(!langOpen)}
+                    className="flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-slate-300 px-3 py-2 rounded-2xl transition-all duration-200 cursor-pointer shadow-xs text-slate-700 font-extrabold"
+                  >
+                    <Globe className="w-4 h-4 text-blue-600" />
+                    <span className="text-xs uppercase hidden sm:inline">
+                      {language === 'english' ? 'EN' : language === 'sinhala' ? 'සිං' : 'த'}
+                    </span>
+                    <ChevronDown className={`w-3 h-3 text-slate-500 transition-transform duration-300 ${langOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Language Dropdown */}
+                  {langOpen && (
+                    <div className="absolute top-[calc(100%+8px)] right-0 w-36 bg-white/95 backdrop-blur-2xl border border-slate-200 rounded-2xl shadow-xl overflow-hidden z-50 p-1.5 animate-fade-in-up">
+                      <button
+                        onClick={() => { setLanguage('english'); setLangOpen(false); }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                          language === 'english' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-blue-600'
+                        }`}
+                      >
+                        <span>English</span>
+                        {language === 'english' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                      </button>
+                      <button
+                        onClick={() => { setLanguage('sinhala'); setLangOpen(false); }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                          language === 'sinhala' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-blue-600'
+                        }`}
+                      >
+                        <span>සිංහල</span>
+                        {language === 'sinhala' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                      </button>
+                      <button
+                        onClick={() => { setLanguage('tamil'); setLangOpen(false); }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                          language === 'tamil' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-blue-600'
+                        }`}
+                      >
+                        <span>தமிழ்</span>
+                        {language === 'tamil' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                <button
-                  onClick={logout}
-                  className="p-1.5 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors"
-                  title="Sign Out"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowAuthModal(true)}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-all"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Sign In / Admin Login</span>
-              </button>
-            )}
+                {/* Auth / Profile Capsule */}
+                {currentUser ? (
+                  <div className="relative" ref={profileRef}>
+                    <button
+                      onClick={() => setProfileOpen(!profileOpen)}
+                      className="flex items-center gap-2.5 bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-slate-300 px-2.5 py-1.5 rounded-2xl transition-all duration-200 cursor-pointer shadow-xs group"
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-xs shadow-xs">
+                        {currentUser.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="hidden sm:flex flex-col items-start text-left">
+                        <span className="text-xs font-extrabold text-slate-800 leading-tight truncate max-w-[110px]">
+                          {currentUser.name}
+                        </span>
+                        <span className={`text-[10px] font-mono uppercase tracking-wider font-bold ${
+                          currentUser.role === 'admin' ? 'text-purple-600' : 'text-blue-600'
+                        }`}>
+                          {currentUser.role}
+                        </span>
+                      </div>
+                      <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-300 ${profileOpen ? 'rotate-180' : ''}`} />
+                    </button>
 
+                    {/* Profile Dropdown */}
+                    {profileOpen && (
+                      <div className="absolute top-[calc(100%+8px)] right-0 w-56 bg-white/95 backdrop-blur-2xl border border-slate-200 rounded-2xl shadow-2xl overflow-hidden z-50 animate-fade-in-up text-slate-800">
+                        <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+                          <p className="text-xs font-extrabold text-slate-900 truncate">{currentUser.name}</p>
+                          <p className="text-[11px] text-slate-500 font-mono truncate">{currentUser.phone || currentUser.email}</p>
+                        </div>
+                        <div className="p-1.5 space-y-1">
+                          {(currentUser?.role === 'admin' || userRole === 'admin') && (
+                            <button
+                              onClick={() => {
+                                setUserRole('admin');
+                                setCurrentView('admin-panel');
+                                setProfileOpen(false);
+                              }}
+                              className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-purple-700 hover:text-purple-900 hover:bg-purple-50 transition-colors cursor-pointer"
+                            >
+                              <ShieldCheck className="w-4 h-4 text-purple-600" />
+                              <span>Admin Dashboard</span>
+                            </button>
+                          )}
+                          <button
+                            onClick={() => { setCurrentView('my-bookings'); setProfileOpen(false); }}
+                            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                          >
+                            <Ticket className="w-4 h-4 text-blue-600" />
+                            <span>{t('myTickets')}</span>
+                          </button>
+                          {currentUser?.role !== 'admin' && userRole !== 'admin' && (
+                            <button
+                              onClick={() => { setCurrentView('passenger-settings'); setProfileOpen(false); }}
+                              className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                            >
+                              <Settings className="w-4 h-4 text-blue-600" />
+                              <span>{t('passengerSettings')}</span>
+                            </button>
+                          )}
+                          <button
+                            onClick={() => { logout(); setProfileOpen(false); }}
+                            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            <span>{t('signOut')}</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowAuthModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/30 transition-all duration-200 cursor-pointer active:scale-95"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    <span>{t('signIn')}</span>
+                  </button>
+                )}
+
+                
+              </div>
+
+            </div>
           </div>
 
+          </nav>
+      </div>
+
+      {/* ── Mobile Bottom Navigation Bar ── */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-safe transition-colors duration-300">
+        <div className="flex items-center justify-around px-2 py-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.activeOn);
+            return (
+              <button
+                key={item.key}
+                onClick={() => handleNavItemClick(item.key)}
+                className={`flex flex-col items-center justify-center w-16 gap-1 p-1 rounded-xl transition-all ${
+                  active
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
+              >
+                <Icon className={`w-5 h-5 ${active ? 'fill-blue-100 dark:fill-blue-900/50' : ''}`} />
+                <span className="text-[10px] font-bold text-center leading-tight truncate w-full">
+                  {t(item.translationKey)}
+                </span>
+              </button>
+            );
+          })}
+          
+          <button
+            onClick={() => {
+              if (currentUser) {
+                if (currentUser.role === 'admin' || userRole === 'admin') {
+                  setCurrentView('admin-panel');
+                } else {
+                  setCurrentView('passenger-settings');
+                }
+              } else {
+                setShowAuthModal(true);
+              }
+            }}
+            className={`flex flex-col items-center justify-center w-16 gap-1 p-1 rounded-xl transition-all ${
+              currentView === 'passenger-settings' || currentView === 'admin-panel'
+                ? 'text-blue-600 dark:text-blue-400'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+            }`}
+          >
+            {currentUser ? (
+              (currentUser.role === 'admin' || userRole === 'admin') ? (
+                <ShieldCheck className={`w-5 h-5 ${currentView === 'admin-panel' ? 'fill-blue-100 dark:fill-blue-900/50' : ''}`} />
+              ) : (
+                <Settings className={`w-5 h-5 ${currentView === 'passenger-settings' ? 'fill-blue-100 dark:fill-blue-900/50' : ''}`} />
+              )
+            ) : (
+              <LogIn className="w-5 h-5" />
+            )}
+            <span className="text-[10px] font-bold text-center leading-tight truncate w-full">
+              {currentUser ? (
+                (currentUser.role === 'admin' || userRole === 'admin') ? t('adminPortal') : t('passengerSettings')
+              ) : (
+                t('signIn')
+              )}
+            </span>
+          </button>
         </div>
-      </nav>
+      </div>
 
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </>

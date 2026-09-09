@@ -1,7 +1,10 @@
 import { create } from 'zustand';
 import type { BusRoute, BoardingPoint, Booking, PassengerDetails, UserAccount } from '../types/booking';
-import { routesApi, bookingsApi, seatsApi, validateApi } from '../services/api';
+import { routesApi, bookingsApi, seatsApi, validateApi, authApi } from '../services/api';
 import confetti from 'canvas-confetti';
+import { translations } from './translations';
+import type { Language, TranslationKey } from './translations';
+
 
 // ─── Generate a persistent browser session ID for seat locking ────────────────
 function getSessionId(): string {
@@ -15,19 +18,69 @@ function getSessionId(): string {
 
 export type AppView =
   | 'passenger-search'
+  | 'schedules-dashboard'
   | 'seat-selection'
   | 'checkout'
   | 'ticket-confirmation'
   | 'my-bookings'
   | 'live-tracking'
-  | 'admin-panel';
+  | 'admin-panel'
+  | 'passenger-settings';
+
+export const VIEW_HASH_MAP: Record<AppView, string> = {
+  'passenger-search': 'home',
+  'schedules-dashboard': 'journeys',
+  'seat-selection': 'seats',
+  'checkout': 'checkout',
+  'ticket-confirmation': 'confirmation',
+  'my-bookings': 'my-tickets',
+  'live-tracking': 'live-gps',
+  'admin-panel': 'admin',
+  'passenger-settings': 'settings',
+};
+
+export const HASH_VIEW_MAP: Record<string, AppView> = {
+  'home': 'passenger-search',
+  '': 'passenger-search',
+  '/': 'passenger-search',
+  'search': 'passenger-search',
+  'journeys': 'schedules-dashboard',
+  'schedules': 'schedules-dashboard',
+  'schedules-dashboard': 'schedules-dashboard',
+  'seats': 'seat-selection',
+  'seat-selection': 'seat-selection',
+  'checkout': 'checkout',
+  'confirmation': 'ticket-confirmation',
+  'ticket-confirmation': 'ticket-confirmation',
+  'my-tickets': 'my-bookings',
+  'my-bookings': 'my-bookings',
+  'live-gps': 'live-tracking',
+  'live-tracking': 'live-tracking',
+  'admin': 'admin-panel',
+  'admin-panel': 'admin-panel',
+  'settings': 'passenger-settings',
+  'passenger-settings': 'passenger-settings',
+};
+
+export function getViewFromLocation(): AppView {
+  if (typeof window === 'undefined') return 'passenger-search';
+  const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+  if (hash && HASH_VIEW_MAP[hash]) {
+    return HASH_VIEW_MAP[hash];
+  }
+  return 'passenger-search';
+}
 
 interface BookingStore {
   // Authentication
   currentUser: UserAccount | null;
-  login: (email: string, pass: string, role?: 'passenger' | 'admin') => { success: boolean; message: string };
-  register: (name: string, email: string, pass: string, role?: 'passenger' | 'admin') => { success: boolean; message: string };
+  login: (email: string, pass: string, role?: 'passenger' | 'admin') => Promise<{ success: boolean; message: string }>;
+  register: (name: string, email: string, pass: string, role?: 'passenger' | 'admin', phone?: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
+  updateProfile: (name: string, phone?: string) => Promise<{ success: boolean; message: string }>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
+  showAuthModal: boolean;
+  setShowAuthModal: (val: boolean) => void;
 
   // Loading & errors
   isLoading: boolean;
@@ -36,7 +89,13 @@ interface BookingStore {
 
   // Navigation
   currentView: AppView;
-  setCurrentView: (view: AppView) => void;
+  setCurrentView: (view: AppView, pushHistory?: boolean) => void;
+  goToSearchSchedules: () => void;
+  goToHome: () => void;
+
+  // Theme
+  theme: 'light' | 'dark';
+  setTheme: (theme: 'light' | 'dark') => void;
 
   // Role switching
   userRole: 'passenger' | 'admin';
@@ -66,7 +125,7 @@ interface BookingStore {
   selectedSeatIds: string[];
   lockExpirySeconds: number;
   lockActive: boolean;
-  toggleSeatSelection: (seatId: string) => Promise<void>;
+  toggleSeatSelection: (seatId: string) => void;
   clearSeatSelection: () => void;
   tickLockTimer: () => void;
 
@@ -87,6 +146,7 @@ interface BookingStore {
   bookings: Booking[];
   loadBookings: () => Promise<void>;
   latestConfirmedBooking: Booking | null;
+  setLatestConfirmedBooking: (b: Booking | null) => void;
   createBooking: (
     paymentMethod: 'card' | 'upi' | 'netbanking' | 'wallet',
     insuranceSelected: boolean,
@@ -97,61 +157,155 @@ interface BookingStore {
   // GPS tracking
   trackingRouteId: string | null;
   setTrackingRouteId: (id: string | null) => void;
+
+  // Localization
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: TranslationKey | string) => string;
 }
 
 export const useBookingStore = create<BookingStore>((set, get) => ({
   currentUser: JSON.parse(localStorage.getItem('dewmina_user') || 'null'),
+  showAuthModal: false,
+  setShowAuthModal: (val) => set({ showAuthModal: val }),
 
-  login: (email, _password, role) => {
-    const cleanEmail = email.trim().toLowerCase();
-    
-    // Check credentials
-    if (cleanEmail === 'admin@dewminasuperline.lk' || cleanEmail === 'admin' || role === 'admin') {
-      const user: UserAccount = {
-        id: 'usr-admin-1',
-        name: 'Super Admin & Fleet Manager',
-        email: cleanEmail,
-        role: 'admin',
-      };
-      localStorage.setItem('dewmina_user', JSON.stringify(user));
-      set({ currentUser: user, userRole: 'admin', currentView: 'admin-panel' });
-      return { success: true, message: 'Logged in as Admin' };
+  theme: (localStorage.getItem('dewmina_theme') as 'light' | 'dark') || 'light',
+  setTheme: (theme) => {
+    localStorage.setItem('dewmina_theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
     } else {
-      const user: UserAccount = {
-        id: `usr-${Date.now()}`,
-        name: cleanEmail.split('@')[0] || 'Passenger User',
-        email: cleanEmail,
-        role: 'passenger',
-      };
-      localStorage.setItem('dewmina_user', JSON.stringify(user));
-      set({ currentUser: user, userRole: 'passenger', currentView: 'passenger-search' });
-      return { success: true, message: 'Logged in as Passenger' };
+      document.documentElement.classList.remove('dark');
+    }
+    set({ theme });
+  },
+
+  login: async (email, password, role) => {
+    try {
+      const res = await authApi.login({ email, password, role });
+      if (res.success && res.user) {
+        const user: UserAccount = {
+          id: res.user.id,
+          name: res.user.name,
+          email: res.user.email,
+          role: res.user.role,
+          phone: res.user.phone,
+        };
+        localStorage.setItem('dewmina_user', JSON.stringify(user));
+        localStorage.setItem('auth_token', res.token);
+        set({
+          currentUser: user,
+          userRole: user.role as any,
+          showAuthModal: false,
+        });
+        get().setCurrentView(user.role === 'admin' ? 'admin-panel' : 'passenger-search');
+        return { success: true, message: res.message || 'Logged in successfully' };
+      }
+      return { success: false, message: res.message || 'Login failed' };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Authentication error occurred' };
     }
   },
 
-  register: (name, email, _password, role) => {
-    const user: UserAccount = {
-      id: `usr-${Date.now()}`,
-      name,
-      email: email.trim().toLowerCase(),
-      role: role || 'passenger',
-    };
-    localStorage.setItem('dewmina_user', JSON.stringify(user));
-    set({ currentUser: user, userRole: user.role, currentView: user.role === 'admin' ? 'admin-panel' : 'passenger-search' });
-    return { success: true, message: 'Registered successfully' };
+  register: async (name, email, password, role, phone) => {
+    try {
+      const res = await authApi.register({ name, email, password, role, phone });
+      if (res.success && res.user) {
+        const user: UserAccount = {
+          id: res.user.id,
+          name: res.user.name,
+          email: res.user.email,
+          role: res.user.role,
+          phone: res.user.phone,
+        };
+        localStorage.setItem('dewmina_user', JSON.stringify(user));
+        localStorage.setItem('auth_token', res.token);
+        set({
+          currentUser: user,
+          userRole: user.role as any,
+          showAuthModal: false,
+        });
+        get().setCurrentView(user.role === 'admin' ? 'admin-panel' : 'passenger-search');
+        return { success: true, message: res.message || 'Registration successful' };
+      }
+      return { success: false, message: res.message || 'Registration failed' };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Registration error occurred' };
+    }
   },
 
   logout: () => {
     localStorage.removeItem('dewmina_user');
-    set({ currentUser: null, userRole: 'passenger', currentView: 'passenger-search' });
+    localStorage.removeItem('auth_token');
+    set({ currentUser: null, userRole: 'passenger' });
+    get().setCurrentView('passenger-search');
+  },
+
+  updateProfile: async (name, phone) => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return { success: false, message: 'Not authenticated.' };
+    try {
+      const res = await authApi.updateProfile(token, { name, phone });
+      if (res.success && res.user) {
+        const currentUser = get().currentUser;
+        const updatedUser: UserAccount = {
+          ...currentUser,
+          id: res.user.id,
+          name: res.user.name,
+          email: res.user.email,
+          role: res.user.role,
+          phone: res.user.phone,
+        };
+        localStorage.setItem('dewmina_user', JSON.stringify(updatedUser));
+        set({ currentUser: updatedUser });
+        return { success: true, message: res.message || 'Profile updated successfully.' };
+      }
+      return { success: false, message: res.message || 'Update failed.' };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Profile update error.' };
+    }
+  },
+
+  changePassword: async (currentPassword, newPassword) => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return { success: false, message: 'Not authenticated.' };
+    try {
+      const res = await authApi.changePassword(token, { currentPassword, newPassword });
+      if (res.success) {
+        return { success: true, message: res.message || 'Password changed successfully.' };
+      }
+      return { success: false, message: res.message || 'Password change failed.' };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Password change error.' };
+    }
   },
 
   isLoading: false,
   error: null,
   setError: (msg) => set({ error: msg }),
 
-  currentView: 'passenger-search',
-  setCurrentView: (view) => set({ currentView: view }),
+  currentView: getViewFromLocation(),
+  setCurrentView: (view, pushHistory = true) => {
+    const current = get().currentView;
+    if (view === current) return;
+
+    if (pushHistory !== false && typeof window !== 'undefined') {
+      const hash = VIEW_HASH_MAP[view] || 'home';
+      window.history.pushState(
+        { view, routeId: get().selectedRoute?.id },
+        '',
+        `#${hash}`
+      );
+    }
+    set({ currentView: view });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  },
+  goToSearchSchedules: () => {
+    get().setCurrentView('schedules-dashboard');
+  },
+  goToHome: () => {
+    get().setCurrentView('passenger-search');
+  },
 
   userRole: JSON.parse(localStorage.getItem('dewmina_user') || 'null')?.role || 'passenger',
   setUserRole: (role) => set({ userRole: role }),
@@ -164,8 +318,11 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   soloFemaleOnly: false,
   busTypeFilter: 'all',
 
-  setSearchCriteria: (origin, dest, date) =>
-    set({ searchOrigin: origin, searchDestination: dest, searchDate: date }),
+  setSearchCriteria: (origin, dest, date) => {
+    const today = new Date().toISOString().split('T')[0];
+    const validDate = (!date || date < today) ? today : date;
+    set({ searchOrigin: origin, searchDestination: dest, searchDate: validDate });
+  },
   setSoloFemaleOnly: (val) => set({ soloFemaleOnly: val }),
   setBusTypeFilter: (val) => set({ busTypeFilter: val }),
 
@@ -186,50 +343,65 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
       selectedSeatIds: [],
       selectedBoardingPoint: route?.boardingPoints?.[0] ?? null,
       selectedDropPoint: route?.dropPoints?.[0] ?? null,
-      lockExpirySeconds: 480,
+      lockExpirySeconds: 600,
       lockActive: false,
     }),
   addBusRoute: (newRoute) =>
     set((state) => ({ routes: [newRoute, ...state.routes] })),
 
   selectedSeatIds: [],
-  lockExpirySeconds: 480,
+  lockExpirySeconds: 600,
   lockActive: false,
 
-  toggleSeatSelection: async (seatId: string) => {
+  toggleSeatSelection: (seatId: string) => {
     const { selectedSeatIds, selectedRoute, sessionId } = get();
     if (!selectedRoute) return;
 
-    const seat = selectedRoute.seats.find((s) => s.id === seatId);
-    if (!seat || seat.status === 'booked') return;
+    const routeId = selectedRoute.id;
+    const normalizedNum = seatId.replace(`${routeId}-`, '').replace(/^seat-/, '').replace(/^0+/, '');
+    const canonicalId = `${routeId}-${normalizedNum}`;
+
+    let seat = selectedRoute.seats.find((s) => s.id === canonicalId || s.id === seatId || s.number === normalizedNum || s.number === seatId);
+    if (!seat) {
+      seat = {
+        id: canonicalId,
+        number: normalizedNum,
+        row: 1,
+        col: 1,
+        price: selectedRoute.seats[0]?.price || selectedRoute.priceStarting || 950,
+        status: 'available',
+        deck: 'lower'
+      };
+      selectedRoute.seats.push(seat);
+    }
+
+    if (seat.status === 'booked') return;
+    const actualId = seat.id;
 
     let newSelected: string[];
 
-    if (selectedSeatIds.includes(seatId)) {
-      // Deselect — unlock on backend
-      newSelected = selectedSeatIds.filter((id) => id !== seatId);
-      seatsApi.unlock({ seatIds: [seatId], sessionId }).catch(() => {});
+    if (selectedSeatIds.includes(actualId) || selectedSeatIds.includes(seatId) || selectedSeatIds.includes(canonicalId)) {
+      // Deselect — unlock on backend asynchronously
+      newSelected = selectedSeatIds.filter((id) => id !== actualId && id !== seatId && id !== canonicalId);
+      seatsApi.unlock({ seatIds: [actualId], sessionId }).catch(() => {});
     } else {
       if (selectedSeatIds.length >= 6) {
         alert('Maximum 6 seats per booking.');
         return;
       }
 
-      // Try to acquire a server-side seat lock
-      try {
-        await seatsApi.lock({ seatIds: [seatId], routeId: selectedRoute.id, sessionId });
-      } catch (err: any) {
-        alert(err.message || 'This seat was just taken by another user. Please choose a different seat.');
-        return;
-      }
+      // Optimistic instant selection
+      newSelected = [...selectedSeatIds, actualId];
 
-      newSelected = [...selectedSeatIds, seatId];
+      // Async background server lock (non-blocking)
+      seatsApi.lock({ seatIds: [actualId], routeId: selectedRoute.id, sessionId }).catch(() => {});
     }
 
+    // Instant local state update (0ms lag)
     set({
       selectedSeatIds: newSelected,
       lockActive: newSelected.length > 0,
-      lockExpirySeconds: newSelected.length > 0 ? 480 : 480,
+      lockExpirySeconds: 600,
     });
   },
 
@@ -238,7 +410,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     if (selectedSeatIds.length > 0) {
       seatsApi.unlock({ seatIds: selectedSeatIds, sessionId }).catch(() => {});
     }
-    set({ selectedSeatIds: [], lockActive: false, lockExpirySeconds: 480 });
+    set({ selectedSeatIds: [], lockActive: false, lockExpirySeconds: 600 });
   },
 
   tickLockTimer: () => {
@@ -246,7 +418,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     if (!lockActive) return;
     if (lockExpirySeconds <= 1) {
       get().clearSeatSelection();
-      alert('Seat hold expired! Please re-select your seats.');
+      alert('Seat hold expired! Your 10-minute hold window has elapsed. Please re-select your seats.');
     } else {
       set({ lockExpirySeconds: lockExpirySeconds - 1 });
     }
@@ -293,6 +465,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     }
   },
   latestConfirmedBooking: null,
+  setLatestConfirmedBooking: (b) => set({ latestConfirmedBooking: b }),
 
   createBooking: async (paymentMethod, insuranceSelected) => {
     const {
@@ -304,6 +477,13 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
       return null;
     }
 
+    // Map selectedSeatIds to canonical route-prefixed seat IDs (e.g. "route-101-17")
+    const canonicalSeatIds = selectedSeatIds.map((id: string) => {
+      if (id.startsWith(`${selectedRoute.id}-`)) return id;
+      const num = id.replace(/^[^-]+-/, '').replace(/^seat-/, '').replace(/^0+/, '');
+      return `${selectedRoute.id}-${num}`;
+    });
+
     set({ isLoading: true, error: null });
 
     try {
@@ -311,7 +491,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         routeId: selectedRoute.id,
         boardingPointId: selectedBoardingPoint.id,
         dropPointId: selectedDropPoint.id,
-        seatIds: selectedSeatIds,
+        seatIds: canonicalSeatIds,
         sessionId,
         passenger: {
           fullName: passengerInfo.fullName,
@@ -326,6 +506,20 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         searchDate,
       });
 
+      // Update selectedRoute local seat status so the SeatMap updates immediately with proper gender colors
+      if (selectedRoute) {
+        canonicalSeatIds.forEach(seatId => {
+          const s = selectedRoute.seats.find(st => st.id === seatId || st.number === seatId.split('-').pop());
+          if (s) {
+            s.status = 'booked';
+            (s as any).gender = passengerInfo.gender || 'male';
+            if (passengerInfo.gender === 'female') {
+              (s as any).isFemaleBooked = true;
+            }
+          }
+        });
+      }
+
       // Refresh routes so seat counts update
       const updatedRoutes = await routesApi.getAll();
 
@@ -339,10 +533,10 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         selectedSeatIds: [],
         lockActive: false,
         isLoading: false,
-        currentView: 'ticket-confirmation',
         appliedPromo: '',
         discountRate: 0,
       });
+      get().setCurrentView('ticket-confirmation');
 
       return newBooking;
     } catch (err: any) {
@@ -376,5 +570,21 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   },
 
   trackingRouteId: 'route-101',
-  setTrackingRouteId: (id) => set({ trackingRouteId: id, currentView: 'live-tracking' }),
+  setTrackingRouteId: (id) => {
+    set({ trackingRouteId: id });
+    get().setCurrentView('live-tracking');
+  },
+
+  // Localization Implementation
+  language: (localStorage.getItem('dewmina_lang') as Language) || 'english',
+  setLanguage: (lang) => {
+    localStorage.setItem('dewmina_lang', lang);
+    set({ language: lang });
+  },
+  t: (key) => {
+    const lang = get().language;
+    const dict = translations[lang] || translations.english;
+    // Fallback if the key doesn't exist in translation dictionary
+    return (dict as any)[key] || key;
+  },
 }));

@@ -4,7 +4,7 @@ import type { SeatLock } from '../types';
 // This mirrors a Redis TTL cache for concurrency control
 export const seatLocks = new Map<string, SeatLock>();
 
-const LOCK_TTL_MS = 8 * 60 * 1000; // 8 minutes
+const LOCK_TTL_MS = 10 * 60 * 1000; // 10 minutes (600 seconds)
 
 // Clean up expired locks every 60 seconds
 setInterval(() => {
@@ -41,6 +41,15 @@ export function isSeatAvailable(seatId: string, sessionId: string): boolean {
     return true;
   }
   // Available if owned by same session
+  return lock.sessionId === sessionId;
+}
+
+export function isSeatLockedBySession(seatId: string, sessionId: string): boolean {
+  const lock = seatLocks.get(seatId);
+  if (!lock || lock.expiresAt <= Date.now()) {
+    if (lock) seatLocks.delete(seatId);
+    return false;
+  }
   return lock.sessionId === sessionId;
 }
 

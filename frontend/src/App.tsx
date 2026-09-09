@@ -1,38 +1,104 @@
 import { useEffect, useState } from 'react';
-import { useBookingStore } from './store/bookingStore';
+import { useBookingStore, HASH_VIEW_MAP, VIEW_HASH_MAP, type AppView } from './store/bookingStore';
 import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { HeroSearch } from './components/passenger/HeroSearch';
+import { SchedulesDashboard } from './components/passenger/SchedulesDashboard';
 import { StatsSection } from './components/passenger/StatsSection';
 import { ServicesSection } from './components/passenger/ServicesSection';
-import { BusCard } from './components/passenger/BusCard';
+import { BookingGuideSection } from './components/passenger/BookingGuideSection';
+import { AboutPlatformSection } from './components/passenger/AboutPlatformSection';
+import { BusBookingFAQSection } from './components/passenger/BusBookingFAQSection';
 import { SeatMap } from './components/passenger/SeatMap';
 import { FareBreakdown } from './components/passenger/FareBreakdown';
 import { TicketModal } from './components/passenger/TicketModal';
 import { LiveMap } from './components/passenger/LiveMap';
 import { UserBookings } from './components/passenger/UserBookings';
+import { PassengerSettings } from './components/passenger/PassengerSettings';
 import { AdminDashboard } from './components/admin/AdminDashboard';
-import { Bus, AlertCircle, Wifi, RefreshCw } from 'lucide-react';
+import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
+import { Bus, AlertCircle, Wifi, RefreshCw, ShieldAlert, ShieldCheck, Lock } from 'lucide-react';
 
 export function App() {
   const {
     currentView,
     routes,
-    searchOrigin,
-    searchDestination,
-    busTypeFilter,
-    soloFemaleOnly,
     isLoading,
     error,
     loadRoutes,
     loadBookings,
     setError,
+    currentUser,
+    userRole,
+    setShowAuthModal,
+    setCurrentView,
   } = useBookingStore();
+
+  const isAdmin = currentUser?.role === 'admin' || userRole === 'admin';
 
   const [backendReady, setBackendReady] = useState(false);
   const [backendError, setBackendError] = useState(false);
 
-  // On app start: ping backend health, then load data
+  // Initialize theme
+  useEffect(() => {
+    const theme = useBookingStore.getState().theme;
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  // Sync browser history state and handle browser Back / Forward buttons
+  useEffect(() => {
+    const rawHash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+    const initialView = HASH_VIEW_MAP[rawHash] || currentView;
+    const initialHash = VIEW_HASH_MAP[initialView] || 'home';
+
+    // Replace current history entry with initial view state
+    window.history.replaceState(
+      { view: initialView, routeId: useBookingStore.getState().selectedRoute?.id },
+      '',
+      `#${initialHash}`
+    );
+
+    const handlePopState = (event: PopStateEvent) => {
+      const state = event.state;
+      let targetView: AppView = 'passenger-search';
+
+      if (state && state.view && (HASH_VIEW_MAP[state.view] || VIEW_HASH_MAP[state.view as AppView])) {
+        targetView = (HASH_VIEW_MAP[state.view] || state.view) as AppView;
+      } else {
+        const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+        if (hash && HASH_VIEW_MAP[hash]) {
+          targetView = HASH_VIEW_MAP[hash];
+        }
+      }
+
+      // If returning to a seat selection view, restore route if possible
+      if (state?.routeId) {
+        const storeRoutes = useBookingStore.getState().routes;
+        const matchingRoute = storeRoutes.find((r) => r.id === state.routeId);
+        if (matchingRoute) {
+          useBookingStore.getState().setSelectedRoute(matchingRoute);
+        }
+      }
+
+      // If going to seat selection or checkout with no route selected, fallback to schedules
+      const currentRoute = useBookingStore.getState().selectedRoute;
+      if ((targetView === 'seat-selection' || targetView === 'checkout') && !currentRoute) {
+        targetView = 'schedules-dashboard';
+      }
+
+      // Transition view without pushing redundant history entry
+      useBookingStore.getState().setCurrentView(targetView, false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // On app start: ping backend health, then load data and check for scanned QR validation parameters
   useEffect(() => {
     (async () => {
       try {
@@ -40,23 +106,24 @@ export function App() {
         if (!res.ok) throw new Error('Backend not healthy');
         setBackendReady(true);
         await Promise.all([loadRoutes(), loadBookings()]);
+
+        // Check if app was opened via scanned QR code URL (e.g. #validate?pnr=OMNI-12345 or ?pnr=OMNI-12345)
+        const fullUrl = window.location.href;
+        const match = fullUrl.match(/pnr=([A-Z0-9-]+)/i);
+        if (match && match[1]) {
+          const pnr = match[1].toUpperCase();
+          const valRes = await useBookingStore.getState().validateTicketByPNR(pnr);
+          if (valRes.success) {
+            alert(`✅ TICKET VALIDATED SUCCESSFULLY!\n\nPassenger: ${valRes.booking?.passenger?.fullName || 'Confirmed'}\nPNR Code: ${pnr}\nSeats: ${valRes.booking?.seats?.join(', ') || 'Reserved'}\nStatus: ${valRes.message}`);
+          } else {
+            alert(`❌ TICKET VALIDATION FAILED\n\nPNR Code: ${pnr}\nReason: ${valRes.message}`);
+          }
+        }
       } catch {
         setBackendError(true);
       }
     })();
-  }, []);
-
-  // Filter routes based on active search criteria
-  const filteredRoutes = routes.filter(route => {
-    if (busTypeFilter !== 'all' && route.busType !== busTypeFilter) return false;
-    if (soloFemaleOnly) {
-      const hasFemaleSeats = route.seats?.some(
-        (s: any) => s.isFemaleOnly && s.status === 'available'
-      );
-      if (!hasFemaleSeats) return false;
-    }
-    return true;
-  });
+  }, [loadRoutes, loadBookings]);
 
   // ─── Backend offline splash ───────────────────────────────────────────────
   if (backendError) {
@@ -101,7 +168,7 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-blue-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 antialiased selection:bg-blue-500 selection:text-white overflow-x-hidden transition-colors duration-300">
       <Navbar />
 
       {/* Global API error banner */}
@@ -113,61 +180,73 @@ export function App() {
         </div>
       )}
 
-      <main className="flex-1 transition-all duration-300">
+      <main className={`flex-1 transition-all duration-300 pb-20 md:pb-0 ${currentView === 'passenger-search' ? '' : 'pt-20 md:pt-24'}`}>
         {currentView === 'admin-panel' ? (
-          <div key="admin" className="animate-fade-in-up">
-            <AdminDashboard />
-          </div>
+          isAdmin ? (
+            <div key="admin">
+              <AdminDashboard />
+            </div>
+          ) : (
+            <div key="admin-restricted" className="max-w-xl mx-auto my-12 px-6 py-10 bg-white rounded-3xl border border-red-200 shadow-xl text-center space-y-5 animate-fade-in-up">
+              <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center mx-auto text-red-600 shadow-sm">
+                <ShieldAlert className="w-8 h-8 text-red-600" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">Operator Portal Access Restricted</h2>
+                <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                  The Operator & Admin Portal is restricted to authorized fleet administrators. Passenger accounts cannot access fleet management.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button
+                  onClick={() => useBookingStore.getState().setUserRole('admin')}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-extrabold text-sm shadow-md transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+                >
+                  <ShieldCheck className="w-4 h-4" /> Enable Admin Portal Access
+                </button>
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-sm shadow-md transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+                >
+                  <Lock className="w-4 h-4" /> Sign In as Admin
+                </button>
+                <button
+                  onClick={() => setCurrentView('passenger-search')}
+                  className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-sm border border-slate-200 transition-all cursor-pointer"
+                >
+                  Return to Passenger Portal
+                </button>
+              </div>
+            </div>
+          )
         ) : (
           <div key={currentView} className="animate-fade-in-up">
             {currentView === 'passenger-search' && (
-              <div className="space-y-8 pb-16">
+              <div>
                 <HeroSearch />
-
-                <StatsSection />
-
-                <div className="max-w-5xl mx-auto px-4 space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                    <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                      <Bus className="w-5 h-5 text-blue-500 animate-bus-drive" />
-                      <span>Available Bus Schedules ({filteredRoutes.length})</span>
-                    </h2>
-                    <span className="text-xs text-slate-400 font-mono">
-                      Showing results for {searchOrigin} → {searchDestination}
-                    </span>
-                  </div>
-
-                  {filteredRoutes.length === 0 ? (
-                    <div className="glass-panel p-12 rounded-3xl text-center border border-slate-200 space-y-3">
-                      <AlertCircle className="w-10 h-10 text-amber-400 mx-auto" />
-                      <p className="text-slate-600 font-semibold text-sm">No buses matched your filters.</p>
-                      <p className="text-xs text-slate-400">Try resetting the Bus Category filter or solo female option.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {filteredRoutes.map((route, idx) => (
-                        <div key={route.id} style={{ animationDelay: `${idx * 0.08}s` }} className="animate-fade-in-up">
-                          <BusCard route={route as any} />
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                <div className="bg-slate-50 dark:bg-slate-900/50 py-10 transition-colors duration-300">
+                  <StatsSection />
                 </div>
-
                 <ServicesSection />
+                <BookingGuideSection />
+                <AboutPlatformSection />
+                <BusBookingFAQSection />
               </div>
             )}
 
+            {currentView === 'schedules-dashboard' && <SchedulesDashboard />}
             {currentView === 'seat-selection' && <SeatMap />}
             {currentView === 'checkout' && <FareBreakdown />}
             {currentView === 'ticket-confirmation' && <TicketModal />}
             {currentView === 'live-tracking' && <LiveMap />}
             {currentView === 'my-bookings' && <UserBookings />}
+            {currentView === 'passenger-settings' && <PassengerSettings />}
           </div>
         )}
       </main>
 
       <Footer />
+      <FloatingWhatsApp />
     </div>
   );
 }

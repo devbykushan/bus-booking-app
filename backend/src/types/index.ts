@@ -1,11 +1,23 @@
 export type SeatStatus = 'available' | 'booked' | 'locked';
 export type DeckType = 'lower' | 'upper';
 export type BusCategory =
-  | 'AC Seater'
+  | 'Super Luxury (49 Seats 2*2)'
+  | 'Super Luxury'
+  | 'Luxury Air Bus (48 Seats 2*2)'
+  | 'Semi Luxury (2*2 Coach)'
+  | 'Normal Service (58 Seats 3*2)'
+  | 'Normal Service (54 Seats 3*2)'
+  | 'Normal Service'
   | 'AC Sleeper'
+  | 'AC Seater'
   | 'Non-AC Seater'
   | 'Luxury Volvo Multi-Axle'
-  | 'Double Decker Sleeper';
+  | 'Ashok Leyland (54 Seats 3*2)'
+  | 'Ashok Leyland (54 Seats 2*2)'
+  | 'Yutong (48 Seats 2*2)'
+  | 'Yutong (51 Seats 2*2)'
+  | 'Lanka Ashok Leyland (57 Seats 3*2)'
+  | 'Lanka Ashok Leyland (57 Seats 2*2)';
 
 export interface Seat {
   id: string;
