@@ -1558,12 +1558,14 @@ export const SeatMap: React.FC = () => {
                               deck: 'lower' as DeckType
                             };
 
+                            const isSeat1 = seatNumStr === '1' || normalizedNum === '1';
+                            const isNormalService = selectedRoute?.busType?.includes('Normal Service') || selectedRoute?.busType?.includes('3*2') || selectedRoute?.busType?.includes('Leyland');
                             const isSelected = selectedSeatIds.includes(seat.id) || selectedSeatIds.includes(seatNumStr) || selectedSeatIds.includes(normalizedNum);
                             const isBooked = seat.status === 'booked';
                             const isBookedFemale = isBooked && ((seat as any).gender === 'female' || (seat as any).isFemaleBooked);
                             const isBookedMale = isBooked && !isBookedFemale;
                             const isReserved = !isBooked && !isSelected && (seat.isFemaleOnly || seat.status === 'blocked');
-                            const isUnavailable = seat.status === 'unavailable' || seat.status === 'locked';
+                            const isUnavailable = seat.status === 'unavailable' || seat.status === 'locked' || (isNormalService && isSeat1);
 
                             return (
                               <div 
@@ -1576,7 +1578,7 @@ export const SeatMap: React.FC = () => {
                                 {hoveredSeatNum === seatNumStr && (
                                   <div className="absolute -top-11 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
                                     <div className="border border-slate-300 rounded-lg px-2.5 py-1 bg-white text-slate-900 shadow-md whitespace-nowrap text-left leading-tight">
-                                      <div className="text-[10px] font-bold text-blue-600">
+                                      <div className={`text-[10px] font-bold ${isSeat1 ? 'text-rose-600' : 'text-blue-600'}`}>
                                         SEAT #{seatNumStr} • {sIdx === 2 ? 'REAR CENTER' : sIdx === 0 || sIdx === 4 ? 'WINDOW' : 'AISLE'}
                                       </div>
                                       <div className="text-xs font-mono font-extrabold text-emerald-600">
@@ -1663,9 +1665,8 @@ export const SeatMap: React.FC = () => {
                               status: 'available' as const,
                               deck: 'lower' as DeckType
                             };
-
-                            const isNormalService = selectedRoute.busType?.includes('Normal Service') || selectedRoute.busType?.includes('3*2') || selectedRoute.busType?.includes('Leyland');
-                            const isSeat1 = seatNumStr === '1' || normalizedNum === '1';
+                                                        const isSeat1 = seatNumStr === '1' || normalizedNum === '1';
+                            const isNormalService = selectedRoute?.busType?.includes('Normal Service') || selectedRoute?.busType?.includes('3*2') || selectedRoute?.busType?.includes('Leyland');
                             const isSelected = selectedSeatIds.includes(seat.id) || selectedSeatIds.includes(seatNumStr) || selectedSeatIds.includes(normalizedNum);
                             const isBooked = seat.status === 'booked';
                             const isBookedFemale = isBooked && ((seat as any).gender === 'female' || (seat as any).isFemaleBooked);
@@ -1687,7 +1688,7 @@ export const SeatMap: React.FC = () => {
                                   }`}>
                                     <div className="border border-slate-300 rounded-lg px-2.5 py-1 bg-white text-slate-900 shadow-md whitespace-nowrap text-left leading-tight">
                                       <div className={`text-[10px] font-bold ${isSeat1 ? 'text-rose-600' : 'text-blue-600'}`}>
-                                        SEAT #{seatNumStr} • {isSeat1 ? 'CREW / CONDUCTOR SEAT (UNAVAILABLE)' : sIdx === 0 ? 'LEFT WINDOW' : 'LEFT AISLE'}
+                                        SEAT #{seatNumStr} • {isSeat1 ? 'CREW / CONDUCTOR SEAT' : sIdx === 0 ? 'LEFT WINDOW' : 'LEFT AISLE'}
                                       </div>
                                       <div className="text-xs font-mono font-extrabold text-emerald-600">
                                         {isSeat1 ? 'NOT FOR BOOKING' : `LKR ${validatedSeatPrice.toLocaleString()}`}
@@ -1756,12 +1757,14 @@ export const SeatMap: React.FC = () => {
                               deck: 'lower' as DeckType
                             };
 
+                            const isSeat1 = seatNumStr === '1' || normalizedNum === '1';
+                            const isNormalService = selectedRoute?.busType?.includes('Normal Service') || selectedRoute?.busType?.includes('3*2') || selectedRoute?.busType?.includes('Leyland');
                             const isSelected = selectedSeatIds.includes(seat.id) || selectedSeatIds.includes(seatNumStr) || selectedSeatIds.includes(normalizedNum);
                             const isBooked = seat.status === 'booked';
                             const isBookedFemale = isBooked && ((seat as any).gender === 'female' || (seat as any).isFemaleBooked);
                             const isBookedMale = isBooked && !isBookedFemale;
                             const isReserved = !isBooked && !isSelected && (seat.isFemaleOnly || seat.status === 'blocked');
-                            const isUnavailable = seat.status === 'unavailable' || seat.status === 'locked';
+                            const isUnavailable = seat.status === 'unavailable' || seat.status === 'locked' || (isNormalService && isSeat1);
 
                             return (
                               <div 
@@ -1776,7 +1779,7 @@ export const SeatMap: React.FC = () => {
                                     sIdx === rightSeats.length - 1 ? 'right-0 left-auto translate-x-0 items-end' : 'left-1/2 -translate-x-1/2 items-center'
                                   }`}>
                                     <div className="border border-slate-300 rounded-lg px-2.5 py-1 bg-white text-slate-900 shadow-md whitespace-nowrap text-left leading-tight">
-                                      <div className="text-[10px] font-bold text-blue-600">
+                                      <div className={`text-[10px] font-bold ${isSeat1 ? 'text-rose-600' : 'text-blue-600'}`}>
                                         SEAT #{seatNumStr} • {sIdx === 0 ? 'RIGHT AISLE' : sIdx === 1 ? 'RIGHT MIDDLE' : 'RIGHT WINDOW'}
                                       </div>
                                       <div className="text-xs font-mono font-extrabold text-emerald-600">

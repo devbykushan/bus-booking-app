@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { dbQuery, hashPassword, verifyPassword } from '../db/database';
-import { sendAccountCreationEmail } from '../services/emailService';
+import { sendAccountCreationEmail, sendOTPEmail } from '../services/emailService';
 
 export const authRouter = Router();
 
@@ -13,9 +13,59 @@ const SL_PHONE_REGEX = /^(?:0|\+94)7\d{8}$/;
  * POST /api/auth/register
  * Register a new user account with Neon PostgreSQL validation
  */
+
+/**
+ * POST /api/auth/send-otp
+ * Generate and send OTP for registration
+ */
+authRouter.post('/send-otp', async (req: Request, res: Response) => {
+  try {
+    const { name, email } = req.body;
+    
+    if (!name || typeof name !== 'string' || name.trim().length < 3) {
+      return res.status(400).json({ error: 'Full name must be at least 3 characters long.' });
+    }
+    if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email.trim())) {
+      return res.status(400).json({ error: 'Please enter a valid email address.' });
+    }
+    
+    const cleanEmail = email.trim().toLowerCase();
+    
+    // Check if email already registered
+    const existing = await dbQuery('SELECT "id" FROM users WHERE LOWER("email") = $1', [cleanEmail]);
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: 'An account with this email address already exists. Please sign in instead.' });
+    }
+    
+    // Generate 6 digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 mins
+    
+    // Save OTP to DB
+    await dbQuery(
+      `INSERT INTO otps ("email", "otp", "expiresAt")
+       VALUES ($1, $2, $3)
+       ON CONFLICT ("email") DO UPDATE SET "otp" = EXCLUDED."otp", "expiresAt" = EXCLUDED."expiresAt"`,
+      [cleanEmail, otp, expiresAt]
+    );
+    
+    // Send email
+    await sendOTPEmail(cleanEmail, name.trim(), otp);
+    
+    return res.json({ success: true, message: 'OTP sent successfully to your email.' });
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    return res.status(500).json({ error: 'Failed to send OTP due to a server error.' });
+  }
+});
+
 authRouter.post('/register', async (req: Request, res: Response) => {
   try {
-    const { name, email, password, role = 'passenger', phone } = req.body;
+    const { name, email, password, role = 'passenger', phone, otp } = req.body;
+
+    if (!otp || typeof otp !== 'string' || otp.trim().length !== 6) {
+      return res.status(400).json({ error: 'Please enter the 6-digit OTP sent to your email.' });
+    }
 
     // 1. Input validations
     if (!name || typeof name !== 'string' || name.trim().length < 3) {
@@ -54,6 +104,24 @@ authRouter.post('/register', async (req: Request, res: Response) => {
         error: 'An account with this email address already exists. Please sign in instead.',
       });
     }
+
+    
+    // Check OTP
+    const otpResult = await dbQuery('SELECT "otp", "expiresAt" FROM otps WHERE "email" = $1', [cleanEmail]);
+    if (otpResult.rows.length === 0) {
+      return res.status(400).json({ error: 'No OTP requested for this email. Please request a new OTP.' });
+    }
+    
+    const dbOtp = otpResult.rows[0];
+    if (dbOtp.otp !== otp.trim()) {
+      return res.status(400).json({ error: 'Invalid OTP. Please check the code and try again.' });
+    }
+    if (Date.now() > Number(dbOtp.expiresAt)) {
+      return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
+    }
+    
+    // Clear OTP from DB
+    await dbQuery('DELETE FROM otps WHERE "email" = $1', [cleanEmail]);
 
     // 3. Hash password and insert record
     const userId = `usr-${Date.now()}-${uuidv4().substring(0, 6)}`;

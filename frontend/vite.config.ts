@@ -8,6 +8,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      useCredentials: true,
+      devOptions: {
+        enabled: true
+      },
       workbox: {
         clientsClaim: true,
         skipWaiting: true,
@@ -19,6 +23,10 @@ export default defineConfig({
         short_name: 'Superline',
         description: 'Book your bus tickets easily with Superline',
         theme_color: '#ffffff',
+        background_color: '#ffffff',
+        display: 'standalone',
+        start_url: '/',
+        orientation: 'portrait-primary',
         icons: [
           {
             src: 'pwa-192x192.png',

@@ -356,41 +356,7 @@ export const Navbar: React.FC = () => {
             );
           })}
           
-          <button
-            onClick={() => {
-              if (currentUser) {
-                if (currentUser.role === 'admin' || userRole === 'admin') {
-                  setCurrentView('admin-panel');
-                } else {
-                  setCurrentView('passenger-settings');
-                }
-              } else {
-                setShowAuthModal(true);
-              }
-            }}
-            className={`flex flex-col items-center justify-center w-16 gap-1 p-1 rounded-xl transition-all ${
-              currentView === 'passenger-settings' || currentView === 'admin-panel'
-                ? 'text-blue-600 dark:text-blue-400'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-            }`}
-          >
-            {currentUser ? (
-              (currentUser.role === 'admin' || userRole === 'admin') ? (
-                <ShieldCheck className={`w-5 h-5 ${currentView === 'admin-panel' ? 'fill-blue-100 dark:fill-blue-900/50' : ''}`} />
-              ) : (
-                <Settings className={`w-5 h-5 ${currentView === 'passenger-settings' ? 'fill-blue-100 dark:fill-blue-900/50' : ''}`} />
-              )
-            ) : (
-              <LogIn className="w-5 h-5" />
-            )}
-            <span className="text-[10px] font-bold text-center leading-tight truncate w-full">
-              {currentUser ? (
-                (currentUser.role === 'admin' || userRole === 'admin') ? t('adminPortal') : t('passengerSettings')
-              ) : (
-                t('signIn')
-              )}
-            </span>
-          </button>
+          
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import { useBookingStore } from '../../store/bookingStore';
 import { RouteDeploymentForm } from './RouteDeploymentForm';
 import { SeatLayoutCustomizerModal } from './SeatLayoutCustomizerModal';
 import { RouteDetailsTimetableEditorModal } from './RouteDetailsTimetableEditorModal';
+import { TimetableManager } from './TimetableManager';
 import { QRScannerModal } from '../operator/QRScannerModal';
 import { routesApi, authApi } from '../../services/api';
 import type { BusRoute } from '../../types/booking';
@@ -16,7 +17,7 @@ import {
 export const AdminDashboard: React.FC = () => {
   const { bookings, routes, loadRoutes } = useBookingStore();
 
-  const [activeTab, setActiveTab] = useState<'fleet' | 'analytics' | 'users'>('fleet');
+  const [activeTab, setActiveTab] = useState<'fleet' | 'timetables' | 'analytics' | 'users'>('fleet');
   const [showScanner, setShowScanner] = useState(false);
   const [selectedRouteId, setSelectedRouteId] = useState<string>(routes[0]?.id || '');
   const [showSeatBuilder, setShowSeatBuilder] = useState(false);
@@ -190,6 +191,14 @@ export const AdminDashboard: React.FC = () => {
               }`}
             >
               <Bus className="w-4 h-4" /> Fleet & Route Operations
+            </button>
+            <button
+              onClick={() => setActiveTab('timetables')}
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left ${
+                activeTab === 'timetables' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <Calendar className="w-4 h-4" /> Master Timetables
             </button>
             <button
               onClick={() => setActiveTab('analytics')}
@@ -464,6 +473,13 @@ export const AdminDashboard: React.FC = () => {
 
           </div>
 
+        </div>
+      )}
+
+      {/* ─── TAB 1.5: TIMETABLES ─── */}
+      {activeTab === 'timetables' && (
+        <div className="space-y-8">
+          <TimetableManager />
         </div>
       )}
 

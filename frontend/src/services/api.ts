@@ -109,6 +109,10 @@ export const validateApi = {
 // ─── Authentication API ───────────────────────────────────────────────────────
 
 export const authApi = {
+  /** Send OTP for account registration */
+  sendOtp: (payload: { name: string; email: string }): Promise<{ success: boolean; message: string }> =>
+    apiFetch('/auth/send-otp', { method: 'POST', body: JSON.stringify(payload) }),
+
   /** Register a new user account against Neon PostgreSQL */
   register: (payload: {
     name: string;
@@ -116,6 +120,7 @@ export const authApi = {
     password: string;
     role?: 'passenger' | 'admin';
     phone?: string;
+    otp: string;
   }): Promise<{ success: boolean; message: string; token: string; user: any }> =>
     apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
 
