@@ -278,6 +278,11 @@ export const SchedulesDashboard: React.FC = () => {
   // Filter and Sort routes
   const filteredAndSortedRoutes = useMemo(() => {
     let result = routes.filter((route) => {
+      // Departure Date Filter (Calendar Mode)
+      if (searchDate && route.departureDate && route.departureDate !== searchDate) {
+        return false;
+      }
+
       // Bus class / type filter
       if (busTypeFilter !== 'all') {
         const bType = (route.busType || '').toLowerCase();
@@ -342,7 +347,7 @@ export const SchedulesDashboard: React.FC = () => {
     });
 
     return result;
-  }, [routes, searchOrigin, searchDestination, busTypeFilter, timeFilter, sortBy]);
+  }, [routes, searchOrigin, searchDestination, searchDate, busTypeFilter, timeFilter, sortBy]);
 
   const activeRouteForMap = focusedRoute || filteredAndSortedRoutes[0] || null;
 

@@ -8,6 +8,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        clientsClaim: true,
+        skipWaiting: true,
+        cleanupOutdatedCaches: true
+      },
       includeAssets: ['favicon.svg', 'dewmina-logo.png'],
       manifest: {
         name: 'Superline Bus Booking',

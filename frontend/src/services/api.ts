@@ -26,7 +26,7 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const routesApi = {
   /** Fetch all bus routes with seats, boarding points, and GPS */
-  getAll: (): Promise<any[]> => apiFetch('/routes'),
+  getAll: (date?: string): Promise<any[]> => apiFetch(`/routes${date ? `?date=${date}` : ''}`),
 
   /** Fetch a single route by ID */
   getById: (id: string): Promise<any> => apiFetch(`/routes/${id}`),

@@ -63,6 +63,7 @@ export interface BusRoute {
   busType: BusCategory;
   origin: string;
   destination: string;
+  departureDate: string;
   departureTime: string;
   arrivalTime: string;
   duration: string;
@@ -95,8 +96,8 @@ export interface Booking {
   busType: BusCategory;
   origin: string;
   destination: string;
-  departureDate: string;
   departureTime: string;
+  departureDate: string;
   boardingPoint: BoardingPoint;
   dropPoint: BoardingPoint;
   seats: Seat[];
