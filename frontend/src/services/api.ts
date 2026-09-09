@@ -169,6 +169,20 @@ export const authApi = {
   /** Delete a registered user account */
   deleteUser: (id: string): Promise<any> =>
     apiFetch(`/auth/users/${id}`, { method: 'DELETE' }),
+
+  /** Send 6-digit OTP to passenger WhatsApp number */
+  sendWhatsAppOtp: (phone: string): Promise<{ success: boolean; message: string; otpPreview?: string; whatsappUrl?: string }> =>
+    apiFetch('/auth/send-whatsapp-otp', {
+      method: 'POST',
+      body: JSON.stringify({ phone }),
+    }),
+
+  /** Verify WhatsApp OTP entered by passenger */
+  verifyWhatsAppOtp: (payload: { phone: string; otp: string }): Promise<{ success: boolean; message: string }> =>
+    apiFetch('/auth/verify-whatsapp-otp', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
 };
 
 // ─── Health Check ─────────────────────────────────────────────────────────────

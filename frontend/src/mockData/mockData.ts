@@ -2,7 +2,7 @@ import type { BusRoute, Seat } from '../types/booking';
 
 const generateSeats = (busType: string, hasUpperDeck: boolean = false, routePrice?: number): Seat[] => {
   const seats: Seat[] = [];
-  const basePrice = routePrice || ((busType.includes('Normal Service') || busType.includes('3*2') || busType.includes('Leyland')) ? 950 : (busType.includes('Super Luxury') || busType.includes('Luxury')) ? 2800 : busType.includes('Sleeper') ? 3000 : 1500);
+  const basePrice = routePrice || ((busType.includes('Normal Service') || busType.includes('3*2') || busType.includes('Leyland')) ? 1157 : (busType.includes('Super Luxury') || busType.includes('Luxury')) ? 2800 : busType.includes('Sleeper') ? 3000 : 1500);
 
   // Super Luxury 49-seat 2*2 layout (Sri Lanka Express Coach 1-49)
   if (busType.includes('49 Seats') || busType.includes('Super Luxury')) {
@@ -203,7 +203,7 @@ export const MOCK_ROUTES: BusRoute[] = [
     departureTime: '05:00 AM',
     arrivalTime: '11:30 AM',
     duration: '6h 30m',
-    priceStarting: 1160,
+    priceStarting: 1157,
     availableSeatsCount: 34,
     totalSeatsCount: 54,
     hasUpperDeck: false,
