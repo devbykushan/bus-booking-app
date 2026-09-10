@@ -40,6 +40,27 @@ export const UserBookings: React.FC = () => {
     }
   };
 
+  const userBookings = React.useMemo(() => {
+    if (!currentUser) return [];
+    if (currentUser.role === 'admin') return bookings;
+
+    const userEmail = (currentUser.email || '').trim().toLowerCase();
+    const userPhone = (currentUser.phone || '').trim().replace(/[\s-]/g, '');
+    const userName = (currentUser.name || '').trim().toLowerCase();
+
+    return bookings.filter(b => {
+      const bEmail = (b.passenger?.email || '').trim().toLowerCase();
+      const bPhone = (b.passenger?.phone || '').trim().replace(/[\s-]/g, '');
+      const bName = (b.passenger?.fullName || '').trim().toLowerCase();
+
+      return (
+        (userEmail && bEmail === userEmail) ||
+        (userPhone && bPhone === userPhone) ||
+        (userName && bName === userName)
+      );
+    });
+  }, [bookings, currentUser]);
+
   if (!currentUser) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-12 space-y-6 animate-fade-in-up">
@@ -75,26 +96,6 @@ export const UserBookings: React.FC = () => {
       </div>
     );
   }
-
-  const userBookings = React.useMemo(() => {
-    if (!currentUser) return [];
-    if (currentUser.role === 'admin') return bookings;
-
-    const userEmail = (currentUser.email || '').trim().toLowerCase();
-    const userPhone = (currentUser.phone || '').trim().replace(/[\s-]/g, '');
-    const userName = (currentUser.name || '').trim().toLowerCase();
-
-    return bookings.filter(b => {
-      const bEmail = (b.passenger?.email || '').trim().toLowerCase();
-      const bPhone = (b.passenger?.phone || '').trim().replace(/[\s-]/g, '');
-      const bName = (b.passenger?.fullName || '').trim().toLowerCase();
-
-      if (userEmail && bEmail === userEmail) return true;
-      if (userPhone && bPhone && (bPhone === userPhone || bPhone.endsWith(userPhone.slice(-9)))) return true;
-      if (userName && bName === userName) return true;
-      return false;
-    });
-  }, [bookings, currentUser]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">

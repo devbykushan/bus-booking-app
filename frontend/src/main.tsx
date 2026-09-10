@@ -1,7 +1,11 @@
 
-// ─── Development Only: Unregister Rogue Service Workers ─────────────────────
-// This prevents older production PWA builds from caching assets during active development.
-if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import App from './App.tsx';
+
+// Unregister rogue development service workers if any are lingering
+if ('serviceWorker' in navigator && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
   navigator.serviceWorker.getRegistrations().then((registrations) => {
     for (const registration of registrations) {
       registration.unregister();
@@ -9,13 +13,11 @@ if (import.meta.env.DEV && 'serviceWorker' in navigator) {
   });
 }
 
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
-
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+const rootEl = document.getElementById('root');
+if (rootEl) {
+  createRoot(rootEl).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+}

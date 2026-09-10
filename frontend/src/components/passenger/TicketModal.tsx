@@ -14,7 +14,20 @@ export const TicketModal: React.FC = () => {
   const [isValidatingQr, setIsValidatingQr] = useState(false);
   const hasAutoSent = useRef(false);
 
-  if (!latestConfirmedBooking) {
+  const booking = latestConfirmedBooking;
+
+  // Auto-send WhatsApp alert on screen load
+  useEffect(() => {
+    if (booking && !hasAutoSent.current) {
+      hasAutoSent.current = true;
+      const rawPhone = booking.passenger?.phone || '';
+      if (rawPhone) {
+        setAutoSendBlocked(true);
+      }
+    }
+  }, [booking]);
+
+  if (!booking) {
     return (
       <div className="text-center py-16">
         <p className="text-slate-500">{t('noRecentTicket')}</p>
@@ -24,8 +37,6 @@ export const TicketModal: React.FC = () => {
       </div>
     );
   }
-
-  const booking = latestConfirmedBooking;
 
   const handlePrint = () => {
     window.print();
@@ -71,17 +82,6 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
     setAutoSendBlocked(false);
     setTimeout(() => setSentToast(false), 5000);
   };
-
-  // Auto-send WhatsApp alert on screen load
-  useEffect(() => {
-    if (booking && !hasAutoSent.current) {
-      hasAutoSent.current = true;
-      const rawPhone = booking.passenger.phone || '';
-      if (rawPhone) {
-        setAutoSendBlocked(true);
-      }
-    }
-  }, [booking?.id]);
 
   const handleOpenWhatsAppModal = () => {
     setPhoneInput(booking.passenger.phone || '');

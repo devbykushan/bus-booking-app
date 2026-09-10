@@ -10,7 +10,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       useCredentials: true,
       devOptions: {
-        enabled: true
+        enabled: false
       },
       workbox: {
         clientsClaim: true,
@@ -61,5 +61,13 @@ export default defineConfig({
   preview: {
     port: 3000,
     host: true,
+    allowedHosts: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:4000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   }
 })
