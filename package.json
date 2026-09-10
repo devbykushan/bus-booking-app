@@ -4,9 +4,12 @@
   "version": "1.0.0",
   "description": "Dewmina Super Line — Monaragala to Colombo Bus Booking Platform",
   "scripts": {
-    "dev": "npx -y concurrently -k -n BACKEND,FRONTEND -c cyan,magenta \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "dev": "node dev.js",
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:backend": "npm --prefix backend run dev",
+    "waha:start": "docker compose up -d",
+    "waha:stop": "docker compose down",
+    "waha:logs": "docker compose logs -f waha",
     "build": "npm --prefix frontend run build && npm --prefix backend run build",
     "build:frontend": "npm --prefix frontend run build",
     "build:backend": "npm --prefix backend run build",

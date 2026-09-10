@@ -422,13 +422,6 @@ export const SeatMap: React.FC = () => {
       const targetWaUrl = res.whatsappUrl || `https://api.whatsapp.com/send?phone=${fullPhone.replace(/\D/g, '')}&text=${encodeURIComponent(`🔐 *Dewmina Super Line Bus Booking*\nYour WhatsApp verification code is: *${res.otpPreview || '123456'}*\nThis code is valid for 10 minutes.\nEnter this code on the booking screen to verify your identity.`)}`;
       setWhatsappUrl(targetWaUrl);
       setResendTimer(60);
-
-      // Open WhatsApp window directly so the user receives the code in WhatsApp immediately
-      try {
-        window.open(targetWaUrl, '_blank');
-      } catch (e) {
-        console.warn('Could not auto-open WhatsApp tab:', e);
-      }
     } catch (err: any) {
       setPhoneError(err.message || 'Failed to send WhatsApp verification code. Please check your number.');
     } finally {
@@ -1201,16 +1194,6 @@ export const SeatMap: React.FC = () => {
                                   <span>Resend OTP</span>
                                 </button>
                               )}
-
-                              <a
-                                href={whatsappUrl || `https://api.whatsapp.com/send?phone=${(countryCode + phoneInput).replace(/\D/g, '')}&text=${encodeURIComponent(`🔐 *Dewmina Super Line*\nYour WhatsApp verification code is: *${demoOtp || '123456'}*`)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 font-bold hover:underline"
-                              >
-                                <span>Open in WhatsApp</span>
-                                <ExternalLink className="w-3 h-3" />
-                              </a>
                             </div>
                           </div>
                         </div>

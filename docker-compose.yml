@@ -1,0 +1,20 @@
+services:
+  waha:
+    image: devlikeapro/waha:latest
+    container_name: waha
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - WAHA_PRINT_QR=true
+      - WAHA_DASHBOARD_ENABLED=true
+      - WAHA_DASHBOARD_NO_PASSWORD=true
+      - WHATSAPP_SWAGGER_NO_PASSWORD=true
+      - WAHA_NO_API_KEY=true
+      - WAHA_LOG_LEVEL=info
+      - WHATSAPP_DEFAULT_ENGINE=WEBJS
+    volumes:
+      - waha_sessions:/app/.sessions
+
+volumes:
+  waha_sessions:
