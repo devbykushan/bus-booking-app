@@ -108,9 +108,9 @@ export interface Booking {
   discountAmount: number;
   totalFare: number;
   promoCodeApplied?: string;
-  paymentMethod: 'card' | 'upi' | 'netbanking' | 'wallet';
+  paymentMethod: 'card' | 'upi' | 'netbanking' | 'wallet' | 'bank_transfer';
   paymentStatus: 'paid' | 'pending' | 'refunded';
-  bookingStatus: 'confirmed' | 'cancelled' | 'boarded';
+  bookingStatus: 'confirmed' | 'cancelled' | 'boarded' | 'pending_payment';
   qrCodeData: string;
   createdAt: string;
   seatNumbers?: string[];
@@ -137,4 +137,19 @@ export interface AnalyticsSummary {
   activeBuses: number;
   occupancyRate: number;
   femaleBookingsPct: number;
+}
+
+export interface PaymentSlip {
+  id: string;
+  bookingId: string;
+  pnr: string;
+  imageData: string;
+  imageMime: string;
+  amount: number;
+  passengerName: string;
+  passengerPhone: string;
+  uploadedAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  status: 'pending' | 'approved' | 'rejected';
 }
