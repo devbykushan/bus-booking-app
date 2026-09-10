@@ -67,6 +67,35 @@ authRouter.post('/send-otp', async (req: Request, res: Response) => {
   }
 });
 
+
+authRouter.post('/verify-email-otp', async (req: Request, res: Response) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res.status(400).json({ error: 'Email and OTP are required.' });
+    }
+    const cleanEmail = email.trim().toLowerCase();
+    
+    const otpResult = await dbQuery('SELECT "otp", "expiresAt" FROM otps WHERE "email" = $1', [cleanEmail]);
+    if (otpResult.rows.length === 0) {
+      return res.status(400).json({ error: 'No OTP requested for this email. Please request a new OTP.' });
+    }
+    
+    const dbOtp = otpResult.rows[0];
+    if (dbOtp.otp !== otp.trim()) {
+      return res.status(400).json({ error: 'Invalid OTP. Please check the code and try again.' });
+    }
+    if (Date.now() > Number(dbOtp.expiresAt)) {
+      return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
+    }
+    
+    return res.json({ success: true, message: 'OTP verified successfully.' });
+  } catch (error) {
+    console.error('Error verifying email OTP:', error);
+    return res.status(500).json({ error: 'Failed to verify OTP due to a server error.' });
+  }
+});
+
 authRouter.post('/register', async (req: Request, res: Response) => {
   try {
     const { name, email, password, role = 'passenger', phone, otp } = req.body;

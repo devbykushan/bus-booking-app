@@ -75,6 +75,7 @@ interface BookingStore {
   // Authentication
   currentUser: UserAccount | null;
   login: (email: string, pass: string, role?: 'passenger' | 'admin') => Promise<{ success: boolean; message: string }>;
+  verifyEmailOtp: (email: string, otp: string) => Promise<{ success: boolean; message: string }>;
   sendOtp: (name: string, email: string) => Promise<{ success: boolean; message: string }>;
   register: (name: string, email: string, pass: string, otp: string, role?: 'passenger' | 'admin', phone?: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
@@ -208,6 +209,17 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     }
   },
 
+  verifyEmailOtp: async (email, otp) => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await authApi.verifyEmailOtp({ email, otp });
+      set({ isLoading: false });
+      return res;
+    } catch (error: any) {
+      set({ error: error.message || 'Failed to verify OTP', isLoading: false });
+      throw error;
+    }
+  },
   sendOtp: async (name, email) => {
     try {
       const res = await authApi.sendOtp({ name, email });

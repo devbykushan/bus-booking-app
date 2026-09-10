@@ -233,30 +233,6 @@ export const SeatMap: React.FC = () => {
     };
   }, [selectedRoute?.id, selectedSeatIds]);
 
-  if (!selectedRoute) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-4">
-        <div className="w-16 h-16 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto shadow-inner">
-          <Armchair className="w-8 h-8" />
-        </div>
-        <h3 className="text-xl font-bold text-slate-800">No Bus Route Selected</h3>
-        <p className="text-slate-500 text-sm">Please choose a bus schedule to view seat layout and book seats.</p>
-        <button
-          onClick={goToSearchSchedules}
-          className="mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-md transition-all"
-        >
-          {t('backToSearch')}
-        </button>
-      </div>
-    );
-  }
-
-  const formatTimer = (secs: number) => {
-    const mins = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${mins}:${s < 10 ? '0' : ''}${s}`;
-  };
-
   // Date parsing for "Displaying Results for 08/26/2026 Wednesday"
   const formattedDateBanner = useMemo(() => {
     try {
@@ -269,7 +245,9 @@ export const SeatMap: React.FC = () => {
         const yyyy = d.getFullYear();
         return `${mm}/${dd}/${yyyy} ${days[d.getDay()]}`;
       }
-    } catch (_) {}
+    } catch {
+      // ignore
+    }
     return travelDate;
   }, [travelDate]);
 
@@ -307,14 +285,38 @@ export const SeatMap: React.FC = () => {
     });
   }, [selectedRoute, selectedSeatIds, validatedSeatPrice]);
 
-  const baseTotal = selectedSeatsList.reduce((sum, s) => sum + s.price, 0);
-  const discountAmount = Number((baseTotal * discountRate).toFixed(2));
-  const finalTotal = Math.max(0, baseTotal - discountAmount);
-
   // Progressive Disclosure Step Calculations
   const isStep1Done = useMemo(() => {
     return Boolean(selectedBoardingPoint && selectedDropPoint && travelDate);
   }, [selectedBoardingPoint, selectedDropPoint, travelDate]);
+
+  if (!selectedRoute) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-4">
+        <div className="w-16 h-16 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto shadow-inner">
+          <Armchair className="w-8 h-8" />
+        </div>
+        <h3 className="text-xl font-bold text-slate-800">No Bus Route Selected</h3>
+        <p className="text-slate-500 text-sm">Please choose a bus schedule to view seat layout and book seats.</p>
+        <button
+          onClick={goToSearchSchedules}
+          className="mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-md transition-all"
+        >
+          {t('backToSearch')}
+        </button>
+      </div>
+    );
+  }
+
+  const formatTimer = (secs: number) => {
+    const mins = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${mins}:${s < 10 ? '0' : ''}${s}`;
+  };
+
+  const baseTotal = selectedSeatsList.reduce((sum, s) => sum + s.price, 0);
+  const discountAmount = Number((baseTotal * discountRate).toFixed(2));
+  const finalTotal = Math.max(0, baseTotal - discountAmount);
 
   const isStep2Unlocked = isStep1Done;
   const isStep2Done = isStep2Unlocked && isPhoneVerified;
