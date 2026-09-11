@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Plus, Save, RefreshCw, Trash2, CheckCircle2, Calendar, Bus } from 'lucide-react';
+import { BASE_URL } from '../../services/api';
 
 const api = {
   get: async (path: string) => {
-    const res = await fetch('/api' + path);
+    const res = await fetch(BASE_URL + path);
     if (!res.ok) throw new Error('Fetch failed');
     return { data: await res.json() };
   },
   post: async (path: string, body?: any) => {
-    const res = await fetch('/api' + path, {
+    const res = await fetch(BASE_URL + path, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body || {})
@@ -17,7 +18,7 @@ const api = {
     return { data: await res.json() };
   },
   delete: async (path: string) => {
-    const res = await fetch('/api' + path, { method: 'DELETE' });
+    const res = await fetch(BASE_URL + path, { method: 'DELETE' });
     if (!res.ok) throw new Error('Fetch failed');
     return { data: await res.json() };
   }

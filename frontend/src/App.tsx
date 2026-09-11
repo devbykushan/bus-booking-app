@@ -19,6 +19,7 @@ import { SlipUploadPage } from './components/passenger/SlipUploadPage';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
 import { Bus, AlertCircle, Wifi, RefreshCw, ShieldAlert, ShieldCheck, Lock } from 'lucide-react';
+import { BASE_URL } from './services/api';
 
 export function App() {
   const {
@@ -103,7 +104,7 @@ export function App() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/health');
+        const res = await fetch(`${BASE_URL}/health`);
         if (!res.ok) throw new Error('Backend not healthy');
         setBackendReady(true);
         await Promise.all([loadRoutes(), loadBookings()]);

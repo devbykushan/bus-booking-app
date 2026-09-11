@@ -8,7 +8,7 @@ import {
   ArrowRight, Crown, X, User, Users, MessageSquare, KeyRound,
   RotateCcw, Sparkles, ExternalLink, Loader2, Edit2
 } from 'lucide-react';
-import { authApi } from '../../services/api';
+import { authApi, BASE_URL } from '../../services/api';
 
 export const SeatMap: React.FC = () => {
   const { 
@@ -195,7 +195,7 @@ export const SeatMap: React.FC = () => {
     let isMounted = true;
     const fetchLiveRouteStatus = async () => {
       try {
-        const res = await fetch(`/api/routes/${selectedRoute.id}`);
+        const res = await fetch(`${BASE_URL}/routes/${selectedRoute.id}`);
         if (res.ok && isMounted) {
           const liveRoute: BusRoute = await res.json();
           if (liveRoute && liveRoute.seats) {
