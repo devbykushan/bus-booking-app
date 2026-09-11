@@ -99,16 +99,20 @@ export const SchedulesDashboard: React.FC = () => {
     return (!searchDate || searchDate < now) ? now : searchDate;
   });
 
-  // Auto-heal past search dates
+  // Auto-heal past search dates or dates beyond 1-week limit
   useEffect(() => {
     const now = toISODateString(new Date());
     if (searchDate < now) {
       setSearchCriteria(searchOrigin, searchDestination, now);
+    } else if (searchDate > maxDateStr) {
+      setSearchCriteria(searchOrigin, searchDestination, maxDateStr);
     }
     if (modDate < now) {
       setModDate(now);
+    } else if (modDate > maxDateStr) {
+      setModDate(maxDateStr);
     }
-  }, [todayStr]);
+  }, [todayStr, maxDateStr]);
 
   // Horizontal scrollable dates state (Strictly 1 week / 7 days advance booking)
   const dateScrollRef = useRef<HTMLDivElement>(null);

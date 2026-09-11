@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useBookingStore } from '../../store/bookingStore';
 import type { BusRoute, DeckType, Seat } from '../../types/booking';
@@ -44,8 +44,52 @@ export const SeatMap: React.FC = () => {
   // Right-Side Sliding Seat Drawer State
   const [isSeatDrawerOpen, setIsSeatDrawerOpen] = useState(false);
 
-  // Form states
-  const [travelDate, setTravelDate] = useState(searchDate || new Date().toISOString().split('T')[0]);
+  // Strictly 1-week (7 days) advance booking date helpers
+  const toISODateString = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayStr = useMemo(() => toISODateString(new Date()), []);
+  const maxDateStr = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7); // Strictly 1 week (7 days) limit
+    return toISODateString(d);
+  }, []);
+
+  const validateTravelDate = useCallback((val: string): string | null => {
+    if (!val) return 'Please select a valid travel date';
+    if (val < todayStr) return 'Please select a valid future travel date';
+    if (val > maxDateStr) return 'Bookings are only permitted up to 1 week (7 days) in advance';
+    return null;
+  }, [todayStr, maxDateStr]);
+
+  // Form states - clamp initial date between today and today + 7 days
+  const [travelDate, setTravelDate] = useState(() => {
+    const now = toISODateString(new Date());
+    const maxD = new Date();
+    maxD.setDate(maxD.getDate() + 7);
+    const max = toISODateString(maxD);
+    if (!searchDate || searchDate < now) return now;
+    if (searchDate > max) return max;
+    return searchDate;
+  });
+
+  // Keep travelDate synchronized and within 1-week limit if store searchDate changes
+  useEffect(() => {
+    if (searchDate) {
+      if (searchDate < todayStr) {
+        setTravelDate(todayStr);
+      } else if (searchDate > maxDateStr) {
+        setTravelDate(maxDateStr);
+      } else {
+        setTravelDate(searchDate);
+      }
+    }
+  }, [searchDate, todayStr, maxDateStr]);
+
   const [countryCode, setCountryCode] = useState('+94');
   const [phoneInput, setPhoneInput] = useState('');
   const [phoneError, setPhoneError] = useState<string | null>(null);
@@ -287,8 +331,9 @@ export const SeatMap: React.FC = () => {
 
   // Progressive Disclosure Step Calculations
   const isStep1Done = useMemo(() => {
-    return Boolean(selectedBoardingPoint && selectedDropPoint && travelDate);
-  }, [selectedBoardingPoint, selectedDropPoint, travelDate]);
+    const isDateValid = Boolean(travelDate && travelDate >= todayStr && travelDate <= maxDateStr);
+    return Boolean(selectedBoardingPoint && selectedDropPoint && isDateValid && !dateError);
+  }, [selectedBoardingPoint, selectedDropPoint, travelDate, todayStr, maxDateStr, dateError]);
 
   if (!selectedRoute) {
     return (
@@ -330,6 +375,11 @@ export const SeatMap: React.FC = () => {
   const isStep5Unlocked = isStep4Done;
 
   const handleStep1Proceed = () => {
+    const dateErr = validateTravelDate(travelDate);
+    if (dateErr) {
+      setDateError(dateErr);
+      return;
+    }
     if (!selectedBoardingPoint) {
       setBoardingError('Please select a pickup / boarding location.');
       return;
@@ -340,6 +390,7 @@ export const SeatMap: React.FC = () => {
     }
     setBoardingError(null);
     setDropError(null);
+    setDateError(null);
     setOpenSection1(false);
     setOpenSection2(true);
   };
@@ -361,6 +412,12 @@ export const SeatMap: React.FC = () => {
   };
 
   const handleDateConfirm = () => {
+    const dateErr = validateTravelDate(travelDate);
+    if (dateErr) {
+      setDateError(dateErr);
+      return;
+    }
+    setDateError(null);
     setSearchCriteria(selectedRoute.origin, selectedRoute.destination, travelDate);
   };
 
@@ -806,17 +863,24 @@ export const SeatMap: React.FC = () => {
               <div className="p-5 sm:p-6 pt-1 border-t border-slate-100 space-y-5 animate-fade-in">
                 {/* Confirm Travel Date */}
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-800">
-                    Confirm Travel Date
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Confirm Travel Date
+                    </label>
+                    <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                      Max 7 Days Advance Booking
+                    </span>
+                  </div>
                   <div className="flex gap-2">
                     <input
                       type="date"
                       value={travelDate}
-                      min={new Date().toISOString().split('T')[0]}
+                      min={todayStr}
+                      max={maxDateStr}
                       onChange={(e) => {
-                        setTravelDate(e.target.value);
-                        setDateError(null);
+                        const val = e.target.value;
+                        setTravelDate(val);
+                        setDateError(validateTravelDate(val));
                       }}
                       className={`flex-1 px-4 py-2.5 rounded-xl border text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-inner ${
                         dateError ? 'border-rose-400 bg-rose-50/40 text-rose-900' : 'border-slate-200 bg-slate-50/60 text-slate-800 focus:bg-white'
@@ -825,9 +889,9 @@ export const SeatMap: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => {
-                        const today = new Date().toISOString().split('T')[0];
-                        if (travelDate < today) {
-                          setDateError('Please select a valid future travel date');
+                        const dateErr = validateTravelDate(travelDate);
+                        if (dateErr) {
+                          setDateError(dateErr);
                           return;
                         }
                         setDateError(null);
