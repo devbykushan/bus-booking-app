@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
-import { routesApi } from '../../services/api';
+import { routesApi, BASE_URL } from '../../services/api';
 import type { BusRoute, Seat, BusCategory, DeckType, SeatStatus } from '../../types/booking';
 import { 
   LayoutGrid, Save, X, Shield, Bus, RefreshCw, Plus, Trash2, Edit3, 
@@ -274,7 +274,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
   const fetchLiveRouteData = async (isSilent = false) => {
     if (!isSilent) setIsLiveSyncing(true);
     try {
-      const res = await fetch(`/api/routes/${route.id}`);
+      const res = await fetch(`${BASE_URL}/routes/${route.id}`);
       if (res.ok) {
         const liveRoute: BusRoute = await res.json();
         if (liveRoute) {
@@ -378,7 +378,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
     setIsSaving(true);
     setFeedbackMsg(null);
     try {
-      const res = await fetch(`/api/routes/${route.id}/layout`, {
+      const res = await fetch(`${BASE_URL}/routes/${route.id}/layout`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

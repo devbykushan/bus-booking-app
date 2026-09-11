@@ -4,7 +4,8 @@
  * All requests go to http://localhost:4000 (proxied via Vite as /api).
  */
 
-const BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const rawApiUrl = (import.meta.env.VITE_API_URL || '/api').trim().replace(/\/+$/, '');
+export const BASE_URL = rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl}/api`;
 
 // ─── Generic fetch helper ─────────────────────────────────────────────────────
 
