@@ -58,9 +58,15 @@ authRouter.post('/send-otp', async (req: Request, res: Response) => {
     );
     
     // Send email
-    await sendOTPEmail(cleanEmail, name.trim(), otp);
+    const emailSent = await sendOTPEmail(cleanEmail, name.trim(), otp);
     
-    return res.json({ success: true, message: 'OTP sent successfully to your email.' });
+    return res.json({ 
+      success: true, 
+      message: emailSent 
+        ? 'OTP sent successfully to your email.' 
+        : `OTP generated (Email delivery unavailable). Your verification code is: ${otp}`,
+      devOtp: emailSent ? undefined : otp,
+    });
   } catch (error) {
     console.error('Error sending OTP:', error);
     return res.status(500).json({ error: 'Failed to send OTP due to a server error.' });

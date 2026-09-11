@@ -225,8 +225,8 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   },
   sendOtp: async (name, email) => {
     try {
-      const res = await authApi.sendOtp({ name, email });
-      return { success: res.success, message: res.message || 'OTP sent successfully' };
+      const res: any = await authApi.sendOtp({ name, email });
+      return { success: res.success, message: res.message || 'OTP sent successfully', devOtp: res.devOtp };
     } catch (err: any) {
       return { success: false, message: err.message || 'Failed to send OTP' };
     }
