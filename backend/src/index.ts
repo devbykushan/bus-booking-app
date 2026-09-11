@@ -7,6 +7,8 @@ import { seatsRouter } from './routes/seatsRouter';
 import { validateRouter } from './routes/validateRouter';
 import { authRouter } from './routes/authRouter';
 import timetablesRouter from './routes/timetablesRouter';
+import { webhookRouter } from './routes/webhookRouter';
+import { paymentSlipsRouter } from './routes/paymentSlipsRouter';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -25,12 +27,14 @@ initDb().catch((err) => {
 });
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
+app.use('/api/webhook', webhookRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/routes', routesRouter);
 app.use('/api/bookings', bookingsRouter);
 app.use('/api/seats', seatsRouter);
 app.use('/api/validate-ticket', validateRouter);
 app.use('/api/timetables', timetablesRouter);
+app.use('/api/payment-slips', paymentSlipsRouter);
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

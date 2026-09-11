@@ -115,7 +115,7 @@ export const SeatMap: React.FC = () => {
   };
 
   // Payment & Promo states
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking' | 'wallet'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking' | 'wallet' | 'bank_transfer'>('card');
   const [promoInput, setPromoInput] = useState('');
   const [promoMessage, setPromoMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -422,13 +422,6 @@ export const SeatMap: React.FC = () => {
       const targetWaUrl = res.whatsappUrl || `https://api.whatsapp.com/send?phone=${fullPhone.replace(/\D/g, '')}&text=${encodeURIComponent(`🔐 *Dewmina Super Line Bus Booking*\nYour WhatsApp verification code is: *${res.otpPreview || '123456'}*\nThis code is valid for 10 minutes.\nEnter this code on the booking screen to verify your identity.`)}`;
       setWhatsappUrl(targetWaUrl);
       setResendTimer(60);
-
-      // Open WhatsApp window directly so the user receives the code in WhatsApp immediately
-      try {
-        window.open(targetWaUrl, '_blank');
-      } catch (e) {
-        console.warn('Could not auto-open WhatsApp tab:', e);
-      }
     } catch (err: any) {
       setPhoneError(err.message || 'Failed to send WhatsApp verification code. Please check your number.');
     } finally {
@@ -1201,16 +1194,6 @@ export const SeatMap: React.FC = () => {
                                   <span>Resend OTP</span>
                                 </button>
                               )}
-
-                              <a
-                                href={whatsappUrl || `https://api.whatsapp.com/send?phone=${(countryCode + phoneInput).replace(/\D/g, '')}&text=${encodeURIComponent(`🔐 *Dewmina Super Line*\nYour WhatsApp verification code is: *${demoOtp || '123456'}*`)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 font-bold hover:underline"
-                              >
-                                <span>Open in WhatsApp</span>
-                                <ExternalLink className="w-3 h-3" />
-                              </a>
                             </div>
                           </div>
                         </div>
@@ -1517,6 +1500,34 @@ export const SeatMap: React.FC = () => {
                         Pay On Board (Cash to Conductor / At Boarding Point Counter)
                       </span>
                       <p className="text-[11px] text-slate-500">Pay directly in cash when boarding the bus.</p>
+                    </div>
+                  </div>
+
+                  {/* Bank Transfer option */}
+                  <div 
+                    onClick={() => setPaymentMethod('bank_transfer')}
+                    className={`p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-start gap-4 hover:-translate-y-0.5 ${
+                      paymentMethod === 'bank_transfer'
+                        ? 'border-emerald-500 bg-emerald-50/40 shadow-xs ring-2 ring-emerald-500/20'
+                        : 'border-slate-200 bg-slate-50/40 hover:bg-white hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="w-5 h-5 mt-0.5 rounded-full border-2 border-slate-300 flex items-center justify-center flex-shrink-0">
+                      {paymentMethod === 'bank_transfer' && <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-scale-in" />}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="px-2 py-0.5 rounded bg-emerald-600 text-white font-black text-[10px] tracking-wider shadow-2xs">BANK</span>
+                        <span className="text-xs font-bold text-slate-800">Online Bank Transfer</span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mb-2">Transfer to our bank account and upload your payment slip. Admin will verify and confirm your booking.</p>
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 space-y-1">
+                        <p className="text-[11px] font-bold text-emerald-800">Bank Account Details:</p>
+                        <p className="text-[11px] text-slate-700">🏦 <span className="font-semibold">Bank:</span> Bank of Ceylon</p>
+                        <p className="text-[11px] text-slate-700">💳 <span className="font-semibold">Account No:</span> 8001234567</p>
+                        <p className="text-[11px] text-slate-700">👤 <span className="font-semibold">Name:</span> Dewmina Super Line</p>
+                        <p className="text-[11px] text-slate-700">📍 <span className="font-semibold">Branch:</span> Monaragala</p>
+                      </div>
                     </div>
                   </div>
 

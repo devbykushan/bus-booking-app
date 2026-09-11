@@ -25,7 +25,8 @@ export type AppView =
   | 'my-bookings'
   | 'live-tracking'
   | 'admin-panel'
-  | 'passenger-settings';
+  | 'passenger-settings'
+  | 'slip-upload';
 
 export const VIEW_HASH_MAP: Record<AppView, string> = {
   'passenger-search': 'home',
@@ -37,6 +38,7 @@ export const VIEW_HASH_MAP: Record<AppView, string> = {
   'live-tracking': 'live-gps',
   'admin-panel': 'admin',
   'passenger-settings': 'settings',
+  'slip-upload': 'slip-upload',
 };
 
 export const HASH_VIEW_MAP: Record<string, AppView> = {
@@ -60,6 +62,7 @@ export const HASH_VIEW_MAP: Record<string, AppView> = {
   'admin-panel': 'admin-panel',
   'settings': 'passenger-settings',
   'passenger-settings': 'passenger-settings',
+  'slip-upload': 'slip-upload',
 };
 
 export function getViewFromLocation(): AppView {
@@ -150,7 +153,7 @@ interface BookingStore {
   latestConfirmedBooking: Booking | null;
   setLatestConfirmedBooking: (b: Booking | null) => void;
   createBooking: (
-    paymentMethod: 'card' | 'upi' | 'netbanking' | 'wallet',
+    paymentMethod: 'card' | 'upi' | 'netbanking' | 'wallet' | 'bank_transfer',
     insuranceSelected: boolean,
   ) => Promise<Booking | null>;
   cancelBooking: (pnr: string) => Promise<void>;
@@ -533,7 +536,9 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
       const updatedRoutes = await routesApi.getAll();
 
       // Confetti
-      try { confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } }); } catch (_) {}
+      if (paymentMethod !== 'bank_transfer') {
+        try { confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } }); } catch (_) {}
+      }
 
       set({
         routes: updatedRoutes,
@@ -545,7 +550,11 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         appliedPromo: '',
         discountRate: 0,
       });
-      get().setCurrentView('ticket-confirmation');
+      if (paymentMethod === 'bank_transfer') {
+        get().setCurrentView('slip-upload');
+      } else {
+        get().setCurrentView('ticket-confirmation');
+      }
 
       return newBooking;
     } catch (err: any) {

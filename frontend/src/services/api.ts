@@ -4,7 +4,7 @@
  * All requests go to http://localhost:4000 (proxied via Vite as /api).
  */
 
-const BASE_URL = '/api';
+const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 // ─── Generic fetch helper ─────────────────────────────────────────────────────
 
@@ -191,6 +191,33 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
+};
+
+// ─── Payment Slips API ────────────────────────────────────────────────────────
+
+export const paymentSlipsApi = {
+  /** Upload a bank transfer payment slip */
+  upload: (payload: {
+    bookingId: string;
+    pnr: string;
+    imageData: string;
+    imageMime: string;
+    amount: number;
+    passengerName: string;
+    passengerPhone: string;
+  }): Promise<{ success: boolean; slipId?: string; message: string }> =>
+    apiFetch('/payment-slips', { method: 'POST', body: JSON.stringify(payload) }),
+
+  /** Get all payment slips (admin) */
+  getAll: (): Promise<any[]> => apiFetch('/payment-slips'),
+
+  /** Approve a payment slip (admin) */
+  approve: (id: string, adminName?: string): Promise<{ success: boolean; message: string }> =>
+    apiFetch(`/payment-slips/${id}/approve`, { method: 'PATCH', body: JSON.stringify({ adminName }) }),
+
+  /** Reject a payment slip (admin) */
+  reject: (id: string, reason?: string, adminName?: string): Promise<{ success: boolean; message: string }> =>
+    apiFetch(`/payment-slips/${id}/reject`, { method: 'PATCH', body: JSON.stringify({ reason, adminName }) }),
 };
 
 // ─── Health Check ─────────────────────────────────────────────────────────────

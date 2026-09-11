@@ -5,7 +5,7 @@ import { SeatLayoutCustomizerModal } from './SeatLayoutCustomizerModal';
 import { RouteDetailsTimetableEditorModal } from './RouteDetailsTimetableEditorModal';
 import { TimetableManager } from './TimetableManager';
 import { QRScannerModal } from '../operator/QRScannerModal';
-import { routesApi, authApi } from '../../services/api';
+import { routesApi, authApi, paymentSlipsApi } from '../../services/api';
 import type { BusRoute } from '../../types/booking';
 import { 
   TrendingUp, Users, DollarSign, Bus, Award, BarChart2, 
@@ -17,7 +17,7 @@ import {
 export const AdminDashboard: React.FC = () => {
   const { bookings, routes, loadRoutes } = useBookingStore();
 
-  const [activeTab, setActiveTab] = useState<'fleet' | 'timetables' | 'analytics' | 'users'>('fleet');
+  const [activeTab, setActiveTab] = useState<'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips'>('fleet');
   const [showScanner, setShowScanner] = useState(false);
   const [selectedRouteId, setSelectedRouteId] = useState<string>(routes[0]?.id || '');
   const [showSeatBuilder, setShowSeatBuilder] = useState(false);
@@ -35,6 +35,12 @@ export const AdminDashboard: React.FC = () => {
   const [selectedUserForModal, setSelectedUserForModal] = useState<any | null>(null);
   const [confirmDeleteUserId, setConfirmDeleteUserId] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+
+  // Payment Slips state
+  const [paymentSlips, setPaymentSlips] = useState<any[]>([]);
+  const [slipsLoading, setSlipsLoading] = useState(false);
+  const [selectedSlipImage, setSelectedSlipImage] = useState<{ src: string; pnr: string } | null>(null);
+  const [processingSlipId, setProcessingSlipId] = useState<string | null>(null);
 
   const selectedRoute = routes.find(r => r.id === selectedRouteId) || routes[0] || null;
   const manifestBookings = bookings.filter(b => b.routeId === selectedRoute?.id);
@@ -67,6 +73,55 @@ export const AdminDashboard: React.FC = () => {
       fetchUsers();
     }
   }, [activeTab]);
+
+  const fetchPaymentSlips = async () => {
+    setSlipsLoading(true);
+    try {
+      const slips = await paymentSlipsApi.getAll();
+      setPaymentSlips(slips);
+    } catch (err: any) {
+      console.error('Error loading payment slips:', err);
+    } finally {
+      setSlipsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPaymentSlips();
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'payment-slips') {
+      fetchPaymentSlips();
+    }
+  }, [activeTab]);
+
+  const handleApproveSlip = async (slipId: string) => {
+    setProcessingSlipId(slipId);
+    try {
+      await paymentSlipsApi.approve(slipId, 'Admin');
+      showToast('Payment approved! Booking confirmed.');
+      await fetchPaymentSlips();
+    } catch (err: any) {
+      alert(`Failed to approve: ${err.message}`);
+    } finally {
+      setProcessingSlipId(null);
+    }
+  };
+
+  const handleRejectSlip = async (slipId: string) => {
+    const reason = prompt('Reason for rejection (optional):') || 'Payment could not be verified.';
+    setProcessingSlipId(slipId);
+    try {
+      await paymentSlipsApi.reject(slipId, reason, 'Admin');
+      showToast('Payment rejected. Booking cancelled.');
+      await fetchPaymentSlips();
+    } catch (err: any) {
+      alert(`Failed to reject: ${err.message}`);
+    } finally {
+      setProcessingSlipId(null);
+    }
+  };
 
   const showToast = (msg: string) => {
     setActionMessage(msg);
@@ -222,6 +277,23 @@ export const AdminDashboard: React.FC = () => {
                   activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
                 }`}>
                   {totalUsersCount}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('payment-slips')}
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left ${
+                activeTab === 'payment-slips' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4" /> Payment Slips
+              </div>
+              {paymentSlips.filter(s => s.status === 'pending').length > 0 && (
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                  activeTab === 'payment-slips' ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-700'
+                }`}>
+                  {paymentSlips.filter(s => s.status === 'pending').length}
                 </span>
               )}
             </button>
@@ -911,6 +983,131 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
+      {/* ─── TAB 4: PAYMENT SLIPS ─── */}
+      {activeTab === 'payment-slips' && (
+        <div className="space-y-6">
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 text-center">
+              <p className="text-2xl font-extrabold text-orange-600">{paymentSlips.filter(s => s.status === 'pending').length}</p>
+              <p className="text-xs text-orange-700 font-semibold mt-1">Pending Review</p>
+            </div>
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center">
+              <p className="text-2xl font-extrabold text-emerald-600">{paymentSlips.filter(s => s.status === 'approved').length}</p>
+              <p className="text-xs text-emerald-700 font-semibold mt-1">Approved</p>
+            </div>
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
+              <p className="text-2xl font-extrabold text-red-600">{paymentSlips.filter(s => s.status === 'rejected').length}</p>
+              <p className="text-xs text-red-700 font-semibold mt-1">Rejected</p>
+            </div>
+          </div>
+
+          {/* Refresh button */}
+          <div className="flex justify-between items-center">
+            <h3 className="text-sm font-bold text-slate-700">All Payment Slips</h3>
+            <button
+              onClick={fetchPaymentSlips}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition-colors"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Refresh
+            </button>
+          </div>
+
+          {slipsLoading ? (
+            <div className="text-center py-12 text-slate-400">
+              <div className="w-8 h-8 border-2 border-slate-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-3" />
+              Loading slips...
+            </div>
+          ) : paymentSlips.length === 0 ? (
+            <div className="text-center py-12 text-slate-400">
+              <p className="text-4xl mb-3">💳</p>
+              <p className="text-sm font-semibold">No payment slips yet.</p>
+              <p className="text-xs mt-1">Slips will appear here when passengers submit bank transfers.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {paymentSlips.map((slip) => (
+                <div
+                  key={slip.id}
+                  className={`bg-white rounded-2xl border-2 shadow-sm overflow-hidden ${
+                    slip.status === 'pending' ? 'border-orange-300' :
+                    slip.status === 'approved' ? 'border-emerald-300' : 'border-red-200'
+                  }`}
+                >
+                  <div className="flex items-stretch gap-4 p-4">
+                    {/* Status badge + info */}
+                    <div className="flex-1 space-y-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                          slip.status === 'pending' ? 'bg-orange-100 text-orange-700' :
+                          slip.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                        }`}>
+                          {slip.status.toUpperCase()}
+                        </span>
+                        <span className="text-xs font-mono font-bold text-blue-600">{slip.pnr}</span>
+                      </div>
+                      <p className="text-base font-bold text-slate-800 truncate">{slip.passengerName}</p>
+                      <p className="text-lg font-extrabold text-slate-900">LKR {Number(slip.amount).toLocaleString()}</p>
+                      <p className="text-[11px] text-slate-400">
+                        Submitted: {new Date(slip.uploadedAt).toLocaleString()}
+                      </p>
+                      {slip.reviewedAt && (
+                        <p className="text-[11px] text-slate-400">
+                          Reviewed: {new Date(slip.reviewedAt).toLocaleString()} by {slip.reviewedBy}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Slip thumbnail */}
+                    {slip.imageData && (
+                      <div
+                        className="w-24 h-24 flex-shrink-0 cursor-pointer rounded-xl overflow-hidden border border-slate-200 hover:border-blue-400 transition-colors"
+                        onClick={() => setSelectedSlipImage({ src: `data:${slip.imageMime};base64,${slip.imageData}`, pnr: slip.pnr })}
+                      >
+                        <img
+                          src={`data:${slip.imageMime};base64,${slip.imageData}`}
+                          alt="Payment slip"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+
+                    {/* Action buttons */}
+                    <div className="flex flex-col gap-2 justify-center flex-shrink-0">
+                      <button
+                        onClick={() => setSelectedSlipImage({ src: `data:${slip.imageMime};base64,${slip.imageData}`, pnr: slip.pnr })}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
+                      >
+                        <Eye className="w-3.5 h-3.5" /> View Slip
+                      </button>
+                      {slip.status === 'pending' && (
+                        <>
+                          <button
+                            onClick={() => handleApproveSlip(slip.id)}
+                            disabled={processingSlipId === slip.id}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold transition-colors"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Approve
+                          </button>
+                          <button
+                            onClick={() => handleRejectSlip(slip.id)}
+                            disabled={processingSlipId === slip.id}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white text-xs font-bold transition-colors"
+                          >
+                            <X className="w-3.5 h-3.5" /> Reject
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
         </main>
       </div>
 
@@ -1004,6 +1201,34 @@ export const AdminDashboard: React.FC = () => {
           route={editDetailsRoute}
           onClose={() => setEditDetailsRoute(null)}
         />
+      )}
+
+      {/* Slip Image Lightbox */}
+      {selectedSlipImage && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedSlipImage(null)}
+        >
+          <div
+            className="bg-white rounded-2xl p-4 max-w-lg w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-3">
+              <p className="font-bold text-slate-800">Slip — {selectedSlipImage.pnr}</p>
+              <button
+                onClick={() => setSelectedSlipImage(null)}
+                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <img
+              src={selectedSlipImage.src}
+              alt="Payment slip full view"
+              className="w-full rounded-xl border border-slate-200 max-h-[70vh] object-contain"
+            />
+          </div>
+        </div>
       )}
 
     </div>

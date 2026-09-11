@@ -170,3 +170,63 @@ _If you did not request this verification code, please ignore this message._`;
   }
 }
 
+/**
+ * Send WhatsApp payment approval/rejection notification to passenger
+ */
+export async function sendWhatsAppPaymentUpdate(payload: {
+  pnr: string;
+  passengerName: string;
+  passengerPhone: string;
+  amount: number;
+  status: 'approved' | 'rejected';
+  reason?: string;
+}): Promise<boolean> {
+  const wahaApiUrl = process.env.WAHA_API_URL || 'http://localhost:3000';
+  const session = process.env.WAHA_SESSION || 'default';
+  const isEnabled = process.env.WAHA_ENABLED !== 'false';
+
+  if (!isEnabled) return false;
+  if (!payload.passengerPhone) return false;
+
+  const chatId = formatSriLankanPhone(payload.passengerPhone);
+
+  const message = payload.status === 'approved'
+    ? `✅ *Payment Approved — Booking Confirmed!*
+*Dewmina Super Line*
+
+Dear *${payload.passengerName}*,
+
+Your bank transfer payment of *LKR ${Number(payload.amount).toLocaleString()}* has been *verified and approved*! 🎉
+
+📌 *PNR:* \`${payload.pnr}\`
+
+Your booking is now *CONFIRMED*. Please show your PNR at the boarding point.
+
+Thank you for choosing Dewmina Super Line! 🚌`
+    : `❌ *Payment Rejected — Booking Cancelled*
+*Dewmina Super Line*
+
+Dear *${payload.passengerName}*,
+
+Unfortunately, your bank transfer slip for *LKR ${Number(payload.amount).toLocaleString()}* could not be verified.
+
+📌 *PNR:* \`${payload.pnr}\`
+📝 *Reason:* ${payload.reason || 'Payment could not be verified.'}
+
+Your booking has been *cancelled* and your seats have been released. Please try booking again or contact us for assistance.
+
+Dewmina Super Line 🚌`;
+
+  try {
+    const endpoint = `${wahaApiUrl.replace(/\/$/, '')}/api/sendText`;
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session, chatId, text: message }),
+    });
+    return response.ok;
+  } catch (error: any) {
+    console.error('[WAHA Service] Failed to send payment update:', error?.message);
+    return false;
+  }
+}

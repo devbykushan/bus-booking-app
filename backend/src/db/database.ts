@@ -210,6 +210,21 @@ export async function initializeSchema(p: Pool): Promise<void> {
       FOREIGN KEY ("routeId") REFERENCES routes("id")
     );
 
+    CREATE TABLE IF NOT EXISTS payment_slips (
+      "id" TEXT PRIMARY KEY,
+      "bookingId" TEXT NOT NULL,
+      "pnr" TEXT NOT NULL,
+      "imageData" TEXT NOT NULL,
+      "imageMime" TEXT NOT NULL DEFAULT 'image/jpeg',
+      "amount" DOUBLE PRECISION NOT NULL,
+      "passengerName" TEXT NOT NULL DEFAULT '',
+      "passengerPhone" TEXT NOT NULL DEFAULT '',
+      "uploadedAt" TEXT NOT NULL,
+      "reviewedAt" TEXT,
+      "reviewedBy" TEXT,
+      "status" TEXT NOT NULL DEFAULT 'pending'
+    );
+
     UPDATE routes 
     SET "busType" = 'Normal Service', "priceStarting" = 1157 
     WHERE "busType" LIKE '%Normal Service%' OR "busType" LIKE '%58 Seats%' OR "busType" LIKE '%54 Seats%' OR "busNumber" LIKE '%Route 98%' OR "busNumber" LIKE '%ND-3223%';

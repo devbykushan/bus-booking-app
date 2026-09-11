@@ -198,7 +198,7 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
           "passengerEmail", "passengerPhone", "passengerGender", "passengerAge", "baseFare", "taxAmount",
           "insuranceAmount", "discountAmount", "totalFare", "promoCodeApplied", "paymentMethod", "paymentStatus",
           "bookingStatus", "qrCodeData", "createdAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, 'paid', 'confirmed', $26, $27)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29)
       `, [
         bookingId, pnr, routeId, route.operatorName, route.busNumber, route.busType,
         route.origin, route.destination, departureDate, route.departureTime,
@@ -206,11 +206,14 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
         passenger.fullName, passenger.email, passenger.phone, passenger.gender, passenger.age,
         baseFare, taxAmount, insuranceAmount, discountAmount, totalFare,
         promo || null, paymentMethod || 'card',
+        paymentMethod === 'bank_transfer' ? 'pending' : 'paid',
+        paymentMethod === 'bank_transfer' ? 'pending_payment' : 'confirmed',
         qrCodeData, new Date().toISOString(),
       ]);
 
       // Mark seats as booked in DB
-      await client.query('UPDATE seats SET "status" = \'booked\' WHERE "id" = ANY($1::text[]) OR "id" = ANY($2::text[])', [canonicalSeatIds, seatIds]);
+      const seatNewStatus = (paymentMethod || 'card') === 'bank_transfer' ? 'reserved' : 'booked';
+      await client.query(`UPDATE seats SET "status" = '${seatNewStatus}' WHERE "id" = ANY($1::text[]) OR "id" = ANY($2::text[])`, [canonicalSeatIds, seatIds]);
 
       await client.query('COMMIT');
     } catch (txErr) {
@@ -229,20 +232,22 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
     const formatted = await formatBooking(newBookingRes.rows[0], pool);
 
     // Non-blocking trigger for WhatsApp E-Ticket sending via WAHA
-    sendWhatsAppETicket({
-      pnr,
-      passengerName: passenger.fullName,
-      passengerPhone: passenger.phone,
-      busNumber: route.busNumber || 'ND-3223',
-      busType: route.busType || 'Normal Service',
-      origin: route.origin || 'Monaragala',
-      destination: route.destination || 'Colombo',
-      departureDate,
-      departureTime: route.departureTime || '05:00 AM',
-      seatNumbers: seatIds.map((id: string) => id.replace(/^[^-]+-/, '').replace(/^seat-/, '')),
-      totalFare,
-      paymentMethod: paymentMethod || 'card',
-    }).catch(err => console.error('[WAHA Async Error]', err));
+    if ((paymentMethod || 'card') !== 'bank_transfer') {
+      sendWhatsAppETicket({
+        pnr,
+        passengerName: passenger.fullName,
+        passengerPhone: passenger.phone,
+        busNumber: route.busNumber || 'ND-3223',
+        busType: route.busType || 'Normal Service',
+        origin: route.origin || 'Monaragala',
+        destination: route.destination || 'Colombo',
+        departureDate,
+        departureTime: route.departureTime || '05:00 AM',
+        seatNumbers: seatIds.map((id: string) => id.replace(/^[^-]+-/, '').replace(/^seat-/, '')),
+        totalFare,
+        paymentMethod: paymentMethod || 'card',
+      }).catch(err => console.error('[WAHA Async Error]', err));
+    }
 
     res.status(201).json(formatted);
   } catch (err: any) {

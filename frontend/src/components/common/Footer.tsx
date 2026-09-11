@@ -176,14 +176,14 @@ export const Footer: React.FC = () => {
                 </a>
 
                 <a
-                  href="mailto:dewminasuperline@gmail.com"
+                  href="mailto:dewminasuperline.pvt.ltd@gmail.com"
                   className="flex items-center gap-3 p-2.5 rounded-2xl bg-white hover:bg-blue-50/40 border border-slate-200 hover:border-blue-300 text-slate-800 transition-all duration-300 shadow-xs hover:shadow-md hover:-translate-y-0.5 group"
                 >
                   <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
                     <Mail className="w-4 h-4" />
                   </div>
                   <div className="overflow-hidden">
-                    <p className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">dewminasuperline@gmail.com</p>
+                    <p className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">dewminasuperline.pvt.ltd@gmail.com</p>
                     <p className="text-[10px] text-slate-500">Online Inquiries & Support</p>
                   </div>
                 </a>
