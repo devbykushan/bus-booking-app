@@ -278,25 +278,27 @@ Thank you for choosing OmniBus!
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
-  const port = Number(process.env.SMTP_PORT) || 587;
-  const secure = process.env.SMTP_SECURE === 'true';
 
-  if (host && user && pass) {
+  if (user && pass) {
     try {
-      console.log(`[Email Service] Sending welcome email to ${email} via SMTP (${host})...`);
-      const transporter = nodemailer.createTransport({
-        host,
-        port,
-        secure,
-        family: 4,
-        connectionTimeout: 5000,
-        greetingTimeout: 5000,
-        socketTimeout: 8000,
-        auth: {
-          user,
-          pass,
-        },
-      } as any);
+      console.log(`[Email Service] Sending welcome email to ${email}...`);
+      const isGmail = (host && host.includes('gmail')) || user.includes('@gmail.com');
+      const transporter = isGmail
+        ? nodemailer.createTransport({
+            service: 'gmail',
+            auth: { user, pass },
+            family: 4,
+          } as any)
+        : nodemailer.createTransport({
+            host: host || 'smtp.gmail.com',
+            port: Number(process.env.SMTP_PORT) || 587,
+            secure: process.env.SMTP_SECURE === 'true',
+            family: 4,
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 15000,
+            auth: { user, pass },
+          } as any);
 
       const info = await transporter.sendMail({
         from: fromAddress,
@@ -306,10 +308,10 @@ Thank you for choosing OmniBus!
         html: htmlBody,
       });
 
-      console.log(`[Email Service] ✅ Welcome email delivered successfully to ${email} via SMTP! ID: ${info.messageId}`);
+      console.log(`[Email Service] ✅ Welcome email delivered successfully to ${email}! ID: ${info.messageId}`);
       return true;
     } catch (err: any) {
-      console.error(`[Email Service] Failed to send email via SMTP (${host}):`, err?.message || err);
+      console.error(`[Email Service] Failed to send email via SMTP:`, err?.message || err);
     }
   }
 
@@ -428,19 +430,28 @@ Thank you!
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
-  if (host && user && pass) {
+  if (user && pass) {
     try {
-      const transporter = nodemailer.createTransport({
-        host,
-        port: Number(process.env.SMTP_PORT) || 587,
-        secure: process.env.SMTP_SECURE === 'true',
-        connectionTimeout: 5000,
-        greetingTimeout: 5000,
-        socketTimeout: 8000,
-        auth: { user, pass },
-      } as any);
-      await transporter.sendMail({ from: fromAddress, to: email, subject, text: textBody, html: htmlBody });
-      console.log(`[Email Service] ✅ OTP email delivered to ${email} via SMTP (${host})`);
+      console.log(`[Email Service] Sending OTP email to ${email}...`);
+      const isGmail = (host && host.includes('gmail')) || user.includes('@gmail.com');
+      const transporter = isGmail
+        ? nodemailer.createTransport({
+            service: 'gmail',
+            auth: { user, pass },
+            family: 4,
+          } as any)
+        : nodemailer.createTransport({
+            host: host || 'smtp.gmail.com',
+            port: Number(process.env.SMTP_PORT) || 587,
+            secure: process.env.SMTP_SECURE === 'true',
+            family: 4,
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 15000,
+            auth: { user, pass },
+          } as any);
+      const info = await transporter.sendMail({ from: fromAddress, to: email, subject, text: textBody, html: htmlBody });
+      console.log(`[Email Service] ✅ OTP email delivered to ${email} (Message ID: ${info.messageId})`);
       return true;
     } catch (err: any) {
       console.error('[Email Service] SMTP OTP error:', err?.message || err);
