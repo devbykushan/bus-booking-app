@@ -225,8 +225,8 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   },
   sendOtp: async (name, email) => {
     try {
-      const res = await authApi.sendOtp({ name, email });
-      return { success: res.success, message: res.message || 'OTP sent successfully' };
+      const res: any = await authApi.sendOtp({ name, email });
+      return { success: res.success, message: res.message || 'OTP sent successfully', devOtp: res.devOtp };
     } catch (err: any) {
       return { success: false, message: err.message || 'Failed to send OTP' };
     }
@@ -332,7 +332,11 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
 
   setSearchCriteria: (origin, dest, date) => {
     const today = new Date().toISOString().split('T')[0];
-    const validDate = (!date || date < today) ? today : date;
+    const maxD = new Date();
+    maxD.setDate(maxD.getDate() + 7);
+    const maxAllowed = maxD.toISOString().split('T')[0];
+    let validDate = (!date || date < today) ? today : date;
+    if (validDate > maxAllowed) validDate = maxAllowed;
     set({ searchOrigin: origin, searchDestination: dest, searchDate: validDate });
   },
   setSoloFemaleOnly: (val) => set({ soloFemaleOnly: val }),
@@ -487,6 +491,17 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
 
     if (!selectedRoute || selectedSeatIds.length === 0 || !selectedBoardingPoint || !selectedDropPoint) {
       return null;
+    }
+
+    if (searchDate) {
+      const today = new Date().toISOString().split('T')[0];
+      const maxD = new Date();
+      maxD.setDate(maxD.getDate() + 7);
+      const maxAllowed = maxD.toISOString().split('T')[0];
+      if (searchDate < today || searchDate > maxAllowed) {
+        set({ isLoading: false, error: 'Bookings are only permitted up to 1 week (7 days) in advance.' });
+        return null;
+      }
     }
 
     // Map selectedSeatIds to canonical route-prefixed seat IDs (e.g. "route-101-17")

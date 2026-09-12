@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { paymentSlipsApi } from '../../services/api';
-import { Upload, CheckCircle2, AlertCircle, FileImage, ArrowLeft, Loader2, X } from 'lucide-react';
+import { Upload, CheckCircle2, AlertCircle, FileImage, FileText, ArrowLeft, Loader2, X } from 'lucide-react';
 
 export const SlipUploadPage: React.FC = () => {
   const { latestConfirmedBooking, setCurrentView } = useBookingStore();
@@ -18,12 +18,15 @@ export const SlipUploadPage: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      setError('Only image files (JPG, PNG) are accepted.');
+    const isImage = file.type.startsWith('image/');
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+
+    if (!isImage && !isPdf) {
+      setError('Only image files (JPG, PNG, WEBP) or PDF documents are accepted.');
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setError('File size must be less than 5MB.');
+    if (file.size > 20 * 1024 * 1024) {
+      setError('File size must be less than 20MB.');
       return;
     }
 
@@ -54,11 +57,12 @@ export const SlipUploadPage: React.FC = () => {
       reader.onload = async (ev) => {
         try {
           const base64 = (ev.target?.result as string).split(',')[1];
+          const mime = selectedFile.type || (selectedFile.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
           await paymentSlipsApi.upload({
             bookingId: booking.id,
             pnr: booking.pnr,
             imageData: base64,
-            imageMime: selectedFile.type,
+            imageMime: mime,
             amount: booking.totalFare,
             passengerName: booking.passenger?.fullName || '',
             passengerPhone: booking.passenger?.phone || '',
@@ -133,6 +137,8 @@ export const SlipUploadPage: React.FC = () => {
     );
   }
 
+  const isSelectedPdf = selectedFile?.type === 'application/pdf' || selectedFile?.name.toLowerCase().endsWith('.pdf');
+
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4">
       <div className="max-w-lg mx-auto space-y-6 animate-fade-in-up">
@@ -196,18 +202,45 @@ export const SlipUploadPage: React.FC = () => {
               onClick={() => fileInputRef.current?.click()}
               className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all"
             >
-              <FileImage className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <p className="text-sm font-semibold text-slate-600">Click or drag & drop your slip</p>
-              <p className="text-xs text-slate-400 mt-1">JPG, PNG — Max 5MB</p>
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <FileImage className="w-8 h-8 text-blue-500" />
+                <span className="text-slate-300 font-bold">/</span>
+                <FileText className="w-8 h-8 text-red-500" />
+              </div>
+              <p className="text-sm font-semibold text-slate-700">Click or drag & drop your slip</p>
+              <p className="text-xs text-slate-400 mt-1">Image (JPG, PNG) or PDF Document — Max 20MB</p>
+            </div>
+          ) : isSelectedPdf ? (
+            <div className="relative p-5 rounded-2xl bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center text-red-600 flex-shrink-0 shadow-sm">
+                <FileText className="w-6 h-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-slate-800 truncate">{selectedFile?.name}</p>
+                <p className="text-xs text-slate-500">
+                  PDF Document • {((selectedFile?.size || 0) / (1024 * 1024)).toFixed(2)} MB
+                </p>
+                <span className="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-700">
+                  Ready to submit
+                </span>
+              </div>
+              <button
+                onClick={() => { setSelectedFile(null); setPreviewUrl(null); }}
+                className="p-1.5 rounded-full bg-white border border-slate-200 shadow-sm hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors"
+                title="Remove document"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           ) : (
             <div className="relative">
-              <img src={previewUrl} alt="Slip preview" className="w-full rounded-xl border border-slate-200 max-h-64 object-contain" />
+              <img src={previewUrl} alt="Slip preview" className="w-full rounded-xl border border-slate-200 max-h-64 object-contain bg-slate-50" />
               <button
                 onClick={() => { setSelectedFile(null); setPreviewUrl(null); }}
-                className="absolute top-2 right-2 p-1 rounded-full bg-white border border-slate-200 shadow-sm hover:bg-red-50"
+                className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 shadow-md hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors"
+                title="Remove image"
               >
-                <X className="w-4 h-4 text-slate-600" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           )}
@@ -215,7 +248,7 @@ export const SlipUploadPage: React.FC = () => {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,.pdf,application/pdf"
             onChange={handleFileChange}
             className="hidden"
           />

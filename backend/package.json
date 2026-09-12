@@ -4,9 +4,9 @@
   "description": "OmniBus REST API — Express + SQLite backend",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "dev:backend": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "db:migrate": "ts-node-dev --transpile-only src/db/migrate.ts",
+    "dev": "node ./node_modules/ts-node-dev/lib/bin.js --respawn --transpile-only src/index.ts",
+    "dev:backend": "node ./node_modules/ts-node-dev/lib/bin.js --respawn --transpile-only src/index.ts",
+    "db:migrate": "node ./node_modules/ts-node-dev/lib/bin.js --transpile-only src/db/migrate.ts",
     "build": "node ./node_modules/typescript/bin/tsc",
     "prestart": "npm run build",
     "start": "node dist/index.js"

@@ -61,14 +61,17 @@ export const HeroSearch: React.FC = () => {
     return (!searchDate || searchDate < now) ? now : searchDate;
   });
 
-  // Auto-heal past dates when today's date changes or component renders
+  // Auto-heal past dates or dates beyond 1-week limit
   React.useEffect(() => {
     const now = toISODateString(new Date());
     if (!date || date < now) {
       setDate(now);
       setSearchCriteria(origin, destination, now);
+    } else if (date > maxDateStr) {
+      setDate(maxDateStr);
+      setSearchCriteria(origin, destination, maxDateStr);
     }
-  }, [todayStr]);
+  }, [todayStr, maxDateStr]);
 
   const handleSwap = () => {
     const temp = origin;

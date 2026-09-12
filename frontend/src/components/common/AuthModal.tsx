@@ -128,7 +128,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
         }
       } else {
         if (regStep === 1) {
-          await sendOtp(name, email);
+          const res = await sendOtp(name, email);
+          if (res && !res.success) {
+            setShakeError(true);
+            setErrorMsg(res.message || 'Failed to send OTP. Please try again.');
+            return;
+          }
+          if ((res as any)?.devOtp) {
+            setOtp((res as any).devOtp);
+          }
           setRegStep(2);
         } else if (regStep === 2) {
           await useBookingStore.getState().verifyEmailOtp(email, otp);

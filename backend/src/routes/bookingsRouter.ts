@@ -117,6 +117,20 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
       return;
     }
 
+    const effectiveDate = searchDate || route.departureDate;
+    if (effectiveDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const bookingDate = new Date(effectiveDate);
+      bookingDate.setHours(0, 0, 0, 0);
+      const maxAllowed = new Date(today);
+      maxAllowed.setDate(maxAllowed.getDate() + 7);
+      if (bookingDate < today || bookingDate > maxAllowed) {
+        res.status(400).json({ error: 'Bookings are only permitted up to 1 week (7 days) in advance.' });
+        return;
+      }
+    }
+
     // Normalize seat IDs to route-prefixed canonical format (e.g. "route-101-17")
     const canonicalSeatIds = seatIds.map((id: string) => {
       if (id.startsWith(`${routeId}-`)) return id;

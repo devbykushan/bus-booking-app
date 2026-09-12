@@ -289,6 +289,9 @@ Thank you for choosing OmniBus!
         port,
         secure,
         family: 4,
+        connectionTimeout: 5000,
+        greetingTimeout: 5000,
+        socketTimeout: 8000,
         auth: {
           user,
           pass,
@@ -318,6 +321,9 @@ Thank you for choosing OmniBus!
       host: 'smtp.ethereal.email',
       port: 587,
       secure: false,
+      connectionTimeout: 4000,
+      greetingTimeout: 4000,
+      socketTimeout: 6000,
       auth: {
         user: testAccount.user,
         pass: testAccount.pass,
@@ -392,7 +398,7 @@ Thank you!
 </html>
   `.trim();
 
-  // 1. Resend
+  // 1. Resend (HTTP API - Best for cloud hosts like Render)
   if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim()) {
     try {
       const apiKey = process.env.RESEND_API_KEY.trim();
@@ -407,13 +413,18 @@ Thank you!
           text: textBody,
         }),
       });
-      if (res.ok) return true;
+      if (res.ok) {
+        console.log(`[Email Service] ✅ OTP email delivered to ${email} via Resend`);
+        return true;
+      }
+      const errText = await res.text();
+      console.error(`[Email Service] Resend OTP error HTTP ${res.status}:`, errText);
     } catch (err) {
       console.error('[Email Service] Resend OTP error:', err);
     }
   }
 
-  // 2. SMTP
+  // 2. SMTP (Gmail, Brevo, SendGrid, etc.)
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
@@ -423,30 +434,37 @@ Thank you!
         host,
         port: Number(process.env.SMTP_PORT) || 587,
         secure: process.env.SMTP_SECURE === 'true',
+        connectionTimeout: 5000,
+        greetingTimeout: 5000,
+        socketTimeout: 8000,
         auth: { user, pass },
       } as any);
       await transporter.sendMail({ from: fromAddress, to: email, subject, text: textBody, html: htmlBody });
+      console.log(`[Email Service] ✅ OTP email delivered to ${email} via SMTP (${host})`);
       return true;
-    } catch (err) {
-      console.error('[Email Service] SMTP OTP error:', err);
+    } catch (err: any) {
+      console.error('[Email Service] SMTP OTP error:', err?.message || err);
     }
   }
 
-  // 3. Fallback
+  // 3. Fallback preview
   try {
     const testAccount = await nodemailer.createTestAccount();
     const testTransporter = nodemailer.createTransport({
       host: 'smtp.ethereal.email',
       port: 587,
       secure: false,
+      connectionTimeout: 4000,
+      greetingTimeout: 4000,
+      socketTimeout: 6000,
       auth: { user: testAccount.user, pass: testAccount.pass },
     });
     const info = await testTransporter.sendMail({ from: fromAddress, to: email, subject, text: textBody, html: htmlBody });
     const previewUrl = nodemailer.getTestMessageUrl(info);
     console.log('[Email Service] OTP Ethereal Preview: ', previewUrl);
     return true;
-  } catch (err) {
-    console.error(err);
+  } catch (err: any) {
+    console.warn('[Email Service] Fallback preview unavailable (network or SMTP blocked):', err?.message || err);
     return false;
   }
 }
