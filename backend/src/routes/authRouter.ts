@@ -238,7 +238,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+      return res.status(404).json({ error: 'No account found with this email address. Please click "Register here" below to create your account.' });
     }
 
     const dbUser = result.rows[0];
@@ -246,7 +246,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
     // 2. Verify password hash
     const isMatch = verifyPassword(password, dbUser.password);
     if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+      return res.status(401).json({ error: 'Incorrect password. Please verify your password and try again.' });
     }
 
     // 3. Verify strict role matching between requested login tab and actual user account role

@@ -2,10 +2,10 @@ import { getPool } from './db/database';
 async function run() {
   const p = getPool();
   try {
-    const res = await p.query("SELECT * FROM routes WHERE \"departureDate\" = '2026-09-09'");
-    console.log("Routes for 2026-09-09:");
-    for (const r of res.rows) {
-      console.log(`- ${r.id}: Bus ${r.busNumber}, Departs: ${r.departureTime}, Price: ${r.priceStarting}`);
+    const res = await p.query('SELECT "id", "name", "email", "role", "phone", "createdAt" FROM users ORDER BY "createdAt" DESC');
+    console.log("Users in DB count:", res.rows.length);
+    for (const u of res.rows) {
+      console.log(`- ${u.id}: ${u.name} | ${u.email} | ${u.role} | ${u.phone}`);
     }
   } catch(e) {
     console.error(e);
