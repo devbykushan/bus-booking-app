@@ -12,7 +12,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [role, setRole] = useState<'passenger' | 'admin'>('passenger');
   const [regStep, setRegStep] = useState(1);
-  const [otpMode, setOtpMode] = useState(false);
   const [otp, setOtp] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -67,7 +66,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     setPhoneTouched(false);
     setEmailTouched(false);
     setPasswordTouched(false);
-    setOtpMode(false);
     setOtp('');
   };
 
@@ -125,6 +123,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
         const res = await login(email, password, role);
         if (res.success) {
           onClose();
+        } else {
+          setShakeError(true);
+          setErrorMsg(res.message || 'Login failed. Please check your credentials.');
         }
       } else {
         if (regStep === 1) {
@@ -139,20 +140,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
           }
           setRegStep(2);
         } else if (regStep === 2) {
-          await useBookingStore.getState().verifyEmailOtp(email, otp);
-          setRegStep(3);
-        } else if (regStep === 3) {
           const res = await register(name, email, password, otp, role, phone);
           if (res.success) {
             setRegistrationSuccess(true);
+          } else {
+            setShakeError(true);
+            setErrorMsg(res.message || 'Registration failed. Please check the OTP and try again.');
           }
         }
       }
     } catch (err: any) {
       setShakeError(true);
-      // The error is already handled by the store, which updates the `error` state.
-      // But if there's a local error, we can set it:
-      // setErrorMsg(err.message || 'Something went wrong. Please try again.');
+      setErrorMsg(err.message || 'Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -294,30 +293,40 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-4 text-xs">
 
-                {/* OTP Input (Only in OTP Mode) */}
+                {/* Step 2: OTP Input */}
                 {mode === 'register' && regStep === 2 && (
-                  <div className="animate-fade-in-up" style={{ animationDelay: '80ms' }}>
-                    <label className="block text-slate-600 mb-1.5 font-semibold">Enter OTP</label>
-                    <div className="relative flex items-center rounded-xl border py-2.5 px-3 transition-all border-blue-300 bg-blue-50/30">
-                      <Lock className="w-4 h-4 mr-2.5 transition-colors text-blue-500" />
-                      <input
-                        type="text"
-                        placeholder="123456"
-                        value={otp}
-                        maxLength={6}
-                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                        className="w-full bg-transparent text-slate-800 text-xs font-mono tracking-widest focus:outline-none placeholder-slate-400"
-                        required
-                      />
+                  <div className="animate-fade-in-up space-y-3" style={{ animationDelay: '80ms' }}>
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-2xl text-blue-900 text-xs">
+                      <p className="font-bold flex items-center gap-1.5">
+                        <Mail className="w-4 h-4 text-blue-600" /> Verification Code Sent!
+                      </p>
+                      <p className="text-[11px] text-blue-700 mt-1">
+                        We sent a 6-digit OTP to <strong>{email}</strong>. Check your inbox and spam folder.
+                      </p>
                     </div>
-                    <div className="mt-1 text-[10px] text-blue-600 font-semibold pl-1">
-                      Please enter the 6-digit code sent to your email.
+
+                    <div>
+                      <label className="block text-slate-600 mb-1.5 font-semibold">Enter 6-Digit OTP</label>
+                      <div className="relative flex items-center rounded-xl border py-2.5 px-3 transition-all border-blue-300 bg-blue-50/30">
+                        <Lock className="w-4 h-4 mr-2.5 transition-colors text-blue-500" />
+                        <input
+                          ref={otpRef}
+                          type="text"
+                          placeholder="123456"
+                          value={otp}
+                          maxLength={6}
+                          onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                          className="w-full bg-transparent text-slate-800 text-sm font-mono tracking-widest focus:outline-none placeholder-slate-400"
+                          required
+                          autoFocus
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* Full Name (register only) */}
-                {mode === 'register' && !otpMode && (
+                {/* Step 1: Full Name (register only) */}
+                {mode === 'register' && regStep === 1 && (
                   <div className="animate-fade-in-up" style={{ animationDelay: '80ms' }}>
                     <label className="block text-slate-600 mb-1.5 font-semibold">Full Name</label>
                     <div className={inputRingClass(nameTouched, isNameValid(name), shakeError && !isNameValid(name))}>
@@ -346,8 +355,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                   </div>
                 )}
 
-                {/* Mobile Number (passenger registration only) */}
-                {mode === 'register' && role === 'passenger' && !otpMode && (
+                {/* Step 1: Mobile Number (passenger registration only) */}
+                {mode === 'register' && role === 'passenger' && regStep === 1 && (
                   <div className="animate-fade-in-up" style={{ animationDelay: '140ms' }}>
                     <label className="block text-slate-600 mb-1.5 font-semibold">Mobile Number</label>
                     <div className={inputRingClass(phoneTouched, isPhoneValid(phone), shakeError && !isPhoneValid(phone))}>
@@ -381,68 +390,72 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 )}
 
                 {/* Email */}
-                {(mode === 'login' || (mode === 'register' && regStep === 1)) && <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '200ms' : '80ms' }}>
-                  <label className="block text-slate-600 mb-1.5 font-semibold">Email Address</label>
-                  <div className={inputRingClass(emailTouched, isEmailValid(email), shakeError && !isEmailValid(email))}>
-                    <Mail className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(emailTouched, isEmailValid(email))}`} />
-                    <input
-                      ref={emailRef}
-                      type="email"
-                      placeholder={role === 'admin' ? 'admin@dewminasuperline.lk' : 'passenger@dewminasuperline.lk'}
-                      value={email}
-                      onBlur={() => setEmailTouched(true)}
-                      onChange={(e) => { setEmail(e.target.value); if (!emailTouched) setEmailTouched(true); }}
-                      className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400"
-                      required
-                    />
-                    {emailTouched && (
-                      isEmailValid(email)
-                        ? <span className="text-emerald-500 font-bold ml-1 text-sm animate-fade-in-up">✓</span>
-                        : <AlertCircle className="w-4 h-4 text-rose-500 ml-1 animate-fade-in-up" />
+                {(mode === 'login' || (mode === 'register' && regStep === 1)) && (
+                  <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '200ms' : '80ms' }}>
+                    <label className="block text-slate-600 mb-1.5 font-semibold">Email Address</label>
+                    <div className={inputRingClass(emailTouched, isEmailValid(email), shakeError && !isEmailValid(email))}>
+                      <Mail className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(emailTouched, isEmailValid(email))}`} />
+                      <input
+                        ref={emailRef}
+                        type="email"
+                        placeholder={role === 'admin' ? 'admin@dewminasuperline.lk' : 'passenger@dewminasuperline.lk'}
+                        value={email}
+                        onBlur={() => setEmailTouched(true)}
+                        onChange={(e) => { setEmail(e.target.value); if (!emailTouched) setEmailTouched(true); }}
+                        className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400"
+                        required
+                      />
+                      {emailTouched && (
+                        isEmailValid(email)
+                          ? <span className="text-emerald-500 font-bold ml-1 text-sm animate-fade-in-up">✓</span>
+                          : <AlertCircle className="w-4 h-4 text-rose-500 ml-1 animate-fade-in-up" />
+                      )}
+                    </div>
+                    {emailTouched && !isEmailValid(email) && (
+                      <div className="mt-1 text-[10px] text-rose-500 font-semibold animate-fade-in-up pl-1">
+                        Please enter a valid email address.
+                      </div>
                     )}
                   </div>
-                  {emailTouched && !isEmailValid(email) && (
-                    <div className="mt-1 text-[10px] text-rose-500 font-semibold animate-fade-in-up pl-1">
-                      Please enter a valid email address.
-                    </div>
-                  )}
-                </div>}
+                )}
 
                 {/* Password */}
-                {(mode === 'login' || (mode === 'register' && regStep === 1)) && <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '260ms' : '140ms' }}>
-                  <label className="block text-slate-600 mb-1.5 font-semibold">Password</label>
-                  <div className={inputRingClass(passwordTouched, isPasswordValid(password), shakeError && !isPasswordValid(password))}>
-                    <Lock className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(passwordTouched, isPasswordValid(password))}`} />
-                    <input
-                      ref={passwordRef}
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••••"
-                      value={password}
-                      onBlur={() => setPasswordTouched(true)}
-                      onChange={(e) => { setPassword(e.target.value); if (!passwordTouched) setPasswordTouched(true); }}
-                      className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400 pr-8"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors"
-                      tabIndex={-1}
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {passwordTouched && !isPasswordValid(password) && (
-                    <div className="mt-1 text-[10px] text-rose-500 font-semibold animate-fade-in-up pl-1">
-                      Password must be at least 6 characters long.
+                {(mode === 'login' || (mode === 'register' && regStep === 1)) && (
+                  <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '260ms' : '140ms' }}>
+                    <label className="block text-slate-600 mb-1.5 font-semibold">Password</label>
+                    <div className={inputRingClass(passwordTouched, isPasswordValid(password), shakeError && !isPasswordValid(password))}>
+                      <Lock className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(passwordTouched, isPasswordValid(password))}`} />
+                      <input
+                        ref={passwordRef}
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        value={password}
+                        onBlur={() => setPasswordTouched(true)}
+                        onChange={(e) => { setPassword(e.target.value); if (!passwordTouched) setPasswordTouched(true); }}
+                        className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400 pr-8"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
-                  )}
-                </div>}
+                    {passwordTouched && !isPasswordValid(password) && (
+                      <div className="mt-1 text-[10px] text-rose-500 font-semibold animate-fade-in-up pl-1">
+                        Password must be at least 6 characters long.
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 ${
+                  className={`w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 cursor-pointer ${
                     isSubmitting ? 'opacity-70 cursor-wait' : ''
                   }`}
                 >
@@ -457,11 +470,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                   ) : mode === 'login' ? (
                     `Sign In as ${role === 'admin' ? 'Admin' : 'Passenger'}`
                   ) : regStep === 1 ? (
-                    'Send OTP'
-                  ) : regStep === 2 ? (
-                    'Verify OTP'
+                    'Send Verification Code (OTP)'
                   ) : (
-                    'Create Account'
+                    'Verify & Create Account'
                   )}
                 </button>
               </form>

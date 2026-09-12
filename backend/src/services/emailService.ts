@@ -439,15 +439,18 @@ Thank you!
             service: 'gmail',
             auth: { user, pass },
             family: 4,
+            connectionTimeout: 5000,
+            greetingTimeout: 5000,
+            socketTimeout: 5000,
           } as any)
         : nodemailer.createTransport({
             host: host || 'smtp.gmail.com',
             port: Number(process.env.SMTP_PORT) || 587,
             secure: process.env.SMTP_SECURE === 'true',
             family: 4,
-            connectionTimeout: 10000,
-            greetingTimeout: 10000,
-            socketTimeout: 15000,
+            connectionTimeout: 5000,
+            greetingTimeout: 5000,
+            socketTimeout: 5000,
             auth: { user, pass },
           } as any);
       const info = await transporter.sendMail({ from: fromAddress, to: email, subject, text: textBody, html: htmlBody });
@@ -455,27 +458,9 @@ Thank you!
       return true;
     } catch (err: any) {
       console.error('[Email Service] SMTP OTP error:', err?.message || err);
+      return false;
     }
   }
 
-  // 3. Fallback preview
-  try {
-    const testAccount = await nodemailer.createTestAccount();
-    const testTransporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false,
-      connectionTimeout: 4000,
-      greetingTimeout: 4000,
-      socketTimeout: 6000,
-      auth: { user: testAccount.user, pass: testAccount.pass },
-    });
-    const info = await testTransporter.sendMail({ from: fromAddress, to: email, subject, text: textBody, html: htmlBody });
-    const previewUrl = nodemailer.getTestMessageUrl(info);
-    console.log('[Email Service] OTP Ethereal Preview: ', previewUrl);
-    return true;
-  } catch (err: any) {
-    console.warn('[Email Service] Fallback preview unavailable (network or SMTP blocked):', err?.message || err);
-    return false;
-  }
+  return false;
 }
