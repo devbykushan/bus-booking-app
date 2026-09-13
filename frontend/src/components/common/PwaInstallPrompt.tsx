@@ -72,8 +72,16 @@ export const PwaInstallPrompt: React.FC = () => {
       }
     };
 
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setIsOpen(false);
+      setDeferredPrompt(null);
+      (window as any).__deferredPwaPrompt = null;
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('pwa-prompt-captured', handlePromptCaptured);
+    window.addEventListener('appinstalled', handleAppInstalled);
 
     // 6. Smooth delayed entrance (2.5 seconds after page load)
     const timer = setTimeout(() => {
@@ -83,6 +91,7 @@ export const PwaInstallPrompt: React.FC = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('pwa-prompt-captured', handlePromptCaptured);
+      window.removeEventListener('appinstalled', handleAppInstalled);
       clearTimeout(timer);
     };
   }, []);
