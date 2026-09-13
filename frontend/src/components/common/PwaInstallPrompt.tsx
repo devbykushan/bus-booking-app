@@ -7,9 +7,12 @@ import { useBookingStore } from '../../store/bookingStore';
 
 export const PwaInstallPrompt: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(
+    typeof window !== 'undefined' ? (window as any).__deferredPwaPrompt : null
+  );
   const [isIos, setIsIos] = useState(false);
   const [showIosGuide, setShowIosGuide] = useState(false);
+  const [showAndroidGuide, setShowAndroidGuide] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const setIsPwaPromptOpen = useBookingStore((state) => state.setIsPwaPromptOpen);
 
@@ -53,12 +56,24 @@ export const PwaInstallPrompt: React.FC = () => {
     }
 
     // 5. Listen to Android / Chrome PWA install event
+    if ((window as any).__deferredPwaPrompt) {
+      setDeferredPrompt((window as any).__deferredPwaPrompt);
+    }
+
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
+      (window as any).__deferredPwaPrompt = e;
       setDeferredPrompt(e);
     };
 
+    const handlePromptCaptured = () => {
+      if ((window as any).__deferredPwaPrompt) {
+        setDeferredPrompt((window as any).__deferredPwaPrompt);
+      }
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('pwa-prompt-captured', handlePromptCaptured);
 
     // 6. Smooth delayed entrance (2.5 seconds after page load)
     const timer = setTimeout(() => {
@@ -67,26 +82,33 @@ export const PwaInstallPrompt: React.FC = () => {
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('pwa-prompt-captured', handlePromptCaptured);
       clearTimeout(timer);
     };
   }, []);
 
   const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      // Native Android Chrome 1-click install
-      deferredPrompt.prompt();
-      const choiceResult = await deferredPrompt.userChoice;
-      if (choiceResult.outcome === 'accepted') {
-        setIsOpen(false);
+    const promptEvent = deferredPrompt || (window as any).__deferredPwaPrompt;
+    if (promptEvent) {
+      // Native Android Chrome 1-click install dialog
+      try {
+        promptEvent.prompt();
+        const choiceResult = await promptEvent.userChoice;
+        if (choiceResult?.outcome === 'accepted') {
+          setIsOpen(false);
+        }
+        setDeferredPrompt(null);
+        (window as any).__deferredPwaPrompt = null;
+      } catch (err) {
+        console.warn('Error displaying native install prompt:', err);
+        setShowAndroidGuide(true);
       }
-      setDeferredPrompt(null);
     } else if (isIos) {
       // Open Apple Safari instructions sheet
       setShowIosGuide(true);
     } else {
-      // Generic fallback for other mobile browsers
-      alert('To install the app, tap your browser menu (⋮) and choose "Install app" or "Add to Home Screen".');
-      setIsOpen(false);
+      // Open polite Android / Mobile browser guide modal (no alert!)
+      setShowAndroidGuide(true);
     }
   };
 
@@ -243,7 +265,74 @@ export const PwaInstallPrompt: React.FC = () => {
                 setShowIosGuide(false);
                 setIsOpen(false);
               }}
-              className="w-full py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md"
+              className="w-full py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md cursor-pointer"
+            >
+              Got it!
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Android / Chrome Step-by-Step Guide Modal */}
+      {showAndroidGuide && (
+        <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-700 space-y-4 animate-slide-up">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                <Smartphone className="w-5 h-5" />
+                <h4 className="text-sm font-black text-slate-900 dark:text-white">Install on Mobile</h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAndroidGuide(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Install <strong>Dewmina Super Line</strong> directly onto your home screen in 2 simple taps:
+            </p>
+
+            <div className="space-y-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/60 text-xs">
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-black flex items-center justify-center flex-shrink-0 text-[11px]">
+                  1
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-slate-700 dark:text-slate-200 font-bold flex items-center gap-1.5">
+                    <span>Tap your browser menu</span>
+                    <span className="font-mono text-sm font-black text-slate-900 dark:text-white bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded">⋮</span>
+                  </p>
+                  <p className="text-[11px] text-slate-500">Located at the top right of your browser address bar.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-black flex items-center justify-center flex-shrink-0 text-[11px]">
+                  2
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-slate-700 dark:text-slate-200 font-bold flex items-center gap-1.5">
+                    <span>Tap</span>
+                    <strong className="text-emerald-700 dark:text-emerald-400 font-extrabold flex items-center gap-1">
+                      "Install app" <Download className="w-3.5 h-3.5 inline" />
+                    </strong>
+                    <span>or "Add to Home screen"</span>
+                  </p>
+                  <p className="text-[11px] text-slate-500">Then confirm "Install" to place the app on your home screen.</p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowAndroidGuide(false);
+                setIsOpen(false);
+              }}
+              className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 text-white text-xs font-bold transition-all shadow-md cursor-pointer"
             >
               Got it!
             </button>
