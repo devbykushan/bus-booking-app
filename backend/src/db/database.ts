@@ -225,6 +225,12 @@ export async function initializeSchema(p: Pool): Promise<void> {
       "status" TEXT NOT NULL DEFAULT 'pending'
     );
 
+    CREATE TABLE IF NOT EXISTS whatsapp_auth (
+      "id" TEXT PRIMARY KEY,
+      "data" TEXT NOT NULL,
+      "updatedAt" TEXT NOT NULL
+    );
+
     UPDATE routes 
     SET "busType" = 'Normal Service', "priceStarting" = 1157 
     WHERE "busType" LIKE '%Normal Service%' OR "busType" LIKE '%58 Seats%' OR "busType" LIKE '%54 Seats%' OR "busNumber" LIKE '%Route 98%' OR "busNumber" LIKE '%ND-3223%';

@@ -67,6 +67,58 @@ export function formatSriLankanPhoneJid(phone: string): string {
   return `${cleaned}@s.whatsapp.net`;
 }
 
+import { dbQuery } from '../db/database';
+
+async function restoreAuthFromDb(): Promise<void> {
+  try {
+    const res = await dbQuery('SELECT "id", "data" FROM whatsapp_auth');
+    if (res?.rows && res.rows.length > 0) {
+      if (!fs.existsSync(AUTH_DIR)) {
+        fs.mkdirSync(AUTH_DIR, { recursive: true });
+      }
+      for (const row of res.rows) {
+        const filePath = path.join(AUTH_DIR, row.id);
+        fs.writeFileSync(filePath, row.data, 'utf8');
+      }
+      addEngineLog(`Restored ${res.rows.length} WhatsApp auth keys from PostgreSQL.`);
+    }
+  } catch (err: any) {
+    console.warn('[WhatsApp Service] Could not restore auth from DB:', err?.message || err);
+  }
+}
+
+async function saveAuthToDb(): Promise<void> {
+  try {
+    if (!fs.existsSync(AUTH_DIR)) return;
+    const files = fs.readdirSync(AUTH_DIR);
+    const now = new Date().toISOString();
+    for (const file of files) {
+      const filePath = path.join(AUTH_DIR, file);
+      const stat = fs.statSync(filePath);
+      if (stat.isFile()) {
+        const data = fs.readFileSync(filePath, 'utf8');
+        await dbQuery(
+          `INSERT INTO whatsapp_auth ("id", "data", "updatedAt") 
+           VALUES ($1, $2, $3) 
+           ON CONFLICT ("id") DO UPDATE SET "data" = EXCLUDED."data", "updatedAt" = EXCLUDED."updatedAt"`,
+          [file, data, now]
+        );
+      }
+    }
+  } catch (err: any) {
+    console.warn('[WhatsApp Service] Could not sync auth to DB:', err?.message || err);
+  }
+}
+
+async function clearAuthFromDb(): Promise<void> {
+  try {
+    await dbQuery('DELETE FROM whatsapp_auth');
+    addEngineLog('Cleared WhatsApp auth credentials from PostgreSQL database.');
+  } catch (err: any) {
+    console.warn('[WhatsApp Service] Could not clear auth from DB:', err?.message || err);
+  }
+}
+
 /**
  * Initialize WhatsApp connection via Baileys (Pure Node.js)
  */
@@ -82,6 +134,9 @@ export async function initWhatsApp(): Promise<void> {
     if (!fs.existsSync(AUTH_DIR)) {
       fs.mkdirSync(AUTH_DIR, { recursive: true });
     }
+
+    // Restore any previously saved session from PostgreSQL
+    await restoreAuthFromDb();
 
     addEngineLog(`Loading auth state from: ${AUTH_DIR}`);
     const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
@@ -111,7 +166,10 @@ export async function initWhatsApp(): Promise<void> {
       syncFullHistory: false,
     });
 
-    sock.ev.on('creds.update', saveCreds);
+    sock.ev.on('creds.update', async () => {
+      await saveCreds();
+      await saveAuthToDb();
+    });
 
     sock.ev.on('connection.update', async (update: Partial<ConnectionState>) => {
       const { connection, lastDisconnect, qr } = update;
@@ -228,6 +286,7 @@ export async function restartWhatsAppSession(): Promise<boolean> {
     if (fs.existsSync(AUTH_DIR)) {
       fs.rmSync(AUTH_DIR, { recursive: true, force: true });
     }
+    await clearAuthFromDb();
     currentStatus = 'disconnected';
     currentQrDataUrl = null;
     connectedUser = null;
