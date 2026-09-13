@@ -18,6 +18,7 @@ import { PassengerSettings } from './components/passenger/PassengerSettings';
 import { SlipUploadPage } from './components/passenger/SlipUploadPage';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
+import { PwaInstallPrompt } from './components/common/PwaInstallPrompt';
 import { Bus, AlertCircle, Wifi, RefreshCw, ShieldAlert, ShieldCheck, Lock } from 'lucide-react';
 import { BASE_URL } from './services/api';
 
@@ -250,6 +251,7 @@ export function App() {
 
       <Footer />
       <FloatingWhatsApp />
+      <PwaInstallPrompt />
     </div>
   );
 }
