@@ -3,6 +3,7 @@ import {
   X, Smartphone, Star, Sparkles, Download, 
   Share2, PlusSquare, CheckCircle2 
 } from 'lucide-react';
+import { useBookingStore } from '../../store/bookingStore';
 
 export const PwaInstallPrompt: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,6 +11,14 @@ export const PwaInstallPrompt: React.FC = () => {
   const [isIos, setIsIos] = useState(false);
   const [showIosGuide, setShowIosGuide] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const setIsPwaPromptOpen = useBookingStore((state) => state.setIsPwaPromptOpen);
+
+  useEffect(() => {
+    setIsPwaPromptOpen(isOpen);
+    return () => {
+      setIsPwaPromptOpen(false);
+    };
+  }, [isOpen, setIsPwaPromptOpen]);
 
   useEffect(() => {
     // 1. Check if already installed as standalone PWA
@@ -92,8 +101,8 @@ export const PwaInstallPrompt: React.FC = () => {
   return (
     <>
       {/* Floating Bottom Card */}
-      <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-md z-50 animate-slide-up">
-        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-3xl p-5 border border-emerald-500/30 dark:border-emerald-500/20 shadow-2xl shadow-emerald-950/20 relative overflow-hidden">
+      <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] left-4 right-4 md:left-auto md:right-6 md:bottom-6 md:max-w-md z-[110] transition-all duration-300">
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-3xl p-4 sm:p-5 border border-emerald-500/30 dark:border-emerald-500/20 shadow-2xl shadow-emerald-950/20 relative overflow-hidden">
           {/* Subtle Ambient Background Gradient */}
           <div className="absolute -right-12 -top-12 w-40 h-40 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute -left-12 -bottom-12 w-40 h-40 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
@@ -178,7 +187,7 @@ export const PwaInstallPrompt: React.FC = () => {
 
       {/* iOS Safari Step-by-Step Guide Modal */}
       {showIosGuide && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-700 space-y-4 animate-slide-up">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">

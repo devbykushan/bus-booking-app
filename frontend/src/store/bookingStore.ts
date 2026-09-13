@@ -87,6 +87,8 @@ interface BookingStore {
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
   showAuthModal: boolean;
   setShowAuthModal: (val: boolean) => void;
+  isPwaPromptOpen: boolean;
+  setIsPwaPromptOpen: (val: boolean) => void;
 
   // Loading & errors
   isLoading: boolean;
@@ -174,6 +176,8 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   currentUser: JSON.parse(localStorage.getItem('dewmina_user') || 'null'),
   showAuthModal: false,
   setShowAuthModal: (val) => set({ showAuthModal: val }),
+  isPwaPromptOpen: false,
+  setIsPwaPromptOpen: (val) => set({ isPwaPromptOpen: val }),
 
   theme: (localStorage.getItem('dewmina_theme') as 'light' | 'dark') || 'light',
   setTheme: (theme) => {

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ChevronRight, Phone, Clock } from 'lucide-react';
+import { useBookingStore } from '../../store/bookingStore';
 
 const WHATSAPP_CONTACTS = [
   {
@@ -54,7 +55,9 @@ export const FloatingWhatsApp: React.FC = () => {
     setIsOpen(false);
   };
 
-  if (isModalOpen) return null;
+  const isPwaPromptOpen = useBookingStore((state) => state.isPwaPromptOpen);
+
+  if (isModalOpen || isPwaPromptOpen) return null;
 
   return (
     <div className="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-30 flex flex-col items-end select-none" ref={menuRef}>
