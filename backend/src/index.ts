@@ -9,6 +9,8 @@ import { authRouter } from './routes/authRouter';
 import timetablesRouter from './routes/timetablesRouter';
 import { webhookRouter } from './routes/webhookRouter';
 import { paymentSlipsRouter } from './routes/paymentSlipsRouter';
+import { whatsappRouter } from './routes/whatsappRouter';
+import { initWhatsApp } from './services/whatsappService';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -27,6 +29,11 @@ initDb().catch((err) => {
   console.error('Failed to initialize Neon PostgreSQL database:', err);
 });
 
+// ─── Initialize WhatsApp Baileys Engine ──────────────────────────────────────
+initWhatsApp().catch((err) => {
+  console.warn('[WhatsApp] Could not initialize WhatsApp engine:', err?.message || err);
+});
+
 // ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api/webhook', webhookRouter);
 app.use('/api/auth', authRouter);
@@ -36,6 +43,7 @@ app.use('/api/seats', seatsRouter);
 app.use('/api/validate-ticket', validateRouter);
 app.use('/api/timetables', timetablesRouter);
 app.use('/api/payment-slips', paymentSlipsRouter);
+app.use('/api/whatsapp', whatsappRouter);
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

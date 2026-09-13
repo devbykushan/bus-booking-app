@@ -5,19 +5,20 @@ import { SeatLayoutCustomizerModal } from './SeatLayoutCustomizerModal';
 import { RouteDetailsTimetableEditorModal } from './RouteDetailsTimetableEditorModal';
 import { TimetableManager } from './TimetableManager';
 import { QRScannerModal } from '../operator/QRScannerModal';
+import { WhatsAppManagerSection } from './WhatsAppManagerModal';
 import { routesApi, authApi, paymentSlipsApi } from '../../services/api';
 import type { BusRoute } from '../../types/booking';
 import { 
   TrendingUp, Users, DollarSign, Bus, Award, BarChart2, 
   SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
   Trash2, RefreshCw, Edit3, Clock, Star, Search,
-  Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText
+  Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare
 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
   const { bookings, routes, loadRoutes } = useBookingStore();
 
-  const [activeTab, setActiveTab] = useState<'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips'>('fleet');
+  const [activeTab, setActiveTab] = useState<'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp'>('fleet');
   const [showScanner, setShowScanner] = useState(false);
   const [selectedRouteId, setSelectedRouteId] = useState<string>(routes[0]?.id || '');
   const [showSeatBuilder, setShowSeatBuilder] = useState(false);
@@ -296,6 +297,21 @@ export const AdminDashboard: React.FC = () => {
                   {paymentSlips.filter(s => s.status === 'pending').length}
                 </span>
               )}
+            </button>
+            <button
+              onClick={() => setActiveTab('whatsapp')}
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left ${
+                activeTab === 'whatsapp' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" /> WhatsApp Gateway
+              </div>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                activeTab === 'whatsapp' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
+              }`}>
+                BOT
+              </span>
             </button>
           </div>
 
@@ -1112,6 +1128,13 @@ export const AdminDashboard: React.FC = () => {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ─── TAB 6: WHATSAPP AUTOMATION GATEWAY ─── */}
+      {activeTab === 'whatsapp' && (
+        <div className="animate-fade-in-up">
+          <WhatsAppManagerSection />
         </div>
       )}
 

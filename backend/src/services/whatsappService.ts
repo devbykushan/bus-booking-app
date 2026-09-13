@@ -1,0 +1,318 @@
+import makeWASocket, {
+  DisconnectReason,
+  useMultiFileAuthState,
+  fetchLatestBaileysVersion,
+  WASocket,
+  ConnectionState,
+} from '@whiskeysockets/baileys';
+import pino from 'pino';
+import QRCode from 'qrcode';
+import path from 'path';
+import fs from 'fs';
+
+export interface BookingNotificationPayload {
+  pnr: string;
+  passengerName: string;
+  passengerPhone: string;
+  busNumber: string;
+  busType: string;
+  origin: string;
+  destination: string;
+  departureDate: string;
+  departureTime: string;
+  seatNumbers: string[];
+  totalFare: number;
+  paymentMethod: string;
+  qrCodeUrl?: string;
+}
+
+export type WhatsAppConnectionStatus = 'connected' | 'connecting' | 'qr_ready' | 'disconnected';
+
+let sock: WASocket | null = null;
+let currentStatus: WhatsAppConnectionStatus = 'disconnected';
+let currentQrDataUrl: string | null = null;
+let currentQrRaw: string | null = null;
+let connectedUser: { id: string; name?: string } | null = null;
+let isInitializing = false;
+
+const AUTH_DIR = path.resolve(process.cwd(), 'auth_info_baileys');
+
+/**
+ * Format Sri Lankan and international phone numbers to Baileys WhatsApp JID (e.g. 94771234567@s.whatsapp.net)
+ */
+export function formatSriLankanPhoneJid(phone: string): string {
+  let cleaned = phone.replace(/[^\d+]/g, '').trim();
+
+  if (cleaned.startsWith('+')) {
+    cleaned = cleaned.substring(1);
+  }
+
+  // Handle local 07X format (e.g., 0771234567 -> 94771234567)
+  if (cleaned.startsWith('0') && cleaned.length === 10) {
+    cleaned = '94' + cleaned.substring(1);
+  } else if (!cleaned.startsWith('94') && cleaned.length === 9) {
+    cleaned = '94' + cleaned;
+  }
+
+  return `${cleaned}@s.whatsapp.net`;
+}
+
+/**
+ * Initialize WhatsApp connection via Baileys (Pure Node.js)
+ */
+export async function initWhatsApp(): Promise<void> {
+  if (isInitializing) return;
+  isInitializing = true;
+
+  try {
+    if (!fs.existsSync(AUTH_DIR)) {
+      fs.mkdirSync(AUTH_DIR, { recursive: true });
+    }
+
+    const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
+    const { version, isLatest } = await fetchLatestBaileysVersion();
+    console.log(`[WhatsApp Service] Baileys engine v${version.join('.')} (Latest: ${isLatest}) initializing...`);
+
+    const logger = pino({ level: 'silent' });
+
+    sock = makeWASocket({
+      version,
+      auth: state,
+      logger,
+      printQRInTerminal: false,
+      browser: ['Dewmina Super Line', 'Chrome', '1.0.0'],
+      connectTimeoutMs: 60000,
+      defaultQueryTimeoutMs: 60000,
+      keepAliveIntervalMs: 25000,
+    });
+
+    sock.ev.on('creds.update', saveCreds);
+
+    sock.ev.on('connection.update', async (update: Partial<ConnectionState>) => {
+      const { connection, lastDisconnect, qr } = update;
+
+      if (qr) {
+        currentQrRaw = qr;
+        try {
+          currentQrDataUrl = await QRCode.toDataURL(qr);
+          currentStatus = 'qr_ready';
+          console.log('\n======================================================');
+          console.log('📱 [WhatsApp Service] NEW QR CODE GENERATED FOR PAIRING:');
+          console.log('Open WhatsApp > Linked Devices > Link a Device');
+          console.log('Or scan in Admin Portal: Settings > WhatsApp Service');
+          console.log('======================================================\n');
+        } catch (qrErr) {
+          console.error('[WhatsApp Service] Error generating QR data URL:', qrErr);
+        }
+      }
+
+      if (connection === 'connecting') {
+        currentStatus = 'connecting';
+        console.log('[WhatsApp Service] Connecting to WhatsApp servers...');
+      }
+
+      if (connection === 'open') {
+        currentStatus = 'connected';
+        currentQrDataUrl = null;
+        currentQrRaw = null;
+        const userJid = sock?.user?.id || 'Unknown';
+        const userName = sock?.user?.name || 'Dewmina Super Line Bot';
+        connectedUser = { id: userJid, name: userName };
+        console.log(`\n🎉 [WhatsApp Service] WhatsApp CONNECTED SUCCESSFULLY! Connected as: ${userName} (${userJid})\n`);
+      }
+
+      if (connection === 'close') {
+        currentStatus = 'disconnected';
+        connectedUser = null;
+        const statusCode = (lastDisconnect?.error as any)?.output?.statusCode;
+        const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+
+        console.log(`[WhatsApp Service] Connection closed due to:`, lastDisconnect?.error, `, reconnecting: ${shouldReconnect}`);
+
+        if (shouldReconnect) {
+          setTimeout(() => {
+            isInitializing = false;
+            initWhatsApp();
+          }, 3000);
+        } else {
+          console.log('[WhatsApp Service] Logged out. Clearing credentials to generate fresh QR on next start.');
+          try {
+            if (fs.existsSync(AUTH_DIR)) {
+              fs.rmSync(AUTH_DIR, { recursive: true, force: true });
+            }
+          } catch (e) {}
+          setTimeout(() => {
+            isInitializing = false;
+            initWhatsApp();
+          }, 2000);
+        }
+      }
+    });
+
+  } catch (error: any) {
+    console.error('[WhatsApp Service] Failed to initialize Baileys:', error);
+    currentStatus = 'disconnected';
+  } finally {
+    isInitializing = false;
+  }
+}
+
+/**
+ * Get current live status and QR code
+ */
+export function getWhatsAppStatus(): {
+  status: WhatsAppConnectionStatus;
+  qrCode: string | null;
+  user: { id: string; name?: string } | null;
+} {
+  return {
+    status: currentStatus,
+    qrCode: currentQrDataUrl,
+    user: connectedUser,
+  };
+}
+
+/**
+ * Restart WhatsApp session (e.g. from Admin Dashboard)
+ */
+export async function restartWhatsAppSession(): Promise<boolean> {
+  try {
+    if (sock) {
+      sock.end(undefined);
+      sock = null;
+    }
+    if (fs.existsSync(AUTH_DIR)) {
+      fs.rmSync(AUTH_DIR, { recursive: true, force: true });
+    }
+    currentStatus = 'disconnected';
+    currentQrDataUrl = null;
+    connectedUser = null;
+    isInitializing = false;
+    await initWhatsApp();
+    return true;
+  } catch (err: any) {
+    console.error('[WhatsApp Service] Error restarting session:', err);
+    return false;
+  }
+}
+
+/**
+ * Send custom text message to a phone number
+ */
+export async function sendWhatsAppMessage(phone: string, text: string): Promise<boolean> {
+  if (!sock || currentStatus !== 'connected') {
+    console.warn(`[WhatsApp Service] Cannot send message: WhatsApp client is not connected (Status: ${currentStatus})`);
+    return false;
+  }
+
+  try {
+    const jid = formatSriLankanPhoneJid(phone);
+    console.log(`[WhatsApp Service] Sending message to ${jid}...`);
+
+    await sock.sendMessage(jid, { text });
+    console.log(`[WhatsApp Service] Message successfully sent to ${jid}!`);
+    return true;
+  } catch (error: any) {
+    console.error(`[WhatsApp Service] Failed to send message to ${phone}:`, error?.message || error);
+    return false;
+  }
+}
+
+/**
+ * Send automated E-Ticket WhatsApp message
+ */
+export async function sendWhatsAppETicket(payload: BookingNotificationPayload): Promise<boolean> {
+  if (!payload.passengerPhone) {
+    console.warn('[WhatsApp Service] Cannot send E-Ticket: passenger phone is missing');
+    return false;
+  }
+
+  const seatsText = payload.seatNumbers && payload.seatNumbers.length > 0
+    ? payload.seatNumbers.join(', ')
+    : 'Assigned';
+
+  const ticketMessage = 
+`🚌 *E-TICKET CONFIRMATION* 🚌
+*Dewmina Super Line*
+
+Dear *${payload.passengerName}*,
+Your bus ticket booking is confirmed! 🎉
+
+📌 *PNR / Ticket ID:* \`${payload.pnr}\`
+🚌 *Bus:* ${payload.busNumber} (${payload.busType})
+🛣️ *Route:* ${payload.origin} ➔ ${payload.destination}
+💺 *Seat No(s):* ${seatsText}
+📅 *Departure Date:* ${payload.departureDate}
+⏰ *Time:* ${payload.departureTime}
+💵 *Total Amount:* LKR ${payload.totalFare.toLocaleString()}
+💳 *Payment:* ${payload.paymentMethod.toUpperCase()}
+
+🔍 *Boarding Pass:*
+Present your PNR Code \`${payload.pnr}\` or QR Code at the boarding gate.
+
+Thank you for choosing Dewmina Super Line! Have a safe & comfortable journey! 🎒✨`;
+
+  return sendWhatsAppMessage(payload.passengerPhone, ticketMessage);
+}
+
+/**
+ * Send WhatsApp OTP verification code
+ */
+export async function sendWhatsAppOtp(phone: string, otp: string): Promise<boolean> {
+  const otpMessage = 
+`🔐 *Dewmina Super Line* — Verification Code 🔐
+
+Your WhatsApp verification OTP code is:
+👉 *${otp}* 👈
+
+This code is valid for 10 minutes.
+Enter this OTP on the booking screen to confirm your identity and proceed with your bus seat booking.
+
+_If you did not request this verification code, please ignore this message._`;
+
+  console.log(`[WhatsApp Service] Generated OTP ${otp} for WhatsApp: ${phone}`);
+  return sendWhatsAppMessage(phone, otpMessage);
+}
+
+/**
+ * Send payment verification status notification
+ */
+export async function sendWhatsAppPaymentUpdate(payload: {
+  pnr: string;
+  passengerName: string;
+  passengerPhone: string;
+  amount: number;
+  status: 'approved' | 'rejected';
+  reason?: string;
+}): Promise<boolean> {
+  if (!payload.passengerPhone) return false;
+
+  const message = payload.status === 'approved'
+    ? `✅ *Payment Approved — Booking Confirmed!*
+*Dewmina Super Line*
+
+Dear *${payload.passengerName}*,
+
+Your bank transfer payment of *LKR ${Number(payload.amount).toLocaleString()}* has been *verified and approved*! 🎉
+
+📌 *PNR:* \`${payload.pnr}\`
+
+Your booking is now *CONFIRMED*. Please show your PNR at the boarding point.
+
+Thank you for choosing Dewmina Super Line! 🚌`
+    : `❌ *Payment Rejected — Booking Cancelled*
+*Dewmina Super Line*
+
+Dear *${payload.passengerName}*,
+
+Unfortunately, your bank transfer slip for *LKR ${Number(payload.amount).toLocaleString()}* could not be verified.
+
+📌 *PNR:* \`${payload.pnr}\`
+📝 *Reason:* ${payload.reason || 'Payment could not be verified.'}
+
+Your booking has been *cancelled* and your seats have been released. Please try booking again or contact us for assistance.
+
+Dewmina Super Line 🚌`;
+
+  return sendWhatsAppMessage(payload.passengerPhone, message);
+}

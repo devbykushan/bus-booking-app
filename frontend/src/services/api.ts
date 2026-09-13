@@ -228,9 +228,29 @@ export const paymentSlipsApi = {
     apiFetch(`/payment-slips/${id}/reject`, { method: 'PATCH', body: JSON.stringify({ reason, adminName }) }),
 };
 
+// ─── WhatsApp Service API ───────────────────────────────────────────────────
+
+export const whatsappApi = {
+  /** Get live connection status & QR code */
+  getStatus: (): Promise<{
+    status: 'connected' | 'connecting' | 'qr_ready' | 'disconnected';
+    qrCode: string | null;
+    user: { id: string; name?: string } | null;
+  }> => apiFetch('/whatsapp/status'),
+
+  /** Restart session and generate fresh QR */
+  restart: (): Promise<{ success: boolean; message: string }> =>
+    apiFetch('/whatsapp/restart', { method: 'POST' }),
+
+  /** Test sending a message */
+  testSend: (phone: string, message: string): Promise<{ success: boolean; message: string; error?: string }> =>
+    apiFetch('/whatsapp/test-send', { method: 'POST', body: JSON.stringify({ phone, message }) }),
+};
+
 // ─── Health Check ─────────────────────────────────────────────────────────────
 
 export const healthApi = {
   ping: (): Promise<{ status: string; timestamp: string }> => apiFetch('/health'),
 };
+
 
