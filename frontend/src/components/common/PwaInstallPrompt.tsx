@@ -101,7 +101,7 @@ export const PwaInstallPrompt: React.FC = () => {
   return (
     <>
       {/* Floating Bottom Card */}
-      <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] left-4 right-4 md:left-auto md:right-6 md:bottom-6 md:max-w-md z-[110] transition-all duration-300">
+      <div className="pwa-install-prompt-container fixed left-4 right-4 md:left-auto md:right-6 md:max-w-md z-[110] transition-all duration-300">
         <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-3xl p-4 sm:p-5 border border-emerald-500/30 dark:border-emerald-500/20 shadow-2xl shadow-emerald-950/20 relative overflow-hidden">
           {/* Subtle Ambient Background Gradient */}
           <div className="absolute -right-12 -top-12 w-40 h-40 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />

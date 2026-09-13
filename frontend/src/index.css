@@ -13,6 +13,17 @@
   }
 }
 
+/* ─── PWA INSTALL PROMPT ──────────────────────────────────────────────────────── */
+.pwa-install-prompt-container {
+  bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+@media (min-width: 768px) {
+  .pwa-install-prompt-container {
+    bottom: 1.5rem !important;
+  }
+}
+
 /* ─── 3D ANIMATED NAVBAR ──────────────────────────────────────────────────────── */
 
 /* Keyframes */
