@@ -109,7 +109,7 @@ export async function initWhatsApp(): Promise<void> {
         currentQrRaw = qr;
         try {
           currentQrDataUrl = await QRCode.toDataURL(qr, {
-            scale: 6,
+            scale: 7,
             margin: 2,
             color: {
               dark: '#0f172a',
@@ -128,7 +128,9 @@ export async function initWhatsApp(): Promise<void> {
       }
 
       if (connection === 'connecting') {
-        currentStatus = 'connecting';
+        if (!currentQrDataUrl) {
+          currentStatus = 'connecting';
+        }
         console.log('[WhatsApp Service] Connecting to WhatsApp servers...');
       }
 
@@ -149,11 +151,13 @@ export async function initWhatsApp(): Promise<void> {
         console.log(`[WhatsApp Service] Connection closed due to:`, lastDisconnect?.error?.message || lastDisconnect?.error, `, reconnecting: ${shouldReconnect}`);
 
         if (shouldReconnect) {
-          currentStatus = 'disconnected';
+          if (!currentQrDataUrl) {
+            currentStatus = 'disconnected';
+          }
           setTimeout(() => {
             isInitializing = false;
             initWhatsApp();
-          }, 3000);
+          }, 4000);
         } else {
           currentStatus = 'disconnected';
           connectedUser = null;
@@ -189,7 +193,7 @@ export function getWhatsAppStatus(): {
   user: { id: string; name?: string } | null;
 } {
   return {
-    status: currentStatus,
+    status: currentQrDataUrl && currentStatus !== 'connected' ? 'qr_ready' : currentStatus,
     qrCode: currentQrDataUrl,
     user: connectedUser,
   };
