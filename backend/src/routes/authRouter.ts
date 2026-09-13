@@ -692,7 +692,7 @@ authRouter.post('/send-whatsapp-otp', async (req: Request, res: Response) => {
     return res.json({
       success: true,
       message: `Verification code sent to WhatsApp: ${cleanPhone}`,
-      otpPreview: otp, // For seamless demo verification and testing
+      // otpPreview intentionally excluded for security — OTP must be received via WhatsApp
       whatsappUrl,
     });
   } catch (error: any) {

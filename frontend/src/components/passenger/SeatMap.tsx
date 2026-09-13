@@ -472,11 +472,9 @@ export const SeatMap: React.FC = () => {
     try {
       const res = await authApi.sendWhatsAppOtp(fullPhone);
       setIsOtpSent(true);
-      if (res.otpPreview) {
-        setDemoOtp(res.otpPreview);
-      }
+      // demoOtp intentionally NOT set — user must receive OTP via WhatsApp
       
-      const targetWaUrl = res.whatsappUrl || `https://api.whatsapp.com/send?phone=${fullPhone.replace(/\D/g, '')}&text=${encodeURIComponent(`🔐 *Dewmina Super Line Bus Booking*\nYour WhatsApp verification code is: *${res.otpPreview || '123456'}*\nThis code is valid for 10 minutes.\nEnter this code on the booking screen to verify your identity.`)}`;
+      const targetWaUrl = res.whatsappUrl || `https://api.whatsapp.com/send?phone=${fullPhone.replace(/\D/g, '')}`;
       setWhatsappUrl(targetWaUrl);
       setResendTimer(60);
     } catch (err: any) {
