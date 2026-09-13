@@ -1,0 +1,40 @@
+name: Auto Sync Branches to Main (Live Auto-Deploy)
+
+on:
+  push:
+    branches:
+      - develop
+      - admin-panel
+      - admin-panel-v2
+
+permissions:
+  contents: write
+
+jobs:
+  sync-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge pushed branch into main and push to trigger Live Deployment
+        run: |
+          SOURCE_BRANCH="${GITHUB_REF#refs/heads/}"
+          echo "🔄 Syncing $SOURCE_BRANCH into main branch for live deployment..."
+          
+          git checkout main
+          git pull origin main --no-rebase
+          
+          # Merge the source branch
+          git merge "origin/$SOURCE_BRANCH" -m "chore(sync): auto-sync $SOURCE_BRANCH into main for live deployment [skip ci]" --allow-unrelated-histories || git merge --abort
+          
+          # Push to main to trigger Vercel / Render Live Auto-Deploy
+          git push origin main
