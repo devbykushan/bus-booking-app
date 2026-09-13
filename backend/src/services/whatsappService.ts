@@ -35,8 +35,17 @@ let currentQrDataUrl: string | null = null;
 let currentQrRaw: string | null = null;
 let connectedUser: { id: string; name?: string } | null = null;
 let isInitializing = false;
+let lastEngineError: string | null = null;
+const engineLogs: string[] = [];
 
-const AUTH_DIR = path.resolve(process.cwd(), 'auth_info_baileys');
+function addEngineLog(msg: string) {
+  const line = `[${new Date().toISOString().substring(11, 19)}] ${msg}`;
+  console.log(line);
+  engineLogs.unshift(line);
+  if (engineLogs.length > 50) engineLogs.pop();
+}
+
+const AUTH_DIR = process.env.AUTH_DIR || path.resolve(process.cwd(), 'auth_info_baileys');
 
 /**
  * Format Sri Lankan and international phone numbers to Baileys WhatsApp JID (e.g. 94771234567@s.whatsapp.net)
@@ -63,16 +72,18 @@ export function formatSriLankanPhoneJid(phone: string): string {
  */
 export async function initWhatsApp(): Promise<void> {
   if (isInitializing) {
-    console.log('[WhatsApp Service] Already initializing, skipping redundant call.');
+    addEngineLog('Already initializing, skipping duplicate init.');
     return;
   }
   isInitializing = true;
+  lastEngineError = null;
 
   try {
     if (!fs.existsSync(AUTH_DIR)) {
       fs.mkdirSync(AUTH_DIR, { recursive: true });
     }
 
+    addEngineLog(`Loading auth state from: ${AUTH_DIR}`);
     const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
     
     let version: [number, number, number] | undefined = undefined;
@@ -80,24 +91,24 @@ export async function initWhatsApp(): Promise<void> {
       const vRes = await fetchLatestBaileysVersion();
       if (vRes?.version) {
         version = vRes.version;
+        addEngineLog(`Fetched latest Baileys version: ${version.join('.')}`);
       }
     } catch (vErr) {
-      console.warn('[WhatsApp Service] Could not fetch latest version from GitHub, relying on Baileys defaults.');
+      addEngineLog('Could not fetch latest version from GitHub, using defaults.');
     }
 
-    console.log(`[WhatsApp Service] Baileys engine initializing with browser macOS Desktop...`);
-
+    addEngineLog('Starting Baileys WASocket...');
     const logger = pino({ level: 'silent' });
 
     sock = makeWASocket({
       ...(version ? { version } : {}),
       auth: state,
       logger,
-      printQRInTerminal: false,
       browser: Browsers.macOS('Desktop'),
       connectTimeoutMs: 60000,
       defaultQueryTimeoutMs: 60000,
       keepAliveIntervalMs: 25000,
+      syncFullHistory: false,
     });
 
     sock.ev.on('creds.update', saveCreds);
@@ -107,6 +118,7 @@ export async function initWhatsApp(): Promise<void> {
 
       if (qr) {
         currentQrRaw = qr;
+        addEngineLog(`Received QR string (length ${qr.length}). Generating QR Image...`);
         try {
           currentQrDataUrl = await QRCode.toDataURL(qr, {
             scale: 7,
@@ -117,13 +129,10 @@ export async function initWhatsApp(): Promise<void> {
             },
           });
           currentStatus = 'qr_ready';
-          console.log('\n======================================================');
-          console.log('📱 [WhatsApp Service] NEW QR CODE GENERATED FOR PAIRING!');
-          console.log('Open WhatsApp > Linked Devices > Link a Device');
-          console.log('Or scan in Admin Portal: Settings > WhatsApp Service');
-          console.log('======================================================\n');
-        } catch (qrErr) {
-          console.error('[WhatsApp Service] Error generating QR data URL:', qrErr);
+          addEngineLog('QR Data URL generated successfully! Ready for pairing.');
+        } catch (qrErr: any) {
+          lastEngineError = `QR generation error: ${qrErr?.message || qrErr}`;
+          addEngineLog(lastEngineError);
         }
       }
 
@@ -131,7 +140,7 @@ export async function initWhatsApp(): Promise<void> {
         if (!currentQrDataUrl) {
           currentStatus = 'connecting';
         }
-        console.log('[WhatsApp Service] Connecting to WhatsApp servers...');
+        addEngineLog('Socket status: connecting...');
       }
 
       if (connection === 'open') {
@@ -141,19 +150,22 @@ export async function initWhatsApp(): Promise<void> {
         const userJid = sock?.user?.id || 'Unknown';
         const userName = sock?.user?.name || 'Dewmina Super Line Bot';
         connectedUser = { id: userJid, name: userName };
-        console.log(`\n🎉 [WhatsApp Service] WhatsApp CONNECTED SUCCESSFULLY! Connected as: ${userName} (${userJid})\n`);
+        addEngineLog(`🎉 WhatsApp CONNECTED as ${userName} (${userJid})`);
       }
 
       if (connection === 'close') {
         const statusCode = (lastDisconnect?.error as any)?.output?.statusCode;
+        const errMsg = lastDisconnect?.error?.message || String(lastDisconnect?.error || 'Unknown error');
         const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
 
-        console.log(`[WhatsApp Service] Connection closed due to:`, lastDisconnect?.error?.message || lastDisconnect?.error, `, reconnecting: ${shouldReconnect}`);
+        lastEngineError = `Connection closed: ${errMsg} (Status: ${statusCode || 'N/A'})`;
+        addEngineLog(lastEngineError);
 
         if (shouldReconnect) {
           if (!currentQrDataUrl) {
             currentStatus = 'disconnected';
           }
+          addEngineLog('Scheduling reconnect in 4s...');
           setTimeout(() => {
             isInitializing = false;
             initWhatsApp();
@@ -162,7 +174,7 @@ export async function initWhatsApp(): Promise<void> {
           currentStatus = 'disconnected';
           connectedUser = null;
           currentQrDataUrl = null;
-          console.log('[WhatsApp Service] Logged out. Clearing credentials to generate fresh QR on next start.');
+          addEngineLog('Logged out. Clearing auth directory to regenerate QR...');
           try {
             if (fs.existsSync(AUTH_DIR)) {
               fs.rmSync(AUTH_DIR, { recursive: true, force: true });
@@ -177,7 +189,8 @@ export async function initWhatsApp(): Promise<void> {
     });
 
   } catch (error: any) {
-    console.error('[WhatsApp Service] Failed to initialize Baileys:', error);
+    lastEngineError = `Baileys init failed: ${error?.message || error}`;
+    addEngineLog(lastEngineError);
     currentStatus = 'disconnected';
   } finally {
     isInitializing = false;
@@ -191,11 +204,15 @@ export function getWhatsAppStatus(): {
   status: WhatsAppConnectionStatus;
   qrCode: string | null;
   user: { id: string; name?: string } | null;
+  lastError?: string | null;
+  logs?: string[];
 } {
   return {
     status: currentQrDataUrl && currentStatus !== 'connected' ? 'qr_ready' : currentStatus,
     qrCode: currentQrDataUrl,
     user: connectedUser,
+    lastError: lastEngineError,
+    logs: engineLogs.slice(0, 10),
   };
 }
 
