@@ -159,7 +159,7 @@ export const WhatsAppManagerSection: React.FC = () => {
               </div>
             </div>
           ) : qrCode ? (
-            <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 space-y-4">
+            <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 space-y-4 animate-fadeIn">
               <div className="p-3 bg-white rounded-2xl shadow-md border border-slate-200">
                 <img src={qrCode} alt="WhatsApp QR Code" className="w-56 h-56 object-contain" />
               </div>
@@ -173,11 +173,49 @@ export const WhatsAppManagerSection: React.FC = () => {
                   2. Tap <strong>Link a Device</strong> and point your camera at this QR code.
                 </p>
               </div>
+
+              <button
+                type="button"
+                disabled={restarting}
+                onClick={handleRestart}
+                className="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold inline-flex items-center gap-1.5 transition-all"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${restarting ? 'animate-spin' : ''}`} />
+                <span>Refresh QR Code</span>
+              </button>
+            </div>
+          ) : restarting || status === 'connecting' ? (
+            <div className="p-10 text-center space-y-4">
+              <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 mx-auto flex items-center justify-center animate-pulse">
+                <Loader2 className="w-8 h-8 animate-spin" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-base font-bold text-slate-800 dark:text-slate-200">Generating WhatsApp QR Code...</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                  Connecting to WhatsApp Multi-Device network. The pairing QR code will appear in a few seconds.
+                </p>
+              </div>
             </div>
           ) : (
-            <div className="p-8 text-center text-slate-400 space-y-3">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto text-indigo-500" />
-              <p className="text-xs font-semibold">Initializing WhatsApp socket and generating QR code...</p>
+            <div className="p-8 text-center space-y-4">
+              <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 mx-auto flex items-center justify-center">
+                <Smartphone className="w-7 h-7" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-base font-bold text-slate-800 dark:text-slate-200">WhatsApp Service is Ready to Pair</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                  Click the button below to initialize the WhatsApp engine and generate a pairing QR code.
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={restarting}
+                onClick={handleRestart}
+                className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 text-white font-extrabold text-xs shadow-md shadow-indigo-500/20 inline-flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${restarting ? 'animate-spin' : ''}`} />
+                <span>{restarting ? 'Generating QR Code...' : '⚡ Generate Pairing QR Code'}</span>
+              </button>
             </div>
           )}
         </div>

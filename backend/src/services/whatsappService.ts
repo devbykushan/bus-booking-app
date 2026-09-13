@@ -2,6 +2,7 @@ import makeWASocket, {
   DisconnectReason,
   useMultiFileAuthState,
   fetchLatestBaileysVersion,
+  Browsers,
   WASocket,
   ConnectionState,
 } from '@whiskeysockets/baileys';
@@ -61,7 +62,10 @@ export function formatSriLankanPhoneJid(phone: string): string {
  * Initialize WhatsApp connection via Baileys (Pure Node.js)
  */
 export async function initWhatsApp(): Promise<void> {
-  if (isInitializing) return;
+  if (isInitializing) {
+    console.log('[WhatsApp Service] Already initializing, skipping redundant call.');
+    return;
+  }
   isInitializing = true;
 
   try {
@@ -70,17 +74,27 @@ export async function initWhatsApp(): Promise<void> {
     }
 
     const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
-    const { version, isLatest } = await fetchLatestBaileysVersion();
-    console.log(`[WhatsApp Service] Baileys engine v${version.join('.')} (Latest: ${isLatest}) initializing...`);
+    
+    let version: [number, number, number] | undefined = undefined;
+    try {
+      const vRes = await fetchLatestBaileysVersion();
+      if (vRes?.version) {
+        version = vRes.version;
+      }
+    } catch (vErr) {
+      console.warn('[WhatsApp Service] Could not fetch latest version from GitHub, relying on Baileys defaults.');
+    }
+
+    console.log(`[WhatsApp Service] Baileys engine initializing with browser macOS Desktop...`);
 
     const logger = pino({ level: 'silent' });
 
     sock = makeWASocket({
-      version,
+      ...(version ? { version } : {}),
       auth: state,
       logger,
       printQRInTerminal: false,
-      browser: ['Dewmina Super Line', 'Chrome', '1.0.0'],
+      browser: Browsers.macOS('Desktop'),
       connectTimeoutMs: 60000,
       defaultQueryTimeoutMs: 60000,
       keepAliveIntervalMs: 25000,
@@ -94,10 +108,17 @@ export async function initWhatsApp(): Promise<void> {
       if (qr) {
         currentQrRaw = qr;
         try {
-          currentQrDataUrl = await QRCode.toDataURL(qr);
+          currentQrDataUrl = await QRCode.toDataURL(qr, {
+            scale: 6,
+            margin: 2,
+            color: {
+              dark: '#0f172a',
+              light: '#ffffff',
+            },
+          });
           currentStatus = 'qr_ready';
           console.log('\n======================================================');
-          console.log('📱 [WhatsApp Service] NEW QR CODE GENERATED FOR PAIRING:');
+          console.log('📱 [WhatsApp Service] NEW QR CODE GENERATED FOR PAIRING!');
           console.log('Open WhatsApp > Linked Devices > Link a Device');
           console.log('Or scan in Admin Portal: Settings > WhatsApp Service');
           console.log('======================================================\n');
@@ -122,19 +143,21 @@ export async function initWhatsApp(): Promise<void> {
       }
 
       if (connection === 'close') {
-        currentStatus = 'disconnected';
-        connectedUser = null;
         const statusCode = (lastDisconnect?.error as any)?.output?.statusCode;
         const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
 
-        console.log(`[WhatsApp Service] Connection closed due to:`, lastDisconnect?.error, `, reconnecting: ${shouldReconnect}`);
+        console.log(`[WhatsApp Service] Connection closed due to:`, lastDisconnect?.error?.message || lastDisconnect?.error, `, reconnecting: ${shouldReconnect}`);
 
         if (shouldReconnect) {
+          currentStatus = 'disconnected';
           setTimeout(() => {
             isInitializing = false;
             initWhatsApp();
           }, 3000);
         } else {
+          currentStatus = 'disconnected';
+          connectedUser = null;
+          currentQrDataUrl = null;
           console.log('[WhatsApp Service] Logged out. Clearing credentials to generate fresh QR on next start.');
           try {
             if (fs.existsSync(AUTH_DIR)) {
