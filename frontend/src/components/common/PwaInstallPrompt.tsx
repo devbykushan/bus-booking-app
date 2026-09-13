@@ -14,6 +14,7 @@ export const PwaInstallPrompt: React.FC = () => {
   const [showIosGuide, setShowIosGuide] = useState(false);
   const [showAndroidGuide, setShowAndroidGuide] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
   const setIsPwaPromptOpen = useBookingStore((state) => state.setIsPwaPromptOpen);
 
   useEffect(() => {
@@ -58,17 +59,20 @@ export const PwaInstallPrompt: React.FC = () => {
     // 5. Listen to Android / Chrome PWA install event
     if ((window as any).__deferredPwaPrompt) {
       setDeferredPrompt((window as any).__deferredPwaPrompt);
+      setIsOpen(true);
     }
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       (window as any).__deferredPwaPrompt = e;
       setDeferredPrompt(e);
+      setIsOpen(true);
     };
 
     const handlePromptCaptured = () => {
       if ((window as any).__deferredPwaPrompt) {
         setDeferredPrompt((window as any).__deferredPwaPrompt);
+        setIsOpen(true);
       }
     };
 
@@ -83,10 +87,10 @@ export const PwaInstallPrompt: React.FC = () => {
     window.addEventListener('pwa-prompt-captured', handlePromptCaptured);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // 6. Smooth delayed entrance (2.5 seconds after page load)
+    // 6. Delayed entrance fallback (4 seconds after page load)
     const timer = setTimeout(() => {
       setIsOpen(true);
-    }, 2500);
+    }, 4000);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -97,11 +101,38 @@ export const PwaInstallPrompt: React.FC = () => {
   }, []);
 
   const handleInstallClick = async () => {
-    const promptEvent = deferredPrompt || (window as any).__deferredPwaPrompt;
+    let promptEvent = deferredPrompt || (window as any).__deferredPwaPrompt;
+
+    // If on Android/Chrome and promptEvent isn't ready yet, auto-wait up to 4.5 seconds
+    if (!promptEvent && !isIos) {
+      setIsConnecting(true);
+      promptEvent = await new Promise<any>((resolve) => {
+        const timeout = setTimeout(() => {
+          cleanup();
+          resolve((window as any).__deferredPwaPrompt || null);
+        }, 4500);
+
+        const onCaptured = () => {
+          cleanup();
+          resolve((window as any).__deferredPwaPrompt || null);
+        };
+
+        const cleanup = () => {
+          clearTimeout(timeout);
+          window.removeEventListener('pwa-prompt-captured', onCaptured);
+          window.removeEventListener('beforeinstallprompt', onCaptured);
+        };
+
+        window.addEventListener('pwa-prompt-captured', onCaptured);
+        window.addEventListener('beforeinstallprompt', onCaptured);
+      });
+      setIsConnecting(false);
+    }
+
     if (promptEvent) {
       // Native Android Chrome 1-click install dialog
       try {
-        promptEvent.prompt();
+        await promptEvent.prompt();
         const choiceResult = await promptEvent.userChoice;
         if (choiceResult?.outcome === 'accepted') {
           setIsOpen(false);
@@ -116,7 +147,7 @@ export const PwaInstallPrompt: React.FC = () => {
       // Open Apple Safari instructions sheet
       setShowIosGuide(true);
     } else {
-      // Open polite Android / Mobile browser guide modal (no alert!)
+      // Fallback only if device does not support native prompt
       setShowAndroidGuide(true);
     }
   };
@@ -199,10 +230,20 @@ export const PwaInstallPrompt: React.FC = () => {
             <button
               type="button"
               onClick={handleInstallClick}
-              className="flex-1 py-2.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 text-white text-xs font-extrabold shadow-md shadow-emerald-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              disabled={isConnecting}
+              className="flex-1 py-2.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 text-white text-xs font-extrabold shadow-md shadow-emerald-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-80"
             >
-              <Download className="w-4 h-4" />
-              <span>{isIos ? 'Install on iPhone' : '⚡ Install Mobile App'}</span>
+              {isConnecting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Connecting 1-Click Install...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  <span>{isIos ? 'Install on iPhone' : '⚡ Install Mobile App'}</span>
+                </>
+              )}
             </button>
 
             <button
