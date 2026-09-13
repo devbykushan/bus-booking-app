@@ -6,7 +6,7 @@ import {
   ArrowLeft, Clock, Check, Armchair, ChevronRight, 
   ChevronUp, ChevronDown, Lock, CheckCircle2, Info,
   ArrowRight, Crown, X, User, Users, MessageSquare, KeyRound,
-  RotateCcw, Sparkles, ExternalLink, Loader2, Edit2
+  RotateCcw, Loader2, Edit2
 } from 'lucide-react';
 import { authApi, BASE_URL } from '../../services/api';
 
@@ -100,8 +100,6 @@ export const SeatMap: React.FC = () => {
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
-  const [demoOtp, setDemoOtp] = useState<string | null>(null);
-  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
 
   // Phone format validation (Sri Lanka +94 requires exactly 9 digits starting with 70, 71, 72, 74, 75, 76, 77, 78)
   const isPhoneValid = useMemo(() => {
@@ -178,7 +176,6 @@ export const SeatMap: React.FC = () => {
     setIsOtpSent(false);
     setOtpInput('');
     setOtpError(null);
-    setWhatsappUrl(null);
     if (countryCode === '+94') {
       if (clean.length > 0 && clean.length < 9) {
         setPhoneError(`Sri Lankan mobile numbers must be 9 digits without leading 0 (${clean.length}/9)`);
@@ -470,12 +467,8 @@ export const SeatMap: React.FC = () => {
 
     const fullPhone = `${countryCode}${clean}`;
     try {
-      const res = await authApi.sendWhatsAppOtp(fullPhone);
+      await authApi.sendWhatsAppOtp(fullPhone);
       setIsOtpSent(true);
-      // demoOtp intentionally NOT set — user must receive OTP via WhatsApp
-      
-      const targetWaUrl = res.whatsappUrl || `https://api.whatsapp.com/send?phone=${fullPhone.replace(/\D/g, '')}`;
-      setWhatsappUrl(targetWaUrl);
       setResendTimer(60);
     } catch (err: any) {
       setPhoneError(err.message || 'Failed to send WhatsApp verification code. Please check your number.');
@@ -518,7 +511,6 @@ export const SeatMap: React.FC = () => {
     setOtpInput('');
     setOtpError(null);
     setPhoneError(null);
-    setWhatsappUrl(null);
   };
 
   const handleApplyPromo = (e: React.FormEvent) => {
@@ -1145,25 +1137,12 @@ export const SeatMap: React.FC = () => {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              {whatsappUrl && (
-                                <a
-                                  href={whatsappUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-2xs transition-all cursor-pointer"
-                                >
-                                  <MessageSquare className="w-3 h-3" />
-                                  <span>Open WhatsApp</span>
-                                  <ExternalLink className="w-2.5 h-2.5" />
-                                </a>
-                              )}
                               <button
                                 type="button"
                                 onClick={() => {
                                   setIsOtpSent(false);
                                   setOtpInput('');
                                   setOtpError(null);
-                                  setWhatsappUrl(null);
                                 }}
                                 className="text-[11px] font-bold text-slate-500 hover:text-slate-800 underline flex-shrink-0 cursor-pointer flex items-center gap-1"
                               >
@@ -1224,23 +1203,9 @@ export const SeatMap: React.FC = () => {
                             </p>
                           )}
 
-                          {/* Demo OTP Auto-fill & Resend Options */}
-                          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-emerald-200/60 text-[11px]">
-                            {demoOtp && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setOtpInput(demoOtp);
-                                  setOtpError(null);
-                                }}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-100/90 text-emerald-900 font-bold hover:bg-emerald-200 transition-colors cursor-pointer shadow-2xs"
-                              >
-                                <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
-                                <span>Auto-fill OTP: <strong className="font-mono text-emerald-950">{demoOtp}</strong></span>
-                              </button>
-                            )}
-
-                            <div className="flex items-center gap-3 ml-auto">
+                          {/* Resend Options */}
+                          <div className="flex items-center justify-end gap-2 pt-2 border-t border-emerald-200/60 text-[11px]">
+                            <div className="flex items-center gap-3">
                               {resendTimer > 0 ? (
                                 <span className="text-slate-500 font-medium">
                                   Resend in <strong className="font-mono text-slate-700">{resendTimer}s</strong>
