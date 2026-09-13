@@ -10,6 +10,7 @@ import timetablesRouter from './routes/timetablesRouter';
 import { webhookRouter } from './routes/webhookRouter';
 import { paymentSlipsRouter } from './routes/paymentSlipsRouter';
 import { whatsappRouter } from './routes/whatsappRouter';
+import { botRouter } from './routes/botRouter';
 import { initWhatsApp } from './services/whatsappService';
 
 const app = express();
@@ -44,6 +45,7 @@ app.use('/api/validate-ticket', validateRouter);
 app.use('/api/timetables', timetablesRouter);
 app.use('/api/payment-slips', paymentSlipsRouter);
 app.use('/api/whatsapp', whatsappRouter);
+app.use('/api/bot', botRouter);
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

@@ -10,6 +10,7 @@ import pino from 'pino';
 import QRCode from 'qrcode';
 import path from 'path';
 import fs from 'fs';
+import { processBotMessage } from './botService';
 
 export interface BookingNotificationPayload {
   pnr: string;
@@ -169,6 +170,32 @@ export async function initWhatsApp(): Promise<void> {
     sock.ev.on('creds.update', async () => {
       await saveCreds();
       await saveAuthToDb();
+    });
+
+    // Auto-respond to incoming WhatsApp messages using Dewmina Super Line Bot
+    sock.ev.on('messages.upsert', async ({ messages, type }) => {
+      if (type !== 'notify') return;
+      for (const msg of messages) {
+        if (!msg.message || msg.key.fromMe) continue;
+        const remoteJid = msg.key.remoteJid;
+        if (!remoteJid || remoteJid.includes('@g.us') || remoteJid.includes('broadcast')) continue;
+
+        const text = msg.message.conversation ||
+                     msg.message.extendedTextMessage?.text ||
+                     '';
+        if (!text.trim()) continue;
+
+        addEngineLog(`[Bot] Incoming WhatsApp msg from ${remoteJid}: "${text.trim().substring(0, 35)}..."`);
+        try {
+          const replyResult = await processBotMessage(text);
+          if (replyResult && replyResult.text) {
+            await sock?.sendMessage(remoteJid, { text: replyResult.text });
+            addEngineLog(`[Bot] Auto-replied successfully to ${remoteJid}`);
+          }
+        } catch (botErr) {
+          console.error('[Bot] WhatsApp auto-reply error:', botErr);
+        }
+      }
     });
 
     sock.ev.on('connection.update', async (update: Partial<ConnectionState>) => {

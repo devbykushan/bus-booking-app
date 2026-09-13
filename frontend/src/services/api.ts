@@ -247,6 +247,18 @@ export const whatsappApi = {
     apiFetch('/whatsapp/test-send', { method: 'POST', body: JSON.stringify({ phone, message }) }),
 };
 
+// ─── Live Bot API ────────────────────────────────────────────────────────────
+
+export const botApi = {
+  chat: (message: string): Promise<{
+    success: boolean;
+    text: string;
+    options?: Array<{ label: string; value: string; icon?: string }>;
+    actions?: Array<{ type: string; label: string; data?: any }>;
+    pnrData?: any;
+  }> => apiFetch('/bot/chat', { method: 'POST', body: JSON.stringify({ message }) }),
+};
+
 // ─── Health Check ─────────────────────────────────────────────────────────────
 
 export const healthApi = {
