@@ -182,7 +182,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
     <>
       <div 
         onClick={() => onFocusRoute && onFocusRoute(route)}
-        className={`bg-white dark:bg-slate-800 rounded-3xl p-6 border transition-all duration-300 relative shadow-sm hover:shadow-md cursor-pointer group/card ${
+        className={`bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 border transition-all duration-300 relative shadow-sm hover:shadow-md cursor-pointer group/card ${
           isSelected
             ? 'border-blue-500 shadow-blue-500/20 ring-4 ring-blue-500/10'
             : isDeparted
@@ -191,118 +191,122 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
         }`}
       >
         {/* ── Top Header Row ────────────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-700/60 pb-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
+        <div className="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-700/60 pb-2.5 sm:pb-3">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
+            <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-1 sm:gap-1.5 truncate">
               <span className="text-blue-600 dark:text-blue-400">{t(route.origin)}</span>
               <span className="text-slate-400 font-normal">→</span>
               <span className="text-indigo-600 dark:text-indigo-400">{t(route.destination)}</span>
             </h3>
-            <span className="text-xs text-slate-400">•</span>
-            <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+            <span className="text-xs text-slate-300 dark:text-slate-600 hidden xs:inline">•</span>
+            <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[120px] sm:max-w-none">
               {route.operatorName}
             </span>
             {route.busNumber && (
               <>
-                <span className="text-xs text-slate-400">•</span>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-700/60 text-xs font-bold font-mono shadow-xs">
-                  <Bus className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <span className="text-xs text-slate-300 dark:text-slate-600">•</span>
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-700/60 text-[11px] font-bold font-mono shadow-xs">
+                  <Bus className="w-3 h-3 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                   <span>{route.busNumber}</span>
                 </span>
               </>
             )}
-            <span className="text-xs text-slate-400">•</span>
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            <span className="text-xs text-slate-300 dark:text-slate-600 hidden md:inline">•</span>
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 hidden md:inline">
               {(route.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             {isDeparted ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-300/80 dark:border-amber-700 text-xs font-extrabold">
-                <Clock className="w-3.5 h-3.5 text-amber-600" />
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-300/80 dark:border-amber-700 text-[10px] sm:text-xs font-extrabold">
+                <Clock className="w-3 h-3 text-amber-600" />
                 <span>{t('departed')}</span>
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-xs font-bold">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                <span>{t('certified')}</span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[10px] sm:text-xs font-bold">
+                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                <span className="hidden xs:inline">{t('certified')}</span>
               </span>
             )}
 
-            <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300 text-xs font-bold font-mono">
+            <div className="flex items-center gap-0.5 sm:gap-1 text-slate-700 dark:text-slate-300 text-[11px] sm:text-xs font-bold font-mono bg-slate-50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded-md border border-slate-200/60 dark:border-slate-600/60">
               <span>{route.operatorRating ? Number(route.operatorRating).toFixed(1) : '4.9'}</span>
-              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
             </div>
           </div>
         </div>
 
-        {/* ── Timing & Route Center Body ─────────────────────────────────── */}
-        <div className="py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        {/* ── Timing & Route Center Body (Compact Horizontal Layout) ─────── */}
+        <div className="py-3 sm:py-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-6">
           
           {/* Departure (From) Column */}
-          <div className="space-y-1">
-            <p className={`text-2xl font-black font-mono tracking-tight flex items-center gap-1.5 ${
+          <div className="space-y-0.5 min-w-0">
+            <p className={`text-lg sm:text-2xl font-black font-mono tracking-tight flex items-center gap-1 sm:gap-1.5 ${
               isDeparted ? 'text-slate-500 dark:text-slate-400' : 'text-blue-600 dark:text-blue-400'
             }`}>
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2 flex-shrink-0">
                 {!isDeparted && (
                   <span className="animate-from-beacon absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                 )}
-                <span className={`relative inline-flex rounded-full h-2 w-2 ${isDeparted ? 'bg-slate-400' : 'bg-blue-500'}`}></span>
+                <span className={`relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 ${isDeparted ? 'bg-slate-400' : 'bg-blue-500'}`}></span>
               </span>
-              {route.departureTime}
+              <span className="truncate">{route.departureTime}</span>
             </p>
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${
-              isDeparted 
-                ? 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600' 
-                : 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60'
-            }`}>
-              <MapPin className={`w-2.5 h-2.5 ${isDeparted ? 'text-slate-500' : 'animate-from-icon text-blue-600 dark:text-blue-400'}`} />
-              {t('departure')}
-            </span>
-            <p className="text-sm font-bold text-slate-800 dark:text-slate-100 pt-0.5">
+            <div className="flex items-center gap-1">
+              <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider ${
+                isDeparted 
+                  ? 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600' 
+                  : 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60'
+              }`}>
+                <MapPin className={`w-2 h-2 ${isDeparted ? 'text-slate-500' : 'animate-from-icon text-blue-600 dark:text-blue-400'}`} />
+                <span>{t('departure')}</span>
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 truncate">
               {t(route.origin)}
             </p>
-            <p className="text-xs text-slate-400 font-mono">
+            <p className="text-[10px] sm:text-xs text-slate-400 font-mono truncate">
               {depDateString}
             </p>
           </div>
 
           {/* Route Arrow with Duration in Middle */}
-          <div className="flex flex-col items-center justify-center w-full sm:w-auto px-2">
-            <div className="flex items-center gap-2 w-full justify-center">
-              <div className="h-[2px] w-12 sm:w-16 bg-slate-200 dark:bg-slate-700 relative overflow-hidden rounded-full">
+          <div className="flex flex-col items-center justify-center px-1 sm:px-2">
+            <div className="flex items-center gap-1 sm:gap-2 w-full justify-center">
+              <div className="h-[2px] w-6 sm:w-14 bg-slate-200 dark:bg-slate-700 relative overflow-hidden rounded-full">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 animate-route-flow opacity-75" />
               </div>
-              <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-xs font-bold font-mono flex-shrink-0 shadow-xs flex items-center gap-1.5">
-                <Clock className="w-3 h-3 text-slate-400" />
-                {route.duration || '6h 00m'}
+              <span className="px-2 py-0.5 sm:px-3 sm:py-1 rounded-full bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[10px] sm:text-xs font-bold font-mono flex-shrink-0 shadow-xs flex items-center gap-1">
+                <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" />
+                <span>{route.duration || '6h 00m'}</span>
               </span>
-              <div className="h-[2px] w-12 sm:w-16 bg-slate-200 dark:bg-slate-700 relative flex items-center justify-end overflow-hidden rounded-full">
+              <div className="h-[2px] w-6 sm:w-14 bg-slate-200 dark:bg-slate-700 relative flex items-center justify-end overflow-hidden rounded-full">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 animate-route-flow opacity-75" />
-                <ChevronRight className="w-4 h-4 text-indigo-600 dark:text-indigo-400 -mr-2 animate-bounce-horizontal relative z-10" />
+                <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-600 dark:text-indigo-400 -mr-1.5 sm:-mr-2 animate-bounce-horizontal relative z-10" />
               </div>
             </div>
           </div>
 
           {/* Arrival (To) Column */}
-          <div className="space-y-1 sm:text-left">
-            <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400 font-mono tracking-tight flex items-center gap-1.5">
-              <span className="relative flex h-2 w-2">
+          <div className="space-y-0.5 text-right min-w-0">
+            <p className="text-lg sm:text-2xl font-black text-indigo-600 dark:text-indigo-400 font-mono tracking-tight flex items-center justify-end gap-1 sm:gap-1.5">
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2 flex-shrink-0">
                 <span className="animate-to-beacon absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-indigo-500"></span>
               </span>
-              {route.arrivalTime}
+              <span className="truncate">{route.arrivalTime}</span>
             </p>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60 text-[10px] font-extrabold uppercase tracking-wider">
-              <MapPin className="w-2.5 h-2.5 animate-to-icon text-indigo-600 dark:text-indigo-400" />
-              {t('arrival')}
-            </span>
-            <p className="text-sm font-bold text-slate-800 dark:text-slate-100 pt-0.5">
+            <div className="flex items-center justify-end gap-1">
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider">
+                <MapPin className="w-2 h-2 animate-to-icon text-indigo-600 dark:text-indigo-400" />
+                <span>{t('arrival')}</span>
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 truncate">
               {t(route.destination)}
             </p>
-            <div className="text-xs font-mono">
+            <div className="text-[10px] sm:text-xs font-mono truncate">
               {isMidnightJourney ? (
                 <span className="text-rose-600 dark:text-rose-400 font-bold">
                   +1 Day <span className="text-slate-400 font-normal">{arrDateString}</span>
@@ -313,32 +317,19 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
             </div>
           </div>
 
-          {/* Prominent Price Tag */}
-          <div className="text-left sm:text-right pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-700 w-full sm:w-auto">
-            <div className="inline-block px-4 py-2 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-800 text-left sm:text-right">
-              <span className="text-2xl md:text-3xl font-black text-indigo-700 dark:text-indigo-400 font-mono tracking-tight">
-                {formattedPrice}
-              </span>
-              <span className="text-xs font-bold text-indigo-600 dark:text-indigo-300 ml-1.5 font-mono uppercase">
-                LKR
-              </span>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{t('perPassenger')}</p>
-            </div>
-          </div>
-
         </div>
 
         {/* ── Departed Notice Banner ─────────────────────────────────────── */}
         {isDeparted && (
-          <div className="p-3 rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/70 text-amber-900 dark:text-amber-200 text-xs font-medium flex items-center justify-between gap-3 mb-4 animate-fade-in">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 flex-shrink-0 text-amber-600" />
+          <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/70 text-amber-900 dark:text-amber-200 text-[11px] sm:text-xs font-medium flex items-center justify-between gap-2 mb-3 animate-fade-in">
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 flex-shrink-0 text-amber-600" />
               <span>
                 <strong className="font-bold">{t('departedToday')}</strong> ({route.departureTime}) — {t('tripDepartedNotice')}
               </span>
             </div>
             {nextTripInfo && (
-              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-indigo-100/80 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700">
+              <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg bg-indigo-100/80 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 flex-shrink-0">
                 <Calendar className="w-3 h-3" />
                 {nextTripInfo.isSameBus ? route.busNumber : t('nextTrip')}
               </span>
@@ -348,26 +339,41 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
 
         {/* ── Midnight Journey Warning Banner ────────────────────────────── */}
         {isMidnightJourney && (
-          <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/70 text-rose-700 dark:text-rose-300 text-xs font-medium flex items-center gap-2 mb-4 animate-fade-in">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-600" />
+          <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/70 text-rose-700 dark:text-rose-300 text-[11px] sm:text-xs font-medium flex items-center gap-1.5 mb-3 animate-fade-in">
+            <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 text-rose-600" />
             <span>
-              <strong className="font-bold">{t('midnightJourney')}</strong> — This journey starts before midnight and continues into the next day. Please plan accordingly.
+              <strong className="font-bold">{t('midnightJourney')}</strong> — This journey starts before midnight and continues into the next day.
             </span>
           </div>
         )}
 
-        {/* ── Bottom Action Row ──────────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-700/60">
-          <div className="flex items-center gap-2">
+        {/* ── Bottom Action & Price Row (Compact Integrated Bar) ─────────── */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2.5 sm:pt-3 border-t border-slate-100 dark:border-slate-700/60">
+          
+          {/* Price & Fare label */}
+          <div className="flex items-baseline gap-1.5">
+            <div className="flex items-baseline gap-1">
+              <span className="text-xl sm:text-2xl font-black text-indigo-700 dark:text-indigo-400 font-mono tracking-tight">
+                {formattedPrice}
+              </span>
+              <span className="text-[10px] sm:text-xs font-bold text-indigo-600 dark:text-indigo-300 font-mono uppercase">
+                LKR
+              </span>
+            </div>
+            <span className="text-[10px] text-slate-400 hidden xs:inline">• {t('perPassenger')}</span>
+          </div>
+
+          {/* Buttons Group */}
+          <div className="flex items-center gap-1.5 sm:gap-2 ml-auto">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowDetailsModal(true);
               }}
-              className="px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-slate-600 flex items-center gap-1.5 transition-colors"
+              className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px] sm:text-xs border border-slate-200 dark:border-slate-600 flex items-center gap-1 transition-colors"
             >
-              <Info className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+              <Info className="w-3 h-3 text-slate-500 dark:text-slate-400" />
               <span>{t('details')}</span>
             </button>
 
@@ -377,9 +383,9 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
                 e.stopPropagation();
                 setShowTimetableModal(true);
               }}
-              className="px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-slate-600 flex items-center gap-1.5 transition-colors"
+              className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px] sm:text-xs border border-slate-200 dark:border-slate-600 flex items-center gap-1 transition-colors"
             >
-              <Clock className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+              <Clock className="w-3 h-3 text-slate-500 dark:text-slate-400" />
               <span>{t('timetable')}</span>
             </button>
 
@@ -390,57 +396,57 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
                   e.stopPropagation();
                   setShowEditorModal(true);
                 }}
-                className="px-3 py-2 rounded-xl bg-blue-50 dark:bg-blue-900/40 hover:bg-blue-100 text-blue-700 dark:text-blue-300 font-bold text-xs border border-blue-200 dark:border-blue-700 flex items-center gap-1.5 transition-colors shadow-xs"
+                className="px-2.5 py-1.5 sm:py-2 rounded-xl bg-blue-50 dark:bg-blue-900/40 hover:bg-blue-100 text-blue-700 dark:text-blue-300 font-bold text-[11px] sm:text-xs border border-blue-200 dark:border-blue-700 flex items-center gap-1 transition-colors shadow-xs"
                 title="Edit Route Details & Timetable"
               >
-                <Edit3 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                <Edit3 className="w-3 h-3 text-blue-600 dark:text-blue-400" />
                 <span className="hidden sm:inline">Edit</span>
               </button>
             )}
-          </div>
 
-          {/* Action Button: Book Now OR Smart Next Available Trip OR No Upcoming Trips */}
-          {!isDeparted ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSelectSeats();
-              }}
-              className="px-6 py-2.5 rounded-2xl bg-slate-900 hover:bg-blue-600 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md transition-all transform hover:scale-105 active:scale-95"
-            >
-              <span>{t('bookNow')}</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          ) : nextTripInfo ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleBookNextTrip(nextTripInfo.route);
-              }}
-              className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-indigo-500/25 transition-all transform hover:scale-105 active:scale-95"
-              title={nextTripInfo.isSameBus ? `Next available trip for ${route.busNumber}` : `Next trip on this route`}
-            >
-              <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>
-                {nextTripInfo.isTomorrow 
-                  ? `${t('bookForTomorrow')} (${nextTripInfo.route.departureTime})` 
-                  : `${t('nextTrip')}: ${nextTripFormattedDate} (${nextTripInfo.route.departureTime})`
-                }
-              </span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              disabled
-              className="px-5 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-700/60 text-slate-400 dark:text-slate-500 font-bold text-xs flex items-center gap-1.5 cursor-not-allowed border border-slate-200 dark:border-slate-700"
-            >
-              <AlertTriangle className="w-3.5 h-3.5 text-slate-400" />
-              <span>{t('noUpcomingTrips')}</span>
-            </button>
-          )}
+            {/* Action Button: Book Now OR Smart Next Available Trip OR No Upcoming Trips */}
+            {!isDeparted ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelectSeats();
+                }}
+                className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-slate-900 hover:bg-blue-600 text-white font-extrabold text-[11px] sm:text-xs flex items-center gap-1 shadow-md transition-all transform hover:scale-105 active:scale-95"
+              >
+                <span>{t('bookNow')}</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            ) : nextTripInfo ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleBookNextTrip(nextTripInfo.route);
+                }}
+                className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-extrabold text-[11px] sm:text-xs flex items-center gap-1 shadow-md shadow-indigo-500/20 transition-all transform hover:scale-105 active:scale-95"
+                title={nextTripInfo.isSameBus ? `Next available trip for ${route.busNumber}` : `Next trip on this route`}
+              >
+                <Calendar className="w-3 h-3 flex-shrink-0" />
+                <span>
+                  {nextTripInfo.isTomorrow 
+                    ? `${t('bookForTomorrow')}` 
+                    : `${t('nextTrip')}: ${nextTripFormattedDate}`
+                  }
+                </span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-slate-100 dark:bg-slate-700/60 text-slate-400 dark:text-slate-500 font-bold text-[10px] sm:text-xs flex items-center gap-1 cursor-not-allowed border border-slate-200 dark:border-slate-700"
+              >
+                <AlertTriangle className="w-3 h-3 text-slate-400" />
+                <span>{t('noUpcomingTrips')}</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
