@@ -70,9 +70,32 @@ export const Navbar: React.FC = () => {
     { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
   ];
 
+  const isAdmin = currentUser?.role === 'admin' || userRole === 'admin';
+
+  const mobileNavItems = [
+    { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
+    { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
+    { key: 'live-tracking', translationKey: 'liveGps', icon: MapPin, activeOn: ['live-tracking'] },
+    isAdmin
+      ? { 
+          key: 'admin-panel', 
+          label: language === 'sinhala' ? 'පරිපාලක' : language === 'tamil' ? 'நிர்வாகம்' : 'Admin', 
+          icon: ShieldCheck, 
+          activeOn: ['admin-panel'],
+          isAdminTab: true 
+        }
+      : { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
+  ];
+
   const isActive = (activeOn: string[]) => activeOn.includes(currentView);
 
   const handleNavItemClick = (view: string) => {
+    if (view === 'admin-panel') {
+      setUserRole('admin');
+      setCurrentView('admin-panel');
+      return;
+    }
+
     const requiresAuth = view === 'live-tracking' || view === 'my-bookings';
     if (requiresAuth && !currentUser) {
       setCurrentView(view as any);
@@ -94,7 +117,6 @@ export const Navbar: React.FC = () => {
     }
 
     setCurrentView(view as any);
-    
   };
 
   return (
@@ -335,28 +357,35 @@ export const Navbar: React.FC = () => {
       {/* ── Mobile Bottom Navigation Bar ── */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-safe transition-colors duration-300">
         <div className="flex items-center justify-around px-2 py-2">
-          {navItems.map((item) => {
+          {mobileNavItems.map((item: any) => {
             const Icon = item.icon;
             const active = isActive(item.activeOn);
+            const isAdminItem = item.isAdminTab;
             return (
               <button
                 key={item.key}
                 onClick={() => handleNavItemClick(item.key)}
-                className={`flex flex-col items-center justify-center w-16 gap-1 p-1 rounded-xl transition-all ${
+                className={`flex flex-col items-center justify-center w-16 gap-1 p-1 rounded-xl transition-all cursor-pointer ${
                   active
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                    ? isAdminItem
+                      ? 'text-purple-600 dark:text-purple-400 font-black'
+                      : 'text-blue-600 dark:text-blue-400 font-black'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-bold'
                 }`}
               >
-                <Icon className={`w-5 h-5 ${active ? 'fill-blue-100 dark:fill-blue-900/50' : ''}`} />
-                <span className="text-[10px] font-bold text-center leading-tight truncate w-full">
-                  {t(item.translationKey)}
+                <Icon className={`w-5 h-5 ${
+                  active 
+                    ? isAdminItem 
+                      ? 'fill-purple-100 dark:fill-purple-900/50 text-purple-600 dark:text-purple-400' 
+                      : 'fill-blue-100 dark:fill-blue-900/50 text-blue-600 dark:text-blue-400' 
+                    : ''
+                }`} />
+                <span className="text-[10px] text-center leading-tight truncate w-full">
+                  {item.label || t(item.translationKey)}
                 </span>
               </button>
             );
           })}
-          
-          
         </div>
       </div>
 
