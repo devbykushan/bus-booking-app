@@ -12,13 +12,14 @@ import {
   TrendingUp, Users, DollarSign, Bus, Award, BarChart2, 
   SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
   Trash2, RefreshCw, Edit3, Clock, Star, Search,
-  Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare
+  Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare, Menu
 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
   const { bookings, routes, loadRoutes } = useBookingStore();
 
   const [activeTab, setActiveTab] = useState<'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp'>('fleet');
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [selectedRouteId, setSelectedRouteId] = useState<string>(routes[0]?.id || '');
   const [showSeatBuilder, setShowSeatBuilder] = useState(false);
@@ -68,6 +69,17 @@ export const AdminDashboard: React.FC = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+    if (isMobileNavOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileNavOpen]);
 
   useEffect(() => {
     if (activeTab === 'users' && usersList.length === 0) {
@@ -236,13 +248,177 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* ─── MOBILE TOP NAVIGATION BAR (Visible on mobile screens only) ─── */}
+      <div className="lg:hidden bg-white rounded-2xl border border-slate-200/90 shadow-sm p-3 flex items-center justify-between animate-fade-in-up">
+        <button
+          onClick={() => setIsMobileNavOpen(true)}
+          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
+          aria-label="Open Admin Menu"
+        >
+          <Menu className="w-4 h-4" />
+          <span>Admin Menu</span>
+        </button>
+
+        <div className="flex items-center gap-2 font-black text-xs text-slate-800">
+          <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+          <span>
+            {activeTab === 'fleet' && 'Fleet & Route Operations'}
+            {activeTab === 'timetables' && 'Master Timetables'}
+            {activeTab === 'analytics' && 'Revenue & Analytics'}
+            {activeTab === 'users' && `User Accounts (${totalUsersCount})`}
+            {activeTab === 'payment-slips' && 'Payment Slips'}
+            {activeTab === 'whatsapp' && 'WhatsApp Gateway'}
+          </span>
+        </div>
+      </div>
+
+      {/* ─── MOBILE SLIDE-OVER DRAWER MODAL ─── */}
+      {isMobileNavOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex">
+          {/* Dimmed backdrop overlay */}
+          <div
+            onClick={() => setIsMobileNavOpen(false)}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs animate-fade-in"
+          />
+
+          {/* Slide Drawer Content */}
+          <div className="relative w-[82vw] max-w-xs h-full bg-white shadow-2xl flex flex-col p-5 space-y-4 overflow-y-auto animate-slide-in-left z-10">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-400">Admin Navigation</h4>
+                <p className="text-xs font-extrabold text-slate-800">Dewmina Super Line</p>
+              </div>
+              <button
+                onClick={() => setIsMobileNavOpen(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                aria-label="Close Navigation"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-2 flex-1">
+              <button
+                onClick={() => { setActiveTab('fleet'); setIsMobileNavOpen(false); }}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'fleet' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Bus className="w-4 h-4" /> Fleet & Route Operations
+              </button>
+              <button
+                onClick={() => { setActiveTab('timetables'); setIsMobileNavOpen(false); }}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'timetables' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Calendar className="w-4 h-4" /> Master Timetables
+              </button>
+              <button
+                onClick={() => { setActiveTab('analytics'); setIsMobileNavOpen(false); }}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'analytics' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <BarChart2 className="w-4 h-4" /> Revenue & Analytics
+              </button>
+              <button
+                onClick={() => { setActiveTab('users'); setIsMobileNavOpen(false); }}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'users' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4" /> User Accounts ({totalUsersCount})
+                </div>
+                {usersList.length > 0 && (
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                    activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+                  }`}>
+                    {totalUsersCount}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => { setActiveTab('payment-slips'); setIsMobileNavOpen(false); }}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'payment-slips' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4" /> Payment Slips
+                </div>
+                {paymentSlips.filter(s => s.status === 'pending').length > 0 && (
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                    activeTab === 'payment-slips' ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-700'
+                  }`}>
+                    {paymentSlips.filter(s => s.status === 'pending').length}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => { setActiveTab('whatsapp'); setIsMobileNavOpen(false); }}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'whatsapp' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4" /> WhatsApp Gateway
+                </div>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                  activeTab === 'whatsapp' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
+                }`}>
+                  BOT
+                </span>
+              </button>
+            </div>
+
+            {activeTab === 'fleet' && (
+              <div className="border-t border-slate-200 pt-4 space-y-2">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2 pb-1">Quick Actions</div>
+                <button
+                  onClick={() => {
+                    setIsMobileNavOpen(false);
+                    const target = routes.find(r => r.id === selectedRouteId) || routes[0];
+                    if (target) setEditDetailsRoute(target);
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left cursor-pointer"
+                >
+                  <Clock className="w-4 h-4" /> Edit Details & Timetable
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMobileNavOpen(false);
+                    const target = routes.find(r => r.id === selectedRouteId) || routes[0];
+                    if (target) setCustomizeRoute(target);
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left cursor-pointer"
+                >
+                  <SlidersHorizontal className="w-4 h-4" /> Customize Seat Layout
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMobileNavOpen(false);
+                    setShowScanner(true);
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left cursor-pointer"
+                >
+                  <QrCode className="w-4 h-4" /> Conductor Ticket Validator
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col lg:flex-row items-start gap-8">
-        <aside className="w-full lg:w-72 shrink-0 bg-white rounded-3xl border border-slate-200 shadow-sm p-4 space-y-4 lg:sticky lg:top-24 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
+        {/* ─── DESKTOP SIDEBAR (Hidden on mobile screens, sticky on desktop) ─── */}
+        <aside className="hidden lg:block w-72 shrink-0 bg-white rounded-3xl border border-slate-200 shadow-sm p-4 space-y-4 lg:sticky lg:top-24 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
           <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2">Admin Navigation</div>
           <div className="flex flex-col gap-2">
             <button
               onClick={() => setActiveTab('fleet')}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left ${
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
                 activeTab === 'fleet' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
@@ -250,7 +426,7 @@ export const AdminDashboard: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('timetables')}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left ${
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
                 activeTab === 'timetables' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
@@ -258,7 +434,7 @@ export const AdminDashboard: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left ${
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
                 activeTab === 'analytics' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
@@ -266,7 +442,7 @@ export const AdminDashboard: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('users')}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left ${
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
                 activeTab === 'users' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
@@ -283,7 +459,7 @@ export const AdminDashboard: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('payment-slips')}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left ${
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
                 activeTab === 'payment-slips' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
@@ -300,7 +476,7 @@ export const AdminDashboard: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('whatsapp')}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left ${
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
                 activeTab === 'whatsapp' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
@@ -323,7 +499,7 @@ export const AdminDashboard: React.FC = () => {
                   const target = routes.find(r => r.id === selectedRouteId) || routes[0];
                   if (target) setEditDetailsRoute(target);
                 }}
-                className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left"
+                className="w-full px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left cursor-pointer"
               >
                 <Clock className="w-4 h-4" /> Edit Details & Timetable
               </button>
@@ -332,13 +508,13 @@ export const AdminDashboard: React.FC = () => {
                   const target = routes.find(r => r.id === selectedRouteId) || routes[0];
                   if (target) setCustomizeRoute(target);
                 }}
-                className="w-full px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left"
+                className="w-full px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left cursor-pointer"
               >
                 <SlidersHorizontal className="w-4 h-4" /> Customize Seat Layout
               </button>
               <button
                 onClick={() => setShowScanner(true)}
-                className="w-full px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left"
+                className="w-full px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left cursor-pointer"
               >
                 <QrCode className="w-4 h-4" /> Conductor Ticket Validator
               </button>

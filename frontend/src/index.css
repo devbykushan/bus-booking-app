@@ -2057,3 +2057,17 @@
     box-shadow: none !important;
   }
 }
+
+/* ─── Mobile Slide-in Left Animation ─── */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
