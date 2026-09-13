@@ -58,6 +58,12 @@ export const translations = {
     busFound: 'Bus Found',
     availableSchedules: 'Available Bus Schedules Dashboard',
     officialPortal: 'Official Dewmina Super Line Booking Portal',
+    departed: 'Departed',
+    departedToday: 'Departed Today',
+    bookForTomorrow: 'Book for Tomorrow',
+    nextTrip: 'Next Trip',
+    noUpcomingTrips: 'No Upcoming Trips',
+    tripDepartedNotice: 'This trip has already departed for the selected date.',
     
     // Seat Map
     selectBoardingPoint: 'Select Boarding Point',
@@ -182,6 +188,12 @@ export const translations = {
     busFound: 'බස් රථයක් හමු විය',
     availableSchedules: 'ලබා ගත හැකි බස් කාලසටහන්',
     officialPortal: 'නිල දෙව්මිණ සුපර් ලයින් ප්‍රවේශපත්‍ර ද්වාරය',
+    departed: 'පිටත්ව ඇත',
+    departedToday: 'අද දින පිටත්ව ඇත',
+    bookForTomorrow: 'හෙට දිනට වෙන්කරන්න',
+    nextTrip: 'ඊළඟ ගමන්වාරය',
+    noUpcomingTrips: 'ඉදිරි ගමන්වාර නොමැත',
+    tripDepartedNotice: 'තෝරාගත් දිනය සඳහා මෙම බස් රථය දැනටමත් පිටත්ව ගොස් ඇත.',
 
     // Seat Map
     selectBoardingPoint: 'පිටත්වන ස්ථානය තෝරන්න',
@@ -306,6 +318,12 @@ export const translations = {
     busFound: 'பஸ் கண்டறியப்பட்டது',
     availableSchedules: 'கிடைக்கும் பஸ் அட்டவணைகள்',
     officialPortal: 'அதிகாரப்பூர்வ தெவ்மிண சூப்பர் லைன் முன்பதிவு போர்டல்',
+    departed: 'புறப்பட்டது',
+    departedToday: 'இன்று புறப்பட்டது',
+    bookForTomorrow: 'நாளைக்கு முன்பதிவு செய்க',
+    nextTrip: 'அடுத்த பயணம்',
+    noUpcomingTrips: 'வரவிருக்கும் பயணங்கள் இல்லை',
+    tripDepartedNotice: 'தேர்ந்தெடுக்கப்பட்ட தேதிக்கு இந்த பஸ் ஏற்கனவே புறப்பட்டுவிட்டது.',
 
     // Seat Map
     selectBoardingPoint: 'ஏறும் இடத்தை தேர்வு செய்யவும்',

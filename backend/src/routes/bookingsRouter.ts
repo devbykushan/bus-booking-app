@@ -129,6 +129,26 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
         res.status(400).json({ error: 'Bookings are only permitted up to 1 week (7 days) in advance.' });
         return;
       }
+
+      // If booking is for today, verify departure time has not passed
+      if (bookingDate.getTime() === today.getTime() && route.departureTime) {
+        const match = route.departureTime.trim().match(/(\d{1,2})[:.]?(\d{2})?\s*(am|pm)?/i);
+        if (match) {
+          let hours = parseInt(match[1], 10);
+          const minutes = match[2] ? parseInt(match[2], 10) : 0;
+          const meridian = match[3]?.toLowerCase();
+          if (meridian === 'pm' && hours < 12) hours += 12;
+          if (meridian === 'am' && hours === 12) hours = 0;
+
+          const now = new Date();
+          const currentMinutes = now.getHours() * 60 + now.getMinutes();
+          const tripMinutes = hours * 60 + minutes;
+          if (tripMinutes <= currentMinutes) {
+            res.status(400).json({ error: 'This bus departure time has already passed for today. Please select a future trip.' });
+            return;
+          }
+        }
+      }
     }
 
     // Normalize seat IDs to route-prefixed canonical format (e.g. "route-101-17")
