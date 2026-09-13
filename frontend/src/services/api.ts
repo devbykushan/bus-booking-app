@@ -141,6 +141,13 @@ export const authApi = {
   }): Promise<{ success: boolean; message: string; token: string; user: any }> =>
     apiFetch('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
 
+  /** Log in or auto-register via Google OAuth ID token */
+  loginWithGoogle: (payload: {
+    credential: string;
+    role?: 'passenger' | 'admin';
+  }): Promise<{ success: boolean; message: string; token: string; user: any }> =>
+    apiFetch('/auth/google', { method: 'POST', body: JSON.stringify(payload) }),
+
   /** Get authenticated user profile */
   getMe: (token: string): Promise<{ user: any }> =>
     apiFetch('/auth/me', { headers: { Authorization: `Bearer ${token}` } }),

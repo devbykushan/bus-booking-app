@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { GoogleLogin } from '@react-oauth/google';
 import { useBookingStore } from '../../store/bookingStore';
 import { LogIn, UserCheck, ShieldCheck, X, Mail, Lock, User, Phone, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
@@ -7,7 +8,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
-  const { login, register, sendOtp, selectedRoute, currentView}  = useBookingStore();
+  const { login, loginWithGoogle, register, sendOtp, selectedRoute, currentView } = useBookingStore();
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [role, setRole] = useState<'passenger' | 'admin'>('passenger');
@@ -157,6 +158,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    if (!credentialResponse.credential) {
+      setErrorMsg('Failed to retrieve credentials from Google.');
+      return;
+    }
+    setIsSubmitting(true);
+    setErrorMsg('');
+    try {
+      const res = await loginWithGoogle(credentialResponse.credential, role);
+      if (res.success) {
+        onClose();
+      } else {
+        setShakeError(true);
+        setErrorMsg(res.message || 'Google Sign-In failed.');
+      }
+    } catch (err: any) {
+      setShakeError(true);
+      setErrorMsg(err.message || 'Google Sign-In error occurred.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setShakeError(true);
+    setErrorMsg('Google Sign-In was cancelled or failed.');
+  };
+
   // Auto-clear the shake animation after it plays
   useEffect(() => {
     if (shakeError) {
@@ -287,6 +316,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-semibold shadow-sm animate-fade-in-up">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-500" />
                   <span>{errorMsg}</span>
+                </div>
+              )}
+
+              {/* Google One-Click Auth */}
+              {(mode === 'login' || (mode === 'register' && regStep === 1)) && (
+                <div className="space-y-3 pt-1">
+                  <div className="flex justify-center w-full [&>div]:!w-full [&>div>iframe]:!w-full [&>div>div]:!w-full shadow-xs rounded-full overflow-hidden">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={handleGoogleError}
+                      theme="outline"
+                      size="large"
+                      shape="pill"
+                      text={mode === 'login' ? 'signin_with' : 'signup_with'}
+                      width="100%"
+                      useOneTap={false}
+                    />
+                  </div>
+
+                  <div className="relative flex items-center justify-center my-2">
+                    <div className="border-t border-slate-200 w-full" />
+                    <span className="bg-white px-3 text-[10px] text-slate-400 font-bold uppercase tracking-wider absolute">
+                      or continue with email
+                    </span>
+                  </div>
                 </div>
               )}
 

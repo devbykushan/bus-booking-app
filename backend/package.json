@@ -16,6 +16,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "express": "^4.21.2",
+    "google-auth-library": "^11.0.2",
     "nodemailer": "^9.0.6",
     "pg": "^8.23.0",
     "typescript": "^5.5.0",

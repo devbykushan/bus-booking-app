@@ -78,6 +78,7 @@ interface BookingStore {
   // Authentication
   currentUser: UserAccount | null;
   login: (email: string, pass: string, role?: 'passenger' | 'admin') => Promise<{ success: boolean; message: string }>;
+  loginWithGoogle: (credential: string, role?: 'passenger' | 'admin') => Promise<{ success: boolean; message: string }>;
   verifyEmailOtp: (email: string, otp: string) => Promise<{ success: boolean; message: string }>;
   sendOtp: (name: string, email: string) => Promise<{ success: boolean; message: string }>;
   register: (name: string, email: string, pass: string, otp: string, role?: 'passenger' | 'admin', phone?: string) => Promise<{ success: boolean; message: string }>;
@@ -209,6 +210,33 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
       return { success: false, message: res.message || 'Login failed' };
     } catch (err: any) {
       return { success: false, message: err.message || 'Authentication error occurred' };
+    }
+  },
+
+  loginWithGoogle: async (credential, role) => {
+    try {
+      const res = await authApi.loginWithGoogle({ credential, role });
+      if (res.success && res.user) {
+        const user: UserAccount = {
+          id: res.user.id,
+          name: res.user.name,
+          email: res.user.email,
+          role: res.user.role,
+          phone: res.user.phone,
+        };
+        localStorage.setItem('dewmina_user', JSON.stringify(user));
+        localStorage.setItem('auth_token', res.token);
+        set({
+          currentUser: user,
+          userRole: user.role as any,
+          showAuthModal: false,
+        });
+        get().setCurrentView(user.role === 'admin' ? 'admin-panel' : 'passenger-search');
+        return { success: true, message: res.message || 'Logged in successfully' };
+      }
+      return { success: false, message: res.message || 'Google login failed' };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Google authentication error occurred' };
     }
   },
 

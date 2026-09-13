@@ -1,8 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import { OAuth2Client } from 'google-auth-library';
 import { dbQuery, hashPassword, verifyPassword } from '../db/database';
 import { sendAccountCreationEmail, sendOTPEmail } from '../services/emailService';
 import { sendWhatsAppOtp } from '../services/wahaService';
+
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '846634088514-gl0r0g50m3omomtf24sh44qpbapbrsg3.apps.googleusercontent.com';
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 export const authRouter = Router();
 
@@ -287,6 +291,103 @@ authRouter.post('/login', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error during login:', error);
     return res.status(500).json({ error: 'Failed to sign in due to a server error.' });
+  }
+});
+
+/**
+ * POST /api/auth/google
+ * Authenticate or register user via Google OAuth ID token
+ */
+authRouter.post('/google', async (req: Request, res: Response) => {
+  try {
+    const { credential, role = 'passenger' } = req.body;
+
+    if (!credential || typeof credential !== 'string') {
+      return res.status(400).json({ error: 'Google credential token is required.' });
+    }
+
+    // Verify Google ID Token
+    let ticket;
+    try {
+      ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: GOOGLE_CLIENT_ID,
+      });
+    } catch (verifyErr: any) {
+      console.error('[AuthRouter] Google verifyIdToken error:', verifyErr);
+      return res.status(401).json({ error: 'Invalid Google authentication token. Please try again.' });
+    }
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      return res.status(400).json({ error: 'Unable to retrieve Google profile information.' });
+    }
+
+    const email = payload.email.trim().toLowerCase();
+    const name = payload.name || payload.given_name || email.split('@')[0];
+    const picture = payload.picture;
+
+    // Check if user already exists
+    const existing = await dbQuery(
+      'SELECT "id", "name", "email", "role", "phone", "createdAt" FROM users WHERE LOWER("email") = $1',
+      [email]
+    );
+
+    let dbUser;
+    if (existing.rows.length > 0) {
+      dbUser = existing.rows[0];
+    } else {
+      // Auto-register new passenger from Google
+      const userId = `usr-g-${Date.now()}-${uuidv4().substring(0, 6)}`;
+      const randomPasswordHash = hashPassword(`google-auth-${uuidv4()}`);
+      const createdAt = new Date().toISOString();
+      const userRole = role === 'admin' ? 'admin' : 'passenger';
+
+      await dbQuery(
+        `INSERT INTO users ("id", "name", "email", "password", "role", "phone", "createdAt")
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [userId, name, email, randomPasswordHash, userRole, null, createdAt]
+      );
+
+      // Send account creation confirmation email asynchronously
+      sendAccountCreationEmail({
+        email,
+        name,
+        role: userRole,
+      }).catch((err) => {
+        console.error('[AuthRouter] Error triggering Google account creation email:', err);
+      });
+
+      dbUser = {
+        id: userId,
+        name,
+        email,
+        role: userRole,
+        phone: null,
+        createdAt,
+      };
+    }
+
+    const token = `token-${dbUser.id}-${Date.now()}`;
+    const user = {
+      id: dbUser.id,
+      name: dbUser.name,
+      email: dbUser.email,
+      role: dbUser.role,
+      phone: dbUser.phone,
+      picture,
+      createdAt: dbUser.createdAt,
+    };
+
+    return res.json({
+      success: true,
+      message: `Signed in successfully as ${user.name}.`,
+      token,
+      user,
+    });
+  } catch (error) {
+    console.error('Error during Google authentication:', error);
+    return res.status(500).json({ error: 'Failed to authenticate with Google due to a server error.' });
   }
 });
 
