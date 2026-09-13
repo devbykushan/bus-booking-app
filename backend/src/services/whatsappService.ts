@@ -214,6 +214,7 @@ export async function initWhatsApp(): Promise<void> {
       if (connection === 'close') {
         const statusCode = (lastDisconnect?.error as any)?.output?.statusCode;
         const errMsg = lastDisconnect?.error?.message || String(lastDisconnect?.error || 'Unknown error');
+        const isConflict = statusCode === 440 || errMsg.includes('conflict');
         const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
 
         lastEngineError = `Connection closed: ${errMsg} (Status: ${statusCode || 'N/A'})`;
@@ -223,11 +224,12 @@ export async function initWhatsApp(): Promise<void> {
           if (!currentQrDataUrl) {
             currentStatus = 'disconnected';
           }
-          addEngineLog('Scheduling reconnect in 4s...');
+          const reconnectDelay = isConflict ? 15000 : 4000;
+          addEngineLog(`Scheduling reconnect in ${reconnectDelay / 1000}s...`);
           setTimeout(() => {
             isInitializing = false;
             initWhatsApp();
-          }, 4000);
+          }, reconnectDelay);
         } else {
           currentStatus = 'disconnected';
           connectedUser = null;
@@ -238,6 +240,7 @@ export async function initWhatsApp(): Promise<void> {
               fs.rmSync(AUTH_DIR, { recursive: true, force: true });
             }
           } catch (e) {}
+          await clearAuthFromDb();
           setTimeout(() => {
             isInitializing = false;
             initWhatsApp();
@@ -304,19 +307,20 @@ export async function restartWhatsAppSession(): Promise<boolean> {
  */
 export async function sendWhatsAppMessage(phone: string, text: string): Promise<boolean> {
   if (!sock || currentStatus !== 'connected') {
-    console.warn(`[WhatsApp Service] Cannot send message: WhatsApp client is not connected (Status: ${currentStatus})`);
+    addEngineLog(`Cannot send message: WhatsApp client is not connected (Status: ${currentStatus})`);
     return false;
   }
 
   try {
     const jid = formatSriLankanPhoneJid(phone);
-    console.log(`[WhatsApp Service] Sending message to ${jid}...`);
+    addEngineLog(`Sending WhatsApp message to ${jid}...`);
 
-    await sock.sendMessage(jid, { text });
-    console.log(`[WhatsApp Service] Message successfully sent to ${jid}!`);
+    const result = await sock.sendMessage(jid, { text });
+    addEngineLog(`Message successfully sent to ${jid}! (Msg ID: ${result?.key?.id || 'OK'})`);
     return true;
   } catch (error: any) {
-    console.error(`[WhatsApp Service] Failed to send message to ${phone}:`, error?.message || error);
+    lastEngineError = `Failed to send to ${phone}: ${error?.message || error}`;
+    addEngineLog(lastEngineError);
     return false;
   }
 }
