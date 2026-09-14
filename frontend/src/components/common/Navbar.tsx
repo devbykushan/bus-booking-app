@@ -121,7 +121,11 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300">
+      <div className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 pt-safe ${
+        scrolled
+          ? 'bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl'
+          : 'bg-[#090d16]/85 dark:bg-slate-950/85 backdrop-blur-xl'
+      }`}>
         <nav
           ref={navRef}
           className={`w-full transition-all duration-500 border-b ${

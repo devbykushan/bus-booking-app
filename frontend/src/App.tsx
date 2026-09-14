@@ -183,7 +183,7 @@ export function App() {
         </div>
       )}
 
-      <main className={`flex-1 transition-all duration-300 pb-20 md:pb-0 ${currentView === 'passenger-search' ? '' : 'pt-20 md:pt-24'}`}>
+      <main className={`flex-1 transition-all duration-300 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0 ${currentView === 'passenger-search' ? '' : 'pt-[calc(5rem+env(safe-area-inset-top,0px))] md:pt-24'}`}>
         {currentView === 'admin-panel' ? (
           isAdmin ? (
             <div key="admin">
