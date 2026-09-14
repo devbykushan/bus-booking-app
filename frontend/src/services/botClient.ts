@@ -85,7 +85,9 @@ async function generateClientFallback(incomingText: string): Promise<Omit<ChatMe
     lower.includes('කාලසටහන') ||
     lower.includes('schedule') ||
     lower.includes('timetable') ||
+    lower.includes('time table') ||
     lower.includes('time') ||
+    lower.includes('times') ||
     lower.includes('වේලාව') ||
     lower.includes('කීයටද') ||
     lower.includes('keeyatada') ||
@@ -93,26 +95,50 @@ async function generateClientFallback(incomingText: string): Promise<Omit<ChatMe
     ['1', '1.', 'one'].includes(lower)
   ) {
     const liveRoutes = useBookingStore.getState().routes || [];
-    let liveRoutesStr = '';
+    let text = '';
     if (liveRoutes.length > 0) {
-      liveRoutesStr = '\n\n**අද දින ක්‍රියාත්මක ගමන් වාර:**\n' + liveRoutes.slice(0, 3).map((r) => 
-        `• ${r.origin} ➔ ${r.destination} (${r.departureTime}) - ${r.busNumber} [LKR ${Number(r.priceStarting || 1157).toLocaleString()}] (${r.availableSeatsCount} seats left)`
-      ).join('\n');
+      const monToCol = liveRoutes.filter((r) => 
+        (r.origin || '').toLowerCase().includes('monaragala') || (r.destination || '').toLowerCase().includes('colombo')
+      );
+      const colToMon = liveRoutes.filter((r) => 
+        (r.origin || '').toLowerCase().includes('colombo') || (r.destination || '').toLowerCase().includes('monaragala')
+      );
+
+      text = `🚌 **Dewmina Super Line සජීවී බස් කාලසටහන (Live Timetable)**\n\n`;
+      if (monToCol.length > 0) {
+        text += `📍 **මොනරාගල ➔ කොළඹ (Daily Express)**\n`;
+        for (const r of monToCol) {
+          const time = (r.departureTime || '').replace('.', ':');
+          const seatsInfo = r.availableSeatsCount !== undefined ? ` | 💺 ඇබෑර්තු: ${r.availableSeatsCount}` : '';
+          text += `• ⏰ ${time} — **${r.busNumber}** (${r.busType || 'Normal'}) [LKR ${Number(r.priceStarting || 1157).toLocaleString()}]${seatsInfo}\n`;
+        }
+      }
+
+      if (colToMon.length > 0) {
+        if (monToCol.length > 0) text += '\n';
+        text += `📍 **කොළඹ ➔ මොනරාගල (Daily Express)**\n`;
+        for (const r of colToMon) {
+          const time = (r.departureTime || '').replace('.', ':');
+          const seatsInfo = r.availableSeatsCount !== undefined ? ` | 💺 ඇබෑර්තු: ${r.availableSeatsCount}` : '';
+          text += `• ⏰ ${time} — **${r.busNumber}** (${r.busType || 'Normal'}) [LKR ${Number(r.priceStarting || 1157).toLocaleString()}]${seatsInfo}\n`;
+        }
+      }
+
+      text += `\n💡 *දැන්ම ආසන තෝරා Online වෙන්කරවා ගත හැක.*`;
+    } else {
+      text = `🚌 **Dewmina Super Line දෛනික බස් කාලසටහන**\n\n` +
+        `📍 **මොනරාගල ➔ කොළඹ (Daily Express)**\n` +
+        `• උදෑසන 05:00 AM / 07:10 AM / 11:40 AM\n` +
+        `• රාත්‍රී 10:55 PM / 11:35 PM\n\n` +
+        `📍 **කොළඹ ➔ මොනරාගල (Daily Express)**\n` +
+        `• දහවල් 01:40 PM / 02:20 PM / 04:10 PM\n` +
+        `• සවස 06:00 PM / 06:50 PM\n\n` +
+        `💡 *සජීවී ආසන ඇබෑර්තු සහ වෙන්කිරීම් සඳහා පහතින් කාලසටහන බලන්න.*`;
     }
 
     return {
       sender: 'bot',
-      text: `🚌 **Dewmina Super Line දෛනික බස් කාලසටහන**\n\n` +
-        `📍 **මොනරාගල ➔ කොළඹ (Daily Express)**\n` +
-        `• උදෑසන 05:00 AM — සාමාන්‍ය සේවාව (Normal)\n` +
-        `• උදෑසන 10:30 AM — අර්ධ සුඛෝපභෝගී (Semi-Luxury)\n` +
-        `• රාත්‍රී 08:00 PM — Super Line Luxury A/C Express\n\n` +
-        `📍 **කොළඹ ➔ මොනරාගල (Daily Express)**\n` +
-        `• උදෑසන 06:30 AM — Semi-Luxury\n` +
-        `• රාත්‍රී 08:00 PM — Super Line A/C Express\n` +
-        `• රාත්‍රී 09:30 PM — Normal Express` +
-        liveRoutesStr +
-        `\n\n💡 *වෙබ් අඩවිය හරහා ඔබට ක්ෂණිකව ආසන තෝරා වෙන්කරගත හැක.*`,
+      text,
       options: [
         { label: '💺 දැන්ම ආසනයක් වෙන්කරන්න', value: 'ආසන වෙන්කිරීම' },
         { label: '💵 ටිකට් මිල ගණන්', value: 'මිල ගණන්' },
