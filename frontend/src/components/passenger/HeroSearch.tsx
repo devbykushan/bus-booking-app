@@ -119,13 +119,13 @@ export const HeroSearch: React.FC = () => {
         <img
           src="/yutong-hero.jpg"
           alt="Yutong C12 Pro Luxury Express Bus"
-          className="w-full h-full object-cover object-[center_22%] sm:object-[center_35%] md:object-center transition-all duration-700 animate-ken-burns"
+          className="w-full h-full object-cover object-[center_15%] sm:object-[center_30%] md:object-center transition-all duration-700 animate-ken-burns"
         />
         {/* Layered responsive overlays */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/25 to-black/90 md:from-black/75 md:via-black/35 md:to-black/85" />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-950/35 via-transparent to-indigo-950/30 md:from-blue-950/55 md:to-indigo-950/45" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_20%,rgba(59,130,246,0.16)_0%,transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_80%,rgba(99,102,241,0.12)_0%,transparent_55%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/15 to-black/85 md:from-black/75 md:via-black/35 md:to-black/85" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-950/30 via-transparent to-indigo-950/25 md:from-blue-950/55 md:to-indigo-950/45" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_20%,rgba(59,130,246,0.18)_0%,transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_80%,rgba(99,102,241,0.14)_0%,transparent_55%)]" />
       </div>
 
       {/* ── Floating Particles ─────────────────────────────────────────── */}
@@ -166,38 +166,38 @@ export const HeroSearch: React.FC = () => {
       </div>
 
       {/* ── Hero Content ───────────────────────────────────────────────── */}
-      <div className="relative z-10 flex flex-col items-center text-center px-4 pt-24 pb-14 space-y-8">
+      <div className="relative z-10 flex flex-col items-center text-center px-3.5 sm:px-4 pt-16 sm:pt-20 md:pt-24 pb-8 sm:pb-10 md:pb-14 space-y-4 sm:space-y-6 md:space-y-8">
 
         {/* Main headline */}
-        <div className="space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white leading-tight tracking-tight drop-shadow-2xl">
+        <div className="space-y-2 sm:space-y-3 md:space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <h1 className="text-2.5xl xs:text-3xl sm:text-5xl md:text-7xl font-black text-white leading-tight tracking-tight drop-shadow-2xl">
             {t('heroTitle')}
           </h1>
 
           {/* Dewmina Super Line branding with shimmer */}
-          <div className="flex items-center justify-center gap-3">
-            <div className="h-px w-16 bg-gradient-to-r from-transparent to-blue-400/60" />
-            <span className="animate-shimmer-text text-sm md:text-base font-bold tracking-[0.22em] uppercase">
+          <div className="flex items-center justify-center gap-2 sm:gap-3">
+            <div className="h-px w-10 sm:w-16 bg-gradient-to-r from-transparent to-blue-400/60" />
+            <span className="animate-shimmer-text text-xs sm:text-sm md:text-base font-bold tracking-[0.2em] uppercase">
               Dewmina Super Line
             </span>
-            <div className="h-px w-16 bg-gradient-to-l from-transparent to-blue-400/60" />
+            <div className="h-px w-10 sm:w-16 bg-gradient-to-l from-transparent to-blue-400/60" />
           </div>
 
         </div>
 
         {/* Trust badges */}
         <div
-          className="flex flex-wrap justify-center gap-3 text-xs font-semibold animate-fade-in-up"
+          className="flex flex-wrap justify-center gap-1.5 sm:gap-2.5 md:gap-3 text-[10px] sm:text-xs font-semibold animate-fade-in-up"
           style={{ animationDelay: '0.4s' }}
         >
           {[
-            { icon: <Shield className="w-3.5 h-3.5 text-green-400" />, label: 'SSL Secured Payments' },
-            { icon: <Clock className="w-3.5 h-3.5 text-amber-400" />, label: t('seatsLocked') },
-            { icon: <Star className="w-3.5 h-3.5 text-yellow-400" />, label: '4.9★ Rated Service' },
+            { icon: <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-400" />, label: 'SSL Secured Payments' },
+            { icon: <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" />, label: t('seatsLocked') },
+            { icon: <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-400" />, label: '4.9★ Rated Service' },
           ].map(({ icon, label }, i) => (
             <span
               key={label}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full
+              className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full
                          bg-white/10 backdrop-blur-sm border border-white/15 text-white/80
                          hover:bg-white/20 hover:border-white/30 transition-all duration-300
                          hover:scale-105 cursor-default"
@@ -215,89 +215,89 @@ export const HeroSearch: React.FC = () => {
         >
           <form
             onSubmit={handleSearchSubmit}
-            className="relative bg-white/10 backdrop-blur-xl border border-white/25
-                       rounded-3xl shadow-2xl shadow-black/30 p-6 md:p-8 space-y-5
+            className="relative bg-white/15 md:bg-white/10 backdrop-blur-xl border border-white/30 md:border-white/25
+                       rounded-2.5xl md:rounded-3xl shadow-2xl shadow-black/35 p-3 sm:p-5 md:p-8 space-y-2.5 sm:space-y-4 md:space-y-5
                        animate-border-glow"
           >
             {/* Inner highlight */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/8 via-transparent to-white/3 pointer-events-none" />
+            <div className="absolute inset-0 rounded-2.5xl md:rounded-3xl bg-gradient-to-br from-white/10 via-transparent to-white/5 pointer-events-none" />
 
-            <div className="relative grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+            <div className="relative grid grid-cols-1 md:grid-cols-12 gap-1.5 sm:gap-2.5 md:gap-3 items-center">
 
               {/* Origin */}
-              <div className="md:col-span-4 relative bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-2xl p-4
-                              border border-white/50 dark:border-slate-700 focus-within:border-blue-400 focus-within:ring-4
-                              focus-within:ring-blue-400/20 transition-all duration-300 shadow-sm
+              <div className="md:col-span-4 relative bg-white/95 dark:bg-slate-900/95 backdrop-blur rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4
+                              border border-white/60 dark:border-slate-700 focus-within:border-blue-400 focus-within:ring-4
+                              focus-within:ring-blue-400/20 transition-all duration-300 shadow-xs md:shadow-sm
                               hover:shadow-blue-200/40 dark:hover:shadow-black/40 hover:shadow-md group/from">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center justify-between gap-1.5 mb-1.5">
+                <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center justify-between gap-1 mb-0.5 md:mb-1.5">
                   <span className="flex items-center gap-1.5">
-                    <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-900/50 border border-blue-200/80 dark:border-blue-700 text-blue-600 dark:text-blue-400 shadow-xs transition-transform duration-300 group-hover/from:scale-110 group-hover/from:-translate-y-0.5">
+                    <span className="relative flex items-center justify-center w-4.5 h-4.5 md:w-5 md:h-5 rounded-md bg-blue-50 dark:bg-blue-900/50 border border-blue-200/80 dark:border-blue-700 text-blue-600 dark:text-blue-400 shadow-2xs transition-transform duration-300 group-hover/from:scale-110 group-hover/from:-translate-y-0.5">
                       <span className="absolute -inset-0.5 rounded-md bg-blue-400/30 dark:bg-blue-500/30 animate-from-beacon pointer-events-none" />
-                      <MapPin className="w-3.5 h-3.5 animate-from-icon relative z-10" />
+                      <MapPin className="w-3 h-3 md:w-3.5 md:h-3.5 animate-from-icon relative z-10" />
                     </span>
                     <span className="font-extrabold">{t('from')}</span>
                   </span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-100/70 dark:bg-blue-900/70 text-blue-700 dark:text-blue-300 font-semibold normal-case">
+                  <span className="text-[8px] md:text-[9px] px-1.5 py-0.2 rounded-full bg-blue-100/70 dark:bg-blue-900/70 text-blue-700 dark:text-blue-300 font-semibold normal-case">
                     Origin
                   </span>
                 </label>
                 <select
                   value={origin}
                   onChange={(e) => setOrigin(e.target.value)}
-                  className="w-full bg-transparent text-slate-900 dark:text-slate-100 font-extrabold text-base focus:outline-none cursor-pointer"
+                  className="w-full bg-transparent text-slate-900 dark:text-slate-100 font-extrabold text-sm md:text-base focus:outline-none cursor-pointer py-0.5"
                 >
                   {CITIES.map(c => <option key={c} value={c}>{t(c)}</option>)}
                 </select>
               </div>
 
               {/* Swap */}
-              <div className="md:col-span-1 flex justify-center">
+              <div className="md:col-span-1 flex justify-center -my-1 md:my-0 relative z-10">
                 <button
                   type="button"
                   onClick={handleSwap}
                   title="Swap Departure & Destination"
-                  className="group/swap p-3 rounded-2xl bg-white/90 hover:bg-blue-50 border border-white/50
-                             text-slate-600 hover:text-blue-600 shadow-sm
+                  className="group/swap p-1.5 sm:p-2 md:p-3 rounded-xl md:rounded-2xl bg-white/95 hover:bg-blue-50 border border-white/60
+                             text-slate-600 hover:text-blue-600 shadow-xs md:shadow-sm
                              transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer relative"
                 >
-                  <ArrowRightLeft className="w-4 h-4 transition-transform duration-500 group-hover/swap:rotate-180 text-blue-600" />
+                  <ArrowRightLeft className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform duration-500 group-hover/swap:rotate-180 text-blue-600" />
                 </button>
               </div>
 
               {/* Destination */}
-              <div className="md:col-span-4 relative bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-2xl p-4
-                              border border-white/50 dark:border-slate-700 focus-within:border-blue-400 focus-within:ring-4
-                              focus-within:ring-blue-400/20 transition-all duration-300 shadow-sm
+              <div className="md:col-span-4 relative bg-white/95 dark:bg-slate-900/95 backdrop-blur rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4
+                              border border-white/60 dark:border-slate-700 focus-within:border-blue-400 focus-within:ring-4
+                              focus-within:ring-blue-400/20 transition-all duration-300 shadow-xs md:shadow-sm
                               hover:shadow-blue-200/40 dark:hover:shadow-black/40 hover:shadow-md group/to">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center justify-between gap-1.5 mb-1.5">
+                <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center justify-between gap-1 mb-0.5 md:mb-1.5">
                   <span className="flex items-center gap-1.5">
-                    <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-900/50 border border-blue-200/80 dark:border-blue-700 text-blue-600 dark:text-blue-400 shadow-xs transition-transform duration-300 group-hover/to:scale-110 group-hover/to:-translate-y-0.5">
+                    <span className="relative flex items-center justify-center w-4.5 h-4.5 md:w-5 md:h-5 rounded-md bg-blue-50 dark:bg-blue-900/50 border border-blue-200/80 dark:border-blue-700 text-blue-600 dark:text-blue-400 shadow-2xs transition-transform duration-300 group-hover/to:scale-110 group-hover/to:-translate-y-0.5">
                       <span className="absolute -inset-0.5 rounded-md bg-blue-400/30 dark:bg-blue-500/30 animate-to-beacon pointer-events-none" />
-                      <MapPin className="w-3.5 h-3.5 animate-to-icon relative z-10" />
+                      <MapPin className="w-3 h-3 md:w-3.5 md:h-3.5 animate-to-icon relative z-10" />
                     </span>
                     <span className="font-extrabold">{t('to')}</span>
                   </span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-100/70 dark:bg-blue-900/70 text-blue-700 dark:text-blue-300 font-semibold normal-case">
+                  <span className="text-[8px] md:text-[9px] px-1.5 py-0.2 rounded-full bg-blue-100/70 dark:bg-blue-900/70 text-blue-700 dark:text-blue-300 font-semibold normal-case">
                     Destination
                   </span>
                 </label>
                 <select
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
-                  className="w-full bg-transparent text-slate-900 dark:text-slate-100 font-extrabold text-base focus:outline-none cursor-pointer"
+                  className="w-full bg-transparent text-slate-900 dark:text-slate-100 font-extrabold text-sm md:text-base focus:outline-none cursor-pointer py-0.5"
                 >
                   {CITIES.map(c => <option key={c} value={c}>{t(c)}</option>)}
                 </select>
               </div>
 
               {/* Date */}
-              <div className="md:col-span-3 relative bg-white/90 backdrop-blur rounded-2xl p-4
-                              border border-white/50 focus-within:border-amber-400 focus-within:ring-4
-                              focus-within:ring-amber-400/20 transition-all duration-300 shadow-sm
+              <div className="md:col-span-3 relative bg-white/95 backdrop-blur rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4
+                              border border-white/60 focus-within:border-amber-400 focus-within:ring-4
+                              focus-within:ring-amber-400/20 transition-all duration-300 shadow-xs md:shadow-sm
                               hover:shadow-amber-200/40 hover:shadow-md group/date">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5 mb-1.5">
-                  <span className="relative flex items-center justify-center w-5 h-5 rounded-md bg-amber-50 border border-amber-200/80 text-amber-600 shadow-xs transition-transform duration-300 group-hover/date:scale-110 group-hover/date:rotate-6">
-                    <Calendar className="w-3.5 h-3.5 animate-date-icon relative z-10" />
+                <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1 mb-0.5 md:mb-1.5">
+                  <span className="relative flex items-center justify-center w-4.5 h-4.5 md:w-5 md:h-5 rounded-md bg-amber-50 border border-amber-200/80 text-amber-600 shadow-2xs transition-transform duration-300 group-hover/date:scale-110 group-hover/date:rotate-6">
+                    <Calendar className="w-3 h-3 md:w-3.5 md:h-3.5 animate-date-icon relative z-10" />
                   </span>
                   <span className="font-extrabold">{t('journeyDate')}</span>
                 </label>
@@ -307,43 +307,45 @@ export const HeroSearch: React.FC = () => {
                   min={todayStr}
                   max={maxDateStr}
                   onChange={handleDateChange}
-                  className="w-full bg-transparent text-slate-900 font-extrabold text-sm focus:outline-none cursor-pointer"
+                  className="w-full bg-transparent text-slate-900 font-extrabold text-xs md:text-sm focus:outline-none cursor-pointer py-0.5"
                 />
               </div>
             </div>
 
             {/* Filters + Submit */}
-            <div className="relative flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-white/20">
+            <div className="relative flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-4 pt-2.5 sm:pt-4 border-t border-white/20">
 
               {/* Animated Bus Class Pill Filter */}
-              <div className="group/filter relative inline-flex items-center gap-2.5 text-xs bg-white/95 backdrop-blur-md
-                              border border-white/80 hover:border-blue-400 px-4 py-2.5 rounded-2xl text-slate-800
-                              shadow-lg shadow-black/10 hover:bg-white hover:shadow-xl hover:shadow-blue-500/20
-                              transition-all duration-300 transform hover:scale-[1.03] active:scale-95 cursor-pointer overflow-hidden">
+              <div className="group/filter relative inline-flex items-center justify-between sm:justify-start gap-2 text-xs bg-white/95 backdrop-blur-md
+                              border border-white/80 hover:border-blue-400 px-3.5 py-2 md:px-4 md:py-2.5 rounded-xl md:rounded-2xl text-slate-800
+                              shadow-sm md:shadow-lg shadow-black/10 hover:bg-white hover:shadow-xl hover:shadow-blue-500/20
+                              transition-all duration-300 transform hover:scale-[1.02] active:scale-95 cursor-pointer overflow-hidden">
                 {/* Ambient glow sweep on hover */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-100/50 to-transparent -translate-x-full group-hover/filter:translate-x-full transition-transform duration-700 pointer-events-none" />
 
-                {/* Animated Filter Icon */}
-                <span className="relative flex items-center justify-center w-6 h-6 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-600 transition-transform duration-300 group-hover/filter:scale-110 group-hover/filter:rotate-[-8deg] flex-shrink-0 shadow-2xs">
-                  <Filter className="w-3.5 h-3.5 animate-filter-tilt relative z-10 text-blue-600" />
-                </span>
-
-                {/* Label & Active Option */}
-                <span className="text-slate-600 font-semibold tracking-wide flex items-center gap-1.5 whitespace-nowrap">
-                  <span className="text-slate-500 font-bold">{t('busClass')}:</span>
-                  <span className="font-extrabold text-slate-900 text-sm tracking-tight">
-                    {busTypeFilter === 'all'
-                      ? t('allClasses')
-                      : busTypeFilter === 'Normal Service' || busTypeFilter === 'Ashok Leyland'
-                      ? t('normalService')
-                      : busTypeFilter === 'Super Luxury' || busTypeFilter === 'Yutong'
-                      ? t('superLuxury')
-                      : busTypeFilter}
+                <div className="flex items-center gap-2">
+                  {/* Animated Filter Icon */}
+                  <span className="relative flex items-center justify-center w-5 h-5 md:w-6 md:h-6 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-600 transition-transform duration-300 group-hover/filter:scale-110 group-hover/filter:rotate-[-8deg] flex-shrink-0 shadow-2xs">
+                    <Filter className="w-3 h-3 md:w-3.5 md:h-3.5 animate-filter-tilt relative z-10 text-blue-600" />
                   </span>
-                </span>
+
+                  {/* Label & Active Option */}
+                  <span className="text-slate-600 font-semibold tracking-wide flex items-center gap-1.5 whitespace-nowrap text-[11px] md:text-xs">
+                    <span className="text-slate-500 font-bold">{t('busClass')}:</span>
+                    <span className="font-extrabold text-slate-900 text-xs md:text-sm tracking-tight">
+                      {busTypeFilter === 'all'
+                        ? t('allClasses')
+                        : busTypeFilter === 'Normal Service' || busTypeFilter === 'Ashok Leyland'
+                        ? t('normalService')
+                        : busTypeFilter === 'Super Luxury' || busTypeFilter === 'Yutong'
+                        ? t('superLuxury')
+                        : busTypeFilter}
+                    </span>
+                  </span>
+                </div>
 
                 {/* Animated Chevron Down */}
-                <ChevronDown className="w-4 h-4 text-blue-600 transition-transform duration-300 group-hover/filter:translate-y-0.5 group-hover/filter:text-blue-700 animate-chevron-bob flex-shrink-0 ml-0.5" />
+                <ChevronDown className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-600 transition-transform duration-300 group-hover/filter:translate-y-0.5 group-hover/filter:text-blue-700 animate-chevron-bob flex-shrink-0 ml-0.5" />
 
                 {/* Hidden Overlay Select for native click & accessibility */}
                 <select
@@ -361,16 +363,16 @@ export const HeroSearch: React.FC = () => {
               {/* Search CTA with ripple */}
               <button
                 type="submit"
-                className="ripple-effect w-full md:w-auto flex items-center justify-center gap-2.5
-                           px-10 py-3.5 rounded-2xl font-extrabold text-sm text-white
+                className="ripple-effect w-full sm:w-auto flex items-center justify-center gap-2
+                           px-6 py-3 md:px-10 md:py-3.5 rounded-xl md:rounded-2xl font-extrabold text-xs sm:text-sm text-white
                            bg-gradient-to-r from-blue-500 to-indigo-600
                            hover:from-blue-400 hover:to-indigo-500
-                           shadow-xl shadow-blue-700/40
-                           transform hover:scale-[1.05] active:scale-95
+                           shadow-lg shadow-blue-700/40
+                           transform hover:scale-[1.03] active:scale-95
                            transition-all duration-200 cursor-pointer
                            relative overflow-hidden"
               >
-                <Search className="w-4 h-4 relative z-10" />
+                <Search className="w-3.5 h-3.5 md:w-4 md:h-4 relative z-10" />
                 <span className="relative z-10">{t('searchBuses')}</span>
                 {/* Animated shine sweep on hover */}
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent
