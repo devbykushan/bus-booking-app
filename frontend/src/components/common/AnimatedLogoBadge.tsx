@@ -38,17 +38,18 @@ export const AnimatedLogoBadge: React.FC<AnimatedLogoBadgeProps> = ({
         const height = canvas.height;
         const len = data.length;
 
-        // Force transparent perimeter margins (prevents any box borders)
-        const marginX = width * 0.06;
-        const marginY = height * 0.06;
+        // Force transparent perimeter margins and cut off 3D floor reflection
+        const marginX = width * 0.05;
+        const marginY = height * 0.05;
+        const bottomCutoff = height * 0.65; // Prevents inverted reflection
 
         for (let i = 0; i < len; i += 4) {
           const pixelIndex = i / 4;
           const x = pixelIndex % width;
           const y = (pixelIndex / width) | 0;
 
-          // Always clear outer edges to guarantee zero rectangular bounding box
-          if (x < marginX || x > width - marginX || y < marginY || y > height - marginY) {
+          // Clear outer margins and bottom floor reflection
+          if (x < marginX || x > width - marginX || y < marginY || y > bottomCutoff) {
             data[i + 3] = 0;
             continue;
           }
@@ -113,7 +114,7 @@ export const AnimatedLogoBadge: React.FC<AnimatedLogoBadgeProps> = ({
         <img
           src="/dewmina-logo.png?v=3"
           alt="Dewmina Super Line"
-          className={`${heightClass} w-auto object-contain transition-transform duration-300 group-hover:scale-105 mix-blend-multiply`}
+          className={`${heightClass} w-auto object-contain transition-transform duration-300 group-hover:scale-105 filter drop-shadow-sm`}
         />
       )}
 
