@@ -28,16 +28,16 @@ export const Footer: React.FC = () => {
   return (
     <footer className="relative bg-gradient-to-b from-slate-50 via-white to-blue-50/40 text-slate-600 text-sm mt-20 pb-24 md:pb-8 overflow-hidden border-t border-slate-200 select-none shadow-inner">
       
-      {/* ── High-Clarity Bus Photo Background ── */}
+      {/* ── High-Clarity Bus Photo Background (Responsive Mobile & Desktop) ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
         <img
           src="/footer-bus-bg.jpg"
           alt="Dewmina Super Line Coach Background"
-          className="w-full h-full object-cover object-center opacity-75 filter blur-[1.5px] saturate-[0.75] contrast-105 scale-105 transition-all duration-700 animate-ken-burns"
+          className="w-full h-full object-cover object-[center_top] sm:object-[center_25%] md:object-center opacity-75 filter blur-[0.5px] md:blur-[1.2px] saturate-[0.85] contrast-105 scale-105 transition-all duration-700 animate-ken-burns"
         />
         {/* Subtle daylight gradient overlay to keep text 100% crisp while keeping photo vivid */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-white/50 to-blue-50/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-white/75 via-white/20 to-slate-50/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/60 to-blue-50/40 dark:from-slate-950/85 dark:via-slate-950/70 dark:to-slate-900/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/85 via-white/30 to-slate-50/30 dark:from-slate-950/90 dark:via-slate-950/40 dark:to-slate-900/30" />
 
         {/* Ambient Floating Glow Blobs */}
         <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl animate-blob-1" />

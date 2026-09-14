@@ -114,18 +114,18 @@ export const HeroSearch: React.FC = () => {
   return (
     <div className="relative min-h-[95vh] flex flex-col justify-center overflow-hidden pt-[calc(5rem+env(safe-area-inset-top,0px))] md:pt-24 pb-12">
 
-      {/* ── Ken Burns Hero Background ──────────────────────────────────── */}
+      {/* ── Ken Burns Hero Background (Responsive Mobile & Desktop) ── */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <img
           src="/yutong-hero.jpg"
           alt="Yutong C12 Pro Luxury Express Bus"
-          className="w-full h-full object-cover object-center animate-ken-burns"
+          className="w-full h-full object-cover object-[center_22%] sm:object-[center_35%] md:object-center transition-all duration-700 animate-ken-burns"
         />
-        {/* Layered overlays */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/35 to-black/85" />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-950/55 via-transparent to-indigo-950/45" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_20%,rgba(59,130,246,0.12)_0%,transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_80%,rgba(99,102,241,0.10)_0%,transparent_55%)]" />
+        {/* Layered responsive overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/25 to-black/90 md:from-black/75 md:via-black/35 md:to-black/85" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-950/35 via-transparent to-indigo-950/30 md:from-blue-950/55 md:to-indigo-950/45" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_20%,rgba(59,130,246,0.16)_0%,transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_80%,rgba(99,102,241,0.12)_0%,transparent_55%)]" />
       </div>
 
       {/* ── Floating Particles ─────────────────────────────────────────── */}
