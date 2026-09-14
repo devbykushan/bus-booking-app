@@ -155,26 +155,16 @@ async function buildRealtimeTimetableReply(isEnglish = false): Promise<string> {
       reply += formatRouteList(todayRoutes);
     } else {
       reply += isEnglish
-        ? `🗓️ *All trips for today (${todayDateStr}) have completed or scheduled as off.*\n\n`
-        : `🗓️ *අද දින (${todayDateStr}) සියලු ගමන් වාර ධාවනය වී අවසන් හෝ නිවාඩු දිනයකි.*\n\n`;
-    }
-
-    if (futureRoutes.length > 0) {
-      reply += isEnglish
-        ? `🗓️ *Upcoming Live Trips:*\n\n`
-        : `🗓️ *ඉදිරි දිනවල සජීවී ගමන් වාර:*\n\n`;
-      const nextUpcoming = futureRoutes.slice(0, 6);
-      for (const r of nextUpcoming) {
-        const isTomorrow = r.departureDate === tomorrowDateStr;
-        const dayLabel = isTomorrow
-          ? (isEnglish ? 'Tomorrow' : 'හෙට')
-          : r.departureDate;
-        const time = (r.departureTime || '').replace('.', ':');
-        const seatsInfo = Number(r.totalSeats) > 0
-          ? (isEnglish ? ` (Seats: ${r.availableSeats})` : ` (ඇබෑර්තු: ${r.availableSeats})`)
-          : '';
-        reply += `• 📅 ${dayLabel} | ⏰ ${time} — ${r.origin} ➔ ${r.destination} [*${r.busNumber}*]${seatsInfo}\n`;
-      }
+        ? `📍 *Daily Express Departure Times:*\n\n` +
+          `• *Monaragala ➔ Colombo:*\n` +
+          `  05:00 AM, 06:00 AM, 07:10 AM, 11:40 AM, 02:20 PM, 10:55 PM, 11:35 PM\n\n` +
+          `• *Colombo ➔ Monaragala:*\n` +
+          `  12:40 AM, 01:40 PM, 02:20 PM, 04:10 PM, 05:10 PM, 06:00 PM, 06:50 PM\n\n`
+        : `📍 *දෛනික ප්‍රධාන ගමන් වාර වේලාවන්:*\n\n` +
+          `• *මොනරාගල ➔ කොළඹ:*\n` +
+          `  උදෑසන 05:00 AM, 06:00 AM, 07:10 AM, 11:40 AM | දහවල් 02:20 PM | රාත්‍රී 10:55 PM, 11:35 PM\n\n` +
+          `• *කොළඹ ➔ මොනරාගල:*\n` +
+          `  මධ්‍යම රාත්‍රී 12:40 AM | දහවල් 01:40 PM, 02:20 PM, 04:10 PM | සවස 05:10 PM, 06:00 PM, 06:50 PM\n\n`;
     }
 
     reply += isEnglish
