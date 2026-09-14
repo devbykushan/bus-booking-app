@@ -376,8 +376,7 @@ export async function processBotMessage(incomingText: string): Promise<BotReplyR
     const reply = isEnglish ? (
       `💵 *Dewmina Super Line Ticket Fares*\n\n` +
       `1️⃣ *Normal Express Service:* LKR 1,157\n` +
-      `2️⃣ *Semi-Luxury Service:* LKR 1,500\n` +
-      `3️⃣ *Super Line Luxury A/C:* LKR 2,500\n\n` +
+      `2️⃣ *Super Luxury A/C:* LKR 2,670\n\n` +
       `✅ *Features & Amenities:*\n` +
       `• Comfortable Pushback Seats\n` +
       `• High-Speed Wi-Fi & USB Charging\n` +
@@ -387,8 +386,7 @@ export async function processBotMessage(incomingText: string): Promise<BotReplyR
     ) : (
       `💵 *Dewmina Super Line ටිකට්පත් ගාස්තු*\n\n` +
       `1️⃣ *සාමාන්‍ය සේවාව (Normal Express):* LKR 1,157\n` +
-      `2️⃣ *අර්ධ සුඛෝපභෝගී (Semi-Luxury):* LKR 1,500\n` +
-      `3️⃣ *සුඛෝපභෝගී (Super Line Luxury A/C):* LKR 2,500\n\n` +
+      `2️⃣ *සුඛෝපභෝගී (Super Luxury A/C):* LKR 2,670\n\n` +
       `✅ *විශේෂ පහසුකම්:*\n` +
       `• සුවපහසු Pushback ආසන\n` +
       `• High-Speed Wi-Fi & USB Charging\n` +
