@@ -525,7 +525,7 @@ export const FloatingWhatsApp: React.FC = () => {
           {/* Footer note */}
           <div className="px-3.5 py-2 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 flex-shrink-0">
             <span className="flex items-center gap-1 font-medium">
-              {botLang === 'en' ? '🚌 Monaragala ⇄ Colombo Daily Express' : '🚌 මොනරාගල ⇄ කොළඹ Daily Express'}
+              {botLang === 'en' ? '🚌 Monaragala ⇄ Colombo' : '🚌 මොනරාගල ⇄ කොළඹ'}
             </span>
             <span className="text-emerald-600 dark:text-emerald-400 font-bold">24/7 Available</span>
           </div>

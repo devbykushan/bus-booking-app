@@ -164,7 +164,7 @@ async function generateClientFallback(incomingText: string, lang: 'si' | 'en' = 
         : `🚌 **Dewmina Super Line සජීවී බස් කාලසටහන (Live Timetable)**\n\n`;
 
       if (monToCol.length > 0) {
-        textOut += isEn ? `📍 **Monaragala ➔ Colombo (Daily Express)**\n` : `📍 **මොනරාගල ➔ කොළඹ (Daily Express)**\n`;
+        textOut += isEn ? `📍 **Monaragala ➔ Colombo**\n` : `📍 **මොනරාගල ➔ කොළඹ**\n`;
         for (const r of monToCol) {
           const time = (r.departureTime || '').replace('.', ':');
           const seatsInfo = r.availableSeatsCount !== undefined
@@ -176,7 +176,7 @@ async function generateClientFallback(incomingText: string, lang: 'si' | 'en' = 
 
       if (colToMon.length > 0) {
         if (monToCol.length > 0) textOut += '\n';
-        textOut += isEn ? `📍 **Colombo ➔ Monaragala (Daily Express)**\n` : `📍 **කොළඹ ➔ මොනරාගල (Daily Express)**\n`;
+        textOut += isEn ? `📍 **Colombo ➔ Monaragala**\n` : `📍 **කොළඹ ➔ මොනරාගල**\n`;
         for (const r of colToMon) {
           const time = (r.departureTime || '').replace('.', ':');
           const seatsInfo = r.availableSeatsCount !== undefined
@@ -192,18 +192,18 @@ async function generateClientFallback(incomingText: string, lang: 'si' | 'en' = 
     } else {
       textOut = isEn
         ? `🚌 **Dewmina Super Line Daily Bus Timetable**\n\n` +
-          `📍 **Monaragala ➔ Colombo (Daily Express)**\n` +
+          `📍 **Monaragala ➔ Colombo**\n` +
           `• Morning: 05:00 AM / 07:10 AM / 11:40 AM\n` +
           `• Night: 10:55 PM / 11:35 PM\n\n` +
-          `📍 **Colombo ➔ Monaragala (Daily Express)**\n` +
+          `📍 **Colombo ➔ Monaragala**\n` +
           `• Afternoon: 01:40 PM / 02:20 PM / 04:10 PM\n` +
           `• Evening: 06:00 PM / 06:50 PM\n\n` +
           `💡 *View live schedules below to select seats.*`
         : `🚌 **Dewmina Super Line දෛනික බස් කාලසටහන**\n\n` +
-          `📍 **මොනරාගල ➔ කොළඹ (Daily Express)**\n` +
+          `📍 **මොනරාගල ➔ කොළඹ**\n` +
           `• උදෑසන 05:00 AM / 07:10 AM / 11:40 AM\n` +
           `• රාත්‍රී 10:55 PM / 11:35 PM\n\n` +
-          `📍 **කොළඹ ➔ මොනරාගල (Daily Express)**\n` +
+          `📍 **කොළඹ ➔ මොනරාගල**\n` +
           `• දහවල් 01:40 PM / 02:20 PM / 04:10 PM\n` +
           `• සවස 06:00 PM / 06:50 PM\n\n` +
           `💡 *සජීවී ආසන ඇබෑර්තු සහ වෙන්කිරීම් සඳහා පහතින් කාලසටහන බලන්න.*`;

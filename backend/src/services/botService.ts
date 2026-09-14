@@ -92,8 +92,8 @@ async function buildRealtimeTimetableReply(isEnglish = false): Promise<string> {
     const futureRoutes = routes.filter((r) => r.departureDate !== todayDateStr);
 
     let reply = isEnglish
-      ? `🚌 *Dewmina Super Line Live Bus Timetable*\n_Route 98: Colombo ⇄ Monaragala Direct Express_\n\n`
-      : `🚌 *Dewmina Super Line සජීවී බස් කාලසටහන (Live Timetable)*\n_Route 98: කොළඹ ⇄ මොනරාගල Direct Express_\n\n`;
+      ? `🚌 *Dewmina Super Line Live Bus Timetable*\n_Route 98: Colombo ⇄ Monaragala_\n\n`
+      : `🚌 *Dewmina Super Line සජීවී බස් කාලසටහන (Live Timetable)*\n_Route 98: කොළඹ ⇄ මොනරාගල_\n\n`;
 
     const formatRouteList = (items: any[]) => {
       const monToCol = items.filter((r) => 
@@ -106,8 +106,8 @@ async function buildRealtimeTimetableReply(isEnglish = false): Promise<string> {
       let text = '';
       if (monToCol.length > 0) {
         text += isEnglish
-          ? `📍 *Monaragala ➔ Colombo (Daily Express)*\n`
-          : `📍 *මොනරාගල ➔ කොළඹ (Daily Express)*\n`;
+          ? `📍 *Monaragala ➔ Colombo*\n`
+          : `📍 *මොනරාගල ➔ කොළඹ*\n`;
         for (const r of monToCol) {
           const time = (r.departureTime || '').replace('.', ':');
           const seatsInfo = Number(r.totalSeats) > 0
@@ -121,8 +121,8 @@ async function buildRealtimeTimetableReply(isEnglish = false): Promise<string> {
       if (colToMon.length > 0) {
         if (text) text += '\n';
         text += isEnglish
-          ? `📍 *Colombo ➔ Monaragala (Daily Express)*\n`
-          : `📍 *කොළඹ ➔ මොනරාගල (Daily Express)*\n`;
+          ? `📍 *Colombo ➔ Monaragala*\n`
+          : `📍 *කොළඹ ➔ මොනරාගල*\n`;
         for (const r of colToMon) {
           const time = (r.departureTime || '').replace('.', ':');
           const seatsInfo = Number(r.totalSeats) > 0
@@ -155,7 +155,7 @@ async function buildRealtimeTimetableReply(isEnglish = false): Promise<string> {
       reply += formatRouteList(todayRoutes);
     } else {
       reply += isEnglish
-        ? `📍 *Daily Express Departure Times:*\n\n` +
+        ? `📍 *Daily Departure Times:*\n\n` +
           `• *Monaragala ➔ Colombo:*\n` +
           `  05:00 AM, 06:00 AM, 07:10 AM, 11:40 AM, 02:20 PM, 10:55 PM, 11:35 PM\n\n` +
           `• *Colombo ➔ Monaragala:*\n` +
@@ -194,18 +194,18 @@ async function buildRealtimeTimetableReply(isEnglish = false): Promise<string> {
 
   return isEnglish
     ? `🚌 *Dewmina Super Line Daily Bus Schedule*\n\n` +
-      `📍 *Monaragala ➔ Colombo (Daily Express)*\n` +
+      `📍 *Monaragala ➔ Colombo*\n` +
       `• Morning: 05:00 AM / 07:10 AM / 11:40 AM\n` +
       `• Night: 10:55 PM / 11:35 PM\n\n` +
-      `📍 *Colombo ➔ Monaragala (Daily Express)*\n` +
+      `📍 *Colombo ➔ Monaragala*\n` +
       `• Afternoon: 01:40 PM / 02:20 PM / 04:10 PM\n` +
       `• Evening: 06:00 PM / 06:50 PM\n\n` +
       `💡 _Visit our website for live seat booking:_\n🌐 https://dewminasuperline.lk`
     : `🚌 *Dewmina Super Line දෛනික බස් කාලසටහන*\n\n` +
-      `📍 *මොනරාගල ➔ කොළඹ (Daily Express)*\n` +
+      `📍 *මොනරාගල ➔ කොළඹ*\n` +
       `• උදෑසන 05:00 AM / 07:10 AM / 11:40 AM\n` +
       `• රාත්‍රී 10:55 PM / 11:35 PM\n\n` +
-      `📍 *කොළඹ ➔ මොනරාගල (Daily Express)*\n` +
+      `📍 *කොළඹ ➔ මොනරාගල*\n` +
       `• දහවල් 01:40 PM / 02:20 PM / 04:10 PM\n` +
       `• සවස 06:00 PM / 06:50 PM\n\n` +
       `💡 _සජීවී ආසන ඇබෑර්තු සහ වෙන්කිරීම් සඳහා අපගේ වෙබ් අඩවියට පිවිසෙන්න._\n🌐 https://dewminasuperline.lk`;
