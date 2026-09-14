@@ -225,12 +225,15 @@ async function buildRealtimeTimetableReply(isEnglish = false): Promise<string> {
  * Intelligent Bot Reply Engine for Dewmina Super Line
  * Processes Sinhala, Singlish, and English passenger queries
  */
-export async function processBotMessage(incomingText: string): Promise<BotReplyResult> {
+export async function processBotMessage(incomingText: string, preferredLang?: string): Promise<BotReplyResult> {
   const text = (incomingText || '').trim();
   const lower = text.toLowerCase();
 
   const hasSinhalaChars = /[ඐ-෦]/.test(text);
-  const isEnglish = !hasSinhalaChars && (
+  const isExplicitEnglish = preferredLang === 'en' || preferredLang === 'english';
+  const isExplicitSinhala = preferredLang === 'si' || preferredLang === 'sinhala';
+
+  const isEnglish = isExplicitEnglish || (!isExplicitSinhala && !hasSinhalaChars && (
     lower.includes('schedule') ||
     lower.includes('timetable') ||
     lower.includes('time table') ||
@@ -249,7 +252,7 @@ export async function processBotMessage(incomingText: string): Promise<BotReplyR
     lower.includes('call') ||
     lower.includes('hi') ||
     lower.includes('hello')
-  );
+  ));
 
   const defaultOpts: BotQuickOption[] = isEnglish ? [
     { label: '🚌 Bus Timetable', value: 'Timetable', icon: 'bus' },

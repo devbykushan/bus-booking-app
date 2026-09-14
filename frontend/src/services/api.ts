@@ -250,13 +250,13 @@ export const whatsappApi = {
 // ─── Live Bot API ────────────────────────────────────────────────────────────
 
 export const botApi = {
-  chat: (message: string): Promise<{
+  chat: (message: string, lang?: string): Promise<{
     success: boolean;
     text: string;
     options?: Array<{ label: string; value: string; icon?: string }>;
     actions?: Array<{ type: string; label: string; data?: any }>;
     pnrData?: any;
-  }> => apiFetch('/bot/chat', { method: 'POST', body: JSON.stringify({ message }) }),
+  }> => apiFetch('/bot/chat', { method: 'POST', body: JSON.stringify({ message, lang }) }),
 };
 
 // ─── Health Check ─────────────────────────────────────────────────────────────

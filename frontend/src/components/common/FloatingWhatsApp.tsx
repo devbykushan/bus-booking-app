@@ -15,11 +15,13 @@ import {
 import { useBookingStore } from '../../store/bookingStore';
 import { 
   type ChatMessage, 
-  INITIAL_BOT_MESSAGE, 
+  INITIAL_BOT_MESSAGE_LANG_SELECT,
+  INITIAL_BOT_MESSAGE_SI,
+  INITIAL_BOT_MESSAGE_EN,
   sendChatMessage 
 } from '../../services/botClient';
 
-const WHATSAPP_CONTACTS = [
+const WHATSAPP_CONTACTS_SI = [
   {
     number: '076 258 1841',
     rawNumber: '94762581841',
@@ -38,10 +40,30 @@ const WHATSAPP_CONTACTS = [
   },
 ];
 
+const WHATSAPP_CONTACTS_EN = [
+  {
+    number: '076 258 1841',
+    rawNumber: '94762581841',
+    title: 'Seat Booking & Inquiries',
+    subtitle: 'Conductor & Online Support',
+    status: 'Online Now',
+    message: 'Hello Dewmina Super Line, I would like to inquire about bus seat booking.',
+  },
+  {
+    number: '072 417 3143',
+    rawNumber: '94724173143',
+    title: 'Express Dispatch & Helpline',
+    subtitle: 'Route & Schedule 24/7 Helpline',
+    status: 'Active 24/7',
+    message: 'Hello Dewmina Super Line, I need assistance with bus schedule/dispatch.',
+  },
+];
+
 export const FloatingWhatsApp: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'bot' | 'whatsapp'>('bot');
-  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_BOT_MESSAGE]);
+  const [botLang, setBotLang] = useState<'si' | 'en' | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_BOT_MESSAGE_LANG_SELECT]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
@@ -90,9 +112,67 @@ export const FloatingWhatsApp: React.FC = () => {
     }
   }, [isOpen, activeTab]);
 
+  const handleSelectLanguage = (lang: 'si' | 'en') => {
+    setBotLang(lang);
+    const userLabel = lang === 'en' ? '🇬🇧 English' : '🇱🇰 සිංහල (Sinhala)';
+    const welcomeMsg = lang === 'en' ? INITIAL_BOT_MESSAGE_EN : INITIAL_BOT_MESSAGE_SI;
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `user-lang-${Date.now()}`,
+        sender: 'user',
+        text: userLabel,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+      welcomeMsg,
+    ]);
+  };
+
+  const handleSwitchLanguage = (newLang: 'si' | 'en') => {
+    if (botLang === newLang) return;
+    setBotLang(newLang);
+    const switchedMsg: ChatMessage = newLang === 'en'
+      ? {
+          id: `bot-lang-switch-${Date.now()}`,
+          sender: 'bot',
+          text: `🇬🇧 **Language changed to English.**\n\nHow can I help you today? Please choose an option below or type your question:`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          options: INITIAL_BOT_MESSAGE_EN.options,
+        }
+      : {
+          id: `bot-lang-switch-${Date.now()}`,
+          sender: 'bot',
+          text: `🇱🇰 **භාෂාව සිංහල වෙත මාරු කරන ලදී.**\n\nඔබට අවශ්‍ය සේවාව පහතින් තෝරන්න හෝ ප්‍රශ්නය මෙහි සටහන් කරන්න:`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          options: INITIAL_BOT_MESSAGE_SI.options,
+        };
+
+    setMessages((prev) => [...prev, switchedMsg]);
+  };
+
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputText).trim();
     if (!text || isTyping) return;
+
+    // Check if selecting initial language
+    if (text === 'LANG_SI' || text === '🇱🇰 සිංහල (Sinhala)' || text === 'සිංහල') {
+      handleSelectLanguage('si');
+      setInputText('');
+      return;
+    }
+
+    if (text === 'LANG_EN' || text === '🇬🇧 English' || text.toLowerCase() === 'english') {
+      handleSelectLanguage('en');
+      setInputText('');
+      return;
+    }
+
+    // Auto-determine language if not yet selected
+    const activeLang = botLang || (/[ඐ-෦]/.test(text) ? 'si' : 'en');
+    if (!botLang) {
+      setBotLang(activeLang);
+    }
 
     setInputText('');
     const userMsg: ChatMessage = {
@@ -106,7 +186,7 @@ export const FloatingWhatsApp: React.FC = () => {
     setIsTyping(true);
 
     try {
-      const reply = await sendChatMessage(text);
+      const reply = await sendChatMessage(text, activeLang);
       setMessages((prev) => [...prev, reply]);
     } catch {
       setMessages((prev) => [
@@ -114,7 +194,9 @@ export const FloatingWhatsApp: React.FC = () => {
         {
           id: `bot-err-${Date.now()}`,
           sender: 'bot',
-          text: 'සමාවන්න, ප්‍රතිචාර දැක්වීමේදී සුළු දෝෂයක් ඇති විය. කරුණාකර නැවත උත්සාහ කරන්න.',
+          text: activeLang === 'en'
+            ? 'Sorry, a temporary response error occurred. Please try again or contact conductor.'
+            : 'සමාවන්න, ප්‍රතිචාර දැක්වීමේදී සුළු දෝෂයක් ඇති විය. කරුණාකර නැවත උත්සාහ කරන්න.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
@@ -129,7 +211,8 @@ export const FloatingWhatsApp: React.FC = () => {
   };
 
   const handleResetChat = () => {
-    setMessages([INITIAL_BOT_MESSAGE]);
+    setBotLang(null);
+    setMessages([INITIAL_BOT_MESSAGE_LANG_SELECT]);
   };
 
   const handleActionClick = (action: any) => {
@@ -156,11 +239,20 @@ export const FloatingWhatsApp: React.FC = () => {
 
   if (isModalOpen || isPwaPromptOpen) return null;
 
+  // Active quick options depending on current state
+  const currentQuickOptions = !botLang
+    ? INITIAL_BOT_MESSAGE_LANG_SELECT.options
+    : botLang === 'en'
+    ? INITIAL_BOT_MESSAGE_EN.options
+    : INITIAL_BOT_MESSAGE_SI.options;
+
+  const contactsList = botLang === 'en' ? WHATSAPP_CONTACTS_EN : WHATSAPP_CONTACTS_SI;
+
   return (
     <div className="fixed bottom-20 md:bottom-6 right-3 sm:right-6 z-40 flex flex-col items-end select-none font-sans" ref={menuRef}>
       {/* ─── LIVE BOT & WHATSAPP CHAT MODAL ─────────────────────────────────────── */}
       {isOpen && (
-        <div className="mb-3 w-[92vw] sm:w-[390px] h-[540px] max-h-[82vh] rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden animate-scale-up origin-bottom-right transition-all">
+        <div className="mb-3 w-[92vw] sm:w-[400px] h-[550px] max-h-[82vh] rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden animate-scale-up origin-bottom-right transition-all">
           {/* Top Header */}
           <div className="bg-gradient-to-r from-[#128C7E] via-[#075E54] to-slate-900 p-3.5 text-white relative flex-shrink-0 shadow-md">
             <div className="flex items-center justify-between">
@@ -179,17 +271,44 @@ export const FloatingWhatsApp: React.FC = () => {
                     </span>
                   </div>
                   <p className="text-[11px] text-emerald-200/90 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-amber-300 inline" /> ක්ෂණික සහය සේවාව
+                    <Sparkles className="w-3 h-3 text-amber-300 inline" />
+                    {botLang === 'en' ? 'Instant AI Assistance' : 'ක්ෂණික සහය සේවාව'}
                   </p>
                 </div>
               </div>
 
               {/* Action Buttons in Header */}
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
+                {/* Language Switch Pill in Header */}
+                <div className="flex items-center bg-black/30 p-0.5 rounded-xl border border-white/15 backdrop-blur-sm text-[11px] font-bold">
+                  <button
+                    onClick={() => handleSwitchLanguage('si')}
+                    title="සිංහල භාෂාවට මාරු වන්න"
+                    className={`px-2 py-0.5 rounded-lg transition-all cursor-pointer ${
+                      botLang === 'si'
+                        ? 'bg-emerald-500 text-white shadow-xs font-black'
+                        : 'text-emerald-100/70 hover:text-white'
+                    }`}
+                  >
+                    සිං
+                  </button>
+                  <button
+                    onClick={() => handleSwitchLanguage('en')}
+                    title="Switch to English"
+                    className={`px-2 py-0.5 rounded-lg transition-all cursor-pointer ${
+                      botLang === 'en'
+                        ? 'bg-emerald-500 text-white shadow-xs font-black'
+                        : 'text-emerald-100/70 hover:text-white'
+                    }`}
+                  >
+                    EN
+                  </button>
+                </div>
+
                 {activeTab === 'bot' && (
                   <button
                     onClick={handleResetChat}
-                    title="නැවත ආරම්භ කරන්න (Reset)"
+                    title={botLang === 'en' ? 'Reset Chat & Language' : 'නැවත ආරම්භ කරන්න (Reset)'}
                     className="p-1.5 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                     aria-label="Reset Chat"
                   >
@@ -238,6 +357,8 @@ export const FloatingWhatsApp: React.FC = () => {
               <div className="flex-1 p-3.5 overflow-y-auto space-y-3.5 text-xs">
                 {messages.map((msg) => {
                   const isUser = msg.sender === 'user';
+                  const isLangSelectPrompt = msg.id === 'init-lang-select';
+
                   return (
                     <div
                       key={msg.id}
@@ -251,6 +372,21 @@ export const FloatingWhatsApp: React.FC = () => {
                         }`}
                       >
                         {msg.text}
+
+                        {/* Interactive Language Selector Buttons inside initial bubble */}
+                        {isLangSelectPrompt && msg.options && (
+                          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2.5 border-t border-slate-100 dark:border-slate-700/60">
+                            {msg.options.map((opt, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => handleSendMessage(opt.value)}
+                                className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-bold text-xs bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-sm hover:shadow-md transition-all active:scale-95 cursor-pointer"
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
 
                         {/* Action Buttons attached to Bot message */}
                         {msg.actions && msg.actions.length > 0 && (
@@ -292,7 +428,7 @@ export const FloatingWhatsApp: React.FC = () => {
 
               {/* Quick Reply Suggestion Chips */}
               <div className="px-3 py-2 bg-slate-100/80 dark:bg-slate-900 border-t border-slate-200/70 dark:border-slate-800 overflow-x-auto flex gap-1.5 scrollbar-none">
-                {INITIAL_BOT_MESSAGE.options?.map((opt, i) => (
+                {currentQuickOptions?.map((opt, i) => (
                   <button
                     key={i}
                     disabled={isTyping}
@@ -317,7 +453,11 @@ export const FloatingWhatsApp: React.FC = () => {
                       handleSendMessage();
                     }
                   }}
-                  placeholder="ප්‍රශ්නයක් හෝ PNR අංකය ලියන්න..."
+                  placeholder={
+                    botLang === 'en'
+                      ? 'Type a question or PNR number...'
+                      : 'ප්‍රශ්නයක් හෝ PNR අංකය ලියන්න...'
+                  }
                   className="flex-1 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-hidden focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
                 />
                 <button
@@ -336,10 +476,12 @@ export const FloatingWhatsApp: React.FC = () => {
           {activeTab === 'whatsapp' && (
             <div className="flex-1 p-3.5 space-y-3 bg-slate-50/70 dark:bg-slate-950 overflow-y-auto">
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium px-1">
-                WhatsApp හරහා Conductor වරුන් සමඟ සෘජුවම සම්බන්ධ වීමට අංකයක් තෝරන්න:
+                {botLang === 'en'
+                  ? 'Select a conductor number to connect directly via WhatsApp:'
+                  : 'WhatsApp හරහා Conductor වරුන් සමඟ සෘජුවම සම්බන්ධ වීමට අංකයක් තෝරන්න:'}
               </p>
 
-              {WHATSAPP_CONTACTS.map((contact, idx) => (
+              {contactsList.map((contact, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleOpenWhatsapp(contact.rawNumber, contact.message)}
@@ -367,7 +509,15 @@ export const FloatingWhatsApp: React.FC = () => {
               ))}
 
               <div className="mt-4 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[11px] text-emerald-900 dark:text-emerald-200">
-                💡 <strong>දැනුවත් කිරීම:</strong> ආසන වෙන්කිරීම්, ප්‍රවේශපත්‍ර තහවුරු කිරීම් සහ බස් රථය ධාවනය වන වේලාවන් සජීවීව දැනගැනීමට Conductor වරුන් සම්බන්ධ කරගත හැක.
+                {botLang === 'en' ? (
+                  <>
+                    💡 <strong>Notice:</strong> Conductors can be contacted for seat reservations, ticket confirmation, and live bus dispatch details.
+                  </>
+                ) : (
+                  <>
+                    💡 <strong>දැනුවත් කිරීම:</strong> ආසන වෙන්කිරීම්, ප්‍රවේශපත්‍ර තහවුරු කිරීම් සහ බස් රථය ධාවනය වන වේලාවන් සජීවීව දැනගැනීමට Conductor වරුන් සම්බන්ධ කරගත හැක.
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -375,7 +525,7 @@ export const FloatingWhatsApp: React.FC = () => {
           {/* Footer note */}
           <div className="px-3.5 py-2 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 flex-shrink-0">
             <span className="flex items-center gap-1 font-medium">
-              🚌 මොනරාගල ⇄ කොළඹ Daily Express
+              {botLang === 'en' ? '🚌 Monaragala ⇄ Colombo Daily Express' : '🚌 මොනරාගල ⇄ කොළඹ Daily Express'}
             </span>
             <span className="text-emerald-600 dark:text-emerald-400 font-bold">24/7 Available</span>
           </div>

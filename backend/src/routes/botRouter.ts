@@ -9,17 +9,20 @@ export const botRouter = Router();
  */
 botRouter.post('/chat', async (req: Request, res: Response) => {
   try {
-    const { message } = req.body;
-    const botResponse = await processBotMessage(message || '');
+    const { message, lang } = req.body;
+    const botResponse = await processBotMessage(message || '', lang);
     res.json({
       success: true,
       ...botResponse,
     });
   } catch (error: any) {
     console.error('[BotRouter] Error processing chat message:', error);
+    const isEn = req.body?.lang === 'en' || req.body?.lang === 'english';
     res.status(500).json({
       success: false,
-      text: 'සමාවන්න, පද්ධතියේ සුළු දෝෂයක් පවතී. කරුණාකර නැවත උත්සාහ කරන්න හෝ WhatsApp මගින් Conductor අමතන්න.',
+      text: isEn
+        ? 'Sorry, a temporary system error occurred. Please try again or contact our conductor via WhatsApp.'
+        : 'සමාවන්න, පද්ධතියේ සුළු දෝෂයක් පවතී. කරුණාකර නැවත උත්සාහ කරන්න හෝ WhatsApp මගින් Conductor අමතන්න.',
       error: error?.message || 'Internal Server Error',
     });
   }
