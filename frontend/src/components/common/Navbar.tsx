@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { AuthModal } from './AuthModal';
-import { Bus, MapPin, Ticket, Clock, ShieldCheck, LogOut, LogIn, ChevronDown, Globe, Route, Settings, Moon, Sun } from 'lucide-react';
+import { Bus, MapPin, Ticket, Clock, ShieldCheck, LogOut, LogIn, ChevronDown, Globe, Route, Settings, Moon, Sun, User } from 'lucide-react';
 import { AnimatedLogoBadge } from './AnimatedLogoBadge';
 
 export const Navbar: React.FC = () => {
@@ -72,47 +72,71 @@ export const Navbar: React.FC = () => {
 
   const isAdmin = currentUser?.role === 'admin' || userRole === 'admin';
 
-  const mobileNavItems = [
-    { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
-    { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
-    { key: 'live-tracking', translationKey: 'liveGps', icon: MapPin, activeOn: ['live-tracking'] },
-    isAdmin
-      ? { 
+  const mobileNavItems = isAdmin
+    ? [
+        { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
+        { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
+        { key: 'live-tracking', translationKey: 'liveGps', icon: MapPin, activeOn: ['live-tracking'] },
+        { 
           key: 'admin-panel', 
           label: language === 'sinhala' ? 'පරිපාලක' : language === 'tamil' ? 'நிர்வாகம்' : 'Admin', 
           icon: ShieldCheck, 
           activeOn: ['admin-panel'],
           isAdminTab: true 
-        }
-      : { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
-  ];
+        },
+      ]
+    : [
+        { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
+        { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
+        { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
+        currentUser
+          ? { 
+              key: 'passenger-settings', 
+              label: language === 'sinhala' ? 'ගිණුම' : language === 'tamil' ? 'கணக்கு' : 'Profile', 
+              icon: User, 
+              activeOn: ['passenger-settings'] 
+            }
+          : { 
+              key: 'sign-in', 
+              label: language === 'sinhala' ? 'පිවිසෙන්න' : language === 'tamil' ? 'உள்நுழைய' : 'Sign In', 
+              icon: LogIn, 
+              activeOn: [] 
+            },
+      ];
 
   const isActive = (activeOn: string[]) => activeOn.includes(currentView);
 
   const handleNavItemClick = (view: string) => {
+    if (view === 'sign-in') {
+      setShowAuthModal(true);
+      return;
+    }
+
     if (view === 'admin-panel') {
       setUserRole('admin');
       setCurrentView('admin-panel');
       return;
     }
 
+    if (view === 'passenger-settings') {
+      setCurrentView('passenger-settings');
+      return;
+    }
+
     const requiresAuth = view === 'live-tracking' || view === 'my-bookings';
     if (requiresAuth && !currentUser) {
       setCurrentView(view as any);
-      
       setShowAuthModal(true);
       return;
     }
 
     if (view === 'passenger-search') {
       goToHome();
-      
       return;
     }
 
     if (view === 'schedules-dashboard') {
       goToSearchSchedules();
-      
       return;
     }
 

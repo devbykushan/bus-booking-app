@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import {
   MapPin, Calendar, ArrowRightLeft, Search,
-  Shield, Filter, Clock, Star, ChevronDown
+  Shield, Filter, Clock, Star, ChevronDown, ChevronRight
 } from 'lucide-react';
 import { RealisticBusAnimation } from '../common/RealisticBusAnimation';
 
@@ -37,6 +37,7 @@ export const HeroSearch: React.FC = () => {
     setSearchCriteria,
     setBusTypeFilter,
     setCurrentView,
+    language,
     t,
   } = useBookingStore();
 
@@ -377,6 +378,36 @@ export const HeroSearch: React.FC = () => {
               </button>
             </div>
           </form>
+
+          {/* Quick Action: Live Bus GPS Tracking */}
+          <div
+            className="mt-4 flex justify-center animate-fade-in-up"
+            style={{ animationDelay: '0.6s' }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentView('live-tracking');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="group/gps inline-flex items-center gap-2.5 px-5 py-2.5 rounded-2xl
+                         bg-white/15 hover:bg-white/25 dark:bg-slate-900/70 dark:hover:bg-slate-900/90
+                         backdrop-blur-xl border border-white/30 hover:border-cyan-400/70
+                         text-white font-extrabold text-xs shadow-xl shadow-black/25
+                         hover:shadow-cyan-500/25 hover:scale-[1.03] active:scale-95
+                         transition-all duration-300 cursor-pointer"
+            >
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 shadow-sm shadow-emerald-400"></span>
+              </span>
+              <MapPin className="w-4 h-4 text-cyan-300 transition-transform duration-300 group-hover/gps:scale-110 group-hover/gps:-rotate-6" />
+              <span className="tracking-wide">
+                {language === 'sinhala' ? 'සජීවී බස් රථ පිහිටීම (Live GPS Tracking)' : 'Track Buses Live on Map (Live GPS)'}
+              </span>
+              <ChevronRight className="w-3.5 h-3.5 text-white/70 transition-transform duration-300 group-hover/gps:translate-x-1" />
+            </button>
+          </div>
         </div>
 
       </div>

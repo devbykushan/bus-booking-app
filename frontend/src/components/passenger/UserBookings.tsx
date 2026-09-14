@@ -3,7 +3,7 @@ import { useBookingStore } from '../../store/bookingStore';
 import { Ticket, MapPin, XCircle, Bus, Clock, Download } from 'lucide-react';
 
 export const UserBookings: React.FC = () => {
-  const { bookings, cancelBooking, setCurrentView, goToSearchSchedules, setTrackingRouteId, currentUser, setShowAuthModal, setLatestConfirmedBooking } = useBookingStore();
+  const { bookings, cancelBooking, setCurrentView, goToSearchSchedules, setTrackingRouteId, currentUser, setShowAuthModal, setLatestConfirmedBooking, language } = useBookingStore();
 
   const handleTrack = (routeId: string) => {
     setTrackingRouteId(routeId);
@@ -91,6 +91,16 @@ export const UserBookings: React.FC = () => {
             >
               Search Bus Routes
             </button>
+            <button
+              onClick={() => {
+                setCurrentView('live-tracking');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-cyan-50 dark:bg-cyan-950/40 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 text-cyan-700 dark:text-cyan-300 font-bold text-xs border border-cyan-200 dark:border-cyan-800 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <MapPin className="w-3.5 h-3.5" />
+              <span>{language === 'sinhala' ? 'සජීවී බස් සිතියම' : 'Track Bus Live (GPS)'}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -100,18 +110,55 @@ export const UserBookings: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       
-      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2">
             <Ticket className="w-6 h-6 text-blue-600" /> My Bus Bookings & Tickets
           </h2>
-          <p className="text-xs text-slate-500">View upcoming journeys, download tickets, or track your bus in real time.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">View upcoming journeys, download tickets, or track your bus in real time.</p>
         </div>
         <button
           onClick={goToSearchSchedules}
           className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm"
         >
           + Book New Trip
+        </button>
+      </div>
+
+      {/* ── Live Bus GPS Tracking Quick Banner ── */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-blue-950/80 via-slate-900/90 to-indigo-950/80 border border-blue-500/30 backdrop-blur-xl shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-white">
+        <div className="flex items-center gap-3.5">
+          <div className="relative flex-shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-blue-600/20 border border-blue-400/30 text-cyan-400 flex items-center justify-center shadow-inner">
+              <MapPin className="w-6 h-6" />
+            </div>
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-slate-900 animate-pulse" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm sm:text-base font-extrabold tracking-tight text-white">
+                {language === 'sinhala' ? 'සජීවී බස් රථ සිතියම (Live GPS)' : 'Live Bus GPS Tracking Map'}
+              </h3>
+              <span className="text-[10px] font-mono uppercase tracking-wider font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                Live
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 mt-0.5">
+              {language === 'sinhala'
+                ? 'මාර්ග අංක 98 බස් රථ වල සජීවී පිහිටීම සිතියම මත ඕනෑම වේලාවක නිරීක්ෂණය කරන්න.'
+                : 'Monitor real-time positions of active buses along Route 98 on the interactive map.'}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => {
+            setCurrentView('live-tracking');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className="flex-shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-xs shadow-md shadow-blue-900/40 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+        >
+          <MapPin className="w-3.5 h-3.5" />
+          <span>{language === 'sinhala' ? 'සිතියම විවෘත කරන්න' : 'Open Live Map'}</span>
         </button>
       </div>
 
