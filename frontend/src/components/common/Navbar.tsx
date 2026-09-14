@@ -414,39 +414,47 @@ export const Navbar: React.FC = () => {
         </nav>
       </div>
 
-      {/* ── Mobile Bottom Navigation Bar ── */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-safe transition-colors duration-300">
-        <div className="flex items-center justify-around px-2 py-2">
-          {mobileNavItems.map((item: any) => {
-            const Icon = item.icon;
-            const active = isActive(item.activeOn);
-            const isAdminItem = item.isAdminTab;
-            return (
-              <button
-                key={item.key}
-                onClick={() => handleNavItemClick(item.key)}
-                className={`flex flex-col items-center justify-center w-16 gap-1 p-1 rounded-xl transition-all cursor-pointer ${
-                  active
-                    ? isAdminItem
-                      ? 'text-purple-600 dark:text-purple-400 font-black'
-                      : 'text-blue-600 dark:text-blue-400 font-black'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-bold'
-                }`}
-              >
-                <Icon className={`w-5 h-5 ${
-                  active 
-                    ? isAdminItem 
-                      ? 'fill-purple-100 dark:fill-purple-900/50 text-purple-600 dark:text-purple-400' 
-                      : 'fill-blue-100 dark:fill-blue-900/50 text-blue-600 dark:text-blue-400' 
-                    : ''
-                }`} />
-                <span className="text-[10px] text-center leading-tight truncate w-full">
-                  {item.label || t(item.translationKey)}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      {/* ── Floating iOS Liquid Glass Mobile Navigation Bar ── */}
+      <div className="md:hidden fixed bottom-3 sm:bottom-4 left-3 right-3 sm:left-6 sm:right-6 max-w-lg mx-auto z-[100] mb-[env(safe-area-inset-bottom,0px)] pointer-events-none">
+        <nav
+          aria-label="Mobile Navigation"
+          className="pointer-events-auto w-full px-2 py-1.5 rounded-[26px] bg-white/75 dark:bg-slate-950/75 backdrop-blur-2xl backdrop-saturate-150 border border-white/40 dark:border-white/10 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.18)] dark:shadow-[0_16px_40px_-6px_rgba(0,0,0,0.6)] shadow-inner transition-all duration-300"
+        >
+          {/* Subtle specular top highlight line */}
+          <div className="h-[1px] w-1/2 mx-auto bg-gradient-to-r from-transparent via-white/70 dark:via-white/20 to-transparent -mt-0.5 mb-1 opacity-75" />
+
+          <div className="flex items-center justify-around gap-1">
+            {mobileNavItems.map((item: any) => {
+              const Icon = item.icon;
+              const active = isActive(item.activeOn);
+              const isAdminItem = item.isAdminTab;
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => handleNavItemClick(item.key)}
+                  className={`flex flex-col items-center justify-center flex-1 py-1 px-1.5 rounded-2xl transition-all duration-200 cursor-pointer active:scale-90 ${
+                    active
+                      ? isAdminItem
+                        ? 'bg-purple-600/15 dark:bg-purple-500/20 text-purple-600 dark:text-purple-300 font-black shadow-xs border border-purple-500/20'
+                        : 'bg-blue-600/15 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-black shadow-xs border border-blue-500/20'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-white/40 dark:hover:bg-white/5 font-bold border border-transparent'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 transition-transform duration-200 ${
+                    active 
+                      ? isAdminItem 
+                        ? 'fill-purple-600/20 dark:fill-purple-400/30 text-purple-600 dark:text-purple-300 scale-105' 
+                        : 'fill-blue-600/20 dark:fill-blue-400/30 text-blue-600 dark:text-blue-400 scale-105' 
+                      : ''
+                  }`} />
+                  <span className="text-[10px] text-center leading-tight truncate w-full mt-0.5 font-sans">
+                    {item.label || t(item.translationKey)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
       </div>
 
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
