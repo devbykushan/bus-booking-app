@@ -249,10 +249,10 @@ export const FloatingWhatsApp: React.FC = () => {
   const contactsList = botLang === 'en' ? WHATSAPP_CONTACTS_EN : WHATSAPP_CONTACTS_SI;
 
   return (
-    <div className="fixed bottom-[3.9rem] md:bottom-6 right-3 sm:right-6 z-40 flex flex-col items-end select-none font-sans" ref={menuRef}>
+    <div className="floating-whatsapp fixed bottom-[5.5rem] md:bottom-6 right-3.5 sm:right-6 z-40 flex flex-col items-end select-none font-sans" ref={menuRef}>
       {/* ─── LIVE BOT & WHATSAPP CHAT MODAL ─────────────────────────────────────── */}
       {isOpen && (
-        <div className="mb-3 w-[92vw] sm:w-[400px] h-[550px] max-h-[82vh] rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden animate-scale-up origin-bottom-right transition-all">
+        <div className="mb-3 w-[92vw] sm:w-[400px] h-[550px] max-h-[78vh] sm:max-h-[82vh] rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden animate-scale-up origin-bottom-right transition-all">
           {/* Top Header */}
           <div className="bg-gradient-to-r from-[#128C7E] via-[#075E54] to-slate-900 p-3.5 text-white relative flex-shrink-0 shadow-md">
             <div className="flex items-center justify-between">

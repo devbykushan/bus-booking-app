@@ -67,12 +67,13 @@ export const bookingsApi = {
     boardingPointId: string;
     dropPointId: string;
     seatIds: string[];
-    sessionId: string;
-    passenger: { fullName: string; email: string; phone: string; gender: string; age: number };
+    sessionId?: string;
+    passenger: { fullName: string; email?: string; phone: string; gender?: string; age?: number };
     paymentMethod: string;
     promoCode?: string;
     insuranceSelected?: boolean;
     searchDate?: string;
+    isCounterBooking?: boolean;
   }): Promise<any> =>
     apiFetch('/bookings', { method: 'POST', body: JSON.stringify(payload) }),
 

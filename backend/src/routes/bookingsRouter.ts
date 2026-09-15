@@ -77,17 +77,19 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
   const {
     routeId, boardingPointId, dropPointId, seatIds, sessionId,
     passenger, paymentMethod, promoCode, insuranceSelected, searchDate,
+    isCounterBooking,
   } = req.body as {
     routeId: string;
     boardingPointId: string;
     dropPointId: string;
     seatIds: string[];
-    sessionId: string;
-    passenger: { fullName: string; email: string; phone: string; gender: string; age: number };
+    sessionId?: string;
+    passenger: { fullName: string; email?: string; phone: string; gender?: string; age?: number };
     paymentMethod: string;
     promoCode?: string;
     insuranceSelected?: boolean;
     searchDate?: string;
+    isCounterBooking?: boolean;
   };
 
   if (!routeId || !seatIds?.length || !passenger?.fullName) {
@@ -178,9 +180,11 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    if (!sessionId || canonicalSeatIds.some((seatId: string) => !isSeatLockedBySession(seatId, sessionId) && !isSeatLockedBySession(seatIds[0], sessionId))) {
-      res.status(409).json({ error: 'Your seat hold has expired. Please select your seats again.' });
-      return;
+    if (!isCounterBooking) {
+      if (!sessionId || canonicalSeatIds.some((seatId: string) => !isSeatLockedBySession(seatId, sessionId) && !isSeatLockedBySession(seatIds[0], sessionId))) {
+        res.status(409).json({ error: 'Your seat hold has expired. Please select your seats again.' });
+        return;
+      }
     }
 
     const [bpRes, dpRes] = await Promise.all([
@@ -237,7 +241,7 @@ bookingsRouter.post('/', async (req: Request, res: Response) => {
         bookingId, pnr, routeId, route.operatorName, route.busNumber, route.busType,
         route.origin, route.destination, departureDate, route.departureTime,
         boardingPointId, dropPointId, JSON.stringify(seatIds),
-        passenger.fullName, passenger.email, passenger.phone, passenger.gender, passenger.age,
+        passenger.fullName, passenger.email || '', passenger.phone, passenger.gender || 'unspecified', passenger.age || 0,
         baseFare, taxAmount, insuranceAmount, discountAmount, totalFare,
         promo || null, paymentMethod || 'card',
         paymentMethod === 'bank_transfer' ? 'pending' : 'paid',
