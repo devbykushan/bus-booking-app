@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { OAuth2Client } from 'google-auth-library';
 import { dbQuery, hashPassword, verifyPassword } from '../db/database';
-import { sendAccountCreationEmail, sendOTPEmail } from '../services/emailService';
+import { sendAccountCreationEmail, sendOTPEmail, lastEmailError } from '../services/emailService';
 import { sendWhatsAppOtp } from '../services/wahaService';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '846634088514-gl0r0g50m3omomtf24sh44qpbapbrsg3.apps.googleusercontent.com';
@@ -743,6 +743,12 @@ authRouter.post('/verify-whatsapp-otp', async (req: Request, res: Response) => {
   }
 });
 
-
-
-
+authRouter.get('/test-email', async (req: Request, res: Response) => {
+  const to = (req.query.to as string) || 'nomitha397@gmail.com';
+  try {
+    const success = await sendOTPEmail(to, 'Test User', '123456');
+    return res.json({ success, to, lastError: lastEmailError });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message, lastError: lastEmailError });
+  }
+});

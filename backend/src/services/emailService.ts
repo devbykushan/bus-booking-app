@@ -7,6 +7,8 @@ export interface WelcomeEmailPayload {
   phone?: string;
 }
 
+export let lastEmailError: string | null = null;
+
 /**
  * Sends welcome email to newly registered user via Resend API, SMTP, or test transport
  */
@@ -436,31 +438,34 @@ Thank you!
       const isGmail = (host && host.includes('gmail')) || user.includes('@gmail.com');
       const transporter = isGmail
         ? nodemailer.createTransport({
-            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
             auth: { user, pass },
-            family: 4,
-            connectionTimeout: 5000,
-            greetingTimeout: 5000,
-            socketTimeout: 5000,
+            connectionTimeout: 15000,
+            greetingTimeout: 15000,
+            socketTimeout: 20000,
           } as any)
         : nodemailer.createTransport({
             host: host || 'smtp.gmail.com',
             port: Number(process.env.SMTP_PORT) || 587,
             secure: process.env.SMTP_SECURE === 'true',
-            family: 4,
-            connectionTimeout: 5000,
-            greetingTimeout: 5000,
-            socketTimeout: 5000,
             auth: { user, pass },
+            connectionTimeout: 15000,
+            greetingTimeout: 15000,
+            socketTimeout: 20000,
           } as any);
       const info = await transporter.sendMail({ from: fromAddress, to: email, subject, text: textBody, html: htmlBody });
       console.log(`[Email Service] ✅ OTP email delivered to ${email} (Message ID: ${info.messageId})`);
+      lastEmailError = null;
       return true;
     } catch (err: any) {
-      console.error('[Email Service] SMTP OTP error:', err?.message || err);
+      lastEmailError = err?.message || String(err);
+      console.error('[Email Service] SMTP OTP error:', lastEmailError);
       return false;
     }
   }
 
+  lastEmailError = 'No SMTP or Resend credentials configured';
   return false;
 }
