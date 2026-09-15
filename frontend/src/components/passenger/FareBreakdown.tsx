@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
-import { ArrowLeft, CreditCard, CheckCircle, Lock, Sparkles, Tag } from 'lucide-react';
+import { ArrowLeft, Building2, Check, CheckCircle, Lock, Tag } from 'lucide-react';
 
 export const FareBreakdown: React.FC = () => {
   const { 
@@ -20,7 +20,7 @@ export const FareBreakdown: React.FC = () => {
   const [promoInput, setPromoInput] = useState('');
   const [promoError, setPromoError] = useState('');
   const [promoSuccess, setPromoSuccess] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking' | 'wallet'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'wallet'>('bank_transfer');
   const [isProcessing, setIsProcessing] = useState(false);
 
   if (!selectedRoute || selectedSeatIds.length === 0) {
@@ -165,62 +165,62 @@ export const FareBreakdown: React.FC = () => {
           </div>
 
           {/* Payment Method Selector */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-            <div className="flex items-center gap-2 text-slate-800 font-bold text-base border-b border-slate-200 pb-3">
-              <CreditCard className="w-5 h-5 text-indigo-600" />
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+            <div className="flex items-center gap-2 text-slate-800 dark:text-white font-bold text-base border-b border-slate-200 dark:border-slate-700 pb-3">
+              <Building2 className="w-5 h-5 text-emerald-600" />
               <span>{t('selectPayment')}</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <button
                 type="button"
-                onClick={() => setPaymentMethod('card')}
-                className={`p-3 rounded-2xl border text-left flex items-center justify-between font-semibold transition-all ${
-                  paymentMethod === 'card'
-                    ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-sm'
+                onClick={() => setPaymentMethod('bank_transfer')}
+                className={`p-3.5 rounded-2xl border text-left flex items-center justify-between font-semibold transition-all cursor-pointer ${
+                  paymentMethod === 'bank_transfer'
+                    ? 'bg-emerald-50 border-emerald-500 text-emerald-800 shadow-xs ring-2 ring-emerald-500/20'
                     : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-800'
                 }`}
               >
-                <span>Credit / Debit Card</span>
-                <CreditCard className="w-4 h-4 text-blue-600" />
+                <div className="space-y-0.5">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[9px] font-black">BANK</span>
+                    <span>Bank Transfer & Slip</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500">BOC 8001234567 Monaragala</p>
+                </div>
+                {paymentMethod === 'bank_transfer' && <Check className="w-4 h-4 text-emerald-600" />}
               </button>
 
               <button
                 type="button"
-                onClick={() => setPaymentMethod('upi')}
-                className={`p-3 rounded-2xl border text-left flex items-center justify-between font-semibold transition-all ${
-                  paymentMethod === 'upi'
-                    ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-sm'
+                onClick={() => setPaymentMethod('wallet')}
+                className={`p-3.5 rounded-2xl border text-left flex items-center justify-between font-semibold transition-all cursor-pointer ${
+                  paymentMethod === 'wallet'
+                    ? 'bg-blue-50 border-blue-500 text-blue-800 shadow-xs ring-2 ring-blue-500/20'
                     : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-800'
                 }`}
               >
-                <span>Digital Wallet / LKR</span>
-                <Sparkles className="w-4 h-4 text-blue-600" />
+                <div className="space-y-0.5">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <span className="px-1.5 py-0.5 rounded bg-blue-600 text-white text-[9px] font-black">CASH</span>
+                    <span>Pay On Board</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500">Pay cash directly to conductor</p>
+                </div>
+                {paymentMethod === 'wallet' && <Check className="w-4 h-4 text-blue-600" />}
               </button>
             </div>
 
-            {paymentMethod === 'card' && (
-              <div className="space-y-3 pt-2 text-xs">
-                <input
-                  type="text"
-                  placeholder="Card Number (4532 •••• •••• 8890)"
-                  defaultValue="4532 8901 2345 8890"
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl p-3 focus:outline-none"
-                />
-                <div className="flex gap-3">
-                  <input
-                    type="text"
-                    placeholder="MM/YY"
-                    defaultValue="08/28"
-                    className="w-1/2 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl p-3"
-                  />
-                  <input
-                    type="password"
-                    placeholder="CVV"
-                    defaultValue="123"
-                    className="w-1/2 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl p-3"
-                  />
+            {paymentMethod === 'bank_transfer' && (
+              <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4 space-y-1.5 text-xs animate-fade-in">
+                <p className="font-bold text-emerald-900 dark:text-emerald-300">Bank Account for Deposit / Transfer:</p>
+                <div className="grid grid-cols-2 gap-2 text-slate-700 dark:text-slate-300 pt-1">
+                  <p>🏦 <span className="font-semibold">Bank:</span> Bank of Ceylon</p>
+                  <p>💳 <span className="font-semibold">Account:</span> 8001234567</p>
+                  <p>👤 <span className="font-semibold">Name:</span> Dewmina Super Line</p>
+                  <p>📍 <span className="font-semibold">Branch:</span> Monaragala</p>
                 </div>
+                <p className="text-[11px] text-emerald-700 dark:text-emerald-400 pt-1">After completing the booking, you will be directed to upload your deposit slip for Admin approval.</p>
               </div>
             )}
           </div>

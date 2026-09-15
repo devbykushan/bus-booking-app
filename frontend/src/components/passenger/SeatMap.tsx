@@ -157,7 +157,7 @@ export const SeatMap: React.FC = () => {
   };
 
   // Payment & Promo states
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking' | 'wallet' | 'bank_transfer'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking' | 'wallet' | 'bank_transfer'>('bank_transfer');
   const [promoInput, setPromoInput] = useState('');
   const [promoMessage, setPromoMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -1477,34 +1477,30 @@ export const SeatMap: React.FC = () => {
               {openSection4 && (
                 <div className="p-5 sm:p-6 pt-1 border-t border-slate-100 space-y-4 animate-fade-in">
                   
-                  {/* Pay By IPG Card (Highlighted Mockup Style) */}
+                  {/* Bank Transfer option (Primary & Preferred) */}
                   <div 
-                    onClick={() => setPaymentMethod('card')}
-                    className={`p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-center gap-4 hover:-translate-y-0.5 ${
-                      paymentMethod === 'card'
-                        ? 'border-blue-600 bg-blue-50/40 shadow-xs ring-2 ring-blue-500/20'
+                    onClick={() => setPaymentMethod('bank_transfer')}
+                    className={`p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-start gap-4 hover:-translate-y-0.5 ${
+                      paymentMethod === 'bank_transfer'
+                        ? 'border-emerald-500 bg-emerald-50/40 shadow-xs ring-2 ring-emerald-500/20'
                         : 'border-slate-200 bg-slate-50/40 hover:bg-white hover:border-slate-300'
                     }`}
                   >
-                    <div className="w-5 h-5 rounded-full border-2 border-blue-600 flex items-center justify-center">
-                      {paymentMethod === 'card' && <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-scale-in" />}
+                    <div className="w-5 h-5 mt-0.5 rounded-full border-2 border-slate-300 flex items-center justify-center flex-shrink-0">
+                      {paymentMethod === 'bank_transfer' && <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-scale-in" />}
                     </div>
-
-                    <div className="flex-1 flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-2.5">
-                        {/* IPG / Card Gateway Badges */}
-                        <span className="px-2 py-0.5 rounded bg-blue-600 text-white font-black text-[10px] tracking-wider shadow-2xs">
-                          IPG PAY
-                        </span>
-                        <span className="text-xs font-bold text-slate-800">
-                          Pay By IPG (For passengers who would like to pay online.)
-                        </span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="px-2 py-0.5 rounded bg-emerald-600 text-white font-black text-[10px] tracking-wider shadow-2xs">BANK</span>
+                        <span className="text-xs font-bold text-slate-800">Online Bank Transfer & Slip Upload</span>
                       </div>
-
-                      <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-600">
-                        <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">VISA</span>
-                        <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">MasterCard</span>
-                        <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200">LankaQR</span>
+                      <p className="text-[11px] text-slate-500 mb-2">Transfer to our bank account and upload your payment slip. Admin will verify and confirm your booking.</p>
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 space-y-1">
+                        <p className="text-[11px] font-bold text-emerald-800">Bank Account Details:</p>
+                        <p className="text-[11px] text-slate-700">🏦 <span className="font-semibold">Bank:</span> Bank of Ceylon</p>
+                        <p className="text-[11px] text-slate-700">💳 <span className="font-semibold">Account No:</span> 8001234567</p>
+                        <p className="text-[11px] text-slate-700">👤 <span className="font-semibold">Name:</span> Dewmina Super Line</p>
+                        <p className="text-[11px] text-slate-700">📍 <span className="font-semibold">Branch:</span> Monaragala</p>
                       </div>
                     </div>
                   </div>
@@ -1527,34 +1523,6 @@ export const SeatMap: React.FC = () => {
                         Pay On Board (Cash to Conductor / At Boarding Point Counter)
                       </span>
                       <p className="text-[11px] text-slate-500">Pay directly in cash when boarding the bus.</p>
-                    </div>
-                  </div>
-
-                  {/* Bank Transfer option */}
-                  <div 
-                    onClick={() => setPaymentMethod('bank_transfer')}
-                    className={`p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-start gap-4 hover:-translate-y-0.5 ${
-                      paymentMethod === 'bank_transfer'
-                        ? 'border-emerald-500 bg-emerald-50/40 shadow-xs ring-2 ring-emerald-500/20'
-                        : 'border-slate-200 bg-slate-50/40 hover:bg-white hover:border-slate-300'
-                    }`}
-                  >
-                    <div className="w-5 h-5 mt-0.5 rounded-full border-2 border-slate-300 flex items-center justify-center flex-shrink-0">
-                      {paymentMethod === 'bank_transfer' && <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-scale-in" />}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2 py-0.5 rounded bg-emerald-600 text-white font-black text-[10px] tracking-wider shadow-2xs">BANK</span>
-                        <span className="text-xs font-bold text-slate-800">Online Bank Transfer</span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 mb-2">Transfer to our bank account and upload your payment slip. Admin will verify and confirm your booking.</p>
-                      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 space-y-1">
-                        <p className="text-[11px] font-bold text-emerald-800">Bank Account Details:</p>
-                        <p className="text-[11px] text-slate-700">🏦 <span className="font-semibold">Bank:</span> Bank of Ceylon</p>
-                        <p className="text-[11px] text-slate-700">💳 <span className="font-semibold">Account No:</span> 8001234567</p>
-                        <p className="text-[11px] text-slate-700">👤 <span className="font-semibold">Name:</span> Dewmina Super Line</p>
-                        <p className="text-[11px] text-slate-700">📍 <span className="font-semibold">Branch:</span> Monaragala</p>
-                      </div>
                     </div>
                   </div>
 
