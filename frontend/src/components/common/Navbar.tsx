@@ -147,17 +147,20 @@ export const Navbar: React.FC = () => {
     <>
       <div className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 pt-safe ${
         scrolled
-          ? 'bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl'
-          : 'bg-[#090d16]/85 dark:bg-slate-950/85 backdrop-blur-xl'
+          ? 'bg-white/70 dark:bg-slate-950/75 backdrop-blur-3xl backdrop-saturate-[190%]'
+          : 'bg-slate-950/50 dark:bg-slate-950/60 backdrop-blur-2xl backdrop-saturate-[180%]'
       }`}>
         <nav
           ref={navRef}
-          className={`w-full transition-all duration-500 border-b ${
+          className={`relative w-full transition-all duration-500 border-b ${
             scrolled
-              ? 'bg-white/85 dark:bg-slate-950/85 backdrop-blur-2xl border-slate-200/80 dark:border-slate-800/80 shadow-md shadow-slate-900/5 dark:shadow-black/40'
-              : 'bg-slate-950/25 dark:bg-slate-950/35 backdrop-blur-xl border-white/10 dark:border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.15)]'
+              ? 'border-white/60 dark:border-white/10 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.12),inset_0_-1px_1px_rgba(255,255,255,0.4)] dark:shadow-[0_12px_40px_-4px_rgba(0,0,0,0.5),inset_0_-1px_1px_rgba(255,255,255,0.08)]'
+              : 'border-white/15 dark:border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.2)]'
           }`}
         >
+          {/* Subtle bottom specular glass sheen */}
+          <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 dark:via-white/20 to-transparent pointer-events-none" />
+
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="flex items-center justify-between h-16 md:h-[72px]">
               
@@ -169,11 +172,11 @@ export const Navbar: React.FC = () => {
                 <AnimatedLogoBadge size="md" />
               </div>
 
-              {/* ── Desktop Navigation Links ── */}
-              <div className={`hidden md:flex items-center gap-1.5 p-1.5 rounded-2xl backdrop-blur-md transition-all duration-300 ${
+              {/* ── Desktop Navigation Links (iOS Liquid Glass Capsule) ── */}
+              <div className={`hidden md:flex items-center gap-1.5 p-1.5 rounded-2xl backdrop-blur-2xl transition-all duration-300 ${
                 scrolled
-                  ? 'bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700'
-                  : 'bg-white/10 dark:bg-white/10 border border-white/15 shadow-inner'
+                  ? 'bg-black/5 dark:bg-white/5 border border-white/60 dark:border-white/10 shadow-xs'
+                  : 'bg-white/10 dark:bg-white/10 border border-white/20 shadow-inner'
               }`}>
                 {navItems.map((item) => {
                   const Icon = item.icon;
@@ -182,11 +185,11 @@ export const Navbar: React.FC = () => {
                     <button
                       key={item.key}
                       onClick={() => handleNavItemClick(item.key)}
-                      className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
                         active
-                          ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 border border-blue-500 scale-[1.02]'
+                          ? 'bg-gradient-to-b from-blue-500/90 to-indigo-600 text-white shadow-[0_2px_12px_rgba(59,130,246,0.35),inset_0_1px_1px_rgba(255,255,255,0.6)] border border-blue-400/40 scale-[1.02]'
                           : scrolled
-                            ? 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700/60 shadow-2xs'
+                            ? 'text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/10'
                             : 'text-white/85 hover:text-white hover:bg-white/15'
                       }`}
                     >
@@ -425,16 +428,16 @@ export const Navbar: React.FC = () => {
         </nav>
       </div>
 
-      {/* ── Native iOS Docked Liquid Glass Tab Bar ── */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] pointer-events-none">
+      {/* ── Native iOS Curved Floating Liquid Glass Tab Bar ── */}
+      <div className="md:hidden fixed bottom-[max(0.5rem,env(safe-area-inset-bottom,0px))] left-0 right-0 z-[100] px-3 pointer-events-none flex justify-center">
         <nav
           aria-label="Mobile Navigation"
-          className="pointer-events-auto relative w-full px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] bg-white/80 dark:bg-slate-950/85 backdrop-blur-3xl backdrop-saturate-[190%] border-t border-white/80 dark:border-white/10 shadow-[0_-8px_32px_rgba(0,0,0,0.12),inset_0_1px_1.5px_rgba(255,255,255,0.85)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.5),inset_0_1px_1.5px_rgba(255,255,255,0.2)] transition-all duration-300"
+          className="pointer-events-auto relative w-full max-w-md px-2 py-1.5 rounded-[28px] bg-white/80 dark:bg-slate-950/80 backdrop-blur-3xl backdrop-saturate-[190%] border border-white/80 dark:border-white/15 shadow-[0_12px_40px_-4px_rgba(0,0,0,0.18),0_4px_16px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,0.9),inset_0_-1px_1px_rgba(255,255,255,0.2)] dark:shadow-[0_16px_48px_-4px_rgba(0,0,0,0.7),inset_0_1px_2px_rgba(255,255,255,0.25)] transition-all duration-300"
         >
           {/* Specular Liquid Glass Top Rim Reflection */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[90%] h-[1.5px] bg-gradient-to-r from-transparent via-white/95 dark:via-white/50 to-transparent pointer-events-none" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[1.5px] bg-gradient-to-r from-transparent via-white/95 dark:via-white/50 to-transparent pointer-events-none rounded-full" />
 
-          <div className="relative z-10 max-w-lg mx-auto flex items-center justify-around gap-1">
+          <div className="relative z-10 flex items-center justify-around gap-1">
             {mobileNavItems.map((item: any) => {
               const Icon = item.icon;
               const active = isActive(item.activeOn);
@@ -443,11 +446,11 @@ export const Navbar: React.FC = () => {
                 <button
                   key={item.key}
                   onClick={() => handleNavItemClick(item.key)}
-                  className={`relative flex flex-col items-center justify-center flex-1 py-1.5 px-1 rounded-2xl transition-all duration-200 cursor-pointer active:scale-90 select-none ${
+                  className={`relative flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-[20px] transition-all duration-200 cursor-pointer active:scale-90 select-none ${
                     active
                       ? isAdminItem
-                        ? 'bg-gradient-to-b from-purple-500/18 via-purple-500/10 to-indigo-600/18 text-purple-700 dark:text-purple-300 font-black border border-purple-400/40 shadow-[0_2px_10px_rgba(168,85,247,0.2),inset_0_1px_1px_rgba(255,255,255,0.8)] dark:shadow-[0_2px_12px_rgba(168,85,247,0.3),inset_0_1px_1px_rgba(255,255,255,0.25)]'
-                        : 'bg-gradient-to-b from-blue-500/18 via-blue-500/10 to-indigo-600/18 text-blue-700 dark:text-cyan-300 font-black border border-blue-400/40 shadow-[0_2px_10px_rgba(59,130,246,0.2),inset_0_1px_1px_rgba(255,255,255,0.8)] dark:shadow-[0_2px_12px_rgba(59,130,246,0.3),inset_0_1px_1px_rgba(255,255,255,0.25)]'
+                        ? 'bg-gradient-to-b from-purple-500/20 via-purple-500/10 to-indigo-600/20 text-purple-700 dark:text-purple-300 font-black border border-purple-400/50 shadow-[0_2px_12px_rgba(168,85,247,0.25),inset_0_1px_1.5px_rgba(255,255,255,0.9)] dark:shadow-[0_2px_14px_rgba(168,85,247,0.35),inset_0_1px_1.5px_rgba(255,255,255,0.3)]'
+                        : 'bg-gradient-to-b from-blue-500/20 via-blue-500/10 to-indigo-600/20 text-blue-700 dark:text-cyan-300 font-black border border-blue-400/50 shadow-[0_2px_12px_rgba(59,130,246,0.25),inset_0_1px_1.5px_rgba(255,255,255,0.9)] dark:shadow-[0_2px_14px_rgba(59,130,246,0.35),inset_0_1px_1.5px_rgba(255,255,255,0.3)]'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-white/40 dark:hover:bg-white/5 font-bold border border-transparent'
                   }`}
                 >
