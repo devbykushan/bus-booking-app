@@ -35,6 +35,7 @@ type SortOption = 'departure-asc' | 'departure-desc' | 'price-asc' | 'price-desc
 export const SchedulesDashboard: React.FC = () => {
   const {
     routes,
+    isLoading,
     searchOrigin,
     searchDestination,
     searchDate,
@@ -879,7 +880,28 @@ export const SchedulesDashboard: React.FC = () => {
 
       {/* ── Main Body Grid ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
-        {filteredAndSortedRoutes.length === 0 ? (
+        {isLoading && routes.length === 0 ? (
+          /* Skeleton Loading Shimmer Cards */
+          <div className="max-w-3xl mx-auto space-y-4 animate-fade-in-up">
+            <div className="flex items-center gap-3 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-300 text-xs font-bold animate-pulse">
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping" />
+              <span>Connecting to cloud server and syncing real-time schedules...</span>
+            </div>
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 animate-pulse space-y-4 shadow-sm">
+                <div className="flex justify-between items-center">
+                  <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-xl w-48" />
+                  <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-xl w-24" />
+                </div>
+                <div className="grid grid-cols-3 gap-4 pt-2">
+                  <div className="h-4 bg-slate-100 dark:bg-slate-700/50 rounded w-24" />
+                  <div className="h-4 bg-slate-100 dark:bg-slate-700/50 rounded w-28" />
+                  <div className="h-4 bg-slate-100 dark:bg-slate-700/50 rounded w-20 ml-auto" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredAndSortedRoutes.length === 0 ? (
           /* Empty State */
           <div className="bg-white dark:bg-slate-800 p-12 md:p-16 rounded-3xl border border-slate-200 shadow-sm text-center max-w-2xl mx-auto space-y-5 animate-fade-in-up">
             <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-500 flex items-center justify-center mx-auto">

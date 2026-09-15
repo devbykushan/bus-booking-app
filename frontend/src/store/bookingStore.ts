@@ -374,14 +374,35 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   setSoloFemaleOnly: (val) => set({ soloFemaleOnly: val }),
   setBusTypeFilter: (val) => set({ busTypeFilter: val }),
 
-  routes: [],
+  routes: (() => {
+    try {
+      const cached = localStorage.getItem('dewmina_cached_routes_v1');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [];
+  })(),
   loadRoutes: async () => {
-    set({ isLoading: true, error: null });
+    const hasCached = get().routes.length > 0;
+    if (!hasCached) {
+      set({ isLoading: true, error: null });
+    }
     try {
       const routes = await routesApi.getAll();
-      set({ routes, isLoading: false });
+      if (Array.isArray(routes) && routes.length > 0) {
+        try {
+          localStorage.setItem('dewmina_cached_routes_v1', JSON.stringify(routes));
+        } catch {}
+      }
+      set({ routes, isLoading: false, error: null });
     } catch (err: any) {
-      set({ isLoading: false, error: `Failed to load routes: ${err.message}` });
+      if (get().routes.length === 0) {
+        set({ isLoading: false, error: `Failed to load routes: ${err.message}` });
+      } else {
+        set({ isLoading: false });
+      }
     }
   },
   selectedRoute: null,

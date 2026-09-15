@@ -26,7 +26,6 @@ export function App() {
   const {
     currentView,
     routes,
-    isLoading,
     error,
     loadRoutes,
     loadBookings,
@@ -39,8 +38,9 @@ export function App() {
 
   const isAdmin = currentUser?.role === 'admin' || userRole === 'admin';
 
-  const [backendReady, setBackendReady] = useState(false);
+  const [backendReady, setBackendReady] = useState(routes.length > 0);
   const [backendError, setBackendError] = useState(false);
+  const [isWakingUp, setIsWakingUp] = useState(false);
 
   // Initialize theme
   useEffect(() => {
@@ -101,14 +101,31 @@ export function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // On app start: ping backend health, then load data and check for scanned QR validation parameters
+  // On app start: Parallelize health ping, routes load, and bookings load (Eliminate waterfall)
   useEffect(() => {
+    let isMounted = true;
+
+    // Detect if cloud server (Render free tier) takes more than 3.5s to wake up
+    const wakeUpTimer = setTimeout(() => {
+      if (isMounted && useBookingStore.getState().routes.length === 0) {
+        setIsWakingUp(true);
+      }
+    }, 3500);
+
     (async () => {
       try {
-        const res = await fetch(`${BASE_URL}/health`);
-        if (!res.ok) throw new Error('Backend not healthy');
+        const routesPromise = loadRoutes();
+        const bookingsPromise = loadBookings();
+        const healthPromise = fetch(`${BASE_URL}/health`, { signal: AbortSignal.timeout(25000) })
+          .then((res) => res.ok)
+          .catch(() => false);
+
+        await Promise.allSettled([routesPromise, bookingsPromise, healthPromise]);
+
+        if (!isMounted) return;
+        clearTimeout(wakeUpTimer);
+        setIsWakingUp(false);
         setBackendReady(true);
-        await Promise.all([loadRoutes(), loadBookings()]);
 
         // Check if app was opened via scanned QR code URL (e.g. #validate?pnr=OMNI-12345 or ?pnr=OMNI-12345)
         const fullUrl = window.location.href;
@@ -123,30 +140,34 @@ export function App() {
           }
         }
       } catch {
-        setBackendError(true);
+        if (isMounted && useBookingStore.getState().routes.length === 0) {
+          setBackendError(true);
+        }
       }
     })();
+
+    return () => {
+      isMounted = false;
+      clearTimeout(wakeUpTimer);
+    };
   }, [loadRoutes, loadBookings]);
 
-  // ─── Backend offline splash ───────────────────────────────────────────────
-  if (backendError) {
+  // ─── Backend offline splash (only if zero routes available) ─────────────────
+  if (backendError && routes.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-800 gap-6 px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 gap-6 px-4">
         <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center">
           <Wifi className="w-8 h-8 text-red-400" />
         </div>
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-slate-800">Backend Server Offline</h1>
-          <p className="text-slate-500 text-sm max-w-sm">
-            The API server is not running. Start it with:
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Connecting to Server</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm max-w-sm">
+            Cloud server is waking up or temporarily unavailable. Please retry.
           </p>
-          <code className="block bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-blue-600 font-mono text-sm mt-2">
-            cd backend && npm run dev
-          </code>
         </div>
         <button
           onClick={() => { setBackendError(false); window.location.reload(); }}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors cursor-pointer"
         >
           <RefreshCw className="w-4 h-4" /> Retry Connection
         </button>
@@ -154,17 +175,22 @@ export function App() {
     );
   }
 
-  // ─── Loading splash ───────────────────────────────────────────────────────
-  if (!backendReady || (isLoading && routes.length === 0)) {
+  // ─── Non-blocking: only show full splash on deep views that strictly require routes ───
+  const isSearchLanding = currentView === 'passenger-search';
+  const shouldBlock = !isSearchLanding && routes.length === 0 && !backendReady;
+
+  if (shouldBlock) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-800 gap-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 gap-6 px-4">
         <div className="relative w-16 h-16">
-          <div className="absolute inset-0 rounded-full border-4 border-blue-100 border-t-blue-500 animate-spin" />
+          <div className="absolute inset-0 rounded-full border-4 border-blue-100 dark:border-slate-800 border-t-blue-500 animate-spin" />
           <Bus className="absolute inset-0 m-auto w-7 h-7 text-blue-500" />
         </div>
         <div className="text-center space-y-1">
-          <p className="font-bold text-slate-800 text-lg">Loading Dewmina Super Line…</p>
-          <p className="text-slate-400 text-sm">Connecting to API server</p>
+          <p className="font-bold text-slate-800 dark:text-white text-lg">Loading Dewmina Super Line…</p>
+          <p className="text-slate-400 text-sm">
+            {isWakingUp ? 'Waking up cloud server (takes ~30s on first load)...' : 'Connecting to API server'}
+          </p>
         </div>
       </div>
     );
@@ -173,6 +199,14 @@ export function App() {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 antialiased selection:bg-blue-500 selection:text-white overflow-x-hidden transition-colors duration-300">
       <Navbar />
+
+      {/* Cloud Server Wake-up notification (Render free tier cold start notification) */}
+      {isWakingUp && routes.length === 0 && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-amber-500/90 dark:bg-amber-600/90 backdrop-blur-xl text-white text-xs font-bold shadow-xl flex items-center gap-2.5 animate-bounce-short border border-amber-300/40">
+          <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+          <span>Connecting to cloud server... Live bus schedules will update momentarily.</span>
+        </div>
+      )}
 
       {/* Global API error banner */}
       {error && (
