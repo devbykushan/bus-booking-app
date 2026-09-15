@@ -275,9 +275,9 @@ Thank you for choosing OmniBus!
   }
 
   // 2. Check if SMTP credentials (Brevo, SendGrid, Gmail, Mailtrap, etc.) are configured
-  const host = process.env.SMTP_HOST;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const user = process.env.SMTP_USER || 'dewminasuperline.pvt.ltd@gmail.com';
+  const pass = process.env.SMTP_PASS || 'kiejrowsxwphixoy';
 
   if (user && pass) {
     try {
@@ -427,9 +427,9 @@ Thank you!
   }
 
   // 2. SMTP (Gmail, Brevo, SendGrid, etc.)
-  const host = process.env.SMTP_HOST;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const user = process.env.SMTP_USER || 'dewminasuperline.pvt.ltd@gmail.com';
+  const pass = process.env.SMTP_PASS || 'kiejrowsxwphixoy';
   if (user && pass) {
     try {
       console.log(`[Email Service] Sending OTP email to ${email}...`);
