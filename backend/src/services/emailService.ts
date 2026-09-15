@@ -245,7 +245,7 @@ Thank you for choosing OmniBus!
   if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim()) {
     try {
       const apiKey = process.env.RESEND_API_KEY.trim();
-      const resendFrom = process.env.EMAIL_FROM || 'OmniBus LK <onboarding@resend.dev>';
+      const resendFrom = process.env.RESEND_FROM || 'Dewmina Super Line <onboarding@resend.dev>';
       console.log(`[Email Service] Sending welcome email to ${email} via Resend HTTP API...`);
 
       const res = await fetch('https://api.resend.com/emails', {
@@ -266,13 +266,16 @@ Thank you for choosing OmniBus!
       if (res.ok) {
         const data = (await res.json()) as any;
         console.log(`[Email Service] ✅ Welcome email delivered successfully to ${email} via Resend API! ID: ${data.id}`);
+        lastEmailError = null;
         return true;
       } else {
         const errorText = await res.text();
-        console.error(`[Email Service] Resend API error (HTTP ${res.status}):`, errorText);
+        lastEmailError = `Resend API error (HTTP ${res.status}): ${errorText}`;
+        console.error(`[Email Service] ${lastEmailError}`);
       }
     } catch (err: any) {
-      console.error('[Email Service] Error connecting to Resend API:', err?.message || err);
+      lastEmailError = err?.message || String(err);
+      console.error('[Email Service] Error connecting to Resend API:', lastEmailError);
     }
   }
 
@@ -406,11 +409,12 @@ Thank you!
   if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim()) {
     try {
       const apiKey = process.env.RESEND_API_KEY.trim();
+      const resendFrom = process.env.RESEND_FROM || 'Dewmina Super Line <onboarding@resend.dev>';
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: process.env.EMAIL_FROM || 'OmniBus LK <onboarding@resend.dev>',
+          from: resendFrom,
           to: [email],
           subject,
           html: htmlBody,
@@ -419,12 +423,15 @@ Thank you!
       });
       if (res.ok) {
         console.log(`[Email Service] ✅ OTP email delivered to ${email} via Resend`);
+        lastEmailError = null;
         return true;
       }
       const errText = await res.text();
-      console.error(`[Email Service] Resend OTP error HTTP ${res.status}:`, errText);
-    } catch (err) {
-      console.error('[Email Service] Resend OTP error:', err);
+      lastEmailError = `Resend OTP error HTTP ${res.status}: ${errText}`;
+      console.error(`[Email Service] ${lastEmailError}`);
+    } catch (err: any) {
+      lastEmailError = err?.message || String(err);
+      console.error('[Email Service] Resend OTP error:', lastEmailError);
     }
   }
 
