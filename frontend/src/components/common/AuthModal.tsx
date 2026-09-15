@@ -136,9 +136,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             setErrorMsg(res.message || 'Failed to send OTP. Please try again.');
             return;
           }
-          if ((res as any)?.devOtp) {
-            setOtp((res as any).devOtp);
-          }
           setRegStep(2);
         } else if (regStep === 2) {
           const res = await register(name, email, password, otp, role, phone);

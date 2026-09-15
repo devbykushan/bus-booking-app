@@ -64,12 +64,16 @@ authRouter.post('/send-otp', async (req: Request, res: Response) => {
     // Send email
     const emailSent = await sendOTPEmail(cleanEmail, name.trim(), otp);
     
+    if (!emailSent) {
+      console.warn(`[Auth] Email sending failed for ${cleanEmail}. Check SMTP credentials.`);
+      return res.status(503).json({
+        error: 'Unable to send verification email at this moment. Please check your email or contact support.',
+      });
+    }
+
     return res.json({ 
       success: true, 
-      message: emailSent 
-        ? 'OTP sent successfully to your email.' 
-        : `OTP generated (Email delivery unavailable). Your verification code is: ${otp}`,
-      devOtp: emailSent ? undefined : otp,
+      message: 'OTP sent successfully to your email. Check your inbox and spam folder.',
     });
   } catch (error) {
     console.error('Error sending OTP:', error);
