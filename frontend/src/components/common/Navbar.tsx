@@ -432,17 +432,16 @@ export const Navbar: React.FC = () => {
         </nav>
       </div>
 
-      {/* ── Floating iOS Liquid Glass Mobile Navigation Bar ── */}
-      <div className="md:hidden fixed bottom-3 sm:bottom-4 left-3 right-3 sm:left-6 sm:right-6 max-w-lg mx-auto z-[100] mb-[env(safe-area-inset-bottom,0px)] pointer-events-none">
+      {/* ── Native iOS Docked Liquid Glass Tab Bar ── */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] pointer-events-none">
         <nav
           aria-label="Mobile Navigation"
-          className="pointer-events-auto relative w-full px-2.5 py-1.5 rounded-[28px] bg-white/60 dark:bg-slate-950/65 backdrop-blur-3xl backdrop-saturate-[190%] border border-white/60 dark:border-white/15 shadow-[0_16px_40px_-8px_rgba(0,0,0,0.22),inset_0_1px_2px_rgba(255,255,255,0.8),inset_0_-1px_1px_rgba(255,255,255,0.2)] dark:shadow-[0_20px_48px_-8px_rgba(0,0,0,0.7),inset_0_1px_2px_rgba(255,255,255,0.25),inset_0_-1px_1px_rgba(255,255,255,0.05)] transition-all duration-300 overflow-hidden"
+          className="pointer-events-auto relative w-full px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] bg-white/80 dark:bg-slate-950/85 backdrop-blur-3xl backdrop-saturate-[190%] border-t border-white/80 dark:border-white/10 shadow-[0_-8px_32px_rgba(0,0,0,0.12),inset_0_1px_1.5px_rgba(255,255,255,0.85)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.5),inset_0_1px_1.5px_rgba(255,255,255,0.2)] transition-all duration-300"
         >
           {/* Specular Liquid Glass Top Rim Reflection */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[85%] h-[1.5px] bg-gradient-to-r from-transparent via-white/95 dark:via-white/50 to-transparent pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-[35%] bg-gradient-to-b from-white/25 dark:from-white/5 to-transparent pointer-events-none rounded-t-[28px]" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[90%] h-[1.5px] bg-gradient-to-r from-transparent via-white/95 dark:via-white/50 to-transparent pointer-events-none" />
 
-          <div className="relative z-10 flex items-center justify-around gap-1">
+          <div className="relative z-10 max-w-lg mx-auto flex items-center justify-around gap-1">
             {mobileNavItems.map((item: any) => {
               const Icon = item.icon;
               const active = isActive(item.activeOn);
@@ -451,19 +450,19 @@ export const Navbar: React.FC = () => {
                 <button
                   key={item.key}
                   onClick={() => handleNavItemClick(item.key)}
-                  className={`relative flex flex-col items-center justify-center flex-1 py-1.5 px-1 rounded-[20px] transition-all duration-300 cursor-pointer active:scale-90 select-none ${
+                  className={`relative flex flex-col items-center justify-center flex-1 py-1.5 px-1 rounded-2xl transition-all duration-200 cursor-pointer active:scale-90 select-none ${
                     active
                       ? isAdminItem
-                        ? 'bg-gradient-to-b from-purple-500/20 via-purple-500/10 to-indigo-600/20 text-purple-700 dark:text-purple-300 font-black border border-purple-400/40 shadow-[0_2px_12px_rgba(168,85,247,0.25),inset_0_1px_1px_rgba(255,255,255,0.8)] dark:shadow-[0_2px_14px_rgba(168,85,247,0.35),inset_0_1px_1px_rgba(255,255,255,0.3)]'
-                        : 'bg-gradient-to-b from-blue-500/20 via-blue-500/10 to-indigo-600/20 text-blue-700 dark:text-cyan-300 font-black border border-blue-400/40 shadow-[0_2px_12px_rgba(59,130,246,0.25),inset_0_1px_1px_rgba(255,255,255,0.8)] dark:shadow-[0_2px_14px_rgba(59,130,246,0.35),inset_0_1px_1px_rgba(255,255,255,0.3)]'
+                        ? 'bg-gradient-to-b from-purple-500/18 via-purple-500/10 to-indigo-600/18 text-purple-700 dark:text-purple-300 font-black border border-purple-400/40 shadow-[0_2px_10px_rgba(168,85,247,0.2),inset_0_1px_1px_rgba(255,255,255,0.8)] dark:shadow-[0_2px_12px_rgba(168,85,247,0.3),inset_0_1px_1px_rgba(255,255,255,0.25)]'
+                        : 'bg-gradient-to-b from-blue-500/18 via-blue-500/10 to-indigo-600/18 text-blue-700 dark:text-cyan-300 font-black border border-blue-400/40 shadow-[0_2px_10px_rgba(59,130,246,0.2),inset_0_1px_1px_rgba(255,255,255,0.8)] dark:shadow-[0_2px_12px_rgba(59,130,246,0.3),inset_0_1px_1px_rgba(255,255,255,0.25)]'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-white/40 dark:hover:bg-white/5 font-bold border border-transparent'
                   }`}
                 >
-                  <Icon className={`w-5 h-5 transition-all duration-300 ${
+                  <Icon className={`w-5 h-5 transition-all duration-200 ${
                     active 
                       ? isAdminItem 
-                        ? 'text-purple-600 dark:text-purple-300 drop-shadow-[0_2px_6px_rgba(168,85,247,0.4)] scale-110' 
-                        : 'text-blue-600 dark:text-cyan-300 drop-shadow-[0_2px_6px_rgba(59,130,246,0.4)] scale-110' 
+                        ? 'text-purple-600 dark:text-purple-300 drop-shadow-[0_2px_6px_rgba(168,85,247,0.4)] scale-105' 
+                        : 'text-blue-600 dark:text-cyan-300 drop-shadow-[0_2px_6px_rgba(59,130,246,0.4)] scale-105' 
                       : 'opacity-85'
                   }`} />
                   <span className="text-[10px] text-center leading-tight truncate w-full mt-0.5 font-sans tracking-tight">
