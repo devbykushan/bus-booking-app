@@ -429,10 +429,10 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* ── Native iOS Curved Floating Liquid Glass Tab Bar ── */}
-      <div className="md:hidden fixed bottom-[max(0.5rem,env(safe-area-inset-bottom,0px))] left-0 right-0 z-[100] px-3 pointer-events-none flex justify-center">
+      <div className="md:hidden fixed bottom-[max(0.35rem,calc(env(safe-area-inset-bottom,0px)*0.35))] left-0 right-0 z-[100] px-3 pointer-events-none flex justify-center">
         <nav
           aria-label="Mobile Navigation"
-          className="pointer-events-auto relative w-full max-w-md px-2 py-1.5 rounded-[28px] bg-white/80 dark:bg-slate-950/80 backdrop-blur-3xl backdrop-saturate-[190%] border border-white/80 dark:border-white/15 shadow-[0_12px_40px_-4px_rgba(0,0,0,0.18),0_4px_16px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,0.9),inset_0_-1px_1px_rgba(255,255,255,0.2)] dark:shadow-[0_16px_48px_-4px_rgba(0,0,0,0.7),inset_0_1px_2px_rgba(255,255,255,0.25)] transition-all duration-300"
+          className="pointer-events-auto relative w-full max-w-md px-2 py-1.5 rounded-[26px] bg-white/85 dark:bg-slate-950/85 backdrop-blur-3xl backdrop-saturate-[190%] border border-white/80 dark:border-white/15 shadow-[0_10px_35px_-4px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,0.9),inset_0_-1px_1px_rgba(255,255,255,0.2)] dark:shadow-[0_14px_42px_-4px_rgba(0,0,0,0.7),inset_0_1px_2px_rgba(255,255,255,0.25)] transition-all duration-300"
         >
           {/* Specular Liquid Glass Top Rim Reflection */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[1.5px] bg-gradient-to-r from-transparent via-white/95 dark:via-white/50 to-transparent pointer-events-none rounded-full" />

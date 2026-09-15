@@ -249,7 +249,7 @@ export const FloatingWhatsApp: React.FC = () => {
   const contactsList = botLang === 'en' ? WHATSAPP_CONTACTS_EN : WHATSAPP_CONTACTS_SI;
 
   return (
-    <div className="fixed bottom-[calc(4.5rem+max(0.5rem,env(safe-area-inset-bottom,0px)))] md:bottom-6 right-3 sm:right-6 z-40 flex flex-col items-end select-none font-sans" ref={menuRef}>
+    <div className="fixed bottom-[calc(4.2rem+max(0.35rem,calc(env(safe-area-inset-bottom,0px)*0.35)))] md:bottom-6 right-3 sm:right-6 z-40 flex flex-col items-end select-none font-sans" ref={menuRef}>
       {/* ─── LIVE BOT & WHATSAPP CHAT MODAL ─────────────────────────────────────── */}
       {isOpen && (
         <div className="mb-3 w-[92vw] sm:w-[400px] h-[550px] max-h-[82vh] rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden animate-scale-up origin-bottom-right transition-all">
