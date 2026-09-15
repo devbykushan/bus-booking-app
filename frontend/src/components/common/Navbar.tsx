@@ -158,13 +158,6 @@ export const Navbar: React.FC = () => {
               : 'bg-slate-950/25 dark:bg-slate-950/35 backdrop-blur-xl border-white/10 dark:border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.15)]'
           }`}
         >
-          {/* Subtle vibrant top accent line */}
-          <div className={`h-[2px] w-full transition-opacity duration-300 ${
-            scrolled
-              ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 opacity-90 shadow-[0_0_8px_rgba(59,130,246,0.3)]'
-              : 'bg-gradient-to-r from-blue-400/80 via-indigo-400/80 to-cyan-400/80 opacity-70'
-          }`} />
-
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="flex items-center justify-between h-16 md:h-[72px]">
               
