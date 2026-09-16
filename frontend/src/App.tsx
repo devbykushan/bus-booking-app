@@ -214,21 +214,19 @@ export function App() {
     );
   }
 
-  // ─── Non-blocking: only show full splash on deep views that strictly require routes ───
-  const isSearchLanding = currentView === 'passenger-search';
-  const shouldBlock = !isSearchLanding && routes.length === 0 && !backendReady;
+  // ─── Initial Startup Loading Splash ───
+  const shouldBlock = routes.length === 0 && !backendReady;
 
   if (shouldBlock) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 gap-6 px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 gap-5 px-4 animate-fade-in">
         <div className="relative w-16 h-16">
           <div className="absolute inset-0 rounded-full border-4 border-blue-100 dark:border-slate-800 border-t-blue-500 animate-spin" />
           <Bus className="absolute inset-0 m-auto w-7 h-7 text-blue-500" />
         </div>
-        <div className="text-center space-y-1">
-          <p className="font-bold text-slate-800 dark:text-white text-lg">Loading Dewmina Super Line…</p>
-          <p className="text-slate-400 text-sm">
-            {isWakingUp ? 'Waking up cloud server (takes ~30s on first load)...' : 'Connecting to API server'}
+        <div className="text-center">
+          <p className="font-black text-xl tracking-tight bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 bg-clip-text text-transparent drop-shadow-xs">
+            Dewmina Super Line…
           </p>
         </div>
       </div>
