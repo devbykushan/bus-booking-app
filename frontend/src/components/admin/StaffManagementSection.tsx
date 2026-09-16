@@ -17,60 +17,52 @@ interface StaffMember {
   createdAt: string;
 }
 
-const AVAILABLE_PERMISSIONS: { key: string; label: string; sin: string; desc: string; icon: string }[] = [
+const AVAILABLE_PERMISSIONS: { key: string; label: string; desc: string; icon: string }[] = [
   {
     key: 'counter_booking',
     label: 'Counter Booking',
-    sin: 'කවුන්ටර ටිකට් නිකුත් කිරීම',
     desc: 'Issue physical counter tickets for walk-in passengers with cash handling',
     icon: '🎫',
   },
   {
     key: 'slips_approval',
     label: 'Payment Slips Approval',
-    sin: 'බැංකු ස්ලිප් පරීක්ෂාව',
     desc: 'Verify and approve/reject bank transfer payment slips uploaded by passengers',
     icon: '📝',
   },
   {
     key: 'qr_scanner',
     label: 'QR Scanner & Ticket Check',
-    sin: 'ටිකට් පරීක්ෂාව (QR)',
     desc: 'Scan passenger QR tickets at bus entrance to verify boarding',
     icon: '📷',
   },
   {
     key: 'manifest_view',
     label: 'Passenger Manifest',
-    sin: 'මගී ලැයිස්තුව බැලීම',
     desc: 'View passenger lists, contact numbers, and download trip manifests',
     icon: '📋',
   },
   {
     key: 'fleet_management',
     label: 'Fleet & Bus Routes',
-    sin: 'බස් සහ ගමන් මාර්ග',
     desc: 'Deploy bus routes, customize seat layouts, and modify fares',
     icon: '🚌',
   },
   {
     key: 'timetable_management',
     label: 'Timetable Schedules',
-    sin: 'කාලසටහන් පාලනය',
     desc: 'Manage bus timetable rotations, recurring schedules and anchor dates',
     icon: '⏱️',
   },
   {
     key: 'analytics',
     label: 'Financial & Revenue Analytics',
-    sin: 'ආදායම් වාර්තා',
     desc: 'Access total revenue, sales metrics, and business financial statistics',
     icon: '📊',
   },
   {
     key: 'whatsapp',
     label: 'WhatsApp Gateway & Bot',
-    sin: 'WhatsApp පණිවිඩ සේවාව',
     desc: 'Manage WhatsApp QR session connection and automated notifications',
     icon: '💬',
   },
@@ -509,7 +501,7 @@ export const StaffManagementSection: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Full Name / නිලධාරියාගේ නම *
+                    Full Name *
                   </label>
                   <div className="relative">
                     <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -526,7 +518,7 @@ export const StaffManagementSection: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Email Address / ඊමේල් ලිපිනය *
+                    Email Address *
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -546,7 +538,7 @@ export const StaffManagementSection: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Contact Mobile Number / දුරකථන අංකය
+                    Contact Mobile Number
                   </label>
                   <div className="relative">
                     <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -562,7 +554,7 @@ export const StaffManagementSection: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
-                    {editingStaff ? 'Reset Password / නව මුරපදය (Optional)' : 'Staff Password / මුරපදය *'}
+                    {editingStaff ? 'Reset Password (Optional)' : 'Staff Password *'}
                   </label>
                   <div className="relative">
                     <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -582,7 +574,7 @@ export const StaffManagementSection: React.FC = () => {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
                   <div>
                     <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                      Module Permissions / පවරන බලතල
+                      Module Permissions
                     </h4>
                     <p className="text-[11px] text-slate-500">
                       {editingStaff?.role === 'super_admin'
@@ -646,7 +638,6 @@ export const StaffManagementSection: React.FC = () => {
                             <span className="text-sm">{perm.icon}</span>
                             <span className="text-xs font-bold">{perm.label}</span>
                           </div>
-                          <p className="text-[11px] text-emerald-700 dark:text-emerald-300/80 font-medium">{perm.sin}</p>
                           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
                             {perm.desc}
                           </p>

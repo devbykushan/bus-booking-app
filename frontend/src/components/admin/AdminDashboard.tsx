@@ -276,7 +276,7 @@ export const AdminDashboard: React.FC = () => {
               onClick={() => setActiveTab('counter-booking')}
               className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
             >
-              <Ticket className="w-4 h-4" /> ➕ Counter Booking (කවුන්ටර බුකින්)
+              <Ticket className="w-4 h-4" /> ➕ Counter Booking
             </button>
           </div>
         </div>
@@ -341,7 +341,7 @@ export const AdminDashboard: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <Ticket className="w-4 h-4 text-blue-500" /> Counter Booking (කවුන්ටරය)
+                    <Ticket className="w-4 h-4 text-blue-500" /> Counter Booking
                   </div>
                   <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-blue-600 text-white">
                     BOOK

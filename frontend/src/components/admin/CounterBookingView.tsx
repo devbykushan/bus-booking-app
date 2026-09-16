@@ -394,7 +394,7 @@ export const CounterBookingView: React.FC<CounterBookingViewProps> = ({ onBookin
             </span>
           </div>
           <h2 className="text-2xl font-black text-slate-800 tracking-tight mt-2">
-            Counter Ticket Booking (කවුන්ටර බුකින්)
+            Counter Ticket Booking
           </h2>
           <p className="text-sm text-slate-500 font-medium">
             Book seats instantly for walk-in passengers and phone inquiries with instant cash receipts and automated WhatsApp E-Tickets.
@@ -517,7 +517,7 @@ export const CounterBookingView: React.FC<CounterBookingViewProps> = ({ onBookin
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-emerald-600" /> Boarding Point (නගින ස්ථානය)
+                    <MapPin className="w-3.5 h-3.5 text-emerald-600" /> Boarding Point
                   </label>
                   <select
                     value={boardingPointId}
@@ -534,7 +534,7 @@ export const CounterBookingView: React.FC<CounterBookingViewProps> = ({ onBookin
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-rose-600" /> Drop-off Point (බසින ස්ථානය)
+                    <MapPin className="w-3.5 h-3.5 text-rose-600" /> Drop-off Point
                   </label>
                   <select
                     value={dropPointId}
