@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   X, 
-  Send, 
   Bot, 
   Phone, 
   RotateCcw, 
@@ -64,14 +63,12 @@ export const FloatingWhatsApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'bot' | 'whatsapp'>('bot');
   const [botLang, setBotLang] = useState<'si' | 'en' | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_BOT_MESSAGE_LANG_SELECT]);
-  const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const { setCurrentView } = useBookingStore();
   const isPwaPromptOpen = useBookingStore((state) => state.isPwaPromptOpen);
@@ -104,13 +101,6 @@ export const FloatingWhatsApp: React.FC = () => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isTyping, isOpen, activeTab]);
-
-  // Focus input when opened
-  useEffect(() => {
-    if (isOpen && activeTab === 'bot') {
-      setTimeout(() => inputRef.current?.focus(), 250);
-    }
-  }, [isOpen, activeTab]);
 
   const handleSelectLanguage = (lang: 'si' | 'en') => {
     setBotLang(lang);
@@ -152,19 +142,17 @@ export const FloatingWhatsApp: React.FC = () => {
   };
 
   const handleSendMessage = async (textToSend?: string) => {
-    const text = (textToSend || inputText).trim();
+    const text = (textToSend || '').trim();
     if (!text || isTyping) return;
 
     // Check if selecting initial language
     if (text === 'LANG_SI' || text === '🇱🇰 සිංහල (Sinhala)' || text === 'සිංහල') {
       handleSelectLanguage('si');
-      setInputText('');
       return;
     }
 
     if (text === 'LANG_EN' || text === '🇬🇧 English' || text.toLowerCase() === 'english') {
       handleSelectLanguage('en');
-      setInputText('');
       return;
     }
 
@@ -174,7 +162,6 @@ export const FloatingWhatsApp: React.FC = () => {
       setBotLang(activeLang);
     }
 
-    setInputText('');
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
       sender: 'user',
@@ -426,48 +413,18 @@ export const FloatingWhatsApp: React.FC = () => {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Quick Reply Suggestion Chips */}
-              <div className="px-3 py-2 bg-slate-100/80 dark:bg-slate-900 border-t border-slate-200/70 dark:border-slate-800 overflow-x-auto flex gap-1.5 scrollbar-none">
+              {/* Quick Action Buttons */}
+              <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 flex flex-wrap gap-1.5 justify-center">
                 {currentQuickOptions?.map((opt, i) => (
                   <button
                     key={i}
                     disabled={isTyping}
                     onClick={() => handleSendMessage(opt.value)}
-                    className="flex-shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 text-slate-700 dark:text-slate-200 border border-slate-300/80 dark:border-slate-700 hover:border-emerald-400 transition-all shadow-2xs active:scale-95 cursor-pointer disabled:opacity-50"
+                    className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200/90 dark:border-emerald-800/60 transition-all shadow-2xs active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-1"
                   >
-                    {opt.label}
+                    <span>{opt.label}</span>
                   </button>
                 ))}
-              </div>
-
-              {/* Chat Input Bar */}
-              <div className="p-2.5 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 flex items-center gap-2">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                  placeholder={
-                    botLang === 'en'
-                      ? 'Type a question or PNR number...'
-                      : 'ප්‍රශ්නයක් හෝ PNR අංකය ලියන්න...'
-                  }
-                  className="flex-1 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-hidden focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-                />
-                <button
-                  disabled={!inputText.trim() || isTyping}
-                  onClick={() => handleSendMessage()}
-                  className="w-8 h-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-all disabled:opacity-40 disabled:hover:bg-emerald-600 shadow-sm cursor-pointer"
-                  aria-label="Send"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                </button>
               </div>
             </div>
           )}
