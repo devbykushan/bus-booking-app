@@ -110,6 +110,21 @@ export async function initializeSchema(p: Pool): Promise<void> {
     );
 
     ALTER TABLE users ADD COLUMN IF NOT EXISTS "permissions" TEXT NOT NULL DEFAULT '[]';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS "emergencyContactName" TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS "emergencyContactPhone" TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS "notifyWhatsapp" BOOLEAN NOT NULL DEFAULT TRUE;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS "notifySms" BOOLEAN NOT NULL DEFAULT TRUE;
+
+    CREATE TABLE IF NOT EXISTS saved_passengers (
+      "id" TEXT PRIMARY KEY,
+      "userId" TEXT NOT NULL REFERENCES users("id") ON DELETE CASCADE,
+      "name" TEXT NOT NULL,
+      "nic" TEXT,
+      "phone" TEXT,
+      "gender" TEXT,
+      "createdAt" TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_saved_passengers_user ON saved_passengers("userId");
 
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(LOWER("email"));
 

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { BusRoute, BoardingPoint, Booking, PassengerDetails, UserAccount } from '../types/booking';
+import type { BusRoute, BoardingPoint, Booking, PassengerDetails, UserAccount, SavedPassenger, TripStats } from '../types/booking';
 import { routesApi, bookingsApi, seatsApi, validateApi, authApi } from '../services/api';
 import confetti from 'canvas-confetti';
 import { translations } from './translations';
@@ -95,8 +95,27 @@ interface BookingStore {
   sendOtp: (name: string, email: string) => Promise<{ success: boolean; message: string }>;
   register: (name: string, email: string, pass: string, otp: string, role?: 'passenger' | 'admin', phone?: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
-  updateProfile: (name: string, phone?: string) => Promise<{ success: boolean; message: string }>;
+  updateProfile: (data: {
+    name: string;
+    phone?: string;
+    emergencyContactName?: string | null;
+    emergencyContactPhone?: string | null;
+    notifyWhatsapp?: boolean;
+    notifySms?: boolean;
+  }) => Promise<{ success: boolean; message: string }>;
+  deleteAccount: () => Promise<{ success: boolean; message: string }>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
+  
+  // Saved Co-Passengers
+  savedPassengers: SavedPassenger[];
+  loadSavedPassengers: () => Promise<void>;
+  addSavedPassenger: (data: { name: string; nic?: string; phone?: string; gender?: string }) => Promise<{ success: boolean; message?: string }>;
+  deleteSavedPassenger: (id: string) => Promise<{ success: boolean; message?: string }>;
+
+  // Passenger Trip Stats
+  tripStats: TripStats | null;
+  loadTripStats: () => Promise<void>;
+
   showAuthModal: boolean;
   setShowAuthModal: (val: boolean) => void;
   isPwaPromptOpen: boolean;
@@ -212,6 +231,10 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
           email: res.user.email,
           role: res.user.role,
           phone: res.user.phone,
+          emergencyContactName: res.user.emergencyContactName || null,
+          emergencyContactPhone: res.user.emergencyContactPhone || null,
+          notifyWhatsapp: res.user.notifyWhatsapp !== false,
+          notifySms: res.user.notifySms !== false,
           permissions: res.user.permissions || [],
           createdAt: res.user.createdAt,
         };
@@ -242,6 +265,10 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
           email: res.user.email,
           role: res.user.role,
           phone: res.user.phone,
+          emergencyContactName: res.user.emergencyContactName || null,
+          emergencyContactPhone: res.user.emergencyContactPhone || null,
+          notifyWhatsapp: res.user.notifyWhatsapp !== false,
+          notifySms: res.user.notifySms !== false,
           permissions: res.user.permissions || [],
           createdAt: res.user.createdAt,
         };
@@ -286,8 +313,6 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     try {
       const res = await authApi.register({ name, email, password, otp, role, phone });
       if (res.success && res.user) {
-        // Do not auto-login the user after registration as per the new requirement.
-        // Just return success so the UI can show a confirmation.
         return { success: true, message: res.message || 'Registration successful' };
       }
       return { success: false, message: res.message || 'Registration failed' };
@@ -299,15 +324,15 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   logout: () => {
     localStorage.removeItem('dewmina_user');
     localStorage.removeItem('auth_token');
-    set({ currentUser: null, userRole: 'passenger' });
+    set({ currentUser: null, userRole: 'passenger', tripStats: null, savedPassengers: [] });
     get().setCurrentView('passenger-search');
   },
 
-  updateProfile: async (name, phone) => {
+  updateProfile: async (data) => {
     const token = localStorage.getItem('auth_token');
     if (!token) return { success: false, message: 'Not authenticated.' };
     try {
-      const res = await authApi.updateProfile(token, { name, phone });
+      const res = await authApi.updateProfile(token, data);
       if (res.success && res.user) {
         const currentUser = get().currentUser;
         const updatedUser: UserAccount = {
@@ -317,6 +342,10 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
           email: res.user.email,
           role: res.user.role,
           phone: res.user.phone,
+          emergencyContactName: res.user.emergencyContactName || null,
+          emergencyContactPhone: res.user.emergencyContactPhone || null,
+          notifyWhatsapp: res.user.notifyWhatsapp !== false,
+          notifySms: res.user.notifySms !== false,
         };
         localStorage.setItem('dewmina_user', JSON.stringify(updatedUser));
         set({ currentUser: updatedUser });
@@ -326,6 +355,69 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     } catch (err: any) {
       return { success: false, message: err.message || 'Profile update error.' };
     }
+  },
+
+  deleteAccount: async () => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return { success: false, message: 'Not authenticated.' };
+    try {
+      const res = await authApi.deleteAccount(token);
+      if (res.success) {
+        get().logout();
+        return { success: true, message: res.message || 'Account deleted successfully.' };
+      }
+      return { success: false, message: res.message || 'Failed to delete account.' };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Error deleting account.' };
+    }
+  },
+
+  savedPassengers: [],
+  loadSavedPassengers: async () => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return;
+    try {
+      const list = await authApi.getSavedPassengers(token);
+      set({ savedPassengers: list || [] });
+    } catch (_) {}
+  },
+  addSavedPassenger: async (data) => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return { success: false, message: 'Not authenticated.' };
+    try {
+      const res = await authApi.addSavedPassenger(token, data);
+      if (res.success && res.passenger) {
+        set({ savedPassengers: [res.passenger, ...get().savedPassengers] });
+        return { success: true };
+      }
+      return { success: false, message: 'Failed to add co-passenger.' };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Error adding co-passenger.' };
+    }
+  },
+  deleteSavedPassenger: async (id) => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return { success: false, message: 'Not authenticated.' };
+    try {
+      const res = await authApi.deleteSavedPassenger(token, id);
+      if (res.success) {
+        set({ savedPassengers: get().savedPassengers.filter((p) => p.id !== id) });
+        return { success: true };
+      }
+      return { success: false, message: res.message || 'Failed to delete co-passenger.' };
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Error deleting co-passenger.' };
+    }
+  },
+
+  tripStats: null,
+  loadTripStats: async () => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return;
+    try {
+      const stats = await authApi.getTripStats(token);
+      set({ tripStats: stats });
+    } catch (_) {}
   },
 
   changePassword: async (currentPassword, newPassword) => {

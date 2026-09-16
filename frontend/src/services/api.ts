@@ -153,15 +153,59 @@ export const authApi = {
   getMe: (token: string): Promise<{ user: any }> =>
     apiFetch('/auth/me', { headers: { Authorization: `Bearer ${token}` } }),
 
-  /** Update user name / username and phone */
+  /** Update user name, phone, emergency contact, and notifications */
   updateProfile: (
     token: string,
-    payload: { name: string; phone?: string }
+    payload: {
+      name: string;
+      phone?: string;
+      emergencyContactName?: string | null;
+      emergencyContactPhone?: string | null;
+      notifyWhatsapp?: boolean;
+      notifySms?: boolean;
+    }
   ): Promise<{ success: boolean; message: string; user: any }> =>
     apiFetch('/auth/profile', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(payload),
+    }),
+
+  /** Delete passenger account permanently */
+  deleteAccount: (token: string): Promise<{ success: boolean; message: string }> =>
+    apiFetch('/auth/account', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  /** Get saved co-passengers */
+  getSavedPassengers: (token: string): Promise<any[]> =>
+    apiFetch('/auth/saved-passengers', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  /** Add a saved co-passenger */
+  addSavedPassenger: (
+    token: string,
+    payload: { name: string; nic?: string; phone?: string; gender?: string }
+  ): Promise<{ success: boolean; passenger: any }> =>
+    apiFetch('/auth/saved-passengers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    }),
+
+  /** Delete a saved co-passenger */
+  deleteSavedPassenger: (token: string, id: string): Promise<{ success: boolean; message: string }> =>
+    apiFetch(`/auth/saved-passengers/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  /** Fetch passenger trip stats (completed, upcoming, total) */
+  getTripStats: (token: string): Promise<{ completedTrips: number; upcomingTrips: number; totalTrips: number }> =>
+    apiFetch('/auth/trip-stats', {
+      headers: { Authorization: `Bearer ${token}` },
     }),
 
   /** Change user password */
