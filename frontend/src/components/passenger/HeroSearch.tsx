@@ -7,9 +7,7 @@ import {
 import { RealisticBusAnimation } from '../common/RealisticBusAnimation';
 
 const CITIES = [
-  'Monaragala', 'Colombo', 'Kandy', 'Galle',
-  'Jaffna', 'Anuradhapura', 'Badulla', 'Wellawaya',
-  'Ratnapura', 'Matara',
+  'Monaragala', 'Colombo',
 ];
 
 // Particle config: position (%), size, delay, duration
