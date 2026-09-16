@@ -79,7 +79,7 @@ export const Navbar: React.FC = () => {
         { key: 'live-tracking', translationKey: 'liveGps', icon: MapPin, activeOn: ['live-tracking'] },
         { 
           key: 'admin-panel', 
-          label: language === 'sinhala' ? 'පරිපාලක' : language === 'tamil' ? 'நிர்வாகம்' : 'Admin', 
+          label: 'Super Admin', 
           icon: ShieldCheck, 
           activeOn: ['admin-panel'],
           isAdminTab: true 
