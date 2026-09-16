@@ -79,7 +79,7 @@ export const Navbar: React.FC = () => {
         { key: 'live-tracking', translationKey: 'liveGps', icon: MapPin, activeOn: ['live-tracking'] },
         { 
           key: 'admin-panel', 
-          label: 'Super Admin', 
+          label: currentUser?.role === 'super_admin' || userRole === 'super_admin' ? 'Super Admin' : 'Admin', 
           icon: ShieldCheck, 
           activeOn: ['admin-panel'],
           isAdminTab: true 
