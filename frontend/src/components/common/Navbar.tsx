@@ -79,7 +79,7 @@ export const Navbar: React.FC = () => {
         { key: 'live-tracking', translationKey: 'liveGps', icon: MapPin, activeOn: ['live-tracking'] },
         { 
           key: 'admin-panel', 
-          label: language === 'sinhala' ? 'පරිපාලක' : language === 'tamil' ? 'நிர்வாகம்' : 'Admin', 
+          label: 'Super Admin', 
           icon: ShieldCheck, 
           activeOn: ['admin-panel'],
           isAdminTab: true 
@@ -219,7 +219,7 @@ export const Navbar: React.FC = () => {
                     }`}
                   >
                     <ShieldCheck className="w-4 h-4" />
-                    <span>{t('adminPortal')}</span>
+                    <span>{currentUser?.role === 'super_admin' || userRole === 'super_admin' ? 'Super Admin' : t('adminPortal')}</span>
                   </button>
                 )}
               </div>
@@ -380,7 +380,7 @@ export const Navbar: React.FC = () => {
                               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 dark:hover:bg-purple-500/20 border border-transparent hover:border-purple-400/30 transition-all duration-200 cursor-pointer active:scale-95"
                             >
                               <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400 drop-shadow-[0_1px_4px_rgba(168,85,247,0.3)]" />
-                              <span>Admin Dashboard</span>
+                              <span>{currentUser?.role === 'super_admin' || userRole === 'super_admin' ? 'Super Admin Dashboard' : 'Admin Dashboard'}</span>
                             </button>
                           )}
                           <button
