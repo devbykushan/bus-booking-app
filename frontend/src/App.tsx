@@ -60,6 +60,29 @@ export function App() {
     }
   }, []);
 
+  // Dynamically swap PWA Manifest and Document Title for Dewmina Master Admin
+  useEffect(() => {
+    const isSuperAdminPortal =
+      currentView === 'admin-portal' ||
+      window.location.pathname.toLowerCase().includes('dew_super-admin') ||
+      window.location.hash.toLowerCase().includes('dew_super-admin');
+
+    let manifestLink = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
+    if (!manifestLink) {
+      manifestLink = document.createElement('link');
+      manifestLink.rel = 'manifest';
+      document.head.appendChild(manifestLink);
+    }
+
+    if (isSuperAdminPortal) {
+      manifestLink.href = '/manifest-superadmin.json';
+      document.title = 'Dewmina Master Admin | Super Admin Command';
+    } else {
+      manifestLink.href = '/manifest.json';
+      document.title = 'Dewmina Super Line | Monaragala to Colombo Online Bus Seat Booking';
+    }
+  }, [currentView]);
+
   // Sync browser history state and handle browser Back / Forward buttons
   useEffect(() => {
     const pathname = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();

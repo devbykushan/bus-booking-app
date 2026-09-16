@@ -8,10 +8,10 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
-  const { login, loginWithGoogle, register, sendOtp, selectedRoute, currentView, setCurrentView } = useBookingStore();
+  const { login, loginWithGoogle, register, sendOtp, selectedRoute, currentView } = useBookingStore();
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
-  const role: 'passenger' | 'admin' = 'passenger';
+  const [role, setRole] = useState<'passenger' | 'admin'>('passenger');
   const [regStep, setRegStep] = useState(1);
   const [otp, setOtp] = useState('');
   const [email, setEmail] = useState('');
@@ -211,18 +211,59 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-blue-50 text-blue-600 shadow-sm animate-pulse-glow">
-                <LogIn className="w-5 h-5" />
+              <div className={`p-2 rounded-xl shadow-sm animate-pulse-glow ${
+                role === 'admin' ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600'
+              }`}>
+                {role === 'admin' ? <ShieldCheck className="w-5 h-5" /> : <LogIn className="w-5 h-5" />}
               </div>
               <div>
                 <h3 className="text-lg font-bold text-slate-800">
-                  {mode === 'login' ? 'Account Sign In' : 'Create New Account'}
+                  {role === 'admin' 
+                    ? 'Fleet Administrator Sign In' 
+                    : mode === 'login' ? 'Passenger Sign In' : 'Create Passenger Account'}
                 </h3>
-                <p className="text-xs text-slate-400 font-medium">Dewmina Super Line Sri Lanka</p>
+                <p className="text-xs text-slate-400 font-medium">
+                  {role === 'admin' ? 'Staff & Fleet Operations' : 'Dewmina Super Line Sri Lanka'}
+                </p>
               </div>
             </div>
             <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
               <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Role Selector: Passenger vs Admin / Staff */}
+          <div className="relative flex p-1 rounded-2xl bg-slate-100/90 text-xs font-bold border border-slate-200/60">
+            <button
+              type="button"
+              onClick={() => {
+                setRole('passenger');
+                setErrorMsg('');
+              }}
+              className={`flex-1 py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                role === 'passenger'
+                  ? 'bg-white text-blue-600 shadow-sm font-black'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Passenger</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setRole('admin');
+                setMode('login');
+                setErrorMsg('');
+              }}
+              className={`flex-1 py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                role === 'admin'
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm font-black'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Admin / Staff</span>
             </button>
           </div>
 
@@ -285,8 +326,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 </div>
               )}
 
-              {/* Google One-Click Auth */}
-              {(mode === 'login' || (mode === 'register' && regStep === 1)) && (
+              {/* Google One-Click Auth (Passenger Only) */}
+              {role === 'passenger' && (mode === 'login' || (mode === 'register' && regStep === 1)) && (
                 <div className="space-y-3 pt-1">
                   <div className="flex justify-center w-full [&>div]:!w-full [&>div>iframe]:!w-full [&>div>div]:!w-full shadow-xs rounded-full overflow-hidden">
                     <GoogleLogin
@@ -475,7 +516,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 cursor-pointer ${
+                  className={`w-full py-3 rounded-xl ${
+                    role === 'admin'
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'
+                      : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+                  } text-white font-bold text-xs shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 cursor-pointer ${
                     isSubmitting ? 'opacity-70 cursor-wait' : ''
                   }`}
                 >
@@ -487,6 +532,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                       </svg>
                       Processing...
                     </>
+                  ) : role === 'admin' ? (
+                    'Sign In to Admin Dashboard'
                   ) : mode === 'login' ? (
                     'Sign In'
                   ) : regStep === 1 ? (
@@ -497,54 +544,55 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 </button>
               </form>
 
-              {/* Switch Mode */}
-              <div className="text-center pt-1 border-t border-slate-100/60">
-                {regStep === 2 ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRegStep(1);
-                      setOtp('');
-                    }}
-                    className="text-xs text-slate-500 hover:text-slate-800 transition-colors font-semibold"
-                  >
-                    Entered wrong email? <span className="underline decoration-slate-400 decoration-2 underline-offset-2">Change Email</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode(mode === 'login' ? 'register' : 'login');
-                      setErrorMsg('');
-                      setNameTouched(false);
-                      setPhoneTouched(false);
-                      setEmailTouched(false);
-                      setPasswordTouched(false);
-                      setRegStep(1);
-                      setOtp('');
-                    }}
-                    className="text-xs text-blue-600 hover:text-blue-800 transition-colors font-semibold"
-                  >
-                    {mode === 'login'
-                      ? <>Don't have an account? <span className="underline decoration-blue-400 decoration-2 underline-offset-2">Register here</span></>
-                      : <>Already have an account? <span className="underline decoration-blue-400 decoration-2 underline-offset-2">Sign in</span></>
-                    }
-                  </button>
-                )}
-
+              {/* Mode Switcher / Notice */}
+              {role === 'admin' ? (
                 <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onClose();
-                      setCurrentView('admin-portal');
-                    }}
-                    className="text-[11px] text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors inline-flex items-center gap-1 font-medium"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5" /> Staff & Administration Portal
-                  </button>
+                  <div className="p-3 bg-purple-50/80 dark:bg-purple-950/30 border border-purple-200/60 dark:border-purple-800/40 rounded-2xl text-center text-xs text-purple-900 dark:text-purple-200 font-medium">
+                    <div className="flex items-center justify-center gap-1.5 text-purple-700 dark:text-purple-300 font-bold mb-0.5">
+                      <ShieldCheck className="w-4 h-4" />
+                      <span>Restricted Operational Staff Access</span>
+                    </div>
+                    <p className="text-[11px] text-purple-600 dark:text-purple-400">
+                      Staff & operator accounts are issued and provisioned by Super Administration.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="text-center pt-1 border-t border-slate-100/60">
+                  {regStep === 2 ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRegStep(1);
+                        setOtp('');
+                      }}
+                      className="text-xs text-slate-500 hover:text-slate-800 transition-colors font-semibold"
+                    >
+                      Entered wrong email? <span className="underline decoration-slate-400 decoration-2 underline-offset-2">Change Email</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode(mode === 'login' ? 'register' : 'login');
+                        setErrorMsg('');
+                        setNameTouched(false);
+                        setPhoneTouched(false);
+                        setEmailTouched(false);
+                        setPasswordTouched(false);
+                        setRegStep(1);
+                        setOtp('');
+                      }}
+                      className="text-xs text-blue-600 hover:text-blue-800 transition-colors font-semibold"
+                    >
+                      {mode === 'login'
+                        ? <>Don't have an account? <span className="underline decoration-blue-400 decoration-2 underline-offset-2">Register here</span></>
+                        : <>Already have an account? <span className="underline decoration-blue-400 decoration-2 underline-offset-2">Sign in</span></>
+                      }
+                    </button>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>

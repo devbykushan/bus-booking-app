@@ -1,0 +1,33 @@
+{
+  "name": "Dewmina Master Admin",
+  "short_name": "Master Admin",
+  "description": "Master Administrative Command Center for Dewmina Super Line",
+  "start_url": "/#dew_super-admin",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "lang": "en",
+  "scope": "/",
+  "id": "/dew_super-admin",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

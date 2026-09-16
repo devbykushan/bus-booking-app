@@ -25,8 +25,8 @@ export const AdminDashboard: React.FC = () => {
 
   const hasPermission = (permKey: string): boolean => {
     if (isSuperAdmin) return true;
-    // Backward compatibility: Any standard admin with no specific permission restrictions gets full operational access
-    if (currentUser?.role === 'admin' && (!currentUser?.permissions || currentUser.permissions.length === 0)) {
+    // For now, all standard admins get full operational access across all operational tabs
+    if (currentUser?.role === 'admin') {
       return true;
     }
     return currentUser?.permissions?.includes(permKey) || false;

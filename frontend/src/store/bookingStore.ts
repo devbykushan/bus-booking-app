@@ -40,7 +40,7 @@ export const VIEW_HASH_MAP: Record<AppView, string> = {
   'admin-panel': 'admin',
   'passenger-settings': 'settings',
   'slip-upload': 'slip-upload',
-  'admin-portal': 'portal',
+  'admin-portal': 'dew_super-admin',
 };
 
 export const HASH_VIEW_MAP: Record<string, AppView> = {
@@ -65,6 +65,9 @@ export const HASH_VIEW_MAP: Record<string, AppView> = {
   'portal': 'admin-portal',
   'admin-login': 'admin-portal',
   'staff-login': 'admin-portal',
+  'dew_super-admin': 'admin-portal',
+  'dew_super_admin': 'admin-portal',
+  'super-admin': 'admin-portal',
   'settings': 'passenger-settings',
   'passenger-settings': 'passenger-settings',
   'slip-upload': 'slip-upload',
