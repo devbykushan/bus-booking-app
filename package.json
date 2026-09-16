@@ -7,6 +7,8 @@
     "dev": "node dev.js",
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:backend": "npm --prefix backend run dev",
+    "create-admin": "npm --prefix backend run create-admin --",
+    "change-password": "npm --prefix backend run change-password --",
     "waha:start": "docker compose up -d",
     "waha:stop": "docker compose down",
     "waha:logs": "docker compose logs -f waha",

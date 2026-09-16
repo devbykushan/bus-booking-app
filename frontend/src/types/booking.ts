@@ -124,11 +124,13 @@ export interface UserAccount {
   name: string;
   email: string;
   phone?: string;
-  role: 'passenger' | 'admin';
+  role: 'passenger' | 'admin' | 'super_admin';
+  permissions?: string[];
+  createdAt?: string;
 }
 
 export interface UserRole {
-  role: 'passenger' | 'admin';
+  role: 'passenger' | 'admin' | 'super_admin';
 }
 
 export interface AnalyticsSummary {

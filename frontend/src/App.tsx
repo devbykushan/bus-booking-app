@@ -17,6 +17,7 @@ import { UserBookings } from './components/passenger/UserBookings';
 import { PassengerSettings } from './components/passenger/PassengerSettings';
 import { SlipUploadPage } from './components/passenger/SlipUploadPage';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { AdminLoginPage } from './components/admin/AdminLoginPage';
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
 import { PwaInstallPrompt } from './components/common/PwaInstallPrompt';
 import { Bus, AlertCircle, Wifi, RefreshCw, ShieldAlert, ShieldCheck, Lock } from 'lucide-react';
@@ -36,7 +37,7 @@ export function App() {
     setCurrentView,
   } = useBookingStore();
 
-  const isAdmin = currentUser?.role === 'admin' || userRole === 'admin';
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || userRole === 'admin';
 
   const [backendReady, setBackendReady] = useState(routes.length > 0);
   const [backendError, setBackendError] = useState(false);
@@ -54,15 +55,20 @@ export function App() {
 
   // Sync browser history state and handle browser Back / Forward buttons
   useEffect(() => {
+    const pathname = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
     const rawHash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
-    const initialView = HASH_VIEW_MAP[rawHash] || currentView;
+    const initialView = HASH_VIEW_MAP[pathname] || HASH_VIEW_MAP[rawHash] || currentView;
     const initialHash = VIEW_HASH_MAP[initialView] || 'home';
+
+    if (initialView !== currentView) {
+      useBookingStore.getState().setCurrentView(initialView, false);
+    }
 
     // Replace current history entry with initial view state
     window.history.replaceState(
       { view: initialView, routeId: useBookingStore.getState().selectedRoute?.id },
       '',
-      `#${initialHash}`
+      pathname && HASH_VIEW_MAP[pathname] ? `/${pathname}` : `#${initialHash}`
     );
 
     const handlePopState = (event: PopStateEvent) => {
@@ -72,8 +78,11 @@ export function App() {
       if (state && state.view && (HASH_VIEW_MAP[state.view] || VIEW_HASH_MAP[state.view as AppView])) {
         targetView = (HASH_VIEW_MAP[state.view] || state.view) as AppView;
       } else {
+        const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
         const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
-        if (hash && HASH_VIEW_MAP[hash]) {
+        if (path && HASH_VIEW_MAP[path]) {
+          targetView = HASH_VIEW_MAP[path];
+        } else if (hash && HASH_VIEW_MAP[hash]) {
           targetView = HASH_VIEW_MAP[hash];
         }
       }
@@ -194,6 +203,10 @@ export function App() {
         </div>
       </div>
     );
+  }
+
+  if (currentView === 'admin-portal') {
+    return <AdminLoginPage />;
   }
 
   return (

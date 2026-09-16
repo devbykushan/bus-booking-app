@@ -105,8 +105,11 @@ export async function initializeSchema(p: Pool): Promise<void> {
       "password" TEXT NOT NULL,
       "role" TEXT NOT NULL DEFAULT 'passenger',
       "phone" TEXT,
+      "permissions" TEXT NOT NULL DEFAULT '[]',
       "createdAt" TEXT NOT NULL
     );
+
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS "permissions" TEXT NOT NULL DEFAULT '[]';
 
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(LOWER("email"));
 
@@ -730,18 +733,9 @@ export async function seedUsers(p: Pool): Promise<void> {
   const count = parseInt(countRes.rows[0].c, 10);
   if (count > 0) return;
 
-  console.log('🌱 Seeding initial admin and demo passenger accounts...');
+  console.log('🌱 Seeding initial demo passenger account...');
 
   const initialUsers = [
-    {
-      id: 'usr-admin-1',
-      name: 'Super Admin & Fleet Manager',
-      email: 'admin@dewminasuperline.lk',
-      password: hashPassword('Admin@123'),
-      role: 'admin',
-      phone: '+94771234567',
-      createdAt: new Date().toISOString(),
-    },
     {
       id: 'usr-passenger-1',
       name: 'Kushan Perera',
@@ -749,17 +743,18 @@ export async function seedUsers(p: Pool): Promise<void> {
       password: hashPassword('Passenger@123'),
       role: 'passenger',
       phone: '+94711433520',
+      permissions: '[]',
       createdAt: new Date().toISOString(),
     },
   ];
 
   for (const u of initialUsers) {
     await p.query(`
-      INSERT INTO users ("id", "name", "email", "password", "role", "phone", "createdAt")
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO users ("id", "name", "email", "password", "role", "phone", "permissions", "createdAt")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       ON CONFLICT ("email") DO NOTHING
-    `, [u.id, u.name, u.email.toLowerCase(), u.password, u.role, u.phone, u.createdAt]);
+    `, [u.id, u.name, u.email.toLowerCase(), u.password, u.role, u.phone, u.permissions, u.createdAt]);
   }
-  console.log('✅ Initial users seeded successfully.');
+  console.log('✅ Initial demo users seeded successfully.');
 }
 

@@ -241,7 +241,44 @@ Thank you for choosing OmniBus!
 </html>
   `.trim();
 
-  // 1. Check if Resend API Key is configured
+  // 1. Check if Brevo (Sendinblue) API Key is configured
+  const brevoApiKey = (process.env.BREVO_API_KEY || '').trim();
+  if (brevoApiKey) {
+    try {
+      console.log(`[Email Service] Sending welcome email to ${email} via Brevo HTTP API...`);
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': brevoApiKey,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: 'Dewmina Super Line', email: process.env.BREVO_SENDER || 'dewminasuperline.pvt.ltd@gmail.com' },
+          to: [{ email, name }],
+          subject,
+          htmlContent: htmlBody,
+          textContent: textBody,
+        }),
+      });
+
+      if (res.ok) {
+        const data = (await res.json()) as any;
+        console.log(`[Email Service] ✅ Welcome email delivered successfully to ${email} via Brevo! MessageId: ${data.messageId}`);
+        lastEmailError = null;
+        return true;
+      } else {
+        const errorText = await res.text();
+        lastEmailError = `Brevo API error (HTTP ${res.status}): ${errorText}`;
+        console.error(`[Email Service] ${lastEmailError}`);
+      }
+    } catch (err: any) {
+      lastEmailError = err?.message || String(err);
+      console.error('[Email Service] Error connecting to Brevo API:', lastEmailError);
+    }
+  }
+
+  // 2. Check if Resend API Key is configured
   if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim()) {
     try {
       const apiKey = process.env.RESEND_API_KEY.trim();
@@ -405,7 +442,43 @@ Thank you!
 </html>
   `.trim();
 
-  // 1. Resend (HTTP API - Best for cloud hosts like Render)
+  // 1. Brevo / Sendinblue (HTTP API - Best for sending to ANY passenger without custom domain)
+  const brevoApiKey = (process.env.BREVO_API_KEY || '').trim();
+  if (brevoApiKey) {
+    try {
+      console.log(`[Email Service] Sending OTP email to ${email} via Brevo HTTP API...`);
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': brevoApiKey,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: 'Dewmina Super Line', email: process.env.BREVO_SENDER || 'dewminasuperline.pvt.ltd@gmail.com' },
+          to: [{ email, name }],
+          subject,
+          htmlContent: htmlBody,
+          textContent: textBody,
+        }),
+      });
+
+      if (res.ok) {
+        const data = (await res.json()) as any;
+        console.log(`[Email Service] ✅ OTP email delivered to ${email} via Brevo (Message ID: ${data.messageId})`);
+        lastEmailError = null;
+        return true;
+      }
+      const errText = await res.text();
+      lastEmailError = `Brevo OTP error HTTP ${res.status}: ${errText}`;
+      console.error(`[Email Service] ${lastEmailError}`);
+    } catch (err: any) {
+      lastEmailError = err?.message || String(err);
+      console.error('[Email Service] Brevo OTP error:', lastEmailError);
+    }
+  }
+
+  // 2. Resend (HTTP API - Cloud hosts)
   if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim()) {
     try {
       const apiKey = process.env.RESEND_API_KEY.trim();

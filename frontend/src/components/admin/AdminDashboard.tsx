@@ -7,19 +7,39 @@ import { TimetableManager } from './TimetableManager';
 import { QRScannerModal } from '../operator/QRScannerModal';
 import { WhatsAppManagerSection } from './WhatsAppManagerModal';
 import { CounterBookingView } from './CounterBookingView';
+import { StaffManagementSection } from './StaffManagementSection';
 import { routesApi, authApi, paymentSlipsApi } from '../../services/api';
 import type { BusRoute } from '../../types/booking';
 import { 
   TrendingUp, Users, DollarSign, Bus, Award, BarChart2, 
   SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
   Trash2, RefreshCw, Edit3, Clock, Star, Search,
-  Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare, Menu
+  Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare, Menu, Shield
 } from 'lucide-react';
 
-export const AdminDashboard: React.FC = () => {
-  const { bookings, routes, loadRoutes, loadBookings } = useBookingStore();
+export type AdminDashboardTab = 'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp' | 'counter-booking' | 'staff';
 
-  const [activeTab, setActiveTab] = useState<'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp' | 'counter-booking'>('fleet');
+export const AdminDashboard: React.FC = () => {
+  const { bookings, routes, loadRoutes, loadBookings, currentUser } = useBookingStore();
+  const isSuperAdmin = currentUser?.role === 'super_admin';
+
+  const hasPermission = (permKey: string): boolean => {
+    if (isSuperAdmin) return true;
+    return currentUser?.permissions?.includes(permKey) || false;
+  };
+
+  const getDefaultTab = (): AdminDashboardTab => {
+    if (isSuperAdmin) return 'fleet';
+    if (hasPermission('counter_booking')) return 'counter-booking';
+    if (hasPermission('slips_approval')) return 'payment-slips';
+    if (hasPermission('fleet_management')) return 'fleet';
+    if (hasPermission('timetable_management')) return 'timetables';
+    if (hasPermission('analytics')) return 'analytics';
+    if (hasPermission('whatsapp')) return 'whatsapp';
+    return 'counter-booking';
+  };
+
+  const [activeTab, setActiveTab] = useState<AdminDashboardTab>(getDefaultTab);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [selectedRouteId, setSelectedRouteId] = useState<string>(routes[0]?.id || '');
@@ -309,92 +329,128 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-2 flex-1">
-              <button
-                onClick={() => { setActiveTab('counter-booking'); setIsMobileNavOpen(false); }}
-                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-black text-left cursor-pointer ${
-                  activeTab === 'counter-booking' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 bg-blue-50/60'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Ticket className="w-4 h-4 text-blue-500" /> Counter Booking (කවුන්ටරය)
-                </div>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-blue-600 text-white">
-                  BOOK
-                </span>
-              </button>
-              <button
-                onClick={() => { setActiveTab('fleet'); setIsMobileNavOpen(false); }}
-                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
-                  activeTab === 'fleet' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                <Bus className="w-4 h-4" /> Fleet & Route Operations
-              </button>
-              <button
-                onClick={() => { setActiveTab('timetables'); setIsMobileNavOpen(false); }}
-                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
-                  activeTab === 'timetables' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                <Calendar className="w-4 h-4" /> Master Timetables
-              </button>
-              <button
-                onClick={() => { setActiveTab('analytics'); setIsMobileNavOpen(false); }}
-                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
-                  activeTab === 'analytics' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                <BarChart2 className="w-4 h-4" /> Revenue & Analytics
-              </button>
-              <button
-                onClick={() => { setActiveTab('users'); setIsMobileNavOpen(false); }}
-                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                  activeTab === 'users' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4" /> User Accounts ({totalUsersCount})
-                </div>
-                {usersList.length > 0 && (
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                    activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
-                  }`}>
-                    {totalUsersCount}
+              {hasPermission('counter_booking') && (
+                <button
+                  onClick={() => { setActiveTab('counter-booking'); setIsMobileNavOpen(false); }}
+                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-black text-left cursor-pointer ${
+                    activeTab === 'counter-booking' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 bg-blue-50/60'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Ticket className="w-4 h-4 text-blue-500" /> Counter Booking (කවුන්ටරය)
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-blue-600 text-white">
+                    BOOK
                   </span>
-                )}
-              </button>
-              <button
-                onClick={() => { setActiveTab('payment-slips'); setIsMobileNavOpen(false); }}
-                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                  activeTab === 'payment-slips' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4" /> Payment Slips
-                </div>
-                {paymentSlips.filter(s => s.status === 'pending').length > 0 && (
+                </button>
+              )}
+
+              {hasPermission('fleet_management') && (
+                <button
+                  onClick={() => { setActiveTab('fleet'); setIsMobileNavOpen(false); }}
+                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
+                    activeTab === 'fleet' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <Bus className="w-4 h-4" /> Fleet & Route Operations
+                </button>
+              )}
+
+              {hasPermission('timetable_management') && (
+                <button
+                  onClick={() => { setActiveTab('timetables'); setIsMobileNavOpen(false); }}
+                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
+                    activeTab === 'timetables' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <Calendar className="w-4 h-4" /> Master Timetables
+                </button>
+              )}
+
+              {hasPermission('analytics') && (
+                <button
+                  onClick={() => { setActiveTab('analytics'); setIsMobileNavOpen(false); }}
+                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
+                    activeTab === 'analytics' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <BarChart2 className="w-4 h-4" /> Revenue & Analytics
+                </button>
+              )}
+
+              {hasPermission('slips_approval') && (
+                <button
+                  onClick={() => { setActiveTab('payment-slips'); setIsMobileNavOpen(false); }}
+                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                    activeTab === 'payment-slips' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4" /> Payment Slips
+                  </div>
+                  {paymentSlips.filter(s => s.status === 'pending').length > 0 && (
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                      activeTab === 'payment-slips' ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-700'
+                    }`}>
+                      {paymentSlips.filter(s => s.status === 'pending').length}
+                    </span>
+                  )}
+                </button>
+              )}
+
+              {hasPermission('whatsapp') && (
+                <button
+                  onClick={() => { setActiveTab('whatsapp'); setIsMobileNavOpen(false); }}
+                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                    activeTab === 'whatsapp' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4" /> WhatsApp Gateway
+                  </div>
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                    activeTab === 'payment-slips' ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-700'
+                    activeTab === 'whatsapp' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
                   }`}>
-                    {paymentSlips.filter(s => s.status === 'pending').length}
+                    BOT
                   </span>
-                )}
-              </button>
-              <button
-                onClick={() => { setActiveTab('whatsapp'); setIsMobileNavOpen(false); }}
-                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                  activeTab === 'whatsapp' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" /> WhatsApp Gateway
-                </div>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                  activeTab === 'whatsapp' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
-                }`}>
-                  BOT
-                </span>
-              </button>
+                </button>
+              )}
+
+              {isSuperAdmin && (
+                <>
+                  <button
+                    onClick={() => { setActiveTab('users'); setIsMobileNavOpen(false); }}
+                    className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                      activeTab === 'users' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4" /> User Accounts ({totalUsersCount})
+                    </div>
+                    {usersList.length > 0 && (
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                        activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+                      }`}>
+                        {totalUsersCount}
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('staff'); setIsMobileNavOpen(false); }}
+                    className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                      activeTab === 'staff' ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-emerald-500" /> Staff & Sub-Admins
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
+                      SUPER
+                    </span>
+                  </button>
+                </>
+              )}
             </div>
 
             {activeTab === 'fleet' && (
@@ -440,94 +496,130 @@ export const AdminDashboard: React.FC = () => {
         <aside className="hidden lg:block w-72 shrink-0 bg-white rounded-3xl border border-slate-200 shadow-sm p-4 space-y-4 lg:sticky lg:top-24 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
           <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2">Admin Navigation</div>
           <div className="flex flex-col gap-2">
-            <button
-              onClick={() => setActiveTab('counter-booking')}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-black text-left cursor-pointer ${
-                activeTab === 'counter-booking' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 bg-blue-50/50'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Ticket className="w-4 h-4 text-blue-600" /> Counter Booking
-              </div>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                activeTab === 'counter-booking' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700'
-              }`}>
-                NEW
-              </span>
-            </button>
-            <button
-              onClick={() => setActiveTab('fleet')}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
-                activeTab === 'fleet' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <Bus className="w-4 h-4" /> Fleet & Route Operations
-            </button>
-            <button
-              onClick={() => setActiveTab('timetables')}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
-                activeTab === 'timetables' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <Calendar className="w-4 h-4" /> Master Timetables
-            </button>
-            <button
-              onClick={() => setActiveTab('analytics')}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
-                activeTab === 'analytics' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <BarChart2 className="w-4 h-4" /> Revenue & Analytics
-            </button>
-            <button
-              onClick={() => setActiveTab('users')}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                activeTab === 'users' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4" /> User Accounts ({totalUsersCount})
-              </div>
-              {usersList.length > 0 && (
+            {hasPermission('counter_booking') && (
+              <button
+                onClick={() => setActiveTab('counter-booking')}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-black text-left cursor-pointer ${
+                  activeTab === 'counter-booking' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 bg-blue-50/50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Ticket className="w-4 h-4 text-blue-600" /> Counter Booking
+                </div>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                  activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+                  activeTab === 'counter-booking' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700'
                 }`}>
-                  {totalUsersCount}
+                  NEW
                 </span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('payment-slips')}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                activeTab === 'payment-slips' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4" /> Payment Slips
-              </div>
-              {paymentSlips.filter(s => s.status === 'pending').length > 0 && (
+              </button>
+            )}
+
+            {hasPermission('fleet_management') && (
+              <button
+                onClick={() => setActiveTab('fleet')}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'fleet' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Bus className="w-4 h-4" /> Fleet & Route Operations
+              </button>
+            )}
+
+            {hasPermission('timetable_management') && (
+              <button
+                onClick={() => setActiveTab('timetables')}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'timetables' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Calendar className="w-4 h-4" /> Master Timetables
+              </button>
+            )}
+
+            {hasPermission('analytics') && (
+              <button
+                onClick={() => setActiveTab('analytics')}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'analytics' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <BarChart2 className="w-4 h-4" /> Revenue & Analytics
+              </button>
+            )}
+
+            {hasPermission('slips_approval') && (
+              <button
+                onClick={() => setActiveTab('payment-slips')}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'payment-slips' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4" /> Payment Slips
+                </div>
+                {paymentSlips.filter(s => s.status === 'pending').length > 0 && (
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                    activeTab === 'payment-slips' ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-700'
+                  }`}>
+                    {paymentSlips.filter(s => s.status === 'pending').length}
+                  </span>
+                )}
+              </button>
+            )}
+
+            {hasPermission('whatsapp') && (
+              <button
+                onClick={() => setActiveTab('whatsapp')}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'whatsapp' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4" /> WhatsApp Gateway
+                </div>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                  activeTab === 'payment-slips' ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-700'
+                  activeTab === 'whatsapp' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
                 }`}>
-                  {paymentSlips.filter(s => s.status === 'pending').length}
+                  BOT
                 </span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('whatsapp')}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                activeTab === 'whatsapp' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4" /> WhatsApp Gateway
-              </div>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                activeTab === 'whatsapp' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
-              }`}>
-                BOT
-              </span>
-            </button>
+              </button>
+            )}
+
+            {isSuperAdmin && (
+              <>
+                <button
+                  onClick={() => setActiveTab('users')}
+                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                    activeTab === 'users' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4" /> User Accounts ({totalUsersCount})
+                  </div>
+                  {usersList.length > 0 && (
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                      activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+                    }`}>
+                      {totalUsersCount}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('staff')}
+                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                    activeTab === 'staff' ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-emerald-500" /> Staff & Sub-Admins
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
+                    SUPER
+                  </span>
+                </button>
+              </>
+            )}
           </div>
 
           {activeTab === 'fleet' && (
@@ -1362,6 +1454,13 @@ export const AdminDashboard: React.FC = () => {
               loadRoutes();
             }}
           />
+        </div>
+      )}
+
+      {/* ─── TAB 8: STAFF & SUB-ADMIN MANAGEMENT (Super Admin Only) ─── */}
+      {activeTab === 'staff' && isSuperAdmin && (
+        <div className="animate-fade-in-up">
+          <StaffManagementSection />
         </div>
       )}
 

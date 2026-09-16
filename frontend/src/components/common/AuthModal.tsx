@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { useBookingStore } from '../../store/bookingStore';
-import { LogIn, UserCheck, ShieldCheck, X, Mail, Lock, User, Phone, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { LogIn, ShieldCheck, X, Mail, Lock, User, Phone, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 interface AuthModalProps {
   onClose: () => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
-  const { login, loginWithGoogle, register, sendOtp, selectedRoute, currentView } = useBookingStore();
+  const { login, loginWithGoogle, register, sendOtp, selectedRoute, currentView, setCurrentView } = useBookingStore();
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
-  const [role, setRole] = useState<'passenger' | 'admin'>('passenger');
+  const role: 'passenger' | 'admin' = 'passenger';
   const [regStep, setRegStep] = useState(1);
   const [otp, setOtp] = useState('');
   const [email, setEmail] = useState('');
@@ -60,17 +60,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     }
   };
 
-  const handleRoleChange = (newRole: 'passenger' | 'admin') => {
-    setRole(newRole);
-    setErrorMsg('');
-    setNameTouched(false);
-    setPhoneTouched(false);
-    setEmailTouched(false);
-    setPasswordTouched(false);
-    setOtp('');
-  };
-
-    const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
     setErrorMsg('');
@@ -279,34 +269,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 </div>
               ) : null}
 
-              {/* Role Selector with Sliding Indicator */}
-              <div className="relative flex p-1 rounded-2xl bg-slate-100/80 backdrop-blur-sm text-xs font-bold border border-slate-200/50">
-                <div
-                  className="absolute top-1 bottom-1 rounded-xl bg-white shadow-sm transition-all duration-300 ease-out"
-                  style={{
-                    left: role === 'passenger' ? '4px' : 'calc(50% + 2px)',
-                    width: 'calc(50% - 6px)',
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleRoleChange('passenger')}
-                  className={`relative z-10 flex-1 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-                    role === 'passenger' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  <UserCheck className="w-4 h-4" /> Passenger
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleRoleChange('admin')}
-                  className={`relative z-10 flex-1 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-                    role === 'admin' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  <ShieldCheck className="w-4 h-4 text-indigo-600" /> Admin & Staff
-                </button>
-              </div>
+              {/* Registration Step Indicator */}
+              {mode === 'register' && (
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-1 px-1">
+                  <span>Step {regStep} of 2</span>
+                  <span>{regStep === 1 ? 'Enter Details' : 'Verify OTP'}</span>
+                </div>
+              )}
 
               {/* Error Message (floats in) */}
               {errorMsg && (
@@ -449,7 +418,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                       <input
                         ref={emailRef}
                         type="email"
-                        placeholder={role === 'admin' ? 'admin@dewminasuperline.lk' : 'passenger@dewminasuperline.lk'}
+                        placeholder="yourname@gmail.com"
                         value={email}
                         onBlur={() => setEmailTouched(true)}
                         onChange={(e) => { setEmail(e.target.value); if (!emailTouched) setEmailTouched(true); }}
@@ -519,7 +488,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                       Processing...
                     </>
                   ) : mode === 'login' ? (
-                    `Sign In as ${role === 'admin' ? 'Admin' : 'Passenger'}`
+                    'Sign In'
                   ) : regStep === 1 ? (
                     'Send Verification Code (OTP)'
                   ) : (
@@ -562,6 +531,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                     }
                   </button>
                 )}
+
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      setCurrentView('admin-portal');
+                    }}
+                    className="text-[11px] text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors inline-flex items-center gap-1 font-medium"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" /> Staff & Administration Portal
+                  </button>
+                </div>
               </div>
             </>
           )}

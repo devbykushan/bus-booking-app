@@ -7,6 +7,8 @@
     "dev": "node ./node_modules/ts-node-dev/lib/bin.js --respawn --transpile-only src/index.ts",
     "dev:backend": "node ./node_modules/ts-node-dev/lib/bin.js --respawn --transpile-only src/index.ts",
     "db:migrate": "node ./node_modules/ts-node-dev/lib/bin.js --transpile-only src/db/migrate.ts",
+    "create-admin": "node ./node_modules/ts-node-dev/lib/bin.js --transpile-only src/scripts/createAdmin.ts",
+    "change-password": "node ./node_modules/ts-node-dev/lib/bin.js --transpile-only src/scripts/changePassword.ts",
     "build": "node ./node_modules/typescript/bin/tsc",
     "prestart": "npm run build",
     "start": "node dist/index.js"

@@ -26,7 +26,8 @@ export type AppView =
   | 'live-tracking'
   | 'admin-panel'
   | 'passenger-settings'
-  | 'slip-upload';
+  | 'slip-upload'
+  | 'admin-portal';
 
 export const VIEW_HASH_MAP: Record<AppView, string> = {
   'passenger-search': 'home',
@@ -39,6 +40,7 @@ export const VIEW_HASH_MAP: Record<AppView, string> = {
   'admin-panel': 'admin',
   'passenger-settings': 'settings',
   'slip-upload': 'slip-upload',
+  'admin-portal': 'portal',
 };
 
 export const HASH_VIEW_MAP: Record<string, AppView> = {
@@ -60,6 +62,9 @@ export const HASH_VIEW_MAP: Record<string, AppView> = {
   'live-tracking': 'live-tracking',
   'admin': 'admin-panel',
   'admin-panel': 'admin-panel',
+  'portal': 'admin-portal',
+  'admin-login': 'admin-portal',
+  'staff-login': 'admin-portal',
   'settings': 'passenger-settings',
   'passenger-settings': 'passenger-settings',
   'slip-upload': 'slip-upload',
@@ -67,6 +72,10 @@ export const HASH_VIEW_MAP: Record<string, AppView> = {
 
 export function getViewFromLocation(): AppView {
   if (typeof window === 'undefined') return 'passenger-search';
+  const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+  if (path && HASH_VIEW_MAP[path]) {
+    return HASH_VIEW_MAP[path];
+  }
   const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
   if (hash && HASH_VIEW_MAP[hash]) {
     return HASH_VIEW_MAP[hash];
@@ -200,6 +209,8 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
           email: res.user.email,
           role: res.user.role,
           phone: res.user.phone,
+          permissions: res.user.permissions || [],
+          createdAt: res.user.createdAt,
         };
         localStorage.setItem('dewmina_user', JSON.stringify(user));
         localStorage.setItem('auth_token', res.token);
@@ -208,7 +219,8 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
           userRole: user.role as any,
           showAuthModal: false,
         });
-        get().setCurrentView(user.role === 'admin' ? 'admin-panel' : 'passenger-search');
+        const isAdmin = user.role === 'admin' || user.role === 'super_admin';
+        get().setCurrentView(isAdmin ? 'admin-panel' : 'passenger-search');
         return { success: true, message: res.message || 'Logged in successfully' };
       }
       return { success: false, message: res.message || 'Login failed' };
@@ -227,6 +239,8 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
           email: res.user.email,
           role: res.user.role,
           phone: res.user.phone,
+          permissions: res.user.permissions || [],
+          createdAt: res.user.createdAt,
         };
         localStorage.setItem('dewmina_user', JSON.stringify(user));
         localStorage.setItem('auth_token', res.token);
@@ -235,7 +249,8 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
           userRole: user.role as any,
           showAuthModal: false,
         });
-        get().setCurrentView(user.role === 'admin' ? 'admin-panel' : 'passenger-search');
+        const isAdmin = user.role === 'admin' || user.role === 'super_admin';
+        get().setCurrentView(isAdmin ? 'admin-panel' : 'passenger-search');
         return { success: true, message: res.message || 'Logged in successfully' };
       }
       return { success: false, message: res.message || 'Google login failed' };

@@ -187,6 +187,40 @@ export const authApi = {
   deleteUser: (id: string): Promise<any> =>
     apiFetch(`/auth/users/${id}`, { method: 'DELETE' }),
 
+  /** Fetch all staff and sub-admins (Super Admin only) */
+  getStaff: (token: string): Promise<{ success: boolean; staff: any[] }> =>
+    apiFetch('/auth/staff', { headers: { Authorization: `Bearer ${token}` } }),
+
+  /** Create new sub-admin / staff member (Super Admin only) */
+  createStaff: (
+    token: string,
+    payload: { name: string; email: string; password: string; phone?: string; permissions: string[] }
+  ): Promise<{ success: boolean; message: string; staff: any }> =>
+    apiFetch('/auth/staff', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    }),
+
+  /** Update staff member permissions or details (Super Admin only) */
+  updateStaff: (
+    token: string,
+    id: string,
+    payload: { name?: string; phone?: string; permissions?: string[]; password?: string }
+  ): Promise<{ success: boolean; message: string; staff: any }> =>
+    apiFetch(`/auth/staff/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    }),
+
+  /** Delete staff member account (Super Admin only) */
+  deleteStaff: (token: string, id: string): Promise<{ success: boolean; message: string }> =>
+    apiFetch(`/auth/staff/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
   /** Send 6-digit OTP to passenger WhatsApp number */
   sendWhatsAppOtp: (phone: string): Promise<{ success: boolean; message: string; otpPreview?: string; whatsappUrl?: string }> =>
     apiFetch('/auth/send-whatsapp-otp', {

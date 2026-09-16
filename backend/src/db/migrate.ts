@@ -55,16 +55,9 @@ async function runMigration() {
     console.log(`     • Boarding Points: ${bpCount.rows[0].count}`);
     console.log(`     • Bookings:        ${bookingsCount.rows[0].count}`);
 
-    // Verify Admin user credentials in DB
-    const adminCheck = await pool.query('SELECT "id", "email", "password", "role" FROM users WHERE "email" = $1', ['admin@dewminasuperline.lk']);
-    if (adminCheck.rows.length > 0) {
-      const isValid = verifyPassword('Admin@123', adminCheck.rows[0].password);
-      if (isValid) {
-        console.log('  ✅ Admin user validation: PASSED (credentials verified)');
-      } else {
-        console.warn('  ⚠️  Admin password verification failed.');
-      }
-    }
+    // Verify Administrator accounts in DB
+    const adminCountRes = await pool.query('SELECT COUNT(*) as count FROM users WHERE "role" IN (\'admin\', \'super_admin\')');
+    console.log(`     • Admin / Staff:   ${adminCountRes.rows[0].count}`);
 
     // Verify Passenger user credentials in DB
     const passCheck = await pool.query('SELECT "id", "email", "password", "role" FROM users WHERE "email" = $1', ['kushan@example.com']);

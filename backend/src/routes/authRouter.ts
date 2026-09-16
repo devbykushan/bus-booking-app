@@ -241,7 +241,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
 
     // 1. Fetch user by email
     const result = await dbQuery(
-      'SELECT "id", "name", "email", "password", "role", "phone", "createdAt" FROM users WHERE LOWER("email") = $1',
+      'SELECT "id", "name", "email", "password", "role", "phone", "permissions", "createdAt" FROM users WHERE LOWER("email") = $1',
       [cleanEmail]
     );
 
@@ -258,22 +258,38 @@ authRouter.post('/login', async (req: Request, res: Response) => {
     }
 
     // 3. Verify strict role matching between requested login tab and actual user account role
-    if (role === 'admin' && dbUser.role !== 'admin') {
+    const isAdminRole = dbUser.role === 'admin' || dbUser.role === 'super_admin';
+
+    if (role === 'admin' && !isAdminRole) {
       return res.status(403).json({
-        error: 'Access denied. Your account does not have administrator privileges. Please switch to the "Passenger" tab to sign in.',
+        error: 'Access denied. Your account does not have administrator privileges.',
       });
     }
 
-    if (role === 'passenger' && dbUser.role === 'admin') {
+    if (role === 'passenger' && isAdminRole) {
       return res.status(403).json({
-        error: 'This is an Administrator account. Please switch to the "Admin & Staff" tab to sign in.',
+        error: 'This is an Administrative account. Please switch to the Staff Portal to sign in.',
       });
     }
 
-    if (role && role !== dbUser.role) {
-      return res.status(403).json({
-        error: `Account role mismatch. This account is registered as ${dbUser.role.toUpperCase()}. Please select the correct login tab.`,
-      });
+    let parsedPermissions: string[] = [];
+    try {
+      parsedPermissions = typeof dbUser.permissions === 'string' ? JSON.parse(dbUser.permissions) : (dbUser.permissions || []);
+    } catch (_) {
+      parsedPermissions = [];
+    }
+    if (dbUser.role === 'super_admin') {
+      parsedPermissions = [
+        'counter_booking',
+        'slips_approval',
+        'qr_scanner',
+        'manifest_view',
+        'fleet_management',
+        'timetable_management',
+        'analytics',
+        'whatsapp',
+        'staff_management',
+      ];
     }
 
     const token = `token-${dbUser.id}-${Date.now()}`;
@@ -283,6 +299,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
       email: dbUser.email,
       role: dbUser.role,
       phone: dbUser.phone,
+      permissions: parsedPermissions,
       createdAt: dbUser.createdAt,
     };
 
@@ -426,7 +443,7 @@ authRouter.get('/me', async (req: Request, res: Response) => {
     }
 
     const result = await dbQuery(
-      'SELECT "id", "name", "email", "role", "phone", "createdAt" FROM users WHERE "id" = $1',
+      'SELECT "id", "name", "email", "role", "phone", "permissions", "createdAt" FROM users WHERE "id" = $1',
       [userId]
     );
 
@@ -434,7 +451,33 @@ authRouter.get('/me', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'User account not found.' });
     }
 
-    return res.json({ user: result.rows[0] });
+    const row = result.rows[0];
+    let parsedPermissions: string[] = [];
+    try {
+      parsedPermissions = typeof row.permissions === 'string' ? JSON.parse(row.permissions) : (row.permissions || []);
+    } catch (_) {
+      parsedPermissions = [];
+    }
+    if (row.role === 'super_admin') {
+      parsedPermissions = [
+        'counter_booking',
+        'slips_approval',
+        'qr_scanner',
+        'manifest_view',
+        'fleet_management',
+        'timetable_management',
+        'analytics',
+        'whatsapp',
+        'staff_management',
+      ];
+    }
+
+    return res.json({
+      user: {
+        ...row,
+        permissions: parsedPermissions,
+      },
+    });
   } catch (error) {
     console.error('Error fetching current user:', error);
     return res.status(500).json({ error: 'Failed to fetch user profile.' });
@@ -592,6 +635,233 @@ authRouter.get('/users', async (_req: Request, res: Response) => {
 });
 
 /**
+ * Helper to verify caller is Super Admin
+ */
+async function verifySuperAdminCaller(authHeader?: string): Promise<{ success: boolean; caller?: any; error?: string }> {
+  const userId = getUserIdFromToken(authHeader);
+  if (!userId) {
+    return { success: false, error: 'Unauthorized. Authentication token missing.' };
+  }
+  const res = await dbQuery('SELECT "id", "name", "email", "role" FROM users WHERE "id" = $1', [userId]);
+  if (res.rows.length === 0 || res.rows[0].role !== 'super_admin') {
+    return { success: false, error: 'Access denied. Only Super Administrator has permission for this action.' };
+  }
+  return { success: true, caller: res.rows[0] };
+}
+
+/**
+ * GET /api/auth/staff
+ * Super Admin endpoint to fetch all staff and sub-admins
+ */
+authRouter.get('/staff', async (req: Request, res: Response) => {
+  try {
+    const authCheck = await verifySuperAdminCaller(req.headers.authorization);
+    if (!authCheck.success) {
+      return res.status(403).json({ error: authCheck.error });
+    }
+
+    const result = await dbQuery(
+      `SELECT "id", "name", "email", "role", "phone", "permissions", "createdAt"
+       FROM users
+       WHERE "role" IN ('admin', 'super_admin')
+       ORDER BY CASE WHEN "role" = 'super_admin' THEN 0 ELSE 1 END, "createdAt" DESC`
+    );
+
+    const staff = result.rows.map((row) => {
+      let permissions = [];
+      try {
+        permissions = typeof row.permissions === 'string' ? JSON.parse(row.permissions) : (row.permissions || []);
+      } catch (_) {
+        permissions = [];
+      }
+      return {
+        ...row,
+        permissions,
+      };
+    });
+
+    return res.json({ success: true, staff });
+  } catch (error) {
+    console.error('Error fetching staff list:', error);
+    return res.status(500).json({ error: 'Failed to fetch staff list.' });
+  }
+});
+
+/**
+ * POST /api/auth/staff
+ * Super Admin endpoint to create a new Sub-Admin / Staff member
+ */
+authRouter.post('/staff', async (req: Request, res: Response) => {
+  try {
+    const authCheck = await verifySuperAdminCaller(req.headers.authorization);
+    if (!authCheck.success) {
+      return res.status(403).json({ error: authCheck.error });
+    }
+
+    const { name, email, password, phone, permissions } = req.body;
+
+    if (!name || typeof name !== 'string' || name.trim().length < 2) {
+      return res.status(400).json({ error: 'Full name is required (at least 2 characters).' });
+    }
+
+    if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email.trim())) {
+      return res.status(400).json({ error: 'Please enter a valid email address.' });
+    }
+
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = name.trim();
+    const cleanPhone = phone ? phone.trim() : null;
+    const permissionsArray = Array.isArray(permissions) ? permissions : [];
+
+    // Check duplicate email
+    const existing = await dbQuery('SELECT "id" FROM users WHERE LOWER("email") = $1', [cleanEmail]);
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: 'An account with this email address already exists.' });
+    }
+
+    const newId = `usr-staff-${Date.now()}-${uuidv4().substring(0, 6)}`;
+    const hashedPassword = hashPassword(password);
+    const createdAt = new Date().toISOString();
+    const permissionsJson = JSON.stringify(permissionsArray);
+
+    await dbQuery(
+      `INSERT INTO users ("id", "name", "email", "password", "role", "phone", "permissions", "createdAt")
+       VALUES ($1, $2, $3, $4, 'admin', $5, $6, $7)`,
+      [newId, cleanName, cleanEmail, hashedPassword, cleanPhone, permissionsJson, createdAt]
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: 'Staff account created successfully.',
+      staff: {
+        id: newId,
+        name: cleanName,
+        email: cleanEmail,
+        role: 'admin',
+        phone: cleanPhone,
+        permissions: permissionsArray,
+        createdAt,
+      },
+    });
+  } catch (error) {
+    console.error('Error creating staff account:', error);
+    return res.status(500).json({ error: 'Failed to create staff account.' });
+  }
+});
+
+/**
+ * PUT /api/auth/staff/:id
+ * Super Admin endpoint to update staff permissions, details or reset password
+ */
+authRouter.put('/staff/:id', async (req: Request, res: Response) => {
+  try {
+    const authCheck = await verifySuperAdminCaller(req.headers.authorization);
+    if (!authCheck.success) {
+      return res.status(403).json({ error: authCheck.error });
+    }
+
+    const { id } = req.params;
+    const { name, phone, permissions, password } = req.body;
+
+    const existingRes = await dbQuery('SELECT "id", "role", "email" FROM users WHERE "id" = $1', [id]);
+    if (existingRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Staff account not found.' });
+    }
+
+    const targetUser = existingRes.rows[0];
+    const isTargetSuper = targetUser.role === 'super_admin';
+
+    const updates: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    if (name && typeof name === 'string' && name.trim().length >= 2) {
+      updates.push(`"name" = $${idx++}`);
+      values.push(name.trim());
+    }
+
+    if (phone !== undefined) {
+      updates.push(`"phone" = $${idx++}`);
+      values.push(phone ? phone.trim() : null);
+    }
+
+    // Only allow changing permissions if target is not super_admin
+    if (!isTargetSuper && Array.isArray(permissions)) {
+      updates.push(`"permissions" = $${idx++}`);
+      values.push(JSON.stringify(permissions));
+    }
+
+    if (password && typeof password === 'string' && password.length >= 6) {
+      updates.push(`"password" = $${idx++}`);
+      values.push(hashPassword(password));
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'No valid fields provided to update.' });
+    }
+
+    values.push(id);
+    const updateQuery = `UPDATE users SET ${updates.join(', ')} WHERE "id" = $${idx} RETURNING "id", "name", "email", "role", "phone", "permissions", "createdAt"`;
+    const updated = await dbQuery(updateQuery, values);
+
+    let parsedPermissions = [];
+    try {
+      parsedPermissions = typeof updated.rows[0].permissions === 'string' ? JSON.parse(updated.rows[0].permissions) : updated.rows[0].permissions;
+    } catch (_) {}
+
+    return res.json({
+      success: true,
+      message: 'Staff account updated successfully.',
+      staff: {
+        ...updated.rows[0],
+        permissions: parsedPermissions,
+      },
+    });
+  } catch (error) {
+    console.error('Error updating staff account:', error);
+    return res.status(500).json({ error: 'Failed to update staff account.' });
+  }
+});
+
+/**
+ * DELETE /api/auth/staff/:id
+ * Super Admin endpoint to delete a staff account
+ */
+authRouter.delete('/staff/:id', async (req: Request, res: Response) => {
+  try {
+    const authCheck = await verifySuperAdminCaller(req.headers.authorization);
+    if (!authCheck.success) {
+      return res.status(403).json({ error: authCheck.error });
+    }
+
+    const { id } = req.params;
+
+    const targetRes = await dbQuery('SELECT "id", "email", "role" FROM users WHERE "id" = $1', [id]);
+    if (targetRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Staff account not found.' });
+    }
+
+    if (targetRes.rows[0].role === 'super_admin') {
+      return res.status(403).json({ error: 'The Super Administrator account is permanent and cannot be deleted.' });
+    }
+
+    await dbQuery('DELETE FROM users WHERE "id" = $1', [id]);
+
+    return res.json({
+      success: true,
+      message: `Staff account (${targetRes.rows[0].email}) deleted successfully.`,
+    });
+  } catch (error) {
+    console.error('Error deleting staff account:', error);
+    return res.status(500).json({ error: 'Failed to delete staff account.' });
+  }
+});
+
+/**
  * PUT /api/auth/users/:id/role
  * Admin endpoint to toggle or change user role (passenger <-> admin)
  */
@@ -604,14 +874,19 @@ authRouter.put('/users/:id/role', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid role specified. Role must be "passenger" or "admin".' });
     }
 
+    const target = await dbQuery('SELECT "id", "role", "email" FROM users WHERE "id" = $1', [id]);
+    if (target.rows.length === 0) {
+      return res.status(404).json({ error: 'User account not found.' });
+    }
+
+    if (target.rows[0].role === 'super_admin') {
+      return res.status(403).json({ error: 'The Super Administrator account is permanent and cannot be modified.' });
+    }
+
     const updated = await dbQuery(
       `UPDATE users SET "role" = $1 WHERE "id" = $2 RETURNING "id", "name", "email", "role", "phone", "createdAt"`,
       [role, id]
     );
-
-    if (updated.rows.length === 0) {
-      return res.status(404).json({ error: 'User account not found.' });
-    }
 
     return res.json({
       success: true,
@@ -631,11 +906,17 @@ authRouter.put('/users/:id/role', async (req: Request, res: Response) => {
 authRouter.delete('/users/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const deleted = await dbQuery('DELETE FROM users WHERE "id" = $1 RETURNING "id", "name", "email"', [id]);
 
-    if (deleted.rows.length === 0) {
+    const target = await dbQuery('SELECT "id", "role", "email" FROM users WHERE "id" = $1', [id]);
+    if (target.rows.length === 0) {
       return res.status(404).json({ error: 'User account not found or already deleted.' });
     }
+
+    if (target.rows[0].role === 'super_admin') {
+      return res.status(403).json({ error: 'The Super Administrator account is permanent and cannot be deleted.' });
+    }
+
+    const deleted = await dbQuery('DELETE FROM users WHERE "id" = $1 RETURNING "id", "name", "email"', [id]);
 
     return res.json({
       success: true,
