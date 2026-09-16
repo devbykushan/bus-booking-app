@@ -79,29 +79,52 @@ export const Navbar: React.FC = () => {
         { key: 'live-tracking', translationKey: 'liveGps', icon: MapPin, activeOn: ['live-tracking'] },
         { 
           key: 'admin-panel', 
-          label: language === 'sinhala' ? 'පරිපාලක' : language === 'tamil' ? 'நிர்வாகம்' : 'Admin', 
+          label: currentUser?.role === 'super_admin' || userRole === 'super_admin' ? 'Super Admin' : 'Admin', 
           icon: ShieldCheck, 
           activeOn: ['admin-panel'],
           isAdminTab: true 
+        },
+        ...(currentUser
+          ? [
+              {
+                key: 'sign-out',
+                label: language === 'sinhala' ? 'පිටවෙන්න' : language === 'tamil' ? 'வெளியேறு' : 'Sign Out',
+                icon: LogOut,
+                activeOn: [],
+                isDanger: true,
+              },
+            ]
+          : []),
+      ]
+    : currentUser
+    ? [
+        { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
+        { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
+        { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
+        { 
+          key: 'passenger-settings', 
+          label: language === 'sinhala' ? 'ගිණුම' : language === 'tamil' ? 'கணக்கு' : 'Profile', 
+          icon: User, 
+          activeOn: ['passenger-settings'] 
+        },
+        { 
+          key: 'sign-out', 
+          label: language === 'sinhala' ? 'පිටවෙන්න' : language === 'tamil' ? 'வெளியேறு' : 'Sign Out', 
+          icon: LogOut, 
+          activeOn: [],
+          isDanger: true,
         },
       ]
     : [
         { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
         { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
         { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
-        currentUser
-          ? { 
-              key: 'passenger-settings', 
-              label: language === 'sinhala' ? 'ගිණුම' : language === 'tamil' ? 'கணக்கு' : 'Profile', 
-              icon: User, 
-              activeOn: ['passenger-settings'] 
-            }
-          : { 
-              key: 'sign-in', 
-              label: language === 'sinhala' ? 'පිවිසෙන්න' : language === 'tamil' ? 'உள்நுழைய' : 'Sign In', 
-              icon: LogIn, 
-              activeOn: [] 
-            },
+        { 
+          key: 'sign-in', 
+          label: language === 'sinhala' ? 'පිවිසෙන්න' : language === 'tamil' ? 'உள்நுழைய' : 'Sign In', 
+          icon: LogIn, 
+          activeOn: [] 
+        },
       ];
 
   const isActive = (activeOn: string[]) => activeOn.includes(currentView);
@@ -112,8 +135,13 @@ export const Navbar: React.FC = () => {
       return;
     }
 
+    if (view === 'sign-out') {
+      logout();
+      return;
+    }
+
     if (view === 'admin-panel') {
-      setUserRole('admin');
+      setUserRole(currentUser?.role === 'super_admin' ? 'super_admin' : 'admin');
       setCurrentView('admin-panel');
       return;
     }
@@ -323,103 +351,105 @@ export const Navbar: React.FC = () => {
                   )}
                 </div>
 
-                {/* Auth / Profile Capsule (iOS Glass Pill) */}
-                {currentUser ? (
-                  <div className="relative" ref={profileRef}>
-                    <button
-                      onClick={() => setProfileOpen(!profileOpen)}
-                      className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-2xl transition-all duration-200 cursor-pointer shadow-xs group active:scale-95 ${
-                        scrolled
-                          ? 'bg-white/80 hover:bg-white dark:bg-slate-900/80 dark:hover:bg-slate-800 border border-slate-200/90 dark:border-white/10 text-slate-800 dark:text-white'
-                          : 'bg-white/15 hover:bg-white/25 border border-white/20 text-white backdrop-blur-md'
-                      }`}
-                    >
-                      <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-xs shadow-xs">
-                        {currentUser.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="hidden sm:flex flex-col items-start text-left">
-                        <span className={`text-xs font-extrabold leading-tight truncate max-w-[110px] ${
-                          scrolled ? 'text-slate-800 dark:text-white' : 'text-white'
-                        }`}>
-                          {currentUser.name}
-                        </span>
-                        <span className={`text-[10px] font-mono uppercase tracking-wider font-bold ${
-                          isAdmin 
-                            ? scrolled ? 'text-purple-600 dark:text-purple-400' : 'text-amber-300' 
-                            : scrolled ? 'text-blue-600 dark:text-blue-400' : 'text-cyan-300'
-                        }`}>
-                          {currentUser.role === 'super_admin' ? 'Super Admin' : currentUser.role}
-                        </span>
-                      </div>
-                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${profileOpen ? 'rotate-180' : ''} ${
-                        scrolled ? 'text-slate-400' : 'text-white/70'
-                      }`} />
-                    </button>
-
-                    {/* Profile Dropdown (iOS Liquid Glass Popover) */}
-                    {profileOpen && (
-                      <div className="absolute top-[calc(100%+8px)] right-0 w-60 bg-white/70 dark:bg-slate-950/75 backdrop-blur-3xl backdrop-saturate-[190%] border border-white/60 dark:border-white/15 rounded-[24px] shadow-[0_24px_56px_-8px_rgba(0,0,0,0.22),inset_0_1px_2px_rgba(255,255,255,0.8),inset_0_-1px_1px_rgba(255,255,255,0.2)] dark:shadow-[0_28px_64px_-8px_rgba(0,0,0,0.7),inset_0_1px_2px_rgba(255,255,255,0.25)] overflow-hidden z-50 animate-fade-in-up text-slate-800 dark:text-slate-100">
-                        {/* Specular top light rim */}
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[85%] h-[1.5px] bg-gradient-to-r from-transparent via-white/95 dark:via-white/50 to-transparent pointer-events-none" />
-
-                        {/* Frosted User Header Plate */}
-                        <div className="relative px-4 py-3 border-b border-white/40 dark:border-white/10 bg-white/40 dark:bg-white/5 backdrop-blur-md">
-                          <p className="text-xs font-black text-slate-900 dark:text-white truncate tracking-tight">{currentUser.name}</p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate mt-0.5">{currentUser.phone || currentUser.email}</p>
+                {/* Auth / Profile Capsule (iOS Glass Pill) - Desktop only */}
+                <div className="hidden md:block">
+                  {currentUser ? (
+                    <div className="relative" ref={profileRef}>
+                      <button
+                        onClick={() => setProfileOpen(!profileOpen)}
+                        className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-2xl transition-all duration-200 cursor-pointer shadow-xs group active:scale-95 ${
+                          scrolled
+                            ? 'bg-white/80 hover:bg-white dark:bg-slate-900/80 dark:hover:bg-slate-800 border border-slate-200/90 dark:border-white/10 text-slate-800 dark:text-white'
+                            : 'bg-white/15 hover:bg-white/25 border border-white/20 text-white backdrop-blur-md'
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-xs shadow-xs">
+                          {currentUser.name.charAt(0).toUpperCase()}
                         </div>
+                        <div className="hidden sm:flex flex-col items-start text-left">
+                          <span className={`text-xs font-extrabold leading-tight truncate max-w-[110px] ${
+                            scrolled ? 'text-slate-800 dark:text-white' : 'text-white'
+                          }`}>
+                            {currentUser.name}
+                          </span>
+                          <span className={`text-[10px] font-mono uppercase tracking-wider font-bold ${
+                            isAdmin 
+                              ? scrolled ? 'text-purple-600 dark:text-purple-400' : 'text-amber-300' 
+                              : scrolled ? 'text-blue-600 dark:text-blue-400' : 'text-cyan-300'
+                          }`}>
+                            {currentUser.role === 'super_admin' ? 'Super Admin' : currentUser.role}
+                          </span>
+                        </div>
+                        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${profileOpen ? 'rotate-180' : ''} ${
+                          scrolled ? 'text-slate-400' : 'text-white/70'
+                        }`} />
+                      </button>
 
-                        {/* Menu Items */}
-                        <div className="p-1.5 space-y-1">
-                          {isAdmin && (
+                      {/* Profile Dropdown (iOS Liquid Glass Popover) */}
+                      {profileOpen && (
+                        <div className="absolute top-[calc(100%+8px)] right-0 w-60 bg-white/70 dark:bg-slate-950/75 backdrop-blur-3xl backdrop-saturate-[190%] border border-white/60 dark:border-white/15 rounded-[24px] shadow-[0_24px_56px_-8px_rgba(0,0,0,0.22),inset_0_1px_2px_rgba(255,255,255,0.8),inset_0_-1px_1px_rgba(255,255,255,0.2)] dark:shadow-[0_28px_64px_-8px_rgba(0,0,0,0.7),inset_0_1px_2px_rgba(255,255,255,0.25)] overflow-hidden z-50 animate-fade-in-up text-slate-800 dark:text-slate-100">
+                          {/* Specular top light rim */}
+                          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[85%] h-[1.5px] bg-gradient-to-r from-transparent via-white/95 dark:via-white/50 to-transparent pointer-events-none" />
+
+                          {/* Frosted User Header Plate */}
+                          <div className="relative px-4 py-3 border-b border-white/40 dark:border-white/10 bg-white/40 dark:bg-white/5 backdrop-blur-md">
+                            <p className="text-xs font-black text-slate-900 dark:text-white truncate tracking-tight">{currentUser.name}</p>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate mt-0.5">{currentUser.phone || currentUser.email}</p>
+                          </div>
+
+                          {/* Menu Items */}
+                          <div className="p-1.5 space-y-1">
+                            {isAdmin && (
+                              <button
+                                onClick={() => {
+                                  setUserRole(currentUser?.role === 'super_admin' ? 'super_admin' : 'admin');
+                                  setCurrentView('admin-panel');
+                                  setProfileOpen(false);
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 dark:hover:bg-purple-500/20 border border-transparent hover:border-purple-400/30 transition-all duration-200 cursor-pointer active:scale-95"
+                              >
+                                <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400 drop-shadow-[0_1px_4px_rgba(168,85,247,0.3)]" />
+                                <span>Admin Dashboard</span>
+                              </button>
+                            )}
                             <button
-                              onClick={() => {
-                                setUserRole(currentUser?.role === 'super_admin' ? 'super_admin' : 'admin');
-                                setCurrentView('admin-panel');
-                                setProfileOpen(false);
-                              }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 dark:hover:bg-purple-500/20 border border-transparent hover:border-purple-400/30 transition-all duration-200 cursor-pointer active:scale-95"
-                            >
-                              <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400 drop-shadow-[0_1px_4px_rgba(168,85,247,0.3)]" />
-                              <span>Admin Dashboard</span>
-                            </button>
-                          )}
-                          <button
-                            onClick={() => { setCurrentView('my-bookings'); setProfileOpen(false); }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-cyan-300 hover:bg-blue-500/15 dark:hover:bg-blue-500/20 border border-transparent hover:border-blue-400/30 transition-all duration-200 cursor-pointer active:scale-95"
-                          >
-                            <Ticket className="w-4 h-4 text-blue-600 dark:text-cyan-400 drop-shadow-[0_1px_4px_rgba(59,130,246,0.3)]" />
-                            <span>{t('myTickets')}</span>
-                          </button>
-                          {!isAdmin && (
-                            <button
-                              onClick={() => { setCurrentView('passenger-settings'); setProfileOpen(false); }}
+                              onClick={() => { setCurrentView('my-bookings'); setProfileOpen(false); }}
                               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-cyan-300 hover:bg-blue-500/15 dark:hover:bg-blue-500/20 border border-transparent hover:border-blue-400/30 transition-all duration-200 cursor-pointer active:scale-95"
                             >
-                              <Settings className="w-4 h-4 text-blue-600 dark:text-cyan-400 drop-shadow-[0_1px_4px_rgba(59,130,246,0.3)]" />
-                              <span>{t('passengerSettings')}</span>
+                              <Ticket className="w-4 h-4 text-blue-600 dark:text-cyan-400 drop-shadow-[0_1px_4px_rgba(59,130,246,0.3)]" />
+                              <span>{t('myTickets')}</span>
                             </button>
-                          )}
-                          <div className="h-[1px] my-1 bg-slate-200/50 dark:bg-white/10" />
-                          <button
-                            onClick={() => { logout(); setProfileOpen(false); }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-500/15 dark:hover:bg-red-500/20 border border-transparent hover:border-red-400/30 transition-all duration-200 cursor-pointer active:scale-95"
-                          >
-                            <LogOut className="w-4 h-4 text-red-500 drop-shadow-[0_1px_4px_rgba(239,68,68,0.3)]" />
-                            <span>{t('signOut')}</span>
-                          </button>
+                            {!isAdmin && (
+                              <button
+                                onClick={() => { setCurrentView('passenger-settings'); setProfileOpen(false); }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-cyan-300 hover:bg-blue-500/15 dark:hover:bg-blue-500/20 border border-transparent hover:border-blue-400/30 transition-all duration-200 cursor-pointer active:scale-95"
+                              >
+                                <Settings className="w-4 h-4 text-blue-600 dark:text-cyan-400 drop-shadow-[0_1px_4px_rgba(59,130,246,0.3)]" />
+                                <span>{t('passengerSettings')}</span>
+                              </button>
+                            )}
+                            <div className="h-[1px] my-1 bg-slate-200/50 dark:bg-white/10" />
+                            <button
+                              onClick={() => { logout(); setProfileOpen(false); }}
+                              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-500/15 dark:hover:bg-red-500/20 border border-transparent hover:border-red-400/30 transition-all duration-200 cursor-pointer active:scale-95"
+                            >
+                              <LogOut className="w-4 h-4 text-red-500 drop-shadow-[0_1px_4px_rgba(239,68,68,0.3)]" />
+                              <span>{t('signOut')}</span>
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setShowAuthModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-xs text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-600/30 transition-all duration-200 cursor-pointer active:scale-95 border border-white/10"
-                  >
-                    <LogIn className="w-4 h-4" />
-                    <span>{t('signIn')}</span>
-                  </button>
-                )}
+                      )}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowAuthModal(true)}
+                      className="flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-xs text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-600/30 transition-all duration-200 cursor-pointer active:scale-95 border border-white/10"
+                    >
+                      <LogIn className="w-4 h-4" />
+                      <span>{t('signIn')}</span>
+                    </button>
+                  )}
+                </div>
 
               </div>
 
@@ -442,6 +472,7 @@ export const Navbar: React.FC = () => {
               const Icon = item.icon;
               const active = isActive(item.activeOn);
               const isAdminItem = item.isAdminTab;
+              const isDangerItem = item.isDanger;
               return (
                 <button
                   key={item.key}
@@ -451,7 +482,9 @@ export const Navbar: React.FC = () => {
                       ? isAdminItem
                         ? 'bg-gradient-to-b from-purple-500/20 via-purple-500/10 to-indigo-600/20 text-purple-700 dark:text-purple-300 font-black border border-purple-400/50 shadow-[0_2px_12px_rgba(168,85,247,0.25),inset_0_1px_1.5px_rgba(255,255,255,0.9)] dark:shadow-[0_2px_14px_rgba(168,85,247,0.35),inset_0_1px_1.5px_rgba(255,255,255,0.3)]'
                         : 'bg-gradient-to-b from-blue-500/20 via-blue-500/10 to-indigo-600/20 text-blue-700 dark:text-cyan-300 font-black border border-blue-400/50 shadow-[0_2px_12px_rgba(59,130,246,0.25),inset_0_1px_1.5px_rgba(255,255,255,0.9)] dark:shadow-[0_2px_14px_rgba(59,130,246,0.35),inset_0_1px_1.5px_rgba(255,255,255,0.3)]'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-white/40 dark:hover:bg-white/5 font-bold border border-transparent'
+                      : isDangerItem
+                        ? 'text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-500/10 dark:hover:bg-red-500/20 font-bold border border-transparent'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-white/40 dark:hover:bg-white/5 font-bold border border-transparent'
                   }`}
                 >
                   <Icon className={`w-5 h-5 transition-all duration-200 ${
@@ -459,9 +492,13 @@ export const Navbar: React.FC = () => {
                       ? isAdminItem 
                         ? 'text-purple-600 dark:text-purple-300 drop-shadow-[0_2px_6px_rgba(168,85,247,0.4)] scale-105' 
                         : 'text-blue-600 dark:text-cyan-300 drop-shadow-[0_2px_6px_rgba(59,130,246,0.4)] scale-105' 
-                      : 'opacity-85'
+                      : isDangerItem
+                        ? 'text-red-500 dark:text-red-400 opacity-90'
+                        : 'opacity-85'
                   }`} />
-                  <span className="text-[10px] text-center leading-tight truncate w-full mt-0.5 font-sans tracking-tight">
+                  <span className={`text-[10px] text-center leading-tight truncate w-full mt-0.5 font-sans tracking-tight ${
+                    isDangerItem ? 'text-red-500 dark:text-red-400 font-medium' : ''
+                  }`}>
                     {item.label || t(item.translationKey)}
                   </span>
                   {active && (
