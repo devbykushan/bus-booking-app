@@ -119,7 +119,10 @@ export const HeroSearch: React.FC = () => {
         <img
           src="/yutong-hero.jpg"
           alt="Yutong C12 Pro Luxury Express Bus"
-          className="w-full h-full object-cover object-[center_15%] sm:object-[center_30%] md:object-center transition-all duration-700 animate-ken-burns"
+          loading="eager"
+          decoding="sync"
+          fetchPriority="high"
+          className="w-full h-full object-cover object-[center_15%] sm:object-[center_30%] md:object-center animate-ken-burns"
         />
         {/* Layered responsive overlays */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/15 to-black/85 md:from-black/75 md:via-black/35 md:to-black/85" />
@@ -150,7 +153,7 @@ export const HeroSearch: React.FC = () => {
       <div className="absolute bottom-[68px] left-0 z-[3] pointer-events-none w-full overflow-hidden">
         <div
           className="animate-bus-streak flex items-center"
-          style={{ animationDelay: '1s', animationDuration: '14s' }}
+          style={{ animationDelay: '0.2s', animationDuration: '14s' }}
         >
           <RealisticBusAnimation />
         </div>
