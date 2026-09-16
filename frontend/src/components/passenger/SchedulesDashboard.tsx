@@ -24,9 +24,7 @@ import {
 } from 'lucide-react';
 
 const CITIES = [
-  'Monaragala', 'Colombo', 'Kandy', 'Galle',
-  'Jaffna', 'Anuradhapura', 'Badulla', 'Wellawaya',
-  'Ratnapura', 'Matara',
+  'Monaragala', 'Colombo',
 ];
 
 type TimeFilter = 'all' | 'morning' | 'afternoon' | 'evening';

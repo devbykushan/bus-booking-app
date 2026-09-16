@@ -138,9 +138,6 @@ export const Footer: React.FC = () => {
               {[
                 { origin: 'Monaragala', dest: 'Colombo', label: 'Monaragala → Colombo' },
                 { origin: 'Colombo', dest: 'Monaragala', label: 'Colombo → Monaragala' },
-                { origin: 'Monaragala', dest: 'Kandy', label: 'Monaragala → Kandy' },
-                { origin: 'Wellawaya', dest: 'Colombo', label: 'Wellawaya → Colombo' },
-                { origin: 'Colombo', dest: 'Galle', label: 'Colombo → Galle' },
               ].map((r, idx) => (
                 <li key={idx}>
                   <button

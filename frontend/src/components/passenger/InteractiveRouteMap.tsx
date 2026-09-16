@@ -53,20 +53,12 @@ const movingBusIcon = L.divIcon({
   iconAnchor: [19, 19],
 });
 
-// Coordinate presets for Sri Lankan stations
+// Coordinate presets for Sri Lankan stations along Monaragala <-> Colombo corridor
 const SRI_LANKA_COORDS: Record<string, [number, number]> = {
   'Monaragala': [6.8722, 81.3507],
   'Colombo': [6.9271, 79.8612],
   'Colombo Fort': [6.9344, 79.8510],
-  'Dehiwala': [6.8510, 79.8659],
-  'Panama': [6.7554, 81.8037],
-  'Arugam Bay': [6.8416, 81.8315],
-  'Kandy': [7.2906, 80.6337],
-  'Galle': [6.0535, 80.2210],
-  'Matara': [5.9549, 80.5550],
-  'Jaffna': [9.6615, 80.0255],
-  'Batticaloa': [7.7170, 81.7000],
-  'Kataragama': [6.4167, 81.3333],
+  'Pettah': [6.9360, 79.8530],
   'Wellawaya': [6.7410, 81.1020],
   'Thanamalwila': [6.4380, 81.1328],
   'Mattala': [6.3025, 81.1189],
