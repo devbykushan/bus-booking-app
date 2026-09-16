@@ -226,11 +226,8 @@ export function App() {
     );
   }
 
-  // ─── Initial Startup Loading Splash ───
-  const isSearchLanding = currentView === 'passenger-search';
-  const shouldBlock = isSearchLanding
-    ? (!initialSplashDone && !backendReady)
-    : (routes.length === 0 && !backendReady);
+  // ─── Initial Startup Loading Splash (Only on first app launch for 1.2s) ───
+  const shouldBlock = !initialSplashDone && routes.length === 0 && !backendReady;
 
   if (shouldBlock) {
     return (
