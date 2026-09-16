@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import {
   User,
-  Users,
   Shield,
   KeyRound,
   Eye,
@@ -16,8 +15,6 @@ import {
   UserCheck,
   ArrowLeft,
   Check,
-  Plus,
-  Trash2,
   Bell,
   MessageSquare,
   HelpCircle,
@@ -37,10 +34,6 @@ export const PassengerSettings: React.FC = () => {
     updateProfile,
     changePassword,
     deleteAccount,
-    savedPassengers,
-    loadSavedPassengers,
-    addSavedPassenger,
-    deleteSavedPassenger,
     tripStats,
     loadTripStats,
     setShowAuthModal,
@@ -50,8 +43,8 @@ export const PassengerSettings: React.FC = () => {
     t,
   } = useBookingStore();
 
-  // Active tab: 'profile' | 'passengers' | 'security' | 'support'
-  const [activeTab, setActiveTab] = useState<'profile' | 'passengers' | 'security' | 'support'>('profile');
+  // Active tab: 'profile' | 'security' | 'support'
+  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'support'>('profile');
 
   // Profile Form state
   const [name, setName] = useState(currentUser?.name || '');
@@ -76,15 +69,6 @@ export const PassengerSettings: React.FC = () => {
   const [passSuccess, setPassSuccess] = useState<string | null>(null);
   const [passError, setPassError] = useState<string | null>(null);
 
-  // Co-passenger modal / form state
-  const [showAddPassengerModal, setShowAddPassengerModal] = useState(false);
-  const [newPassengerName, setNewPassengerName] = useState('');
-  const [newPassengerNic, setNewPassengerNic] = useState('');
-  const [newPassengerPhone, setNewPassengerPhone] = useState('');
-  const [newPassengerGender, setNewPassengerGender] = useState<'male' | 'female' | 'other'>('male');
-  const [passengerLoading, setPassengerLoading] = useState(false);
-  const [passengerError, setPassengerError] = useState<string | null>(null);
-
   // Delete account confirmation modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -92,11 +76,10 @@ export const PassengerSettings: React.FC = () => {
   // Cancellation Policy modal
   const [showPolicyModal, setShowPolicyModal] = useState(false);
 
-  // Load stats and saved passengers on mount
+  // Load stats on mount
   useEffect(() => {
     if (currentUser) {
       loadTripStats();
-      loadSavedPassengers();
     }
   }, [currentUser]);
 
@@ -261,41 +244,6 @@ export const PassengerSettings: React.FC = () => {
     }
   };
 
-  // Handle Add Saved Co-Passenger
-  const handleAddPassenger = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPassengerError(null);
-
-    if (!newPassengerName.trim() || newPassengerName.trim().length < 2) {
-      setPassengerError('Passenger name must be at least 2 characters long.');
-      return;
-    }
-
-    if (newPassengerPhone && !isPhoneValid(newPassengerPhone)) {
-      setPassengerError('Please enter a valid mobile number (07XXXXXXXX).');
-      return;
-    }
-
-    setPassengerLoading(true);
-    const res = await addSavedPassenger({
-      name: newPassengerName.trim(),
-      nic: newPassengerNic.trim() || undefined,
-      phone: newPassengerPhone.trim() || undefined,
-      gender: newPassengerGender,
-    });
-    setPassengerLoading(false);
-
-    if (res.success) {
-      setNewPassengerName('');
-      setNewPassengerNic('');
-      setNewPassengerPhone('');
-      setNewPassengerGender('male');
-      setShowAddPassengerModal(false);
-    } else {
-      setPassengerError(res.message || 'Failed to add co-passenger.');
-    }
-  };
-
   // Handle Delete Account
   const handleDeleteAccountConfirm = async () => {
     setDeleteLoading(true);
@@ -409,23 +357,6 @@ export const PassengerSettings: React.FC = () => {
         >
           <User className="w-4 h-4" />
           <span>{t('profileInformation')}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('passengers')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer shrink-0 ${
-            activeTab === 'passengers'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 scale-[1.02]'
-              : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          <span>{t('savedCoPassengers')}</span>
-          {savedPassengers.length > 0 && (
-            <span className="w-5 h-5 rounded-full bg-white/20 text-white text-[11px] flex items-center justify-center font-bold">
-              {savedPassengers.length}
-            </span>
-          )}
         </button>
 
         <button
@@ -609,193 +540,7 @@ export const PassengerSettings: React.FC = () => {
         </div>
       )}
 
-      {/* ── TAB 2: Saved Co-Passengers Manager ── */}
-      {activeTab === 'passengers' && (
-        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-white/10 pb-4">
-            <div>
-              <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-                <Users className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
-                {t('savedCoPassengers')}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {t('savedCoPassengersDesc')}
-              </p>
-            </div>
-            <button
-              onClick={() => setShowAddPassengerModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs rounded-2xl shadow-md shadow-blue-600/30 transition-all cursor-pointer active:scale-95 shrink-0"
-            >
-              <Plus className="w-4 h-4" />
-              <span>{t('addPassenger')}</span>
-            </button>
-          </div>
-
-          {/* List of Saved Passengers */}
-          {savedPassengers.length === 0 ? (
-            <div className="text-center py-12 px-4 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-cyan-400 flex items-center justify-center mx-auto">
-                <Users className="w-6 h-6" />
-              </div>
-              <p className="text-slate-600 dark:text-slate-400 text-sm font-medium max-w-md mx-auto">
-                {t('noSavedPassengers')}
-              </p>
-              <button
-                onClick={() => setShowAddPassengerModal(true)}
-                className="mt-2 text-xs font-bold text-blue-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{t('addPassenger')}</span>
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {savedPassengers.map((p) => (
-                <div
-                  key={p.id}
-                  className="bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200/80 dark:border-white/10 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-xs hover:border-blue-400/40 transition-all"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0">
-                      {p.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-black text-slate-900 dark:text-white">{p.name}</span>
-                        {p.gender && (
-                          <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider ${
-                            p.gender === 'female'
-                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300'
-                              : 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-cyan-300'
-                          }`}>
-                            {p.gender}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 space-x-2 font-mono">
-                        {p.phone && <span>{p.phone}</span>}
-                        {p.nic && <span>• NIC: {p.nic}</span>}
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => deleteSavedPassenger(p.id)}
-                    className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-colors cursor-pointer"
-                    title={t('deleteCoPassenger')}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Add Co-Passenger Modal */}
-          {showAddPassengerModal && (
-            <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 animate-fade-in-up">
-                <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
-                  <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <User className="w-5 h-5 text-blue-600" />
-                    <span>{t('addPassenger')}</span>
-                  </h3>
-                  <button
-                    onClick={() => setShowAddPassengerModal(false)}
-                    className="p-1 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                {passengerError && (
-                  <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 text-xs font-semibold">
-                    {passengerError}
-                  </div>
-                )}
-
-                <form onSubmit={handleAddPassenger} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                      {t('coPassengerName')} <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={newPassengerName}
-                      onChange={(e) => setNewPassengerName(e.target.value)}
-                      placeholder="e.g. Kasun Fernando"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm"
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                        {t('coPassengerGender')}
-                      </label>
-                      <select
-                        value={newPassengerGender}
-                        onChange={(e) => setNewPassengerGender(e.target.value as any)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm"
-                      >
-                        <option value="male">{t('male')}</option>
-                        <option value="female">{t('female')}</option>
-                        <option value="other">{t('otherGender')}</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                        {t('coPassengerNic')}
-                      </label>
-                      <input
-                        type="text"
-                        value={newPassengerNic}
-                        onChange={(e) => setNewPassengerNic(e.target.value)}
-                        placeholder="200012345678"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                      {t('coPassengerPhone')}
-                    </label>
-                    <input
-                      type="tel"
-                      value={newPassengerPhone}
-                      onChange={(e) => setNewPassengerPhone(e.target.value)}
-                      placeholder="07XXXXXXXX"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 pt-3">
-                    <button
-                      type="button"
-                      onClick={() => setShowAddPassengerModal(false)}
-                      className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={passengerLoading}
-                      className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer disabled:opacity-50"
-                    >
-                      {passengerLoading ? 'Saving...' : 'Save Passenger'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── TAB 3: Security, Alerts & Danger Zone ── */}
+      {/* ── TAB 2: Security, Alerts & Danger Zone ── */}
       {activeTab === 'security' && (
         <div className="space-y-6">
           {/* Notification & Alert Preferences */}
