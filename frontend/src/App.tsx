@@ -46,10 +46,18 @@ export function App() {
     }
   }, [isAdmin, currentView, setCurrentView]);
 
-  const [, setBackendReady] = useState(routes.length > 0);
+  const [backendReady, setBackendReady] = useState(routes.length > 0);
   const [backendError, setBackendError] = useState(false);
   const [isWakingUp, setIsWakingUp] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [initialSplashDone, setInitialSplashDone] = useState(false);
+
+  useEffect(() => {
+    // Show splash for 1.2s on startup, then gracefully reveal home page even if cloud server is waking up
+    const splashTimer = setTimeout(() => {
+      setInitialSplashDone(true);
+    }, 1200);
+    return () => clearTimeout(splashTimer);
+  }, []);
 
   // Initialize theme
   useEffect(() => {
@@ -144,28 +152,9 @@ export function App() {
     };
   }, []);
 
-  // On app start: Parallelize routes load, bookings load, and fast hero image preload
+  // On app start: Parallelize health ping, routes load, and bookings load (Eliminate waterfall)
   useEffect(() => {
     let isMounted = true;
-
-    // Fast aesthetic minimum timer (only 250ms - snappy and responsive)
-    const minTimer = new Promise((resolve) => setTimeout(resolve, 250));
-
-    // Preload hero bus image so it is ready before revealing the page
-    const imagePromise = new Promise<void>((resolve) => {
-      const img = new Image();
-      img.src = '/yutong-hero.jpg';
-      if (img.complete) {
-        resolve();
-        return;
-      }
-      img.onload = () => resolve();
-      img.onerror = () => resolve();
-      setTimeout(resolve, 1200); // Safety timeout so it never hangs
-    });
-
-    // Run health check in background without blocking initial UI
-    fetch(`${BASE_URL}/health`, { signal: AbortSignal.timeout(10000) }).catch(() => false);
 
     // Detect if cloud server (Render free tier) takes more than 3.5s to wake up
     const wakeUpTimer = setTimeout(() => {
@@ -178,15 +167,16 @@ export function App() {
       try {
         const routesPromise = loadRoutes();
         const bookingsPromise = loadBookings();
+        const healthPromise = fetch(`${BASE_URL}/health`, { signal: AbortSignal.timeout(25000) })
+          .then((res) => res.ok)
+          .catch(() => false);
 
-        // Complete initial loading as soon as image and routes resolve
-        await Promise.allSettled([imagePromise, minTimer, routesPromise, bookingsPromise]);
+        await Promise.allSettled([routesPromise, bookingsPromise, healthPromise]);
 
         if (!isMounted) return;
         clearTimeout(wakeUpTimer);
         setIsWakingUp(false);
         setBackendReady(true);
-        setIsInitialLoading(false);
 
         // Check if app was opened via scanned QR code URL (e.g. #validate?pnr=OMNI-12345 or ?pnr=OMNI-12345)
         const fullUrl = window.location.href;
@@ -237,9 +227,14 @@ export function App() {
   }
 
   // ─── Initial Startup Loading Splash ───
-  if (isInitialLoading) {
+  const isSearchLanding = currentView === 'passenger-search';
+  const shouldBlock = isSearchLanding
+    ? (!initialSplashDone && !backendReady)
+    : (routes.length === 0 && !backendReady);
+
+  if (shouldBlock) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 gap-5 px-4 animate-fade-in select-none">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 gap-5 px-4 animate-fade-in">
         <div className="relative w-16 h-16">
           <div className="absolute inset-0 rounded-full border-4 border-blue-100 dark:border-slate-800 border-t-blue-500 animate-spin" />
           <Bus className="absolute inset-0 m-auto w-7 h-7 text-blue-500" />
