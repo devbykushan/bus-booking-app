@@ -241,7 +241,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
 
     // 1. Fetch user by email
     const result = await dbQuery(
-      'SELECT "id", "name", "email", "password", "role", "phone", "permissions", "createdAt" FROM users WHERE LOWER("email") = $1',
+      'SELECT "id", "name", "email", "password", "role", "phone", "permissions", "emergencyContactName", "emergencyContactPhone", "notifyWhatsapp", "notifySms", "createdAt" FROM users WHERE LOWER("email") = $1',
       [cleanEmail]
     );
 
@@ -293,6 +293,10 @@ authRouter.post('/login', async (req: Request, res: Response) => {
       email: dbUser.email,
       role: dbUser.role,
       phone: dbUser.phone,
+      emergencyContactName: dbUser.emergencyContactName || null,
+      emergencyContactPhone: dbUser.emergencyContactPhone || null,
+      notifyWhatsapp: dbUser.notifyWhatsapp !== false,
+      notifySms: dbUser.notifySms !== false,
       permissions: parsedPermissions,
       createdAt: dbUser.createdAt,
     };
@@ -437,7 +441,7 @@ authRouter.get('/me', async (req: Request, res: Response) => {
     }
 
     const result = await dbQuery(
-      'SELECT "id", "name", "email", "role", "phone", "permissions", "createdAt" FROM users WHERE "id" = $1',
+      'SELECT "id", "name", "email", "role", "phone", "permissions", "emergencyContactName", "emergencyContactPhone", "notifyWhatsapp", "notifySms", "createdAt" FROM users WHERE "id" = $1',
       [userId]
     );
 
@@ -469,6 +473,10 @@ authRouter.get('/me', async (req: Request, res: Response) => {
     return res.json({
       user: {
         ...row,
+        emergencyContactName: row.emergencyContactName || null,
+        emergencyContactPhone: row.emergencyContactPhone || null,
+        notifyWhatsapp: row.notifyWhatsapp !== false,
+        notifySms: row.notifySms !== false,
         permissions: parsedPermissions,
       },
     });
@@ -482,7 +490,7 @@ const NAME_REGEX = /^[a-zA-Z\s.'-]+$/;
 
 /**
  * PUT /api/auth/profile
- * Update user's name / username and phone number
+ * Update user's name, phone number, emergency contacts, and notification preferences
  */
 authRouter.put('/profile', async (req: Request, res: Response) => {
   try {
@@ -491,7 +499,7 @@ authRouter.put('/profile', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Authentication token missing or invalid.' });
     }
 
-    const { name, phone } = req.body;
+    const { name, phone, emergencyContactName, emergencyContactPhone, notifyWhatsapp, notifySms } = req.body;
     if (!name || typeof name !== 'string' || name.trim().length < 3) {
       return res.status(400).json({ error: 'Full name / username must be at least 3 characters long.' });
     }
@@ -514,12 +522,34 @@ authRouter.put('/profile', async (req: Request, res: Response) => {
       cleanPhone = stripped.startsWith('0') ? `+94${stripped.substring(1)}` : stripped;
     }
 
+    let cleanEmergencyName = emergencyContactName ? String(emergencyContactName).trim() : null;
+    if (cleanEmergencyName && cleanEmergencyName.length > 50) {
+      return res.status(400).json({ error: 'Emergency contact name cannot exceed 50 characters.' });
+    }
+
+    let cleanEmergencyPhone = emergencyContactPhone ? String(emergencyContactPhone).trim() : null;
+    if (cleanEmergencyPhone) {
+      const strippedEm = cleanEmergencyPhone.replace(/[\s-]/g, '');
+      if (!SL_PHONE_REGEX.test(strippedEm)) {
+        return res.status(400).json({ error: 'Please enter a valid Sri Lankan mobile number for emergency contact (07XXXXXXXX).' });
+      }
+      cleanEmergencyPhone = strippedEm.startsWith('0') ? `+94${strippedEm.substring(1)}` : strippedEm;
+    }
+
+    const cleanNotifyWhatsapp = typeof notifyWhatsapp === 'boolean' ? notifyWhatsapp : null;
+    const cleanNotifySms = typeof notifySms === 'boolean' ? notifySms : null;
+
     const updated = await dbQuery(
       `UPDATE users
-       SET "name" = $1, "phone" = $2
-       WHERE "id" = $3
-       RETURNING "id", "name", "email", "role", "phone", "createdAt"`,
-      [cleanName, cleanPhone, userId]
+       SET "name" = $1,
+           "phone" = $2,
+           "emergencyContactName" = $3,
+           "emergencyContactPhone" = $4,
+           "notifyWhatsapp" = COALESCE($5, "notifyWhatsapp"),
+           "notifySms" = COALESCE($6, "notifySms")
+       WHERE "id" = $7
+       RETURNING "id", "name", "email", "role", "phone", "emergencyContactName", "emergencyContactPhone", "notifyWhatsapp", "notifySms", "createdAt"`,
+      [cleanName, cleanPhone, cleanEmergencyName, cleanEmergencyPhone, cleanNotifyWhatsapp, cleanNotifySms, userId]
     );
 
     if (updated.rows.length === 0) {
@@ -534,6 +564,171 @@ authRouter.put('/profile', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error updating profile:', error);
     return res.status(500).json({ error: 'Failed to update profile due to a server error.' });
+  }
+});
+
+/**
+ * DELETE /api/auth/account
+ * Delete passenger account permanently
+ */
+authRouter.delete('/account', async (req: Request, res: Response) => {
+  try {
+    const userId = getUserIdFromToken(req.headers.authorization);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication token missing or invalid.' });
+    }
+
+    const checkRes = await dbQuery('SELECT "role" FROM users WHERE "id" = $1', [userId]);
+    if (checkRes.rows.length === 0) {
+      return res.status(404).json({ error: 'User account not found.' });
+    }
+    if (checkRes.rows[0].role === 'super_admin') {
+      return res.status(403).json({ error: 'Super Admin accounts cannot be deleted.' });
+    }
+
+    await dbQuery('DELETE FROM users WHERE "id" = $1', [userId]);
+
+    return res.json({
+      success: true,
+      message: 'Your passenger account has been permanently deleted.',
+    });
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    return res.status(500).json({ error: 'Failed to delete account due to a server error.' });
+  }
+});
+
+/**
+ * GET /api/auth/saved-passengers
+ * Fetch list of saved co-passengers for current user
+ */
+authRouter.get('/saved-passengers', async (req: Request, res: Response) => {
+  try {
+    const userId = getUserIdFromToken(req.headers.authorization);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication token missing or invalid.' });
+    }
+
+    const result = await dbQuery(
+      'SELECT "id", "name", "nic", "phone", "gender", "createdAt" FROM saved_passengers WHERE "userId" = $1 ORDER BY "createdAt" DESC',
+      [userId]
+    );
+
+    return res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching saved passengers:', error);
+    return res.status(500).json({ error: 'Failed to fetch saved passengers.' });
+  }
+});
+
+/**
+ * POST /api/auth/saved-passengers
+ * Add a new saved co-passenger
+ */
+authRouter.post('/saved-passengers', async (req: Request, res: Response) => {
+  try {
+    const userId = getUserIdFromToken(req.headers.authorization);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication token missing or invalid.' });
+    }
+
+    const { name, nic, phone, gender } = req.body;
+    if (!name || typeof name !== 'string' || name.trim().length < 2) {
+      return res.status(400).json({ error: 'Passenger name must be at least 2 characters long.' });
+    }
+
+    let cleanPhone = phone ? String(phone).trim() : null;
+    if (cleanPhone) {
+      const stripped = cleanPhone.replace(/[\s-]/g, '');
+      if (SL_PHONE_REGEX.test(stripped)) {
+        cleanPhone = stripped.startsWith('0') ? `+94${stripped.substring(1)}` : stripped;
+      }
+    }
+
+    const id = uuidv4();
+    const createdAt = new Date().toISOString();
+
+    const insertResult = await dbQuery(
+      `INSERT INTO saved_passengers ("id", "userId", "name", "nic", "phone", "gender", "createdAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING "id", "name", "nic", "phone", "gender", "createdAt"`,
+      [id, userId, name.trim(), nic ? String(nic).trim() : null, cleanPhone, gender || null, createdAt]
+    );
+
+    return res.status(201).json({
+      success: true,
+      passenger: insertResult.rows[0],
+    });
+  } catch (error) {
+    console.error('Error adding saved passenger:', error);
+    return res.status(500).json({ error: 'Failed to add saved passenger.' });
+  }
+});
+
+/**
+ * DELETE /api/auth/saved-passengers/:id
+ * Remove a saved co-passenger
+ */
+authRouter.delete('/saved-passengers/:id', async (req: Request, res: Response) => {
+  try {
+    const userId = getUserIdFromToken(req.headers.authorization);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication token missing or invalid.' });
+    }
+
+    const { id } = req.params;
+    const deleteResult = await dbQuery(
+      'DELETE FROM saved_passengers WHERE "id" = $1 AND "userId" = $2 RETURNING "id"',
+      [id, userId]
+    );
+
+    if (deleteResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Saved passenger not found or permission denied.' });
+    }
+
+    return res.json({ success: true, message: 'Saved passenger deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting saved passenger:', error);
+    return res.status(500).json({ error: 'Failed to delete saved passenger.' });
+  }
+});
+
+/**
+ * GET /api/auth/trip-stats
+ * Returns completed, upcoming, and total trips count for the authenticated passenger
+ */
+authRouter.get('/trip-stats', async (req: Request, res: Response) => {
+  try {
+    const userId = getUserIdFromToken(req.headers.authorization);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication token missing or invalid.' });
+    }
+
+    const userRes = await dbQuery('SELECT "email", "phone" FROM users WHERE "id" = $1', [userId]);
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ error: 'User account not found.' });
+    }
+
+    const { email, phone } = userRes.rows[0];
+    const statsRes = await dbQuery(
+      `SELECT 
+         COUNT(*) FILTER (WHERE "travelDate" < TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD')) as completed,
+         COUNT(*) FILTER (WHERE "travelDate" >= TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD') AND "status" != 'cancelled') as upcoming,
+         COUNT(*) as total
+       FROM bookings 
+       WHERE LOWER("passengerEmail") = LOWER($1) OR ("passengerPhone" = $2 AND $2 != '')`,
+      [email, phone || '']
+    );
+
+    const stats = statsRes.rows[0] || {};
+    return res.json({
+      completedTrips: parseInt(stats.completed || '0', 10),
+      upcomingTrips: parseInt(stats.upcoming || '0', 10),
+      totalTrips: parseInt(stats.total || '0', 10),
+    });
+  } catch (error) {
+    console.error('Error fetching trip stats:', error);
+    return res.status(500).json({ error: 'Failed to fetch trip statistics.' });
   }
 });
 

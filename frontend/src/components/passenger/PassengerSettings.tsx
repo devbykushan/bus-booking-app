@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import {
   User,
+  Users,
   Shield,
   KeyRound,
   Eye,
@@ -15,20 +16,51 @@ import {
   UserCheck,
   ArrowLeft,
   Check,
+  Plus,
+  Trash2,
+  Bell,
+  MessageSquare,
+  HelpCircle,
+  PhoneCall,
+  FileText,
+  AlertTriangle,
+  Ticket,
+  Clock,
+  ExternalLink,
+  ChevronRight,
+  ShieldAlert,
 } from 'lucide-react';
 
 export const PassengerSettings: React.FC = () => {
-  const { currentUser, updateProfile, changePassword, setShowAuthModal, goToHome, t } =
-    useBookingStore();
+  const {
+    currentUser,
+    updateProfile,
+    changePassword,
+    deleteAccount,
+    savedPassengers,
+    loadSavedPassengers,
+    addSavedPassenger,
+    deleteSavedPassenger,
+    tripStats,
+    loadTripStats,
+    setShowAuthModal,
+    setCurrentView,
+    goToHome,
+    bookings,
+    t,
+  } = useBookingStore();
 
-  // Active tab: 'profile' | 'security'
-  const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
+  // Active tab: 'profile' | 'passengers' | 'security' | 'support'
+  const [activeTab, setActiveTab] = useState<'profile' | 'passengers' | 'security' | 'support'>('profile');
 
   // Profile Form state
   const [name, setName] = useState(currentUser?.name || '');
   const [phone, setPhone] = useState(currentUser?.phone || '');
-  const [nameTouched, setNameTouched] = useState(false);
-  const [phoneTouched, setPhoneTouched] = useState(false);
+  const [emergencyName, setEmergencyName] = useState(currentUser?.emergencyContactName || '');
+  const [emergencyPhone, setEmergencyPhone] = useState(currentUser?.emergencyContactPhone || '');
+  const [notifyWhatsapp, setNotifyWhatsapp] = useState(currentUser?.notifyWhatsapp !== false);
+  const [notifySms, setNotifySms] = useState(currentUser?.notifySms !== false);
+
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -37,15 +69,48 @@ export const PassengerSettings: React.FC = () => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [currentPassTouched, setCurrentPassTouched] = useState(false);
-  const [newPassTouched, setNewPassTouched] = useState(false);
-  const [confirmPassTouched, setConfirmPassTouched] = useState(false);
   const [showCurrentPass, setShowCurrentPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [passLoading, setPassLoading] = useState(false);
   const [passSuccess, setPassSuccess] = useState<string | null>(null);
   const [passError, setPassError] = useState<string | null>(null);
+
+  // Co-passenger modal / form state
+  const [showAddPassengerModal, setShowAddPassengerModal] = useState(false);
+  const [newPassengerName, setNewPassengerName] = useState('');
+  const [newPassengerNic, setNewPassengerNic] = useState('');
+  const [newPassengerPhone, setNewPassengerPhone] = useState('');
+  const [newPassengerGender, setNewPassengerGender] = useState<'male' | 'female' | 'other'>('male');
+  const [passengerLoading, setPassengerLoading] = useState(false);
+  const [passengerError, setPassengerError] = useState<string | null>(null);
+
+  // Delete account confirmation modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Cancellation Policy modal
+  const [showPolicyModal, setShowPolicyModal] = useState(false);
+
+  // Load stats and saved passengers on mount
+  useEffect(() => {
+    if (currentUser) {
+      loadTripStats();
+      loadSavedPassengers();
+    }
+  }, [currentUser]);
+
+  // Keep form in sync if currentUser updates
+  useEffect(() => {
+    if (currentUser) {
+      setName(currentUser.name || '');
+      setPhone(currentUser.phone || '');
+      setEmergencyName(currentUser.emergencyContactName || '');
+      setEmergencyPhone(currentUser.emergencyContactPhone || '');
+      setNotifyWhatsapp(currentUser.notifyWhatsapp !== false);
+      setNotifySms(currentUser.notifySms !== false);
+    }
+  }, [currentUser]);
 
   // ─── Validation Helpers ──────────────────────────────────────────────────
   const NAME_REGEX = /^[a-zA-Z\s.'-]+$/;
@@ -105,22 +170,24 @@ export const PassengerSettings: React.FC = () => {
     );
   }
 
-  // Handle Profile Update (Username change & Phone)
+  // Calculate stats from bookings if tripStats is loading or fallback
+  const userBookings = bookings.filter(
+    (b) =>
+      b.passenger?.email?.toLowerCase() === currentUser.email?.toLowerCase() ||
+      (currentUser.phone && b.passenger?.phone && b.passenger?.phone.replace(/\D/g, '') === currentUser.phone.replace(/\D/g, ''))
+  );
+  const completedCount = tripStats?.completedTrips ?? userBookings.filter((b) => b.bookingStatus === 'boarded' || b.bookingStatus === 'confirmed').length;
+  const upcomingCount = tripStats?.upcomingTrips ?? userBookings.filter((b) => b.bookingStatus === 'confirmed').length;
+
+  // Handle Profile & Emergency Update
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setNameTouched(true);
-    setPhoneTouched(true);
     setProfileSuccess(null);
     setProfileError(null);
 
     const cleanName = name.trim();
-    if (!cleanName || cleanName.length < 3) {
-      setProfileError('Full Name / Username must be at least 3 characters long.');
-      return;
-    }
-
-    if (!NAME_REGEX.test(cleanName)) {
-      setProfileError('Name can only contain letters, spaces, dots, hyphens, and apostrophes.');
+    if (!isNameValid(cleanName)) {
+      setProfileError('Full Name must be between 3 and 50 characters, containing only letters, spaces, dots, or hyphens.');
       return;
     }
 
@@ -129,8 +196,20 @@ export const PassengerSettings: React.FC = () => {
       return;
     }
 
+    if (emergencyPhone && !isPhoneValid(emergencyPhone)) {
+      setProfileError('Please enter a valid Sri Lankan mobile number for emergency contact (07XXXXXXXX).');
+      return;
+    }
+
     setProfileLoading(true);
-    const res = await updateProfile(cleanName, phone);
+    const res = await updateProfile({
+      name: cleanName,
+      phone,
+      emergencyContactName: emergencyName.trim() || null,
+      emergencyContactPhone: emergencyPhone.trim() || null,
+      notifyWhatsapp,
+      notifySms,
+    });
     setProfileLoading(false);
 
     if (res.success) {
@@ -144,18 +223,15 @@ export const PassengerSettings: React.FC = () => {
   // Handle Password Change
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCurrentPassTouched(true);
-    setNewPassTouched(true);
-    setConfirmPassTouched(true);
     setPassSuccess(null);
     setPassError(null);
 
-    if (!currentPassword) {
+    if (!isCurrentPassValid(currentPassword)) {
       setPassError('Current password is required.');
       return;
     }
 
-    if (!newPassword || newPassword.length < 6) {
+    if (!isNewPassValid(newPassword)) {
       setPassError('New password must be at least 6 characters long.');
       return;
     }
@@ -165,7 +241,7 @@ export const PassengerSettings: React.FC = () => {
       return;
     }
 
-    if (newPassword !== confirmPassword) {
+    if (!isPassMatch) {
       setPassError(t('passwordsDoNotMatch'));
       return;
     }
@@ -179,12 +255,54 @@ export const PassengerSettings: React.FC = () => {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      setCurrentPassTouched(false);
-      setNewPassTouched(false);
-      setConfirmPassTouched(false);
       setTimeout(() => setPassSuccess(null), 5000);
     } else {
       setPassError(res.message);
+    }
+  };
+
+  // Handle Add Saved Co-Passenger
+  const handleAddPassenger = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPassengerError(null);
+
+    if (!newPassengerName.trim() || newPassengerName.trim().length < 2) {
+      setPassengerError('Passenger name must be at least 2 characters long.');
+      return;
+    }
+
+    if (newPassengerPhone && !isPhoneValid(newPassengerPhone)) {
+      setPassengerError('Please enter a valid mobile number (07XXXXXXXX).');
+      return;
+    }
+
+    setPassengerLoading(true);
+    const res = await addSavedPassenger({
+      name: newPassengerName.trim(),
+      nic: newPassengerNic.trim() || undefined,
+      phone: newPassengerPhone.trim() || undefined,
+      gender: newPassengerGender,
+    });
+    setPassengerLoading(false);
+
+    if (res.success) {
+      setNewPassengerName('');
+      setNewPassengerNic('');
+      setNewPassengerPhone('');
+      setNewPassengerGender('male');
+      setShowAddPassengerModal(false);
+    } else {
+      setPassengerError(res.message || 'Failed to add co-passenger.');
+    }
+  };
+
+  // Handle Delete Account
+  const handleDeleteAccountConfirm = async () => {
+    setDeleteLoading(true);
+    const res = await deleteAccount();
+    setDeleteLoading(false);
+    if (!res.success) {
+      alert(res.message || 'Failed to delete account');
     }
   };
 
@@ -227,51 +345,130 @@ export const PassengerSettings: React.FC = () => {
         </div>
       </div>
 
+      {/* ── 1. Travel Summary (Quick Stats Row) ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Completed Trips */}
+        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/90 dark:border-white/10 p-5 rounded-3xl shadow-sm flex items-center justify-between">
+          <div>
+            <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+              {t('completedTrips')}
+            </span>
+            <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">
+              {completedCount}
+            </div>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-cyan-400 flex items-center justify-center border border-blue-100 dark:border-blue-800/40">
+            <Check className="w-6 h-6 stroke-[2.5]" />
+          </div>
+        </div>
+
+        {/* Upcoming Trips */}
+        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/90 dark:border-white/10 p-5 rounded-3xl shadow-sm flex items-center justify-between">
+          <div>
+            <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+              {t('upcomingTrips')}
+            </span>
+            <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">
+              {upcomingCount}
+            </div>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-800/40">
+            <Clock className="w-6 h-6 stroke-[2.5]" />
+          </div>
+        </div>
+
+        {/* Quick My Tickets Shortcut */}
+        <div
+          onClick={() => setCurrentView('my-bookings')}
+          className="bg-gradient-to-br from-blue-600 to-indigo-600 p-5 rounded-3xl shadow-md shadow-blue-600/20 text-white flex items-center justify-between cursor-pointer group active:scale-[0.98] transition-all"
+        >
+          <div>
+            <span className="text-[11px] font-extrabold text-blue-100 uppercase tracking-wider block">
+              {t('myTickets')}
+            </span>
+            <div className="text-sm font-bold text-white mt-1 flex items-center gap-1.5 group-hover:underline">
+              <span>{t('viewMyTickets')}</span>
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center border border-white/20">
+            <Ticket className="w-6 h-6 text-white" />
+          </div>
+        </div>
+      </div>
+
       {/* ── Navigation Tabs ── */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveTab('profile')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer shrink-0 ${
             activeTab === 'profile'
-              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 scale-[1.02]'
-              : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 scale-[1.02]'
+              : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10'
           }`}
         >
           <User className="w-4 h-4" />
-          <span>{t('changeUsername')}</span>
+          <span>{t('profileInformation')}</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('passengers')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer shrink-0 ${
+            activeTab === 'passengers'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 scale-[1.02]'
+              : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>{t('savedCoPassengers')}</span>
+          {savedPassengers.length > 0 && (
+            <span className="w-5 h-5 rounded-full bg-white/20 text-white text-[11px] flex items-center justify-center font-bold">
+              {savedPassengers.length}
+            </span>
+          )}
         </button>
 
         <button
           onClick={() => setActiveTab('security')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer shrink-0 ${
             activeTab === 'security'
-              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 scale-[1.02]'
-              : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 scale-[1.02]'
+              : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10'
           }`}
         >
           <KeyRound className="w-4 h-4" />
           <span>{t('changePasswordTitle')}</span>
         </button>
+
+        <button
+          onClick={() => setActiveTab('support')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer shrink-0 ${
+            activeTab === 'support'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 scale-[1.02]'
+              : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10'
+          }`}
+        >
+          <HelpCircle className="w-4 h-4" />
+          <span>{t('helpSupport')}</span>
+        </button>
       </div>
 
-      {/* ── Tab Content: Profile Settings (Username & Phone) ── */}
+      {/* ── TAB 1: Profile & Emergency Contact ── */}
       {activeTab === 'profile' && (
-        <div className="bg-white/95 backdrop-blur-xl border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                <User className="w-5 h-5 text-blue-600" />
-                {t('profileInformation')}
-              </h2>
-              <p className="text-xs text-slate-500 mt-1">
-                Update your account username, display name, and mobile contact details.
-              </p>
-            </div>
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+          <div className="border-b border-slate-100 dark:border-white/10 pb-4">
+            <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <User className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
+              {t('profileInformation')}
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Update your account name, contact details, and emergency next-of-kin information.
+            </p>
           </div>
 
           {/* Success Banner */}
           {profileSuccess && (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-2xl flex items-center gap-3 text-sm font-semibold animate-fade-in-up">
+            <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 px-4 py-3 rounded-2xl flex items-center gap-3 text-sm font-semibold animate-fade-in-up">
               <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
               <span>{profileSuccess}</span>
             </div>
@@ -279,7 +476,7 @@ export const PassengerSettings: React.FC = () => {
 
           {/* Error Banner */}
           {profileError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl flex items-center gap-3 text-sm font-semibold animate-fade-in-up">
+            <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-2xl flex items-center gap-3 text-sm font-semibold animate-fade-in-up">
               <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
               <span>{profileError}</span>
             </div>
@@ -287,340 +484,679 @@ export const PassengerSettings: React.FC = () => {
 
           <form onSubmit={handleProfileSubmit} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/* Full Name / Username Input */}
+              {/* Full Name */}
               <div className="space-y-2">
-                <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+                <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   {t('usernameLabel')} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <User className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors ${
-                    nameTouched ? (isNameValid(name) ? 'text-emerald-500' : 'text-rose-500') : 'text-slate-400'
-                  }`} />
+                  <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
                     value={name}
-                    onBlur={() => setNameTouched(true)}
-                    onChange={(e) => { setName(e.target.value); setNameTouched(true); }}
-                    placeholder="e.g. Kushan Perera"
-                    className={`w-full pl-10 pr-10 py-3 rounded-2xl text-sm font-semibold text-slate-800 focus:outline-none transition-all ${
-                      !nameTouched
-                        ? 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:bg-white'
-                        : isNameValid(name)
-                          ? 'bg-emerald-50/30 border border-emerald-300 focus:ring-2 focus:ring-emerald-500'
-                          : 'bg-rose-50/30 border border-rose-300 focus:ring-2 focus:ring-rose-500'
-                    }`}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-medium text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    placeholder="Enter full name"
                     required
                   />
-                  {nameTouched && (
-                    isNameValid(name) ? (
-                      <Check className="w-4 h-4 text-emerald-500 absolute right-3.5 top-1/2 -translate-y-1/2" />
-                    ) : (
-                      <AlertCircle className="w-4 h-4 text-rose-500 absolute right-3.5 top-1/2 -translate-y-1/2" />
-                    )
-                  )}
                 </div>
-                {nameTouched && !isNameValid(name) && (
-                  <p className="text-[11px] text-rose-600 font-semibold pl-1">
-                    {name.trim().length < 3
-                      ? 'Full Name / Username must be at least 3 characters.'
-                      : !NAME_REGEX.test(name.trim())
-                        ? 'Name can only contain letters, spaces, dots, hyphens, and apostrophes.'
-                        : 'Name is too long (max 50 characters).'}
-                  </p>
-                )}
               </div>
 
               {/* Mobile Phone Number */}
               <div className="space-y-2">
-                <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+                <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   {t('phoneLabelSettings')}
                 </label>
                 <div className="relative">
-                  <Phone className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors ${
-                    phoneTouched ? (isPhoneValid(phone) ? 'text-emerald-500' : 'text-rose-500') : 'text-slate-400'
-                  }`} />
+                  <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="tel"
                     value={phone}
-                    onBlur={() => setPhoneTouched(true)}
-                    onChange={(e) => { setPhone(e.target.value); setPhoneTouched(true); }}
-                    placeholder="e.g. 0771234567"
-                    className={`w-full pl-10 pr-10 py-3 rounded-2xl text-sm font-semibold text-slate-800 focus:outline-none transition-all ${
-                      !phoneTouched
-                        ? 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:bg-white'
-                        : isPhoneValid(phone)
-                          ? 'bg-emerald-50/30 border border-emerald-300 focus:ring-2 focus:ring-emerald-500'
-                          : 'bg-rose-50/30 border border-rose-300 focus:ring-2 focus:ring-rose-500'
-                    }`}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-medium text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    placeholder="07XXXXXXXX"
                   />
-                  {phoneTouched && phone.trim() && (
-                    isPhoneValid(phone) ? (
-                      <Check className="w-4 h-4 text-emerald-500 absolute right-3.5 top-1/2 -translate-y-1/2" />
-                    ) : (
-                      <AlertCircle className="w-4 h-4 text-rose-500 absolute right-3.5 top-1/2 -translate-y-1/2" />
-                    )
-                  )}
                 </div>
-                {phoneTouched && !isPhoneValid(phone) && (
-                  <p className="text-[11px] text-rose-600 font-semibold pl-1">
-                    Enter a valid Sri Lankan mobile number (e.g. 0771234567 or +94771234567).
-                  </p>
-                )}
+                <p className="text-[11px] text-slate-400">Used for ticket WhatsApp and SMS delivery.</p>
               </div>
 
-              {/* Email (Read-only) */}
+              {/* Email Address (Read-only) */}
               <div className="space-y-2">
-                <label className="block text-xs font-extrabold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   {t('accountEmail')}
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="email"
                     value={currentUser.email}
                     disabled
-                    className="w-full pl-10 pr-10 py-3 bg-slate-100 border border-slate-200/80 rounded-2xl text-sm font-semibold text-slate-500 cursor-not-allowed"
+                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 text-slate-500 font-medium text-sm cursor-not-allowed select-none"
                   />
-                  <Lock className="w-3.5 h-3.5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
                 </div>
               </div>
 
-              {/* Role (Read-only) */}
+              {/* Account Role (Read-only) */}
               <div className="space-y-2">
-                <label className="block text-xs font-extrabold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   {t('accountRole')}
                 </label>
                 <div className="relative">
-                  <Shield className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Shield className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
-                    value={currentUser.role.toUpperCase()}
+                    value={currentUser.role === 'super_admin' ? 'Super Admin' : currentUser.role}
                     disabled
-                    className="w-full pl-10 pr-10 py-3 bg-slate-100 border border-slate-200/80 rounded-2xl text-sm font-extrabold text-slate-600 cursor-not-allowed"
+                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 text-slate-500 font-medium text-sm cursor-not-allowed select-none capitalize"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 flex justify-end">
+            {/* ── Emergency Contact Details Section ── */}
+            <div className="pt-4 border-t border-slate-100 dark:border-white/10 space-y-4">
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-500" />
+                  <span>{t('emergencyContact')}</span>
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {t('emergencyContactDesc')}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-slate-50/70 dark:bg-slate-800/40 p-5 rounded-2xl border border-slate-200/80 dark:border-white/5">
+                <div className="space-y-2">
+                  <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    {t('emergencyNameLabel')}
+                  </label>
+                  <input
+                    type="text"
+                    value={emergencyName}
+                    onChange={(e) => setEmergencyName(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-medium text-sm focus:outline-none focus:border-blue-500"
+                    placeholder="e.g. Nimal Perera (Father / Spouse)"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    {t('emergencyPhoneLabel')}
+                  </label>
+                  <input
+                    type="tel"
+                    value={emergencyPhone}
+                    onChange={(e) => setEmergencyPhone(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-medium text-sm focus:outline-none focus:border-blue-500"
+                    placeholder="07XXXXXXXX"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Save Profile Button */}
+            <div className="flex justify-end pt-2">
               <button
                 type="submit"
-                disabled={profileLoading || !isNameValid(name) || !isPhoneValid(phone)}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-2xl shadow-lg shadow-blue-500/30 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={profileLoading}
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 px-8 rounded-2xl shadow-lg shadow-blue-500/30 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
               >
-                {profileLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Saving...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>{t('saveProfile')}</span>
-                  </>
-                )}
+                {profileLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                <span>{t('saveProfile')}</span>
               </button>
             </div>
           </form>
         </div>
       )}
 
-      {/* ── Tab Content: Password Change ── */}
-      {activeTab === 'security' && (
-        <div className="bg-white/95 backdrop-blur-xl border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+      {/* ── TAB 2: Saved Co-Passengers Manager ── */}
+      {activeTab === 'passengers' && (
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-white/10 pb-4">
             <div>
-              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                <KeyRound className="w-5 h-5 text-blue-600" />
-                {t('changePasswordTitle')}
+              <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <Users className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
+                {t('savedCoPassengers')}
               </h2>
-              <p className="text-xs text-slate-500 mt-1">
-                Ensure your account is using a strong password of at least 6 characters.
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                {t('savedCoPassengersDesc')}
               </p>
+            </div>
+            <button
+              onClick={() => setShowAddPassengerModal(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs rounded-2xl shadow-md shadow-blue-600/30 transition-all cursor-pointer active:scale-95 shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{t('addPassenger')}</span>
+            </button>
+          </div>
+
+          {/* List of Saved Passengers */}
+          {savedPassengers.length === 0 ? (
+            <div className="text-center py-12 px-4 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-cyan-400 flex items-center justify-center mx-auto">
+                <Users className="w-6 h-6" />
+              </div>
+              <p className="text-slate-600 dark:text-slate-400 text-sm font-medium max-w-md mx-auto">
+                {t('noSavedPassengers')}
+              </p>
+              <button
+                onClick={() => setShowAddPassengerModal(true)}
+                className="mt-2 text-xs font-bold text-blue-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{t('addPassenger')}</span>
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {savedPassengers.map((p) => (
+                <div
+                  key={p.id}
+                  className="bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200/80 dark:border-white/10 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-xs hover:border-blue-400/40 transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0">
+                      {p.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black text-slate-900 dark:text-white">{p.name}</span>
+                        {p.gender && (
+                          <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                            p.gender === 'female'
+                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300'
+                              : 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-cyan-300'
+                          }`}>
+                            {p.gender}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 space-x-2 font-mono">
+                        {p.phone && <span>{p.phone}</span>}
+                        {p.nic && <span>• NIC: {p.nic}</span>}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => deleteSavedPassenger(p.id)}
+                    className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-colors cursor-pointer"
+                    title={t('deleteCoPassenger')}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Add Co-Passenger Modal */}
+          {showAddPassengerModal && (
+            <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 animate-fade-in-up">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <User className="w-5 h-5 text-blue-600" />
+                    <span>{t('addPassenger')}</span>
+                  </h3>
+                  <button
+                    onClick={() => setShowAddPassengerModal(false)}
+                    className="p-1 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {passengerError && (
+                  <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 text-xs font-semibold">
+                    {passengerError}
+                  </div>
+                )}
+
+                <form onSubmit={handleAddPassenger} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      {t('coPassengerName')} <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newPassengerName}
+                      onChange={(e) => setNewPassengerName(e.target.value)}
+                      placeholder="e.g. Kasun Fernando"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                        {t('coPassengerGender')}
+                      </label>
+                      <select
+                        value={newPassengerGender}
+                        onChange={(e) => setNewPassengerGender(e.target.value as any)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm"
+                      >
+                        <option value="male">{t('male')}</option>
+                        <option value="female">{t('female')}</option>
+                        <option value="other">{t('otherGender')}</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                        {t('coPassengerNic')}
+                      </label>
+                      <input
+                        type="text"
+                        value={newPassengerNic}
+                        onChange={(e) => setNewPassengerNic(e.target.value)}
+                        placeholder="200012345678"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                      {t('coPassengerPhone')}
+                    </label>
+                    <input
+                      type="tel"
+                      value={newPassengerPhone}
+                      onChange={(e) => setNewPassengerPhone(e.target.value)}
+                      placeholder="07XXXXXXXX"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddPassengerModal(false)}
+                      className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={passengerLoading}
+                      className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer disabled:opacity-50"
+                    >
+                      {passengerLoading ? 'Saving...' : 'Save Passenger'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── TAB 3: Security, Alerts & Danger Zone ── */}
+      {activeTab === 'security' && (
+        <div className="space-y-6">
+          {/* Notification & Alert Preferences */}
+          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xl space-y-5">
+            <div>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <Bell className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
+                {t('notificationAlerts')}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Customize how you receive e-tickets, boarding passes, and departure reminders.
+              </p>
+            </div>
+
+            <div className="space-y-4 pt-2">
+              {/* WhatsApp Toggle */}
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/5">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center shrink-0">
+                    <MessageSquare className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 dark:text-white">{t('notifyWhatsappTitle')}</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t('notifyWhatsappDesc')}</p>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={notifyWhatsapp}
+                    onChange={(e) => {
+                      setNotifyWhatsapp(e.target.checked);
+                      updateProfile({ name: currentUser.name, notifyWhatsapp: e.target.checked });
+                    }}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                </label>
+              </div>
+
+              {/* SMS Toggle */}
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/5">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 flex items-center justify-center shrink-0">
+                    <Phone className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 dark:text-white">{t('notifySmsTitle')}</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t('notifySmsDesc')}</p>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={notifySms}
+                    onChange={(e) => {
+                      setNotifySms(e.target.checked);
+                      updateProfile({ name: currentUser.name, notifySms: e.target.checked });
+                    }}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
             </div>
           </div>
 
-          {/* Success Banner */}
-          {passSuccess && (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-2xl flex items-center gap-3 text-sm font-semibold animate-fade-in-up">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-              <span>{passSuccess}</span>
+          {/* Password Change Card */}
+          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+            <div>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
+                {t('changePasswordTitle')}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Ensure your account is using a long, random password to stay secure.
+              </p>
             </div>
-          )}
 
-          {/* Error Banner */}
-          {passError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl flex items-center gap-3 text-sm font-semibold animate-fade-in-up">
-              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-              <span>{passError}</span>
-            </div>
-          )}
-
-          <form onSubmit={handlePasswordSubmit} className="space-y-6 max-w-xl">
-            {/* Current Password */}
-            <div className="space-y-2">
-              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-                {t('currentPasswordLabel')} <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type={showCurrentPass ? 'text' : 'password'}
-                  value={currentPassword}
-                  onBlur={() => setCurrentPassTouched(true)}
-                  onChange={(e) => { setCurrentPassword(e.target.value); setCurrentPassTouched(true); }}
-                  placeholder="Enter current password"
-                  className={`w-full pl-10 pr-10 py-3 rounded-2xl text-sm font-semibold text-slate-800 focus:outline-none transition-all ${
-                    !currentPassTouched
-                      ? 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:bg-white'
-                      : isCurrentPassValid(currentPassword)
-                        ? 'bg-emerald-50/30 border border-emerald-300 focus:ring-2 focus:ring-emerald-500'
-                        : 'bg-rose-50/30 border border-rose-300 focus:ring-2 focus:ring-rose-500'
-                  }`}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowCurrentPass(!showCurrentPass)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-                >
-                  {showCurrentPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+            {passSuccess && (
+              <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 px-4 py-3 rounded-2xl flex items-center gap-3 text-sm font-semibold animate-fade-in-up">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                <span>{passSuccess}</span>
               </div>
-            </div>
+            )}
 
-            {/* New Password */}
-            <div className="space-y-2">
-              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-                {t('newPasswordLabel')} <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type={showNewPass ? 'text' : 'password'}
-                  value={newPassword}
-                  onBlur={() => setNewPassTouched(true)}
-                  onChange={(e) => { setNewPassword(e.target.value); setNewPassTouched(true); }}
-                  placeholder="At least 6 characters"
-                  className={`w-full pl-10 pr-10 py-3 rounded-2xl text-sm font-semibold text-slate-800 focus:outline-none transition-all ${
-                    !newPassTouched
-                      ? 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:bg-white'
-                      : isNewPassValid(newPassword) && newPassword !== currentPassword
-                        ? 'bg-emerald-50/30 border border-emerald-300 focus:ring-2 focus:ring-emerald-500'
-                        : 'bg-rose-50/30 border border-rose-300 focus:ring-2 focus:ring-rose-500'
-                  }`}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPass(!showNewPass)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-                >
-                  {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+            {passError && (
+              <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-2xl flex items-center gap-3 text-sm font-semibold animate-fade-in-up">
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                <span>{passError}</span>
               </div>
+            )}
 
-              {/* Password strength indicator */}
-              {newPassword.length > 0 && (
-                <div className="space-y-1.5 pt-1">
-                  <div className="flex items-center justify-between text-[11px] font-bold">
-                    <span className="text-slate-500">Password Strength:</span>
-                    <span className={getPasswordStrength(newPassword).textColor}>
-                      {getPasswordStrength(newPassword).label}
-                    </span>
-                  </div>
-                  <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden flex gap-1">
-                    <div className={`h-full rounded-full transition-all duration-300 ${
-                      getPasswordStrength(newPassword).score >= 1 ? getPasswordStrength(newPassword).color : 'bg-transparent'
-                    } w-1/3`} />
-                    <div className={`h-full rounded-full transition-all duration-300 ${
-                      getPasswordStrength(newPassword).score >= 2 ? getPasswordStrength(newPassword).color : 'bg-transparent'
-                    } w-1/3`} />
-                    <div className={`h-full rounded-full transition-all duration-300 ${
-                      getPasswordStrength(newPassword).score >= 3 ? getPasswordStrength(newPassword).color : 'bg-transparent'
-                    } w-1/3`} />
+            <form onSubmit={handlePasswordSubmit} className="space-y-6">
+              <div className="space-y-4">
+                {/* Current Password */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    {t('currentPasswordLabel')} <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type={showCurrentPass ? 'text' : 'password'}
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className="w-full pl-10 pr-12 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-medium text-sm focus:outline-none focus:border-blue-500"
+                      placeholder="Enter current password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrentPass(!showCurrentPass)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      {showCurrentPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
-              )}
 
-              {newPassTouched && newPassword === currentPassword && (
-                <p className="text-[11px] text-rose-600 font-semibold pl-1">
-                  New password cannot be the same as your current password.
-                </p>
-              )}
-            </div>
+                {/* New Password */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    {t('newPasswordLabel')} <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type={showNewPass ? 'text' : 'password'}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full pl-10 pr-12 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-medium text-sm focus:outline-none focus:border-blue-500"
+                      placeholder="Enter new password (min. 6 chars)"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPass(!showNewPass)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {newPassword && (
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
+                        <div className={`h-full ${getPasswordStrength(newPassword).color} transition-all`} style={{ width: `${(getPasswordStrength(newPassword).score / 3) * 100}%` }}></div>
+                      </div>
+                      <span className={`text-[10px] font-bold ${getPasswordStrength(newPassword).textColor}`}>
+                        {getPasswordStrength(newPassword).label}
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-            {/* Confirm New Password */}
-            <div className="space-y-2">
-              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-                {t('confirmPasswordLabel')} <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type={showConfirmPass ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onBlur={() => setConfirmPassTouched(true)}
-                  onChange={(e) => { setConfirmPassword(e.target.value); setConfirmPassTouched(true); }}
-                  placeholder="Re-enter new password"
-                  className={`w-full pl-10 pr-10 py-3 rounded-2xl text-sm font-semibold text-slate-800 focus:outline-none transition-all ${
-                    !confirmPassTouched || confirmPassword.length === 0
-                      ? 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:bg-white'
-                      : isPassMatch
-                        ? 'bg-emerald-50/30 border border-emerald-300 focus:ring-2 focus:ring-emerald-500'
-                        : 'bg-rose-50/30 border border-rose-300 focus:ring-2 focus:ring-rose-500'
-                  }`}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPass(!showConfirmPass)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-                >
-                  {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+                {/* Confirm Password */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    {t('confirmPasswordLabel')} <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type={showConfirmPass ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full pl-10 pr-12 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-medium text-sm focus:outline-none focus:border-blue-500"
+                      placeholder="Re-type new password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPass(!showConfirmPass)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              {/* Real-time Match Feedback */}
-              {confirmPassword.length > 0 && (
-                <p className={`text-[11px] font-semibold pl-1 flex items-center gap-1 ${
-                  isPassMatch ? 'text-emerald-600' : 'text-rose-600'
-                }`}>
-                  {isPassMatch ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>Passwords match</span>
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
-                      <span>{t('passwordsDoNotMatch')}</span>
-                    </>
-                  )}
-                </p>
-              )}
-            </div>
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  disabled={passLoading}
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 px-8 rounded-2xl shadow-lg shadow-blue-500/30 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                >
+                  {passLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                  <span>{t('updatePassword')}</span>
+                </button>
+              </div>
+            </form>
+          </div>
 
-            <div className="pt-2 flex justify-end">
+          {/* Danger Zone: Delete Account */}
+          <div className="bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 rounded-3xl p-6 sm:p-8 space-y-4">
+            <div className="flex items-center gap-2.5 text-rose-600 dark:text-rose-400">
+              <ShieldAlert className="w-5 h-5" />
+              <h3 className="text-base font-black">{t('dangerZone')}</h3>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              {t('deleteAccountWarning')}
+            </p>
+            <div className="pt-2">
               <button
-                type="submit"
-                disabled={passLoading || !isCurrentPassValid(currentPassword) || !isNewPassValid(newPassword) || !isPassMatch || newPassword === currentPassword}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-2xl shadow-lg shadow-blue-500/30 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                type="button"
+                onClick={() => setShowDeleteModal(true)}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-sm transition-all cursor-pointer active:scale-95"
               >
-                {passLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Updating...</span>
-                  </>
-                ) : (
-                  <>
-                    <Shield className="w-4 h-4" />
-                    <span>{t('updatePassword')}</span>
-                  </>
-                )}
+                {t('deleteAccountBtn')}
               </button>
             </div>
-          </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB 4: Help & Support (Item 6) ── */}
+      {activeTab === 'support' && (
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+          <div>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
+              {t('helpSupport')}
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              {t('helpSupportDesc')}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+            {/* 24/7 Hotline Call */}
+            <a
+              href="tel:0762581841"
+              className="bg-slate-50 dark:bg-slate-800/60 hover:bg-blue-50/60 dark:hover:bg-blue-950/30 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 flex items-center gap-4 transition-all group cursor-pointer shadow-xs"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-600/30 group-hover:scale-105 transition-transform">
+                <PhoneCall className="w-6 h-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-black text-slate-900 dark:text-white">{t('callHotline')}</h4>
+                <p className="text-xs text-blue-600 dark:text-cyan-400 font-mono font-bold mt-0.5">076 258 1841 / 072 417 3143</p>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">Available 24 hours for booking & seat inquiries</span>
+              </div>
+              <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors shrink-0" />
+            </a>
+
+            {/* WhatsApp Chat Support */}
+            <a
+              href="https://wa.me/94762581841?text=Hi%20Dewmina%20Travels,%20I%20need%20help%20with%20my%20bus%20booking"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-slate-50 dark:bg-slate-800/60 hover:bg-emerald-50/60 dark:hover:bg-emerald-950/30 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 flex items-center gap-4 transition-all group cursor-pointer shadow-xs"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-600/30 group-hover:scale-105 transition-transform">
+                <MessageSquare className="w-6 h-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-black text-slate-900 dark:text-white">{t('whatsappSupport')}</h4>
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-bold mt-0.5">+94 76 258 1841</p>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">Instant chat with online dispatch conductor</span>
+              </div>
+              <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition-colors shrink-0" />
+            </a>
+          </div>
+
+          {/* Cancellation Policy Trigger Card */}
+          <div
+            onClick={() => setShowPolicyModal(true)}
+            className="p-5 rounded-2xl bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/30 dark:to-blue-950/30 border border-indigo-200/60 dark:border-indigo-800/40 flex items-center justify-between cursor-pointer hover:border-indigo-300 transition-all group"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-black text-slate-900 dark:text-white">{t('refundPolicy')}</h4>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                  Read rules regarding ticket rescheduling, cancellations, and bank refunds.
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-indigo-500 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Account Confirmation Modal ── */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 animate-fade-in-up">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950 text-rose-600 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">{t('deleteAccountBtn')}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {t('confirmDeleteAccount')}
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-3 pt-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                className="px-5 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAccountConfirm}
+                disabled={deleteLoading}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-sm transition-all cursor-pointer disabled:opacity-50"
+              >
+                {deleteLoading ? 'Deleting...' : 'Yes, Delete Account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Cancellation Policy Modal ── */}
+      {showPolicyModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-4 animate-fade-in-up max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+              <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-600" />
+                <span>{t('refundPolicy')}</span>
+              </h3>
+              <button
+                onClick={() => setShowPolicyModal(false)}
+                className="p-1 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="space-y-3 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              <div className="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40">
+                <h5 className="font-black text-blue-900 dark:text-blue-300">⏳ Cancellation Timeframes:</h5>
+                <ul className="list-disc list-inside mt-1 space-y-1 text-slate-700 dark:text-slate-300">
+                  <li><strong>Over 24 hours prior to departure:</strong> 90% refund or free date rescheduling.</li>
+                  <li><strong>12 - 24 hours prior:</strong> 75% refund.</li>
+                  <li><strong>Less than 12 hours:</strong> Non-refundable. Please call hotline for emergency seat swaps.</li>
+                </ul>
+              </div>
+              <p>
+                Bank transfer refunds are credited to the originating account within 2-3 business days upon verification by the Dewmina Super Line finance desk.
+              </p>
+              <p>
+                In the rare event of bus breakdown or route alteration, passengers are guaranteed alternative premium seat placement or a 100% full instant refund.
+              </p>
+            </div>
+            <div className="pt-3 flex justify-end">
+              <button
+                onClick={() => setShowPolicyModal(false)}
+                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md cursor-pointer"
+              >
+                Understood
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

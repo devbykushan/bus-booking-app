@@ -125,8 +125,27 @@ export interface UserAccount {
   email: string;
   phone?: string;
   role: 'passenger' | 'admin' | 'super_admin';
+  emergencyContactName?: string | null;
+  emergencyContactPhone?: string | null;
+  notifyWhatsapp?: boolean;
+  notifySms?: boolean;
   permissions?: string[];
   createdAt?: string;
+}
+
+export interface SavedPassenger {
+  id: string;
+  name: string;
+  nic?: string | null;
+  phone?: string | null;
+  gender?: string | null;
+  createdAt: string;
+}
+
+export interface TripStats {
+  completedTrips: number;
+  upcomingTrips: number;
+  totalTrips: number;
 }
 
 export interface UserRole {
