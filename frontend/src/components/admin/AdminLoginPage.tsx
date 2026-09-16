@@ -35,7 +35,12 @@ export const AdminLoginPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       const res = await login(email.trim().toLowerCase(), password, 'admin');
-      if (!res.success) {
+      if (res.success) {
+        if (typeof window !== 'undefined') {
+          window.history.pushState({ view: 'admin-panel' }, '', '/#admin');
+        }
+        setCurrentView('admin-panel');
+      } else {
         setShake(true);
         setErrorMessage(res.message || 'Authentication failed. Please verify your credentials.');
       }

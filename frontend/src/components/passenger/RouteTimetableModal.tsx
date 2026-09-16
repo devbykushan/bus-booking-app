@@ -12,7 +12,7 @@ interface RouteTimetableModalProps {
 
 export const RouteTimetableModal: React.FC<RouteTimetableModalProps> = ({ route, onClose, onBookNow, onEdit }) => {
   const { userRole, currentUser, setShowAuthModal } = useBookingStore();
-  const isAdmin = userRole === 'admin' || currentUser?.role === 'admin';
+  const isAdmin = userRole === 'admin' || userRole === 'super_admin' || currentUser?.role === 'admin' || currentUser?.role === 'super_admin';
 
   // Combine boarding & drop points or generate default timeline
   const boardingStops = route.boardingPoints && route.boardingPoints.length > 0 

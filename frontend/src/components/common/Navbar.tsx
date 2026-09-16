@@ -70,7 +70,7 @@ export const Navbar: React.FC = () => {
     { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
   ];
 
-  const isAdmin = currentUser?.role === 'admin' || userRole === 'admin';
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || userRole === 'admin' || userRole === 'super_admin';
 
   const mobileNavItems = isAdmin
     ? [
@@ -207,9 +207,9 @@ export const Navbar: React.FC = () => {
                 })}
 
                 {/* Admin Portal Tab (Only visible to verified Admins) */}
-                {(userRole === 'admin' || currentUser?.role === 'admin') && (
+                {isAdmin && (
                   <button
-                    onClick={() => { setUserRole('admin'); setCurrentView('admin-panel'); }}
+                    onClick={() => { setUserRole(currentUser?.role === 'super_admin' ? 'super_admin' : 'admin'); setCurrentView('admin-panel'); }}
                     className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
                       currentView === 'admin-panel'
                         ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/30 border border-purple-400 scale-[1.02]'
@@ -344,11 +344,11 @@ export const Navbar: React.FC = () => {
                           {currentUser.name}
                         </span>
                         <span className={`text-[10px] font-mono uppercase tracking-wider font-bold ${
-                          currentUser.role === 'admin' 
+                          isAdmin 
                             ? scrolled ? 'text-purple-600 dark:text-purple-400' : 'text-amber-300' 
                             : scrolled ? 'text-blue-600 dark:text-blue-400' : 'text-cyan-300'
                         }`}>
-                          {currentUser.role}
+                          {currentUser.role === 'super_admin' ? 'Super Admin' : currentUser.role}
                         </span>
                       </div>
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${profileOpen ? 'rotate-180' : ''} ${
@@ -370,10 +370,10 @@ export const Navbar: React.FC = () => {
 
                         {/* Menu Items */}
                         <div className="p-1.5 space-y-1">
-                          {(currentUser?.role === 'admin' || userRole === 'admin') && (
+                          {isAdmin && (
                             <button
                               onClick={() => {
-                                setUserRole('admin');
+                                setUserRole(currentUser?.role === 'super_admin' ? 'super_admin' : 'admin');
                                 setCurrentView('admin-panel');
                                 setProfileOpen(false);
                               }}
@@ -390,7 +390,7 @@ export const Navbar: React.FC = () => {
                             <Ticket className="w-4 h-4 text-blue-600 dark:text-cyan-400 drop-shadow-[0_1px_4px_rgba(59,130,246,0.3)]" />
                             <span>{t('myTickets')}</span>
                           </button>
-                          {currentUser?.role !== 'admin' && userRole !== 'admin' && (
+                          {!isAdmin && (
                             <button
                               onClick={() => { setCurrentView('passenger-settings'); setProfileOpen(false); }}
                               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-cyan-300 hover:bg-blue-500/15 dark:hover:bg-blue-500/20 border border-transparent hover:border-blue-400/30 transition-all duration-200 cursor-pointer active:scale-95"

@@ -37,7 +37,14 @@ export function App() {
     setCurrentView,
   } = useBookingStore();
 
-  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || userRole === 'admin';
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || userRole === 'admin' || userRole === 'super_admin';
+
+  // Automatically redirect authenticated admins from the portal login page directly to the admin dashboard
+  useEffect(() => {
+    if (isAdmin && currentView === 'admin-portal') {
+      setCurrentView('admin-panel');
+    }
+  }, [isAdmin, currentView, setCurrentView]);
 
   const [backendReady, setBackendReady] = useState(routes.length > 0);
   const [backendError, setBackendError] = useState(false);

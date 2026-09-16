@@ -42,7 +42,7 @@ export const UserBookings: React.FC = () => {
 
   const userBookings = React.useMemo(() => {
     if (!currentUser) return [];
-    if (currentUser.role === 'admin') return bookings;
+    if (currentUser.role === 'admin' || currentUser.role === 'super_admin') return bookings;
 
     const userEmail = (currentUser.email || '').trim().toLowerCase();
     const userPhone = (currentUser.phone || '').trim().replace(/[\s-]/g, '');
@@ -277,7 +277,7 @@ export const UserBookings: React.FC = () => {
                   )}
 
                   {b.bookingStatus === 'confirmed' && (() => {
-                    const cancelInfo = getCancellationInfo(b.createdAt, currentUser?.role === 'admin');
+                    const cancelInfo = getCancellationInfo(b.createdAt, currentUser?.role === 'admin' || currentUser?.role === 'super_admin');
                     return cancelInfo.canCancel ? (
                       <button
                         onClick={() => handleCancel(b.pnr, cancelInfo.canCancel, cancelInfo.text)}

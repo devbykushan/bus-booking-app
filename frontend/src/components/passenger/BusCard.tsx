@@ -34,7 +34,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
     setSelectedRoute, setCurrentView, searchDate, setSearchCriteria,
     routes, userRole, currentUser, setShowAuthModal, language, t 
   } = useBookingStore();
-  const isAdmin = userRole === 'admin' || currentUser?.role === 'admin';
+  const isAdmin = userRole === 'admin' || userRole === 'super_admin' || currentUser?.role === 'admin' || currentUser?.role === 'super_admin';
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showTimetableModal, setShowTimetableModal] = useState(false);

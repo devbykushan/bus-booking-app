@@ -25,18 +25,22 @@ export const AdminDashboard: React.FC = () => {
 
   const hasPermission = (permKey: string): boolean => {
     if (isSuperAdmin) return true;
+    // Backward compatibility: Any standard admin with no specific permission restrictions gets full operational access
+    if (currentUser?.role === 'admin' && (!currentUser?.permissions || currentUser.permissions.length === 0)) {
+      return true;
+    }
     return currentUser?.permissions?.includes(permKey) || false;
   };
 
   const getDefaultTab = (): AdminDashboardTab => {
     if (isSuperAdmin) return 'fleet';
+    if (hasPermission('fleet_management')) return 'fleet';
     if (hasPermission('counter_booking')) return 'counter-booking';
     if (hasPermission('slips_approval')) return 'payment-slips';
-    if (hasPermission('fleet_management')) return 'fleet';
     if (hasPermission('timetable_management')) return 'timetables';
     if (hasPermission('analytics')) return 'analytics';
     if (hasPermission('whatsapp')) return 'whatsapp';
-    return 'counter-booking';
+    return 'fleet';
   };
 
   const [activeTab, setActiveTab] = useState<AdminDashboardTab>(getDefaultTab);

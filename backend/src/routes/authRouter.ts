@@ -257,18 +257,12 @@ authRouter.post('/login', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Incorrect password. Please verify your password and try again.' });
     }
 
-    // 3. Verify strict role matching between requested login tab and actual user account role
+    // 3. Verify role authorization: if admin portal requested, ensure account has admin role
     const isAdminRole = dbUser.role === 'admin' || dbUser.role === 'super_admin';
 
     if (role === 'admin' && !isAdminRole) {
       return res.status(403).json({
         error: 'Access denied. Your account does not have administrator privileges.',
-      });
-    }
-
-    if (role === 'passenger' && isAdminRole) {
-      return res.status(403).json({
-        error: 'This is an Administrative account. Please switch to the Staff Portal to sign in.',
       });
     }
 

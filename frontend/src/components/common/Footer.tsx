@@ -8,7 +8,7 @@ import { RealisticBusAnimation } from './RealisticBusAnimation';
 import { AnimatedLogoBadge } from './AnimatedLogoBadge';
 
 export const Footer: React.FC = () => {
-  const { goToSearchSchedules, setSearchCriteria, setCurrentView, currentUser, userRole, setUserRole, setShowAuthModal } = useBookingStore();
+  const { goToSearchSchedules, setSearchCriteria, setCurrentView, currentUser, userRole, setUserRole } = useBookingStore();
   const [currentSocialIndex, setCurrentSocialIndex] = useState<0 | 1>(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -371,13 +371,14 @@ export const Footer: React.FC = () => {
               <button onClick={() => setCurrentView('my-bookings')} className="hover:text-blue-600 transition-colors">My Tickets</button>
               <button
                 onClick={() => {
-                  if (currentUser?.role === 'admin' || userRole === 'admin') {
-                    setUserRole('admin');
+                  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || userRole === 'admin' || userRole === 'super_admin';
+                  if (isAdmin) {
+                    setUserRole(currentUser?.role === 'super_admin' ? 'super_admin' : 'admin');
                     setCurrentView('admin-panel');
                   } else if (currentUser) {
                     setCurrentView('admin-panel');
                   } else {
-                    setShowAuthModal(true);
+                    setCurrentView('admin-portal');
                   }
                 }}
                 className="hover:text-blue-600 transition-colors cursor-pointer"

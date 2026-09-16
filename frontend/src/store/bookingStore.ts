@@ -115,8 +115,8 @@ interface BookingStore {
   setTheme: (theme: 'light' | 'dark') => void;
 
   // Role switching
-  userRole: 'passenger' | 'admin';
-  setUserRole: (role: 'passenger' | 'admin') => void;
+  userRole: 'passenger' | 'admin' | 'super_admin';
+  setUserRole: (role: 'passenger' | 'admin' | 'super_admin') => void;
 
   // Session ID (for seat locking)
   sessionId: string;
@@ -350,10 +350,12 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
 
     if (pushHistory !== false && typeof window !== 'undefined') {
       const hash = VIEW_HASH_MAP[view] || 'home';
+      const cleanPath = window.location.pathname.replace(/^\/+|\/+$/g, '');
+      const targetUrl = cleanPath && cleanPath !== '' ? `/#${hash}` : `#${hash}`;
       window.history.pushState(
         { view, routeId: get().selectedRoute?.id },
         '',
-        `#${hash}`
+        targetUrl
       );
     }
     set({ currentView: view });

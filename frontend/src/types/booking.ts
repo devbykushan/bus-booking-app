@@ -133,6 +133,12 @@ export interface UserRole {
   role: 'passenger' | 'admin' | 'super_admin';
 }
 
+export const isAdminUser = (user?: UserAccount | null, role?: string | null): boolean => {
+  if (user?.role === 'admin' || user?.role === 'super_admin') return true;
+  if (role === 'admin' || role === 'super_admin') return true;
+  return false;
+};
+
 export interface AnalyticsSummary {
   totalRevenue: number;
   totalBookings: number;
