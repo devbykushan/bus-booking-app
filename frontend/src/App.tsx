@@ -101,20 +101,19 @@ export function App() {
       pathname && HASH_VIEW_MAP[pathname] ? `/${pathname}` : `#${initialHash}`
     );
 
-    const handlePopState = (event: PopStateEvent) => {
-      const state = event.state;
+    const handlePopState = (event?: PopStateEvent | HashChangeEvent) => {
+      const state = (event as PopStateEvent)?.state;
       let targetView: AppView = 'passenger-search';
 
-      if (state && state.view && (HASH_VIEW_MAP[state.view] || VIEW_HASH_MAP[state.view as AppView])) {
+      const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+      const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+
+      if (path && HASH_VIEW_MAP[path]) {
+        targetView = HASH_VIEW_MAP[path];
+      } else if (hash && HASH_VIEW_MAP[hash]) {
+        targetView = HASH_VIEW_MAP[hash];
+      } else if (state && state.view && (HASH_VIEW_MAP[state.view] || VIEW_HASH_MAP[state.view as AppView])) {
         targetView = (HASH_VIEW_MAP[state.view] || state.view) as AppView;
-      } else {
-        const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
-        const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
-        if (path && HASH_VIEW_MAP[path]) {
-          targetView = HASH_VIEW_MAP[path];
-        } else if (hash && HASH_VIEW_MAP[hash]) {
-          targetView = HASH_VIEW_MAP[hash];
-        }
       }
 
       // If returning to a seat selection view, restore route if possible
@@ -137,7 +136,11 @@ export function App() {
     };
 
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handlePopState);
+    };
   }, []);
 
   // On app start: Parallelize health ping, routes load, and bookings load (Eliminate waterfall)
