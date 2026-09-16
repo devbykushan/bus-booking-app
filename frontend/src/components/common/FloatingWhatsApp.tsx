@@ -203,19 +203,14 @@ export const FloatingWhatsApp: React.FC = () => {
   };
 
   const handleActionClick = (action: any) => {
-    if (action.type === 'VIEW_SCHEDULES') {
+    if (action.type === 'VIEW_SCHEDULES' || action.type === 'BOOK_SEAT') {
       setCurrentView('schedules-dashboard');
       setIsOpen(false);
-    } else if (action.type === 'BOOK_SEAT') {
-      setCurrentView('passenger-search');
-      setIsOpen(false);
-      setTimeout(() => {
-        const searchEl = document.getElementById('search-routes') || document.querySelector('section');
-        searchEl?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (action.type === 'VIEW_SLIP_UPLOAD') {
       setCurrentView('slip-upload');
       setIsOpen(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (action.type === 'WHATSAPP_CONTACT') {
       const num = action.data?.number || '94762581841';
       handleOpenWhatsapp(num, 'Hello Dewmina Super Line, I need assistance.');

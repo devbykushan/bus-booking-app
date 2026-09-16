@@ -212,6 +212,7 @@ export const HeroSearch: React.FC = () => {
           style={{ animationDelay: '0.5s' }}
         >
           <form
+            id="search-routes"
             onSubmit={handleSearchSubmit}
             className="relative bg-white/15 md:bg-white/10 backdrop-blur-xl border border-white/30 md:border-white/25
                        rounded-2.5xl md:rounded-3xl shadow-2xl shadow-black/35 p-3 sm:p-5 md:p-8 space-y-2.5 sm:space-y-4 md:space-y-5
