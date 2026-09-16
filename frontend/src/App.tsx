@@ -46,9 +46,10 @@ export function App() {
     }
   }, [isAdmin, currentView, setCurrentView]);
 
-  const [backendReady, setBackendReady] = useState(routes.length > 0);
+  const [, setBackendReady] = useState(routes.length > 0);
   const [backendError, setBackendError] = useState(false);
   const [isWakingUp, setIsWakingUp] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // Initialize theme
   useEffect(() => {
@@ -143,9 +144,20 @@ export function App() {
     };
   }, []);
 
-  // On app start: Parallelize health ping, routes load, and bookings load (Eliminate waterfall)
+  // On app start: Parallelize health ping, routes load, bookings load, and hero image preload
   useEffect(() => {
     let isMounted = true;
+
+    // Minimum display timer (800ms) for smooth aesthetic presentation
+    const minTimer = new Promise((resolve) => setTimeout(resolve, 800));
+
+    // Preload hero bus image so it is 100% ready before revealing the page
+    const imagePromise = new Promise<void>((resolve) => {
+      const img = new Image();
+      img.src = '/yutong-hero.jpg';
+      img.onload = () => resolve();
+      img.onerror = () => resolve();
+    });
 
     // Detect if cloud server (Render free tier) takes more than 3.5s to wake up
     const wakeUpTimer = setTimeout(() => {
@@ -162,12 +174,13 @@ export function App() {
           .then((res) => res.ok)
           .catch(() => false);
 
-        await Promise.allSettled([routesPromise, bookingsPromise, healthPromise]);
+        await Promise.allSettled([routesPromise, bookingsPromise, healthPromise, imagePromise, minTimer]);
 
         if (!isMounted) return;
         clearTimeout(wakeUpTimer);
         setIsWakingUp(false);
         setBackendReady(true);
+        setIsInitialLoading(false);
 
         // Check if app was opened via scanned QR code URL (e.g. #validate?pnr=OMNI-12345 or ?pnr=OMNI-12345)
         const fullUrl = window.location.href;
@@ -218,11 +231,9 @@ export function App() {
   }
 
   // ─── Initial Startup Loading Splash ───
-  const shouldBlock = routes.length === 0 && !backendReady;
-
-  if (shouldBlock) {
+  if (isInitialLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 gap-5 px-4 animate-fade-in">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 gap-5 px-4 animate-fade-in select-none">
         <div className="relative w-16 h-16">
           <div className="absolute inset-0 rounded-full border-4 border-blue-100 dark:border-slate-800 border-t-blue-500 animate-spin" />
           <Bus className="absolute inset-0 m-auto w-7 h-7 text-blue-500" />
