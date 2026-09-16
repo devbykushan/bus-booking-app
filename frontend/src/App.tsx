@@ -144,20 +144,28 @@ export function App() {
     };
   }, []);
 
-  // On app start: Parallelize health ping, routes load, bookings load, and hero image preload
+  // On app start: Parallelize routes load, bookings load, and fast hero image preload
   useEffect(() => {
     let isMounted = true;
 
-    // Minimum display timer (800ms) for smooth aesthetic presentation
-    const minTimer = new Promise((resolve) => setTimeout(resolve, 800));
+    // Fast aesthetic minimum timer (only 250ms - snappy and responsive)
+    const minTimer = new Promise((resolve) => setTimeout(resolve, 250));
 
-    // Preload hero bus image so it is 100% ready before revealing the page
+    // Preload hero bus image so it is ready before revealing the page
     const imagePromise = new Promise<void>((resolve) => {
       const img = new Image();
       img.src = '/yutong-hero.jpg';
+      if (img.complete) {
+        resolve();
+        return;
+      }
       img.onload = () => resolve();
       img.onerror = () => resolve();
+      setTimeout(resolve, 1200); // Safety timeout so it never hangs
     });
+
+    // Run health check in background without blocking initial UI
+    fetch(`${BASE_URL}/health`, { signal: AbortSignal.timeout(10000) }).catch(() => false);
 
     // Detect if cloud server (Render free tier) takes more than 3.5s to wake up
     const wakeUpTimer = setTimeout(() => {
@@ -170,11 +178,9 @@ export function App() {
       try {
         const routesPromise = loadRoutes();
         const bookingsPromise = loadBookings();
-        const healthPromise = fetch(`${BASE_URL}/health`, { signal: AbortSignal.timeout(25000) })
-          .then((res) => res.ok)
-          .catch(() => false);
 
-        await Promise.allSettled([routesPromise, bookingsPromise, healthPromise, imagePromise, minTimer]);
+        // Complete initial loading as soon as image and routes resolve
+        await Promise.allSettled([imagePromise, minTimer, routesPromise, bookingsPromise]);
 
         if (!isMounted) return;
         clearTimeout(wakeUpTimer);
