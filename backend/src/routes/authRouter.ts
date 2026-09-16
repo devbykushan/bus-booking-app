@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { OAuth2Client } from 'google-auth-library';
 import { dbQuery, hashPassword, verifyPassword } from '../db/database';
 import { sendAccountCreationEmail, sendOTPEmail, lastEmailError } from '../services/emailService';
-import { sendWhatsAppOtp } from '../services/wahaService';
+import { sendWhatsAppOtp, sendWhatsAppMessage } from '../services/wahaService';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '846634088514-gl0r0g50m3omomtf24sh44qpbapbrsg3.apps.googleusercontent.com';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -300,6 +300,32 @@ authRouter.post('/login', async (req: Request, res: Response) => {
       permissions: parsedPermissions,
       createdAt: dbUser.createdAt,
     };
+
+    // Non-blocking WhatsApp alert to Super Admin on any admin/super_admin login
+    if (isAdminRole) {
+      const superAdminPhone = process.env.SUPER_ADMIN_WHATSAPP || '';
+      if (superAdminPhone) {
+        const now = new Date().toLocaleString('en-GB', {
+          timeZone: 'Asia/Colombo',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+        });
+        const alertMsg =
+          `🔐 *Admin Login Alert — Dewmina Super Line*\n\n` +
+          `👤 *Name:* ${user.name}\n` +
+          `📧 *Email:* ${user.email}\n` +
+          `🛡️ *Role:* ${user.role}\n` +
+          `🕐 *Time:* ${now} (SL)\n\n` +
+          `_This is an automatic security notification._`;
+        sendWhatsAppMessage(superAdminPhone, alertMsg).catch((err) => {
+          console.warn('[AuthRouter] Admin login WhatsApp alert failed (non-critical):', err);
+        });
+      }
+    }
 
     return res.json({
       success: true,
