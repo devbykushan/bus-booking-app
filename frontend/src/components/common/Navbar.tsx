@@ -151,12 +151,7 @@ export const Navbar: React.FC = () => {
       return;
     }
 
-    const requiresAuth = view === 'live-tracking' || view === 'my-bookings';
-    if (requiresAuth && !currentUser) {
-      setCurrentView(view as any);
-      setShowAuthModal(true);
-      return;
-    }
+
 
     if (view === 'passenger-search') {
       goToHome();
