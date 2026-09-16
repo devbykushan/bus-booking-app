@@ -52,10 +52,10 @@ export function App() {
   const [initialSplashDone, setInitialSplashDone] = useState(false);
 
   useEffect(() => {
-    // Show splash for 1.2s on startup, then gracefully reveal home page even if cloud server is waking up
+    // Show splash for 1.0s on initial app launch
     const splashTimer = setTimeout(() => {
       setInitialSplashDone(true);
-    }, 1200);
+    }, 1000);
     return () => clearTimeout(splashTimer);
   }, []);
 
@@ -226,18 +226,16 @@ export function App() {
     );
   }
 
-  // ─── Initial Startup Loading Splash (Only on first app launch for 1.2s) ───
-  const shouldBlock = !initialSplashDone && routes.length === 0 && !backendReady;
-
-  if (shouldBlock) {
+  // ─── Initial Startup Loading Splash (Shown on app open for 1s) ───
+  if (!initialSplashDone) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 gap-5 px-4 animate-fade-in">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 gap-5 px-4 animate-fade-in transition-colors duration-300">
         <div className="relative w-16 h-16">
           <div className="absolute inset-0 rounded-full border-4 border-blue-100 dark:border-slate-800 border-t-blue-500 animate-spin" />
-          <Bus className="absolute inset-0 m-auto w-7 h-7 text-blue-500" />
+          <Bus className="absolute inset-0 m-auto w-7 h-7 text-blue-600 dark:text-blue-400" />
         </div>
         <div className="text-center">
-          <p className="font-black text-xl tracking-tight bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 bg-clip-text text-transparent drop-shadow-xs">
+          <p className="font-black text-xl tracking-tight text-blue-shimmer drop-shadow-xs">
             Dewmina Super Line…
           </p>
         </div>
@@ -254,7 +252,7 @@ export function App() {
       <Navbar />
 
       {/* Cloud Server Wake-up notification (Render free tier cold start notification) */}
-      {isWakingUp && routes.length === 0 && (
+      {isWakingUp && routes.length === 0 && !backendReady && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-amber-500/90 dark:bg-amber-600/90 backdrop-blur-xl text-white text-xs font-bold shadow-xl flex items-center gap-2.5 animate-bounce-short border border-amber-300/40">
           <span className="w-2 h-2 rounded-full bg-white animate-ping" />
           <span>Connecting to cloud server... Live bus schedules will update momentarily.</span>
