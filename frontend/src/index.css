@@ -2148,3 +2148,48 @@ html {
   animation: blueShimmer 3s linear infinite;
 }
 
+/* ─── Apple iOS Liquid Glass Effect ─── */
+.ios-liquid-glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(32px) saturate(190%);
+  -webkit-backdrop-filter: blur(32px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 
+    0 25px 50px -12px rgba(30, 58, 138, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+    0 2px 4px 0 rgba(255, 255, 255, 0.95) inset;
+}
+
+.ios-input-glass {
+  background: rgba(248, 250, 252, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03) inset;
+}
+
+.ios-input-glass:focus {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14), 0 1px 2px 0 rgba(0, 0, 0, 0.03) inset;
+}
+
+@keyframes floatSlowOrb1 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(30px, -20px) scale(1.08); }
+}
+
+@keyframes floatSlowOrb2 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(-25px, 25px) scale(1.06); }
+}
+
+.animate-orb-1 {
+  animation: floatSlowOrb1 12s ease-in-out infinite;
+}
+
+.animate-orb-2 {
+  animation: floatSlowOrb2 15s ease-in-out infinite;
+}
+
+
