@@ -13,6 +13,7 @@ import { BroadcastAnnouncementModal } from './BroadcastAnnouncementModal';
 import { PromoCodesManager } from './PromoCodesManager';
 import { DailyFinancialSettlementModal } from './DailyFinancialSettlementModal';
 import { SeatBlockManagerModal } from './SeatBlockManagerModal';
+import { LiveMap } from '../passenger/LiveMap';
 import { routesApi, authApi, paymentSlipsApi } from '../../services/api';
 import type { BusRoute } from '../../types/booking';
 import { 
@@ -20,13 +21,13 @@ import {
   SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
   Trash2, RefreshCw, Edit3, Clock, Star, Search,
   Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare, Menu, Shield,
-  Printer, Wrench
+  Printer, Wrench, MapPin
 } from 'lucide-react';
 
-export type AdminDashboardTab = 'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp' | 'counter-booking' | 'staff' | 'promos';
+export type AdminDashboardTab = 'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp' | 'counter-booking' | 'staff' | 'promos' | 'live-gps';
 
 export const AdminDashboard: React.FC = () => {
-  const { bookings, routes, loadRoutes, loadBookings, currentUser } = useBookingStore();
+  const { bookings, routes, loadRoutes, loadBookings, currentUser, adminActiveTab, setAdminActiveTab } = useBookingStore();
   const isSuperAdmin = currentUser?.role === 'super_admin';
 
   const hasPermission = (permKey: string): boolean => {
@@ -49,7 +50,25 @@ export const AdminDashboard: React.FC = () => {
     return 'fleet';
   };
 
-  const [activeTab, setActiveTab] = useState<AdminDashboardTab>(getDefaultTab);
+  const [activeTab, setActiveTabState] = useState<AdminDashboardTab>(() => {
+    const validTabs = ['fleet', 'timetables', 'analytics', 'users', 'payment-slips', 'whatsapp', 'counter-booking', 'staff', 'promos', 'live-gps'];
+    if (adminActiveTab && validTabs.includes(adminActiveTab)) {
+      return adminActiveTab as AdminDashboardTab;
+    }
+    return getDefaultTab();
+  });
+
+  const setActiveTab = (tab: AdminDashboardTab) => {
+    setActiveTabState(tab);
+    setAdminActiveTab(tab);
+  };
+
+  useEffect(() => {
+    const validTabs = ['fleet', 'timetables', 'analytics', 'users', 'payment-slips', 'whatsapp', 'counter-booking', 'staff', 'promos', 'live-gps'];
+    if (adminActiveTab && validTabs.includes(adminActiveTab) && adminActiveTab !== activeTab) {
+      setActiveTabState(adminActiveTab as AdminDashboardTab);
+    }
+  }, [adminActiveTab]);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [selectedRouteId, setSelectedRouteId] = useState<string>(routes[0]?.id || '');
@@ -318,6 +337,7 @@ export const AdminDashboard: React.FC = () => {
             {activeTab === 'payment-slips' && 'Payment Slips'}
             {activeTab === 'whatsapp' && 'WhatsApp Gateway'}
             {activeTab === 'promos' && 'Promo Codes & Discounts'}
+            {activeTab === 'live-gps' && 'Live GPS Fleet Tracking'}
           </span>
         </div>
       </div>
@@ -397,25 +417,21 @@ export const AdminDashboard: React.FC = () => {
                 </button>
               )}
 
-              {hasPermission('slips_approval') && (
-                <button
-                  onClick={() => { setActiveTab('payment-slips'); setIsMobileNavOpen(false); }}
-                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                    activeTab === 'payment-slips' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4" /> Payment Slips
-                  </div>
-                  {paymentSlips.filter(s => s.status === 'pending').length > 0 && (
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                      activeTab === 'payment-slips' ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-700'
-                    }`}>
-                      {paymentSlips.filter(s => s.status === 'pending').length}
-                    </span>
-                  )}
-                </button>
-              )}
+              <button
+                onClick={() => { setActiveTab('live-gps'); setIsMobileNavOpen(false); }}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'live-gps' ? 'bg-cyan-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" /> Live GPS Fleet Tracking
+                </div>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                  activeTab === 'live-gps' ? 'bg-white/20 text-white' : 'bg-cyan-100 text-cyan-700'
+                }`}>
+                  LIVE
+                </span>
+              </button>
 
               {hasPermission('whatsapp') && (
                 <button
@@ -582,25 +598,21 @@ export const AdminDashboard: React.FC = () => {
               </button>
             )}
 
-            {hasPermission('slips_approval') && (
-              <button
-                onClick={() => setActiveTab('payment-slips')}
-                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                  activeTab === 'payment-slips' ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4" /> Payment Slips
-                </div>
-                {paymentSlips.filter(s => s.status === 'pending').length > 0 && (
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                    activeTab === 'payment-slips' ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-700'
-                  }`}>
-                    {paymentSlips.filter(s => s.status === 'pending').length}
-                  </span>
-                )}
-              </button>
-            )}
+            <button
+              onClick={() => setActiveTab('live-gps')}
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                activeTab === 'live-gps' ? 'bg-cyan-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4" /> Live GPS Fleet Tracking
+              </div>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                activeTab === 'live-gps' ? 'bg-white/20 text-white' : 'bg-cyan-100 text-cyan-700'
+              }`}>
+                LIVE
+              </span>
+            </button>
 
             {hasPermission('whatsapp') && (
               <button
@@ -1399,6 +1411,13 @@ export const AdminDashboard: React.FC = () => {
             )}
           </div>
 
+        </div>
+      )}
+
+      {/* ─── TAB: LIVE GPS FLEET TELEMETRY ─── */}
+      {activeTab === 'live-gps' && (
+        <div className="space-y-6 animate-fade-in-up">
+          <LiveMap />
         </div>
       )}
 

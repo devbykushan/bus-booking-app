@@ -221,6 +221,8 @@ interface BookingStore {
   adminReadSlipIds: string[];
   markSlipAsRead: (slipId: string) => void;
   markAllSlipsAsRead: () => void;
+  adminActiveTab: string;
+  setAdminActiveTab: (tab: string) => void;
 
   // Localization
   language: Language;
@@ -874,6 +876,8 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     localStorage.setItem('admin_read_slips', JSON.stringify(updated));
     set({ adminReadSlipIds: updated });
   },
+  adminActiveTab: 'fleet',
+  setAdminActiveTab: (tab: string) => set({ adminActiveTab: tab }),
 
   // Localization Implementation
   language: (localStorage.getItem('dewmina_lang') as Language) || 'english',

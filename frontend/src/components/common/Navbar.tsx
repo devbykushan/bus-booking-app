@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { AuthModal } from './AuthModal';
-import { Bus, MapPin, Ticket, Clock, ShieldCheck, LogOut, LogIn, ChevronDown, Globe, Route, Settings, Moon, Sun, User, Bell } from 'lucide-react';
+import { Bus, MapPin, Ticket, Clock, ShieldCheck, LogOut, LogIn, ChevronDown, Globe, Route, Settings, Moon, Sun, User, Bell, DollarSign } from 'lucide-react';
 import { AnimatedLogoBadge } from './AnimatedLogoBadge';
 
 export const Navbar: React.FC = () => {
@@ -29,7 +29,9 @@ export const Navbar: React.FC = () => {
     isNotificationDrawerOpen,
     setIsNotificationDrawerOpen,
     adminReadSlipIds,
-    markAllSlipsAsRead
+    markAllSlipsAsRead,
+    adminActiveTab,
+    setAdminActiveTab
   } = useBookingStore();
 
   
@@ -69,14 +71,29 @@ export const Navbar: React.FC = () => {
     return `${mins}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  const navItems = [
-    { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
-    { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
-    { key: 'live-tracking', translationKey: 'liveGps', icon: MapPin, activeOn: ['live-tracking'] },
-    { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
-  ];
+  const pendingSlipsCount = paymentSlips.filter((s) => s.status === 'pending').length;
 
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || userRole === 'admin' || userRole === 'super_admin';
+
+  const navItems = isAdmin
+    ? [
+        { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
+        { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
+        { 
+          key: 'admin-payment-slips', 
+          label: language === 'sinhala' ? 'ගෙවීම් Slips' : language === 'tamil' ? 'கட்டண ரசீது' : 'Payment Slips', 
+          icon: DollarSign, 
+          activeOn: ['admin-payment-slips'],
+          badgeCount: pendingSlipsCount,
+        },
+        { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
+      ]
+    : [
+        { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
+        { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
+        { key: 'live-tracking', translationKey: 'liveGps', icon: MapPin, activeOn: ['live-tracking'] },
+        { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
+      ];
 
   // Background polling for payment slips when admin is logged in
   useEffect(() => {
@@ -93,7 +110,14 @@ export const Navbar: React.FC = () => {
     ? [
         { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
         { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
-        { key: 'live-tracking', translationKey: 'liveGps', icon: MapPin, activeOn: ['live-tracking'] },
+        { 
+          key: 'admin-payment-slips', 
+          label: language === 'sinhala' ? 'Slips' : language === 'tamil' ? 'ரசீது' : 'Payment Slips', 
+          icon: DollarSign, 
+          activeOn: ['admin-payment-slips'],
+          badgeCount: pendingSlipsCount,
+          isAdminTab: true 
+        },
         { 
           key: 'admin-panel', 
           label: currentUser?.role === 'super_admin' || userRole === 'super_admin' ? 'Super Admin' : 'Admin', 
@@ -128,7 +152,7 @@ export const Navbar: React.FC = () => {
           key: 'sign-out', 
           label: language === 'sinhala' ? 'පිටවෙන්න' : language === 'tamil' ? 'வெளியேறு' : 'Sign Out', 
           icon: LogOut, 
-          activeOn: [],
+          activeOn: [], 
           isDanger: true,
         },
       ]
@@ -144,7 +168,25 @@ export const Navbar: React.FC = () => {
         },
       ];
 
-  const isActive = (activeOn: string[]) => activeOn.includes(currentView);
+  const isActive = (itemOrArray: any) => {
+    if (typeof itemOrArray === 'string') return currentView === itemOrArray;
+    if (Array.isArray(itemOrArray)) {
+      if (itemOrArray.includes('admin-payment-slips')) {
+        return currentView === 'admin-panel' && adminActiveTab === 'payment-slips';
+      }
+      if (itemOrArray.includes('admin-panel')) {
+        return currentView === 'admin-panel' && adminActiveTab !== 'payment-slips';
+      }
+      return itemOrArray.includes(currentView);
+    }
+    if (itemOrArray?.key === 'admin-payment-slips') {
+      return currentView === 'admin-panel' && adminActiveTab === 'payment-slips';
+    }
+    if (itemOrArray?.key === 'admin-panel') {
+      return currentView === 'admin-panel' && adminActiveTab !== 'payment-slips';
+    }
+    return (itemOrArray?.activeOn || []).includes(currentView);
+  };
 
   const handleNavItemClick = (view: string) => {
     if (view === 'sign-in') {
@@ -157,8 +199,18 @@ export const Navbar: React.FC = () => {
       return;
     }
 
+    if (view === 'admin-payment-slips') {
+      setUserRole(currentUser?.role === 'super_admin' ? 'super_admin' : 'admin');
+      setAdminActiveTab('payment-slips');
+      setCurrentView('admin-panel');
+      return;
+    }
+
     if (view === 'admin-panel') {
       setUserRole(currentUser?.role === 'super_admin' ? 'super_admin' : 'admin');
+      if (adminActiveTab === 'payment-slips') {
+        setAdminActiveTab('fleet');
+      }
       setCurrentView('admin-panel');
       return;
     }
@@ -167,8 +219,6 @@ export const Navbar: React.FC = () => {
       setCurrentView('passenger-settings');
       return;
     }
-
-
 
     if (view === 'passenger-search') {
       goToHome();
@@ -220,7 +270,7 @@ export const Navbar: React.FC = () => {
               }`}>
                 {navItems.map((item) => {
                   const Icon = item.icon;
-                  const active = isActive(item.activeOn);
+                  const active = isActive(item);
                   return (
                     <button
                       key={item.key}
@@ -234,7 +284,12 @@ export const Navbar: React.FC = () => {
                       }`}
                     >
                       <Icon className={`w-4 h-4 ${active ? 'text-white' : scrolled ? 'text-slate-500 group-hover:text-slate-900' : 'text-white/80'}`} />
-                      <span>{t(item.translationKey)}</span>
+                      <span>{item.label || (item.translationKey ? t(item.translationKey) : item.key)}</span>
+                      {item.badgeCount !== undefined && item.badgeCount > 0 && (
+                        <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-orange-600 text-white shadow-xs animate-pulse">
+                          {item.badgeCount}
+                        </span>
+                      )}
                       {item.key === 'live-tracking' && (
                         <span className={`px-1.5 py-0.5 text-[9px] font-black uppercase rounded-md tracking-wider ${
                           active ? 'bg-white/20 text-white border border-white/30' : 'bg-amber-100 text-amber-700 border border-amber-200/70'
@@ -509,7 +564,7 @@ export const Navbar: React.FC = () => {
           <div className="relative z-10 flex items-center justify-around gap-1">
             {mobileNavItems.map((item: any) => {
               const Icon = item.icon;
-              const active = isActive(item.activeOn);
+              const active = isActive(item);
               const isAdminItem = item.isAdminTab;
               const isDangerItem = item.isDanger;
               return (
@@ -526,15 +581,22 @@ export const Navbar: React.FC = () => {
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-white/40 dark:hover:bg-white/5 font-bold border border-transparent'
                   }`}
                 >
-                  <Icon className={`w-5 h-5 transition-all duration-200 ${
-                    active 
-                      ? isAdminItem 
-                        ? 'text-purple-600 dark:text-purple-300 drop-shadow-[0_2px_6px_rgba(168,85,247,0.4)] scale-105' 
-                        : 'text-blue-600 dark:text-cyan-300 drop-shadow-[0_2px_6px_rgba(59,130,246,0.4)] scale-105' 
-                      : isDangerItem
-                        ? 'text-red-500 dark:text-red-400 opacity-90'
-                        : 'opacity-85'
-                  }`} />
+                  <div className="relative flex items-center justify-center">
+                    <Icon className={`w-5 h-5 transition-all duration-200 ${
+                      active 
+                        ? isAdminItem 
+                          ? 'text-purple-600 dark:text-purple-300 drop-shadow-[0_2px_6px_rgba(168,85,247,0.4)] scale-105' 
+                          : 'text-blue-600 dark:text-cyan-300 drop-shadow-[0_2px_6px_rgba(59,130,246,0.4)] scale-105' 
+                        : isDangerItem
+                          ? 'text-red-500 dark:text-red-400 opacity-90'
+                          : 'opacity-85'
+                    }`} />
+                    {item.badgeCount !== undefined && item.badgeCount > 0 && (
+                      <span className="absolute -top-1.5 -right-2.5 px-1 min-w-[15px] h-3.5 rounded-full bg-orange-600 text-white font-black text-[9px] flex items-center justify-center shadow-xs animate-pulse">
+                        {item.badgeCount}
+                      </span>
+                    )}
+                  </div>
                   <span className={`text-[10px] text-center leading-tight truncate w-full mt-0.5 font-sans tracking-tight ${
                     isDangerItem ? 'text-red-500 dark:text-red-400 font-medium' : ''
                   }`}>
