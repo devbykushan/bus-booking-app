@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { AuthModal } from './AuthModal';
-import { Bus, MapPin, Ticket, Clock, ShieldCheck, LogOut, LogIn, ChevronDown, Globe, Route, Settings, Moon, Sun, User } from 'lucide-react';
+import { Bus, MapPin, Ticket, Clock, ShieldCheck, LogOut, LogIn, ChevronDown, Globe, Route, Settings, Moon, Sun, User, Bell } from 'lucide-react';
 import { AnimatedLogoBadge } from './AnimatedLogoBadge';
 
 export const Navbar: React.FC = () => {
@@ -23,7 +23,13 @@ export const Navbar: React.FC = () => {
     setLanguage,
     theme,
     setTheme,
-    t
+    t,
+    paymentSlips,
+    loadPaymentSlips,
+    isNotificationDrawerOpen,
+    setIsNotificationDrawerOpen,
+    adminReadSlipIds,
+    markAllSlipsAsRead
   } = useBookingStore();
 
   
@@ -71,6 +77,17 @@ export const Navbar: React.FC = () => {
   ];
 
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || userRole === 'admin' || userRole === 'super_admin';
+
+  // Background polling for payment slips when admin is logged in
+  useEffect(() => {
+    if (isAdmin) {
+      loadPaymentSlips();
+      const interval = setInterval(() => {
+        loadPaymentSlips(true);
+      }, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [isAdmin]);
 
   const mobileNavItems = isAdmin
     ? [
@@ -284,67 +301,94 @@ export const Navbar: React.FC = () => {
                   )}
                 </button>
 
-                {/* Language Selector (iOS Glass Pill) */}
-                <div className="relative" ref={langRef}>
-                  <button
-                    onClick={() => setLangOpen(!langOpen)}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-200 cursor-pointer shadow-xs font-extrabold active:scale-95 ${
-                      scrolled
-                        ? 'bg-white/80 hover:bg-white dark:bg-slate-900/80 dark:hover:bg-slate-800 border border-slate-200/90 dark:border-white/10 hover:border-slate-300 text-slate-700 dark:text-slate-200'
-                        : 'bg-white/15 hover:bg-white/25 border border-white/20 text-white backdrop-blur-md'
-                    }`}
-                  >
-                    <Globe className={`w-4 h-4 ${scrolled ? 'text-blue-600' : 'text-cyan-300'}`} />
-                    <span className="text-xs uppercase hidden sm:inline">
-                      {language === 'english' ? 'EN' : language === 'sinhala' ? 'සිං' : 'த'}
-                    </span>
-                    <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${langOpen ? 'rotate-180' : ''} ${scrolled ? 'text-slate-500' : 'text-white/70'}`} />
-                  </button>
+                {/* Notification Bell (for Admins) OR Language Selector (for Passengers) */}
+                {isAdmin ? (
+                  <div className="relative">
+                    <button
+                      onClick={() => {
+                        setIsNotificationDrawerOpen(!isNotificationDrawerOpen);
+                        if (!isNotificationDrawerOpen) {
+                          markAllSlipsAsRead();
+                        }
+                      }}
+                      className={`relative flex items-center justify-center w-9 h-9 rounded-2xl transition-all duration-200 cursor-pointer shadow-xs font-extrabold active:scale-95 ${
+                        scrolled
+                          ? 'bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200/90 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                          : 'bg-white/15 hover:bg-white/25 text-white border border-white/20 backdrop-blur-md'
+                      }`}
+                      title="Admin Payment Slip Notifications"
+                      aria-label="Admin Notifications"
+                    >
+                      <Bell className="w-4 h-4" />
+                      {paymentSlips.filter((s) => s.status === 'pending' && !adminReadSlipIds.includes(s.id)).length > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-black text-white animate-pulse shadow-sm">
+                          {paymentSlips.filter((s) => s.status === 'pending' && !adminReadSlipIds.includes(s.id)).length}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  /* Language Selector (iOS Glass Pill for passengers) */
+                  <div className="relative" ref={langRef}>
+                    <button
+                      onClick={() => setLangOpen(!langOpen)}
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-2xl transition-all duration-200 cursor-pointer shadow-xs font-extrabold active:scale-95 ${
+                        scrolled
+                          ? 'bg-white/80 hover:bg-white dark:bg-slate-900/80 dark:hover:bg-slate-800 border border-slate-200/90 dark:border-white/10 hover:border-slate-300 text-slate-700 dark:text-slate-200'
+                          : 'bg-white/15 hover:bg-white/25 border border-white/20 text-white backdrop-blur-md'
+                      }`}
+                    >
+                      <Globe className={`w-4 h-4 ${scrolled ? 'text-blue-600' : 'text-cyan-300'}`} />
+                      <span className="text-xs uppercase hidden sm:inline">
+                        {language === 'english' ? 'EN' : language === 'sinhala' ? 'සිං' : 'த'}
+                      </span>
+                      <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${langOpen ? 'rotate-180' : ''} ${scrolled ? 'text-slate-500' : 'text-white/70'}`} />
+                    </button>
 
-                  {/* Language Dropdown (iOS Liquid Glass) */}
-                  {langOpen && (
-                    <div className="absolute top-[calc(100%+8px)] right-0 w-40 bg-white/70 dark:bg-slate-950/75 backdrop-blur-3xl backdrop-saturate-[190%] border border-white/60 dark:border-white/15 rounded-[22px] shadow-[0_20px_48px_-8px_rgba(0,0,0,0.22),inset_0_1px_2px_rgba(255,255,255,0.8),inset_0_-1px_1px_rgba(255,255,255,0.2)] dark:shadow-[0_24px_56px_-8px_rgba(0,0,0,0.7),inset_0_1px_2px_rgba(255,255,255,0.25)] overflow-hidden z-50 p-1.5 animate-fade-in-up">
-                      {/* Specular highlight rim line */}
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[85%] h-[1.5px] bg-gradient-to-r from-transparent via-white/95 dark:via-white/50 to-transparent pointer-events-none" />
-                      
-                      <div className="space-y-1">
-                        <button
-                          onClick={() => { setLanguage('english'); setLangOpen(false); }}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
-                            language === 'english'
-                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_2px_10px_rgba(59,130,246,0.35),inset_0_1px_1px_rgba(255,255,255,0.5)]'
-                              : 'text-slate-700 dark:text-slate-200 hover:bg-white/50 dark:hover:bg-white/10 hover:text-blue-600 dark:hover:text-cyan-300'
-                          }`}
-                        >
-                          <span>English</span>
-                          {language === 'english' && <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_#fff]" />}
-                        </button>
-                        <button
-                          onClick={() => { setLanguage('sinhala'); setLangOpen(false); }}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
-                            language === 'sinhala'
-                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_2px_10px_rgba(59,130,246,0.35),inset_0_1px_1px_rgba(255,255,255,0.5)]'
-                              : 'text-slate-700 dark:text-slate-200 hover:bg-white/50 dark:hover:bg-white/10 hover:text-blue-600 dark:hover:text-cyan-300'
-                          }`}
-                        >
-                          <span>සිංහල</span>
-                          {language === 'sinhala' && <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_#fff]" />}
-                        </button>
-                        <button
-                          onClick={() => { setLanguage('tamil'); setLangOpen(false); }}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
-                            language === 'tamil'
-                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_2px_10px_rgba(59,130,246,0.35),inset_0_1px_1px_rgba(255,255,255,0.5)]'
-                              : 'text-slate-700 dark:text-slate-200 hover:bg-white/50 dark:hover:bg-white/10 hover:text-blue-600 dark:hover:text-cyan-300'
-                          }`}
-                        >
-                          <span>தமிழ்</span>
-                          {language === 'tamil' && <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_#fff]" />}
-                        </button>
+                    {/* Language Dropdown (iOS Liquid Glass) */}
+                    {langOpen && (
+                      <div className="absolute top-[calc(100%+8px)] right-0 w-40 bg-white/70 dark:bg-slate-950/75 backdrop-blur-3xl backdrop-saturate-[190%] border border-white/60 dark:border-white/15 rounded-[22px] shadow-[0_20px_48px_-8px_rgba(0,0,0,0.22),inset_0_1px_2px_rgba(255,255,255,0.8),inset_0_-1px_1px_rgba(255,255,255,0.2)] dark:shadow-[0_24px_56px_-8px_rgba(0,0,0,0.7),inset_0_1px_2px_rgba(255,255,255,0.25)] overflow-hidden z-50 p-1.5 animate-fade-in-up">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[85%] h-[1.5px] bg-gradient-to-r from-transparent via-white/95 dark:via-white/50 to-transparent pointer-events-none" />
+                        
+                        <div className="space-y-1">
+                          <button
+                            onClick={() => { setLanguage('english'); setLangOpen(false); }}
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
+                              language === 'english'
+                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_2px_10px_rgba(59,130,246,0.35),inset_0_1px_1px_rgba(255,255,255,0.5)]'
+                                : 'text-slate-700 dark:text-slate-200 hover:bg-white/50 dark:hover:bg-white/10 hover:text-blue-600 dark:hover:text-cyan-300'
+                            }`}
+                          >
+                            <span>English</span>
+                            {language === 'english' && <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_#fff]" />}
+                          </button>
+                          <button
+                            onClick={() => { setLanguage('sinhala'); setLangOpen(false); }}
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
+                              language === 'sinhala'
+                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_2px_10px_rgba(59,130,246,0.35),inset_0_1px_1px_rgba(255,255,255,0.5)]'
+                                : 'text-slate-700 dark:text-slate-200 hover:bg-white/50 dark:hover:bg-white/10 hover:text-blue-600 dark:hover:text-cyan-300'
+                            }`}
+                          >
+                            <span>සිංහල</span>
+                            {language === 'sinhala' && <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_#fff]" />}
+                          </button>
+                          <button
+                            onClick={() => { setLanguage('tamil'); setLangOpen(false); }}
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
+                              language === 'tamil'
+                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_2px_10px_rgba(59,130,246,0.35),inset_0_1px_1px_rgba(255,255,255,0.5)]'
+                                : 'text-slate-700 dark:text-slate-200 hover:bg-white/50 dark:hover:bg-white/10 hover:text-blue-600 dark:hover:text-cyan-300'
+                            }`}
+                          >
+                            <span>தமிழ்</span>
+                            {language === 'tamil' && <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_#fff]" />}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Auth / Profile Capsule (iOS Glass Pill) - Desktop only */}
                 <div className="hidden md:block">

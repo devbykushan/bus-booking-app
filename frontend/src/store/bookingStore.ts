@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import type { BusRoute, BoardingPoint, Booking, PassengerDetails, UserAccount, SavedPassenger, TripStats } from '../types/booking';
-import { routesApi, bookingsApi, seatsApi, validateApi, authApi } from '../services/api';
+import type { BusRoute, BoardingPoint, Booking, PassengerDetails, UserAccount, SavedPassenger, TripStats, PaymentSlip } from '../types/booking';
+import { routesApi, bookingsApi, seatsApi, validateApi, authApi, paymentSlipsApi } from '../services/api';
 import confetti from 'canvas-confetti';
 import { translations } from './translations';
 import type { Language, TranslationKey } from './translations';
@@ -210,6 +210,17 @@ interface BookingStore {
   // GPS tracking
   trackingRouteId: string | null;
   setTrackingRouteId: (id: string | null) => void;
+
+  // Admin Payment Slips & Notifications
+  paymentSlips: PaymentSlip[];
+  loadPaymentSlips: (isBackground?: boolean) => Promise<void>;
+  isNotificationDrawerOpen: boolean;
+  setIsNotificationDrawerOpen: (open: boolean) => void;
+  adminSoundEnabled: boolean;
+  setAdminSoundEnabled: (enabled: boolean) => void;
+  adminReadSlipIds: string[];
+  markSlipAsRead: (slipId: string) => void;
+  markAllSlipsAsRead: () => void;
 
   // Localization
   language: Language;
@@ -787,6 +798,81 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   setTrackingRouteId: (id) => {
     set({ trackingRouteId: id });
     get().setCurrentView('live-tracking');
+  },
+
+  // Admin Payment Slips & Notifications Implementation
+  paymentSlips: [],
+  loadPaymentSlips: async (isBackground = false) => {
+    try {
+      const slips = await paymentSlipsApi.getAll();
+      const prevSlips = get().paymentSlips;
+      const prevPendingCount = prevSlips.filter((s: PaymentSlip) => s.status === 'pending').length;
+      const newPendingCount = slips.filter((s: PaymentSlip) => s.status === 'pending').length;
+
+      // Play audio chime if a new slip arrived
+      if (isBackground && newPendingCount > prevPendingCount && get().adminSoundEnabled) {
+        try {
+          const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+          if (AudioCtx) {
+            const ctx = new AudioCtx();
+            const now = ctx.currentTime;
+            const osc1 = ctx.createOscillator();
+            const gain1 = ctx.createGain();
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(587.33, now);
+            gain1.gain.setValueAtTime(0.3, now);
+            gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+            osc1.connect(gain1);
+            gain1.connect(ctx.destination);
+            osc1.start(now);
+            osc1.stop(now + 0.25);
+
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(880, now + 0.12);
+            gain2.gain.setValueAtTime(0.35, now + 0.12);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+            osc2.start(now + 0.12);
+            osc2.stop(now + 0.5);
+          }
+        } catch {}
+      }
+
+      set({ paymentSlips: slips });
+    } catch (err: any) {
+      console.error('Error loading payment slips in store:', err);
+    }
+  },
+  isNotificationDrawerOpen: false,
+  setIsNotificationDrawerOpen: (open) => set({ isNotificationDrawerOpen: open }),
+  adminSoundEnabled: localStorage.getItem('dewmina_admin_sound') !== 'false',
+  setAdminSoundEnabled: (enabled) => {
+    localStorage.setItem('dewmina_admin_sound', String(enabled));
+    set({ adminSoundEnabled: enabled });
+  },
+  adminReadSlipIds: (() => {
+    try {
+      return JSON.parse(localStorage.getItem('admin_read_slips') || '[]');
+    } catch {
+      return [];
+    }
+  })(),
+  markSlipAsRead: (slipId: string) => {
+    const current = get().adminReadSlipIds;
+    if (!current.includes(slipId)) {
+      const updated = [...current, slipId];
+      localStorage.setItem('admin_read_slips', JSON.stringify(updated));
+      set({ adminReadSlipIds: updated });
+    }
+  },
+  markAllSlipsAsRead: () => {
+    const pendingIds = get().paymentSlips.filter((s: PaymentSlip) => s.status === 'pending').map((s: PaymentSlip) => s.id);
+    const updated = Array.from(new Set([...get().adminReadSlipIds, ...pendingIds]));
+    localStorage.setItem('admin_read_slips', JSON.stringify(updated));
+    set({ adminReadSlipIds: updated });
   },
 
   // Localization Implementation
