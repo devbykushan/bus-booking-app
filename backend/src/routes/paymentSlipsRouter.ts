@@ -50,7 +50,7 @@ paymentSlipsRouter.post('/', async (req: Request, res: Response) => {
 💰 *Amount:* LKR ${formattedAmount}
 ⏰ *Time:* ${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Colombo' })}
 
-👉 *Admin Dashboard එකෙන් Slip එක පරීක්ෂා කර Approve කරන්න:*
+👉 *Please review and approve the slip on Admin Dashboard:*
 https://dewmina-super-admin.vercel.app/`;
 
       Promise.allSettled(
@@ -82,7 +82,7 @@ https://dewmina-super-admin.vercel.app/`;
 💰 *Amount:* LKR ${formattedAmount}
 ⏰ *Time:* ${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Colombo' })}
 
-👉 *Admin Dashboard එකෙන් Slip එක පරීක්ෂා කර Approve කරන්න:*
+👉 *Please review and approve the slip on Admin Dashboard:*
 https://dewmina-super-admin.vercel.app/`;
 
     // Non-blocking alert to both admin numbers
