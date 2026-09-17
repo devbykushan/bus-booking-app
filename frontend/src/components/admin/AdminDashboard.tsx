@@ -14,7 +14,8 @@ import {
   TrendingUp, Users, DollarSign, Bus, Award, BarChart2, 
   SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
   Trash2, RefreshCw, Edit3, Clock, Star, Search,
-  Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare, Menu, Shield
+  Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare, Menu, Shield,
+  Bell, Volume2, VolumeX
 } from 'lucide-react';
 
 export type AdminDashboardTab = 'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp' | 'counter-booking' | 'staff';
@@ -69,6 +70,53 @@ export const AdminDashboard: React.FC = () => {
   const [selectedSlipImage, setSelectedSlipImage] = useState<{ src: string; pnr: string; isPdf?: boolean } | null>(null);
   const [processingSlipId, setProcessingSlipId] = useState<string | null>(null);
 
+  // ─── Notification Center State & Audio ───
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [readSlipIds, setReadSlipIds] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('admin_read_slips') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const playNotificationChime = () => {
+    if (!soundEnabled) return;
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+
+      // First beep
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(587.33, now); // D5
+      gain1.gain.setValueAtTime(0.3, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.25);
+
+      // Second pleasant higher chime
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(880, now + 0.12); // A5
+      gain2.gain.setValueAtTime(0.35, now + 0.12);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now + 0.12);
+      osc2.stop(now + 0.5);
+    } catch (e) {
+      console.warn('Audio play error:', e);
+    }
+  };
+
   const selectedRoute = routes.find(r => r.id === selectedRouteId) || routes[0] || null;
   const manifestBookings = bookings.filter(b => b.routeId === selectedRoute?.id);
 
@@ -112,20 +160,38 @@ export const AdminDashboard: React.FC = () => {
     }
   }, [activeTab]);
 
-  const fetchPaymentSlips = async () => {
-    setSlipsLoading(true);
+  const prevPendingSlipsCountRef = React.useRef<number | null>(null);
+
+  const fetchPaymentSlips = async (isBackgroundPoll = false) => {
+    if (!isBackgroundPoll) setSlipsLoading(true);
     try {
       const slips = await paymentSlipsApi.getAll();
       setPaymentSlips(slips);
+
+      const pendingCount = slips.filter((s: any) => s.status === 'pending').length;
+      if (prevPendingSlipsCountRef.current !== null && pendingCount > prevPendingSlipsCountRef.current) {
+        // New pending slip arrived! Play chime and toast
+        playNotificationChime();
+        const newestSlip = slips.find((s: any) => s.status === 'pending');
+        if (newestSlip) {
+          showToast(`🚨 New Bank Slip Uploaded! PNR: ${newestSlip.pnr} (Rs. ${Number(newestSlip.amount || 0).toLocaleString()})`);
+        }
+      }
+      prevPendingSlipsCountRef.current = pendingCount;
     } catch (err: any) {
       console.error('Error loading payment slips:', err);
     } finally {
-      setSlipsLoading(false);
+      if (!isBackgroundPoll) setSlipsLoading(false);
     }
   };
 
   useEffect(() => {
     fetchPaymentSlips();
+    // Poll for new slips every 10 seconds in the background
+    const interval = setInterval(() => {
+      fetchPaymentSlips(true);
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -133,6 +199,25 @@ export const AdminDashboard: React.FC = () => {
       fetchPaymentSlips();
     }
   }, [activeTab]);
+
+  const markAllSlipsAsRead = () => {
+    const allPendingIds = paymentSlips.filter((s: any) => s.status === 'pending').map((s: any) => s.id);
+    const updated = Array.from(new Set([...readSlipIds, ...allPendingIds]));
+    setReadSlipIds(updated);
+    try {
+      localStorage.setItem('admin_read_slips', JSON.stringify(updated));
+    } catch {}
+  };
+
+  const markSlipAsRead = (slipId: string) => {
+    if (!readSlipIds.includes(slipId)) {
+      const updated = [...readSlipIds, slipId];
+      setReadSlipIds(updated);
+      try {
+        localStorage.setItem('admin_read_slips', JSON.stringify(updated));
+      } catch {}
+    }
+  };
 
   const handleApproveSlip = async (slipId: string) => {
     setProcessingSlipId(slipId);
@@ -272,6 +357,138 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Notification Center Popover */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setIsNotifOpen(!isNotifOpen);
+                  if (!isNotifOpen) {
+                    markAllSlipsAsRead();
+                  }
+                }}
+                className="relative p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-all active:scale-95 cursor-pointer flex items-center justify-center"
+                title="Payment Slip Notifications"
+                aria-label="Notifications"
+              >
+                <Bell className="w-4 h-4 text-slate-700" />
+                {paymentSlips.filter((s: any) => s.status === 'pending' && !readSlipIds.includes(s.id)).length > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-black text-white animate-pulse">
+                    {paymentSlips.filter((s: any) => s.status === 'pending' && !readSlipIds.includes(s.id)).length}
+                  </span>
+                )}
+              </button>
+
+              {/* Notification Dropdown Panel */}
+              {isNotifOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setIsNotifOpen(false)} 
+                  />
+                  <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden animate-fade-in-up">
+                    <div className="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-orange-100 text-orange-600">
+                          <Bell className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-black text-slate-800">Slip Notifications</h4>
+                          <p className="text-[10px] text-slate-400 font-medium">
+                            {paymentSlips.filter((s: any) => s.status === 'pending').length} pending approval
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setSoundEnabled(!soundEnabled)}
+                          className={`p-1.5 rounded-lg text-xs font-bold transition-all ${
+                            soundEnabled ? 'text-emerald-600 hover:bg-emerald-50' : 'text-slate-400 hover:bg-slate-100'
+                          }`}
+                          title={soundEnabled ? 'Sound alert ON' : 'Sound alert MUTED'}
+                        >
+                          {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                        </button>
+                        <button
+                          onClick={() => setIsNotifOpen(false)}
+                          className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Slips List */}
+                    <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                      {paymentSlips.filter((s: any) => s.status === 'pending').length === 0 ? (
+                        <div className="p-8 text-center text-slate-400 space-y-1">
+                          <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
+                          <p className="text-xs font-bold text-slate-600">All clear!</p>
+                          <p className="text-[11px]">No pending payment slips right now.</p>
+                        </div>
+                      ) : (
+                        paymentSlips
+                          .filter((s: any) => s.status === 'pending')
+                          .slice(0, 8)
+                          .map((slip: any) => (
+                            <div 
+                              key={slip.id}
+                              onClick={() => {
+                                markSlipAsRead(slip.id);
+                                setActiveTab('payment-slips');
+                                setIsNotifOpen(false);
+                              }}
+                              className="p-3 hover:bg-orange-50/60 transition-colors cursor-pointer flex items-start justify-between gap-3"
+                            >
+                              <div className="space-y-1 min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse flex-shrink-0" />
+                                  <span className="text-xs font-black text-slate-800 truncate">
+                                    {slip.passengerName || 'Passenger'}
+                                  </span>
+                                  <span className="text-[10px] font-mono text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded">
+                                    {slip.pnr}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                                  <span>📞 {slip.passengerPhone || 'N/A'}</span>
+                                </p>
+                                <p className="text-[10px] text-slate-400">
+                                  {slip.uploadedAt ? new Date(slip.uploadedAt).toLocaleString('en-GB', { timeZone: 'Asia/Colombo', hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) : 'Recently'}
+                                </p>
+                              </div>
+
+                              <div className="text-right flex-shrink-0">
+                                <span className="text-xs font-black text-emerald-600 block">
+                                  Rs. {Number(slip.amount || 0).toLocaleString()}
+                                </span>
+                                <span className="mt-1 inline-block text-[10px] font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full">
+                                  Review &gt;
+                                </span>
+                              </div>
+                            </div>
+                          ))
+                      )}
+                    </div>
+
+                    {paymentSlips.filter((s: any) => s.status === 'pending').length > 0 && (
+                      <div className="p-2.5 bg-slate-50 border-t border-slate-100 text-center">
+                        <button
+                          onClick={() => {
+                            setActiveTab('payment-slips');
+                            setIsNotifOpen(false);
+                          }}
+                          className="text-xs font-bold text-orange-600 hover:text-orange-700"
+                        >
+                          View All Payment Slips ({paymentSlips.filter((s: any) => s.status === 'pending').length}) →
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
             <button
               onClick={() => setActiveTab('counter-booking')}
               className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
@@ -1333,7 +1550,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex justify-between items-center">
             <h3 className="text-sm font-bold text-slate-700">All Payment Slips</h3>
             <button
-              onClick={fetchPaymentSlips}
+              onClick={() => fetchPaymentSlips()}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition-colors"
             >
               <RefreshCw className="w-3.5 h-3.5" />

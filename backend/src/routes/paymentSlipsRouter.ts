@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { getPool } from '../db/database';
 import { v4 as uuidv4 } from 'uuid';
-import { sendWhatsAppPaymentUpdate } from '../services/wahaService';
+import { sendWhatsAppPaymentUpdate, sendWhatsAppMessage } from '../services/wahaService';
 
 export const paymentSlipsRouter = Router();
 
@@ -36,6 +36,27 @@ paymentSlipsRouter.post('/', async (req: Request, res: Response) => {
         'UPDATE payment_slips SET "imageData" = $1, "imageMime" = $2, "uploadedAt" = $3 WHERE "pnr" = $4 AND "status" = \'pending\'',
         [imageData, imageMime || 'image/jpeg', new Date().toISOString(), pnr]
       );
+      // Non-blocking alert to both admin numbers on update
+      const adminWhatsAppNumbers = ['94714715903', '94762581841'];
+      const passengerDisplayName = passengerName || booking.passengerName || 'Passenger';
+      const formattedAmount = Number(amount || booking.totalFare || 0).toLocaleString();
+      const updateAlertMessage = 
+`🔄 *PAYMENT SLIP RE-UPLOADED!*
+*Dewmina Super Line*
+
+👤 *Passenger:* ${passengerDisplayName}
+📱 *Phone:* ${passengerPhone || booking.passengerPhone || 'N/A'}
+🎫 *PNR:* \`${pnr}\`
+💰 *Amount:* LKR ${formattedAmount}
+⏰ *Time:* ${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Colombo' })}
+
+👉 *Admin Dashboard එකෙන් Slip එක පරීක්ෂා කර Approve කරන්න:*
+https://dewmina-super-admin.vercel.app/`;
+
+      Promise.allSettled(
+        adminWhatsAppNumbers.map(phone => sendWhatsAppMessage(phone, updateAlertMessage))
+      ).catch(err => console.error('[WhatsApp Admin Alert Error]', err));
+
       res.json({ success: true, message: 'Slip updated successfully. Awaiting admin review.' });
       return;
     }
@@ -45,6 +66,29 @@ paymentSlipsRouter.post('/', async (req: Request, res: Response) => {
       INSERT INTO payment_slips ("id", "bookingId", "pnr", "imageData", "imageMime", "amount", "passengerName", "passengerPhone", "uploadedAt", "status")
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending')
     `, [slipId, booking.id, pnr, imageData, imageMime || 'image/jpeg', amount, passengerName || booking.passengerName, passengerPhone || booking.passengerPhone, new Date().toISOString()]);
+
+    // Admin WhatsApp numbers to notify on new/updated payment slip
+    const adminWhatsAppNumbers = ['94714715903', '94762581841'];
+    const passengerDisplayName = passengerName || booking.passengerName || 'Passenger';
+    const passengerDisplayPhone = passengerPhone || booking.passengerPhone || 'N/A';
+    const formattedAmount = Number(amount || booking.totalFare || 0).toLocaleString();
+    const alertMessage = 
+`🚨 *NEW PAYMENT SLIP UPLOADED!*
+*Dewmina Super Line*
+
+👤 *Passenger:* ${passengerDisplayName}
+📱 *Phone:* ${passengerDisplayPhone}
+🎫 *PNR:* \`${pnr}\`
+💰 *Amount:* LKR ${formattedAmount}
+⏰ *Time:* ${new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Colombo' })}
+
+👉 *Admin Dashboard එකෙන් Slip එක පරීක්ෂා කර Approve කරන්න:*
+https://dewmina-super-admin.vercel.app/`;
+
+    // Non-blocking alert to both admin numbers
+    Promise.allSettled(
+      adminWhatsAppNumbers.map(phone => sendWhatsAppMessage(phone, alertMessage))
+    ).catch(err => console.error('[WhatsApp Admin Alert Error]', err));
 
     res.status(201).json({ success: true, slipId, message: 'Slip uploaded successfully. Awaiting admin review.' });
   } catch (err: any) {
