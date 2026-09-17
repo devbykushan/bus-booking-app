@@ -290,7 +290,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
               {/* Google One-Click Auth (Passenger Only) */}
               {role === 'passenger' && (mode === 'login' || (mode === 'register' && regStep === 1)) && (
                 <div className="space-y-3 pt-1">
-                  <div className="flex justify-center w-full [&>div]:!w-full [&>div>iframe]:!w-full [&>div>div]:!w-full shadow-xs rounded-full overflow-hidden">
+                  <div className="flex items-center justify-center w-full py-0.5">
                     <GoogleLogin
                       onSuccess={handleGoogleSuccess}
                       onError={handleGoogleError}
@@ -298,7 +298,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                       size="large"
                       shape="pill"
                       text={mode === 'login' ? 'signin_with' : 'signup_with'}
-                      width="100%"
                       useOneTap={false}
                     />
                   </div>
