@@ -549,3 +549,145 @@ Thank you!
   lastEmailError = 'No SMTP or Resend credentials configured';
   return false;
 }
+
+/**
+ * Sends admin login security notification email to Super Admin
+ */
+export async function sendAdminLoginAlertEmail(adminUser: { name: string; email: string; role: string }): Promise<boolean> {
+  const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || 'admin.dewminasuperline@gmail.com').trim();
+  const fromAddress = process.env.EMAIL_FROM || '"Dewmina Super Line" <dewminasuperline.pvt.ltd@gmail.com>';
+  const now = new Date().toLocaleString('en-GB', {
+    timeZone: 'Asia/Colombo',
+    dateStyle: 'full',
+    timeStyle: 'medium',
+  });
+
+  const subject = `🔐 Security Alert: Admin Login Detected (${adminUser.name})`;
+  const textBody = `
+Security Alert: Admin Login Detected
+
+An administrator has just logged into the Dewmina Super Line Admin Portal:
+
+- Name: ${adminUser.name}
+- Email: ${adminUser.email}
+- Role: ${adminUser.role}
+- Time: ${now} (Sri Lanka Time)
+
+If this was not authorized by you, please secure your admin account immediately.
+  `.trim();
+
+  const htmlBody = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Login Alert</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; padding: 20px; color: #1e293b; margin: 0;">
+  <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;">
+    <div style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); padding: 24px 20px; text-align: center; color: #ffffff;">
+      <h2 style="margin: 0; font-size: 20px; font-weight: 700;">🔐 Admin Login Alert</h2>
+      <p style="margin: 6px 0 0; opacity: 0.9; font-size: 13px;">Dewmina Super Line Security Service</p>
+    </div>
+    <div style="padding: 24px;">
+      <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.5; color: #334155;">
+        An administrator account has just signed into the portal:
+      </p>
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 20px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Admin Name</td>
+            <td style="padding: 8px 0; font-weight: 700; text-align: right; color: #0f172a;">${adminUser.name}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Email</td>
+            <td style="padding: 8px 0; font-weight: 600; text-align: right; color: #0f172a;">${adminUser.email}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Role</td>
+            <td style="padding: 8px 0; font-weight: 700; text-align: right; color: #2563eb;">${adminUser.role.toUpperCase()}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Timestamp</td>
+            <td style="padding: 8px 0; font-weight: 600; text-align: right; color: #0f172a;">${now} (SL)</td>
+          </tr>
+        </table>
+      </div>
+      <p style="margin: 0; font-size: 12px; color: #94a3b8; text-align: center;">
+        If you did not authorize this login, please change your Super Admin password immediately.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  // 1. Brevo HTTP API
+  const brevoApiKey = (process.env.BREVO_API_KEY || '').trim();
+  if (brevoApiKey) {
+    try {
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': brevoApiKey,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: 'Dewmina Super Line', email: process.env.BREVO_SENDER || 'dewminasuperline.pvt.ltd@gmail.com' },
+          to: [{ email: superAdminEmail, name: 'Super Admin' }],
+          subject,
+          htmlContent: htmlBody,
+          textContent: textBody,
+        }),
+      });
+
+      if (res.ok) {
+        console.log(`[Email Service] ✅ Admin login alert delivered to ${superAdminEmail} via Brevo`);
+        return true;
+      }
+    } catch (err: any) {
+      console.warn('[Email Service] Brevo admin login alert error:', err?.message || err);
+    }
+  }
+
+  // 2. SMTP fallback
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const user = process.env.SMTP_USER || 'dewminasuperline.pvt.ltd@gmail.com';
+  const pass = process.env.SMTP_PASS || 'kiejrowsxwphixoy';
+  if (user && pass) {
+    try {
+      const isGmail = (host && host.includes('gmail')) || user.includes('@gmail.com');
+      const transporter = isGmail
+        ? nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: { user, pass },
+            connectionTimeout: 10000,
+          } as any)
+        : nodemailer.createTransport({
+            host,
+            port: Number(process.env.SMTP_PORT) || 587,
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: { user, pass },
+            connectionTimeout: 10000,
+          } as any);
+
+      await transporter.sendMail({
+        from: fromAddress,
+        to: superAdminEmail,
+        subject,
+        text: textBody,
+        html: htmlBody,
+      });
+      console.log(`[Email Service] ✅ Admin login alert delivered to ${superAdminEmail} via SMTP`);
+      return true;
+    } catch (err: any) {
+      console.warn('[Email Service] SMTP admin login alert error:', err?.message || err);
+    }
+  }
+
+  return false;
+}
+

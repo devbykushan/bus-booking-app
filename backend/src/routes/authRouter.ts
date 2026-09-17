@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { OAuth2Client } from 'google-auth-library';
 import { dbQuery, hashPassword, verifyPassword } from '../db/database';
-import { sendAccountCreationEmail, sendOTPEmail, lastEmailError } from '../services/emailService';
+import { sendAccountCreationEmail, sendOTPEmail, sendAdminLoginAlertEmail, lastEmailError } from '../services/emailService';
 import { sendWhatsAppOtp, sendWhatsAppMessage } from '../services/wahaService';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '846634088514-gl0r0g50m3omomtf24sh44qpbapbrsg3.apps.googleusercontent.com';
@@ -301,30 +301,51 @@ authRouter.post('/login', async (req: Request, res: Response) => {
       createdAt: dbUser.createdAt,
     };
 
-    // Non-blocking WhatsApp alert to Super Admin on any admin/super_admin login
+    // Non-blocking Security Alerts (WhatsApp & Email) to Super Admin on any admin/super_admin login
     if (isAdminRole) {
-      const superAdminPhone = process.env.SUPER_ADMIN_WHATSAPP || '';
-      if (superAdminPhone) {
-        const now = new Date().toLocaleString('en-GB', {
-          timeZone: 'Asia/Colombo',
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true,
-        });
-        const alertMsg =
-          `🔐 *Admin Login Alert — Dewmina Super Line*\n\n` +
-          `👤 *Name:* ${user.name}\n` +
-          `📧 *Email:* ${user.email}\n` +
-          `🛡️ *Role:* ${user.role}\n` +
-          `🕐 *Time:* ${now} (SL)\n\n` +
-          `_This is an automatic security notification._`;
-        sendWhatsAppMessage(superAdminPhone, alertMsg).catch((err) => {
-          console.warn('[AuthRouter] Admin login WhatsApp alert failed (non-critical):', err);
+      // 1. WhatsApp Alert: default to 0724173143 + any configured in SUPER_ADMIN_WHATSAPP
+      const configuredPhone = process.env.SUPER_ADMIN_WHATSAPP || '0724173143';
+      const targetPhones = Array.from(
+        new Set(
+          ['0724173143', configuredPhone]
+            .flatMap((p) => (p || '').split(','))
+            .map((p) => p.trim().replace(/\s+/g, ''))
+            .filter((p) => p.length >= 9)
+        )
+      );
+
+      const now = new Date().toLocaleString('en-GB', {
+        timeZone: 'Asia/Colombo',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+
+      const alertMsg =
+        `🔐 *Admin Login Alert — Dewmina Super Line*\n\n` +
+        `👤 *Name:* ${user.name}\n` +
+        `📧 *Email:* ${user.email}\n` +
+        `🛡️ *Role:* ${user.role}\n` +
+        `🕐 *Time:* ${now} (SL)\n\n` +
+        `_This is an automatic security notification._`;
+
+      for (const phone of targetPhones) {
+        sendWhatsAppMessage(phone, alertMsg).catch((err) => {
+          console.warn(`[AuthRouter] Admin login WhatsApp alert to ${phone} failed (non-critical):`, err);
         });
       }
+
+      // 2. Email Alert to Super Admin
+      sendAdminLoginAlertEmail({
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      }).catch((err) => {
+        console.warn('[AuthRouter] Admin login email alert failed (non-critical):', err);
+      });
     }
 
     return res.json({
