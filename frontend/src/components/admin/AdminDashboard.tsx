@@ -8,16 +8,22 @@ import { QRScannerModal } from '../operator/QRScannerModal';
 import { WhatsAppManagerSection } from './WhatsAppManagerModal';
 import { CounterBookingView } from './CounterBookingView';
 import { StaffManagementSection } from './StaffManagementSection';
+import { PassengerManifestModal } from './PassengerManifestModal';
+import { BroadcastAnnouncementModal } from './BroadcastAnnouncementModal';
+import { PromoCodesManager } from './PromoCodesManager';
+import { DailyFinancialSettlementModal } from './DailyFinancialSettlementModal';
+import { SeatBlockManagerModal } from './SeatBlockManagerModal';
 import { routesApi, authApi, paymentSlipsApi } from '../../services/api';
 import type { BusRoute } from '../../types/booking';
 import { 
   TrendingUp, Users, DollarSign, Bus, Award, BarChart2, 
   SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
   Trash2, RefreshCw, Edit3, Clock, Star, Search,
-  Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare, Menu, Shield
+  Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare, Menu, Shield,
+  Printer, Wrench
 } from 'lucide-react';
 
-export type AdminDashboardTab = 'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp' | 'counter-booking' | 'staff';
+export type AdminDashboardTab = 'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp' | 'counter-booking' | 'staff' | 'promos';
 
 export const AdminDashboard: React.FC = () => {
   const { bookings, routes, loadRoutes, loadBookings, currentUser } = useBookingStore();
@@ -68,6 +74,12 @@ export const AdminDashboard: React.FC = () => {
   const [slipsLoading, setSlipsLoading] = useState(false);
   const [selectedSlipImage, setSelectedSlipImage] = useState<{ src: string; pnr: string; isPdf?: boolean } | null>(null);
   const [processingSlipId, setProcessingSlipId] = useState<string | null>(null);
+
+  // New Modals State
+  const [showManifestModal, setShowManifestModal] = useState(false);
+  const [showBroadcastModal, setShowBroadcastModal] = useState(false);
+  const [showDailySettlementModal, setShowDailySettlementModal] = useState(false);
+  const [showSeatBlockModal, setShowSeatBlockModal] = useState(false);
 
 
 
@@ -305,6 +317,7 @@ export const AdminDashboard: React.FC = () => {
             {activeTab === 'users' && `User Accounts (${totalUsersCount})`}
             {activeTab === 'payment-slips' && 'Payment Slips'}
             {activeTab === 'whatsapp' && 'WhatsApp Gateway'}
+            {activeTab === 'promos' && 'Promo Codes & Discounts'}
           </span>
         </div>
       </div>
@@ -421,6 +434,22 @@ export const AdminDashboard: React.FC = () => {
                   </span>
                 </button>
               )}
+
+              <button
+                onClick={() => { setActiveTab('promos'); setIsMobileNavOpen(false); }}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'promos' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Ticket className="w-4 h-4 text-purple-500" /> Promo Codes & Discounts
+                </div>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                  activeTab === 'promos' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+                }`}>
+                  DEALS
+                </span>
+              </button>
 
               {isSuperAdmin && (
                 <>
@@ -590,6 +619,22 @@ export const AdminDashboard: React.FC = () => {
                 </span>
               </button>
             )}
+
+            <button
+              onClick={() => setActiveTab('promos')}
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                activeTab === 'promos' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Ticket className="w-4 h-4 text-purple-500" /> Promo Codes & Discounts
+              </div>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                activeTab === 'promos' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+              }`}>
+                DEALS
+              </span>
+            </button>
 
             {isSuperAdmin && (
               <>
@@ -768,30 +813,59 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 {selectedRoute && (
-                  <button
-                    onClick={() => {
-                      const csvContent = "data:text/csv;charset=utf-8," 
-                        + ["PNR,Passenger Name,Gender,Phone,Seat Count,Seat Numbers,Fare,Status"].join(",") + "\n"
-                        + manifestBookings.map(b => {
-                            const seatsList = (b.seatNumbers && b.seatNumbers.length > 0) ? b.seatNumbers.join(';') : (b.seats && b.seats.length > 0) ? b.seats.map(s => s.number || s.id).join(';') : 'Assigned';
-                            const count = (b.seats && b.seats.length > 0) ? b.seats.length : (b.seatNumbers && b.seatNumbers.length > 0) ? b.seatNumbers.length : 1;
-                            const g = b.passenger?.gender || (b as any).gender || 'Unspecified';
-                            const name = b.passenger?.fullName || (b as any).passengerName || 'Passenger';
-                            const phone = b.passenger?.phone || (b as any).passengerPhone || '';
-                            return `${b.pnr},"${name}",${g},${phone},${count},"${seatsList}",${b.totalFare},${b.bookingStatus}`;
-                          }).join("\n");
-                      const encodedUri = encodeURI(csvContent);
-                      const link = document.createElement("a");
-                      link.setAttribute("href", encodedUri);
-                      link.setAttribute("download", `manifest_${selectedRoute.busNumber}.csv`);
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                    }}
-                    className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    <Download className="w-3.5 h-3.5" /> Export Manifest
-                  </button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() => setShowSeatBlockModal(true)}
+                      className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                      title="Block or release seats for maintenance / conductor"
+                    >
+                      <Wrench className="w-3.5 h-3.5 text-amber-600" />
+                      <span className="hidden sm:inline">Seat Lock</span>
+                    </button>
+
+                    <button
+                      onClick={() => setShowBroadcastModal(true)}
+                      className="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                      title="Send WhatsApp broadcast to passengers of this bus"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="hidden sm:inline">Broadcast</span>
+                    </button>
+
+                    <button
+                      onClick={() => setShowManifestModal(true)}
+                      className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                      title="Print official passenger boarding manifest"
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                      <span>Print A4</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const csvContent = "data:text/csv;charset=utf-8," 
+                          + ["PNR,Passenger Name,Gender,Phone,Seat Count,Seat Numbers,Fare,Status"].join(",") + "\n"
+                          + manifestBookings.map(b => {
+                              const seatsList = (b.seatNumbers && b.seatNumbers.length > 0) ? b.seatNumbers.join(';') : (b.seats && b.seats.length > 0) ? b.seats.map(s => s.number || s.id).join(';') : 'Assigned';
+                              const count = (b.seats && b.seats.length > 0) ? b.seats.length : (b.seatNumbers && b.seatNumbers.length > 0) ? b.seatNumbers.length : 1;
+                              const g = b.passenger?.gender || (b as any).gender || 'Unspecified';
+                              const name = b.passenger?.fullName || (b as any).passengerName || 'Passenger';
+                              const phone = b.passenger?.phone || (b as any).passengerPhone || '';
+                              return `${b.pnr},"${name}",${g},${phone},${count},"${seatsList}",${b.totalFare},${b.bookingStatus}`;
+                            }).join("\n");
+                        const encodedUri = encodeURI(csvContent);
+                        const link = document.createElement("a");
+                        link.setAttribute("href", encodedUri);
+                        link.setAttribute("download", `manifest_${selectedRoute.busNumber}.csv`);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                      className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" /> <span className="hidden sm:inline">CSV</span>
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -888,6 +962,22 @@ export const AdminDashboard: React.FC = () => {
       {activeTab === 'analytics' && (
         <div className="space-y-8">
           
+          {/* Analytics Header with Daily Settlement Action */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-200 shadow-xs">
+            <div>
+              <h3 className="text-lg font-black text-slate-900">Revenue & Accounting Analytics</h3>
+              <p className="text-xs text-slate-500">Real-time revenue metrics, daily collections & fleet operator commissions</p>
+            </div>
+
+            <button
+              onClick={() => setShowDailySettlementModal(true)}
+              className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+            >
+              <DollarSign className="w-4 h-4" />
+              <span>Daily Settlement Sheet (Cash / Slips / Card)</span>
+            </button>
+          </div>
+
           {/* Revenue KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-2">
@@ -1470,6 +1560,13 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
+      {/* ─── TAB 9: PROMO CODES & DISCOUNTS MANAGEMENT ─── */}
+      {activeTab === 'promos' && (
+        <div className="animate-fade-in-up">
+          <PromoCodesManager />
+        </div>
+      )}
+
         </main>
       </div>
 
@@ -1562,6 +1659,40 @@ export const AdminDashboard: React.FC = () => {
         <RouteDetailsTimetableEditorModal
           route={editDetailsRoute}
           onClose={() => setEditDetailsRoute(null)}
+        />
+      )}
+
+      {/* Passenger Manifest Printable Modal */}
+      {showManifestModal && selectedRoute && (
+        <PassengerManifestModal
+          route={selectedRoute}
+          bookings={bookings.filter(b => b.routeId === selectedRoute.id)}
+          onClose={() => setShowManifestModal(false)}
+        />
+      )}
+
+      {/* WhatsApp Route Broadcast Modal */}
+      {showBroadcastModal && selectedRoute && (
+        <BroadcastAnnouncementModal
+          route={selectedRoute}
+          bookings={bookings.filter(b => b.routeId === selectedRoute.id)}
+          onClose={() => setShowBroadcastModal(false)}
+        />
+      )}
+
+      {/* Daily Cash & Settlement Sheet Modal */}
+      {showDailySettlementModal && (
+        <DailyFinancialSettlementModal
+          bookings={bookings}
+          onClose={() => setShowDailySettlementModal(false)}
+        />
+      )}
+
+      {/* Seat Maintenance & Lock Modal */}
+      {showSeatBlockModal && selectedRoute && (
+        <SeatBlockManagerModal
+          route={selectedRoute}
+          onClose={() => setShowSeatBlockModal(false)}
         />
       )}
 

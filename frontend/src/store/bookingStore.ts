@@ -583,7 +583,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
       selectedRoute.seats.push(seat);
     }
 
-    if (seat.status === 'booked') return;
+    if (seat.status === 'booked' || seat.status === 'blocked') return;
     const actualId = seat.id;
 
     let newSelected: string[];

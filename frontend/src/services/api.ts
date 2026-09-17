@@ -324,6 +324,51 @@ export const whatsappApi = {
   /** Test sending a message */
   testSend: (phone: string, message: string): Promise<{ success: boolean; message: string; error?: string }> =>
     apiFetch('/whatsapp/test-send', { method: 'POST', body: JSON.stringify({ phone, message }) }),
+
+  /** Broadcast emergency message to all passengers on a route */
+  broadcast: (routeId: string, message: string): Promise<{
+    success: boolean;
+    totalPassengers?: number;
+    sentCount?: number;
+    message: string;
+  }> =>
+    apiFetch('/whatsapp/broadcast', { method: 'POST', body: JSON.stringify({ routeId, message }) }),
+};
+
+// ─── Promo Codes API ──────────────────────────────────────────────────────────
+
+export const promoCodesApi = {
+  /** Get all promo codes (Admin) */
+  getAll: (): Promise<{ success: boolean; promoCodes: any[] }> =>
+    apiFetch('/promo-codes'),
+
+  /** Create a promo code (Admin) */
+  create: (payload: {
+    code: string;
+    discountPercent: number;
+    maxDiscount?: number;
+    validUntil?: string;
+    maxUsage?: number;
+  }): Promise<{ success: boolean; message: string }> =>
+    apiFetch('/promo-codes', { method: 'POST', body: JSON.stringify(payload) }),
+
+  /** Toggle active status (Admin) */
+  toggle: (id: string): Promise<{ success: boolean; message: string }> =>
+    apiFetch(`/promo-codes/${id}/toggle`, { method: 'PATCH' }),
+
+  /** Delete promo code (Admin) */
+  delete: (id: string): Promise<{ success: boolean; message: string }> =>
+    apiFetch(`/promo-codes/${id}`, { method: 'DELETE' }),
+
+  /** Validate promo code */
+  validate: (code: string, totalFare: number): Promise<{
+    success: boolean;
+    code?: string;
+    discountPercent?: number;
+    discountAmount?: number;
+    message: string;
+  }> =>
+    apiFetch('/promo-codes/validate', { method: 'POST', body: JSON.stringify({ code, totalFare }) }),
 };
 
 // ─── Live Bot API ────────────────────────────────────────────────────────────
@@ -336,6 +381,17 @@ export const botApi = {
     actions?: Array<{ type: string; label: string; data?: any }>;
     pnrData?: any;
   }> => apiFetch('/bot/chat', { method: 'POST', body: JSON.stringify({ message, lang }) }),
+};
+
+// ─── Seats Admin API (Maintenance Block) ──────────────────────────────────────
+
+export const seatsAdminApi = {
+  toggleBlock: (seatId: string): Promise<{
+    success: boolean;
+    status: 'available' | 'blocked';
+    message: string;
+  }> =>
+    apiFetch(`/seats/${seatId}/block`, { method: 'PATCH' }),
 };
 
 // ─── Health Check ─────────────────────────────────────────────────────────────

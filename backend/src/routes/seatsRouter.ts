@@ -111,3 +111,35 @@ seatsRouter.get('/lock-status/:seatId', (req: Request, res: Response) => {
     lockRemainingSeconds: remaining,
   });
 });
+
+// ─── PATCH /api/seats/:id/block — Admin Maintenance / Block Seat ─────────────
+seatsRouter.patch('/:id/block', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const pool = getPool();
+
+  try {
+    const seatRes = await pool.query('SELECT * FROM seats WHERE "id" = $1', [id]);
+    const seat = seatRes.rows[0];
+
+    if (!seat) {
+      res.status(404).json({ success: false, error: 'Seat not found.' });
+      return;
+    }
+
+    if (seat.status === 'booked') {
+      res.status(400).json({ success: false, error: 'Cannot block an already booked seat.' });
+      return;
+    }
+
+    const newStatus = seat.status === 'blocked' ? 'available' : 'blocked';
+    await pool.query('UPDATE seats SET "status" = $1 WHERE "id" = $2', [newStatus, id]);
+
+    res.json({
+      success: true,
+      status: newStatus,
+      message: `Seat ${seat.number} is now ${newStatus === 'blocked' ? 'Blocked (Maintenance/Reserved)' : 'Available'}.`
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});

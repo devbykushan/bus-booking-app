@@ -249,6 +249,18 @@ export async function initializeSchema(p: Pool): Promise<void> {
       "updatedAt" TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS promo_codes (
+      "id" TEXT PRIMARY KEY,
+      "code" TEXT UNIQUE NOT NULL,
+      "discountPercent" DOUBLE PRECISION NOT NULL,
+      "maxDiscount" DOUBLE PRECISION,
+      "validUntil" TEXT,
+      "usageCount" INTEGER NOT NULL DEFAULT 0,
+      "maxUsage" INTEGER,
+      "isActive" BOOLEAN NOT NULL DEFAULT TRUE,
+      "createdAt" TEXT NOT NULL
+    );
+
     UPDATE routes 
     SET "busType" = 'Normal Service', "priceStarting" = 1157 
     WHERE "busType" LIKE '%Normal Service%' OR "busType" LIKE '%58 Seats%' OR "busType" LIKE '%54 Seats%' OR "busNumber" LIKE '%Route 98%' OR "busNumber" LIKE '%ND-3223%';
