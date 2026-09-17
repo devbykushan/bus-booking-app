@@ -21,6 +21,21 @@
         window.__deferredPwaPrompt = e;
         window.dispatchEvent(new Event('pwa-prompt-captured'));
       });
+      (function() {
+        try {
+          var hostname = window.location.hostname.toLowerCase();
+          var isSuperAdmin = hostname.indexOf('dewmina-super-admin') !== -1 ||
+                             hostname.indexOf('super-admin') !== -1 ||
+                             window.location.href.toLowerCase().indexOf('dew_super') !== -1;
+          var link = document.createElement('link');
+          link.rel = 'manifest';
+          link.href = isSuperAdmin ? '/manifest-superadmin.json' : '/manifest.webmanifest';
+          document.head.appendChild(link);
+          if (isSuperAdmin) {
+            document.title = 'Dewmina Master Admin | Super Admin Command';
+          }
+        } catch (e) {}
+      })();
     </script>
   </head>
   <body>

@@ -75,14 +75,28 @@ export const HASH_VIEW_MAP: Record<string, AppView> = {
 
 export function getViewFromLocation(): AppView {
   if (typeof window === 'undefined') return 'passenger-search';
-  const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+  const path = window.location.pathname.replace(/^\/+|\/+$/g, '').split('?')[0].toLowerCase();
   if (path && HASH_VIEW_MAP[path]) {
     return HASH_VIEW_MAP[path];
   }
-  const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
-  if (hash && HASH_VIEW_MAP[hash]) {
-    return HASH_VIEW_MAP[hash];
+  const rawHash = window.location.hash.replace(/^#\/?/, '').split('?')[0].replace(/\/+$/, '').toLowerCase();
+  if (rawHash && HASH_VIEW_MAP[rawHash]) {
+    return HASH_VIEW_MAP[rawHash];
   }
+
+  // Check if hostname or URL contains super admin patterns
+  const hostname = window.location.hostname.toLowerCase();
+  const fullUrl = window.location.href.toLowerCase();
+  if (
+    hostname.includes('dewmina-super-admin') ||
+    hostname.includes('super-admin') ||
+    fullUrl.includes('dew_super') ||
+    fullUrl.includes('super-admin') ||
+    fullUrl.includes('super_admin')
+  ) {
+    return 'admin-portal';
+  }
+
   return 'passenger-search';
 }
 
@@ -325,7 +339,9 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     localStorage.removeItem('dewmina_user');
     localStorage.removeItem('auth_token');
     set({ currentUser: null, userRole: 'passenger', tripStats: null, savedPassengers: [] });
-    get().setCurrentView('passenger-search');
+    const hostname = window.location.hostname.toLowerCase();
+    const isSuperHost = hostname.includes('dewmina-super-admin') || hostname.includes('super-admin');
+    get().setCurrentView(isSuperHost ? 'admin-portal' : 'passenger-search');
   },
 
   updateProfile: async (data) => {

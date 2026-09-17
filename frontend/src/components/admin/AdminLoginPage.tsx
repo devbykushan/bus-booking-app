@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import {
   Lock, Mail, Eye, EyeOff,
-  ArrowLeft, AlertCircle, CheckCircle2, Download, ShieldCheck
+  ArrowLeft, AlertCircle, CheckCircle2, Download, ShieldCheck,
+  X, Smartphone, Sparkles
 } from 'lucide-react';
 import { AnimatedLogoBadge } from '../common/AnimatedLogoBadge';
 
@@ -16,27 +17,100 @@ export const AdminLoginPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [shake, setShake] = useState(false);
   const [canInstall, setCanInstall] = useState<boolean>(false);
+  const [isInstalling, setIsInstalling] = useState<boolean>(false);
+  const [showInstallGuide, setShowInstallGuide] = useState<boolean>(false);
 
+  // Auto-detect and prepare PWA install
   useEffect(() => {
     if (typeof window !== 'undefined' && (window as any).__deferredPwaPrompt) {
       setCanInstall(true);
     }
     const handleCaptured = () => setCanInstall(true);
     window.addEventListener('pwa-prompt-captured', handleCaptured);
-    return () => window.removeEventListener('pwa-prompt-captured', handleCaptured);
+
+    // Auto-prompt on Android upon first screen touch or when ready
+    const isAndroid = typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent);
+    let autoPrompted = false;
+
+    const tryAutoPrompt = async () => {
+      if (autoPrompted) return;
+      const promptEvent = typeof window !== 'undefined' ? (window as any).__deferredPwaPrompt : null;
+      if (promptEvent && isAndroid) {
+        autoPrompted = true;
+        try {
+          await promptEvent.prompt();
+          const choice = await promptEvent.userChoice;
+          if (choice && choice.outcome === 'accepted') {
+            (window as any).__deferredPwaPrompt = null;
+            setCanInstall(false);
+          }
+        } catch (e) {
+          console.log('[Super Admin PWA] Auto-install prompt handled:', e);
+        }
+      }
+    };
+
+    const handleFirstTouch = () => {
+      tryAutoPrompt();
+      window.removeEventListener('click', handleFirstTouch);
+      window.removeEventListener('touchstart', handleFirstTouch);
+    };
+
+    window.addEventListener('click', handleFirstTouch, { passive: true });
+    window.addEventListener('touchstart', handleFirstTouch, { passive: true });
+    window.addEventListener('pwa-prompt-captured', tryAutoPrompt);
+
+    return () => {
+      window.removeEventListener('pwa-prompt-captured', handleCaptured);
+      window.removeEventListener('pwa-prompt-captured', tryAutoPrompt);
+      window.removeEventListener('click', handleFirstTouch);
+      window.removeEventListener('touchstart', handleFirstTouch);
+    };
   }, []);
 
   const handleInstallClick = async () => {
-    const promptEvent = typeof window !== 'undefined' ? (window as any).__deferredPwaPrompt : null;
+    let promptEvent = typeof window !== 'undefined' ? (window as any).__deferredPwaPrompt : null;
+    
+    // If on Android/Chrome and prompt event is buffering, wait up to 3 seconds
+    if (!promptEvent) {
+      setIsInstalling(true);
+      promptEvent = await new Promise<any>((resolve) => {
+        const timer = setTimeout(() => {
+          cleanup();
+          resolve((window as any).__deferredPwaPrompt || null);
+        }, 3000);
+
+        const onCaptured = () => {
+          cleanup();
+          resolve((window as any).__deferredPwaPrompt || null);
+        };
+
+        const cleanup = () => {
+          clearTimeout(timer);
+          window.removeEventListener('pwa-prompt-captured', onCaptured);
+          window.removeEventListener('beforeinstallprompt', onCaptured);
+        };
+
+        window.addEventListener('pwa-prompt-captured', onCaptured);
+        window.addEventListener('beforeinstallprompt', onCaptured);
+      });
+      setIsInstalling(false);
+    }
+
     if (promptEvent) {
-      promptEvent.prompt();
-      const choice = await promptEvent.userChoice;
-      if (choice && choice.outcome === 'accepted') {
-        (window as any).__deferredPwaPrompt = null;
-        setCanInstall(false);
+      try {
+        await promptEvent.prompt();
+        const choice = await promptEvent.userChoice;
+        if (choice && choice.outcome === 'accepted') {
+          (window as any).__deferredPwaPrompt = null;
+          setCanInstall(false);
+        }
+      } catch (e) {
+        console.error('PWA install error:', e);
+        setShowInstallGuide(true);
       }
     } else {
-      alert('To install "Dewmina Master Admin" on your device:\n\n• On iPhone/iPad (Safari): Tap the Share button, then tap "Add to Home Screen".\n• On Android/Chrome: Tap the 3 dots menu (⋮) and select "Install app".\n• On Mac/PC (Chrome/Edge): Click the Install icon in the browser address bar.');
+      setShowInstallGuide(true);
     }
   };
 
@@ -87,6 +161,10 @@ export const AdminLoginPage: React.FC = () => {
       {/* Back to Home Button */}
       <button
         onClick={() => {
+          if (typeof window !== 'undefined' && window.location.hostname.toLowerCase().includes('dewmina-super-admin')) {
+            window.location.href = 'https://dewminatravels.vercel.app';
+            return;
+          }
           if (typeof window !== 'undefined') {
             window.history.pushState({ view: 'passenger-search' }, '', '/#home');
           }
@@ -124,11 +202,21 @@ export const AdminLoginPage: React.FC = () => {
         {/* Dedicated PWA Install Banner */}
         <button
           type="button"
+          disabled={isInstalling}
           onClick={handleInstallClick}
-          className="w-full mb-6 py-2.5 px-4 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 text-blue-300 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer group shadow-sm active:scale-98"
+          className="w-full mb-6 py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600/20 via-indigo-600/20 to-blue-600/20 hover:from-blue-600/30 hover:to-indigo-600/30 border border-blue-500/40 text-blue-300 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer group shadow-sm active:scale-98 disabled:opacity-60"
         >
-          <Download className="w-4 h-4 text-blue-400 group-hover:translate-y-0.5 transition-transform" />
-          <span>Install "Dewmina Master Admin" App{canInstall ? ' (Ready)' : ''}</span>
+          {isInstalling ? (
+            <>
+              <span className="w-3.5 h-3.5 border-2 border-blue-400/30 border-t-blue-400 rounded-full animate-spin" />
+              <span>Connecting Auto-Install...</span>
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4 text-blue-400 group-hover:translate-y-0.5 transition-transform" />
+              <span>Install "Dewmina Master Admin" App{canInstall ? ' (Ready)' : ''}</span>
+            </>
+          )}
         </button>
 
         {/* Error Alert */}
@@ -211,6 +299,64 @@ export const AdminLoginPage: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* Modern In-App Installation Guide Modal */}
+      {showInstallGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+          <div className="relative w-full max-w-sm rounded-3xl bg-slate-900 border border-blue-500/30 p-6 shadow-2xl text-white">
+            <button
+              type="button"
+              onClick={() => setShowInstallGuide(false)}
+              className="absolute top-4 right-4 p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-xl bg-blue-600/20 border border-blue-500/30">
+                <Smartphone className="w-6 h-6 text-blue-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-black">Install "Super Admin"</h3>
+                <p className="text-xs text-slate-400">Add to your device home screen</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-xs text-slate-300 mb-6 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+              <div className="font-bold text-blue-400 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Android Chrome Quick Steps:</span>
+              </div>
+              <p>1. Tap the <strong className="text-white">three dots (⋮)</strong> at the top-right of Chrome.</p>
+              <p>2. Select <strong className="text-white">"Install app"</strong> (or <strong className="text-white">"Add to Home screen"</strong>).</p>
+              <p>3. Tap <strong className="text-white">Install</strong> to add the Super Admin app directly.</p>
+              <div className="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400">
+                <span>iOS Safari: Tap Share (⎋) ➔ "Add to Home Screen"</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowInstallGuide(false);
+                  handleInstallClick();
+                }}
+                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs transition cursor-pointer"
+              >
+                Try Auto-Install Again
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowInstallGuide(false)}
+                className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

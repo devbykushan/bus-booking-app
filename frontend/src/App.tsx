@@ -69,12 +69,15 @@ export function App() {
     }
   }, []);
 
-  // Dynamically swap PWA Manifest and Document Title for Dewmina Master Admin
+  // Dynamically swap PWA Manifest and Document Title for Super Admin
   useEffect(() => {
+    const hostname = window.location.hostname.toLowerCase();
     const isSuperAdminPortal =
       currentView === 'admin-portal' ||
-      window.location.pathname.toLowerCase().includes('dew_super-admin') ||
-      window.location.hash.toLowerCase().includes('dew_super-admin');
+      hostname.includes('dewmina-super-admin') ||
+      hostname.includes('super-admin') ||
+      window.location.pathname.toLowerCase().includes('dew_super') ||
+      window.location.hash.toLowerCase().includes('dew_super');
 
     let manifestLink = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
     if (!manifestLink) {
@@ -87,16 +90,25 @@ export function App() {
       manifestLink.href = '/manifest-superadmin.json';
       document.title = 'Dewmina Master Admin | Super Admin Command';
     } else {
-      manifestLink.href = '/manifest.json';
+      manifestLink.href = '/manifest.webmanifest';
       document.title = 'Dewmina Super Line | Monaragala to Colombo Online Bus Seat Booking';
     }
   }, [currentView]);
 
   // Sync browser history state and handle browser Back / Forward buttons
   useEffect(() => {
-    const pathname = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
-    const rawHash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
-    const initialView = HASH_VIEW_MAP[pathname] || HASH_VIEW_MAP[rawHash] || currentView;
+    const hostname = window.location.hostname.toLowerCase();
+    const pathname = window.location.pathname.replace(/^\/+|\/+$/g, '').split('?')[0].toLowerCase();
+    const rawHash = window.location.hash.replace(/^#\/?/, '').split('?')[0].replace(/\/+$/, '').toLowerCase();
+    const fullUrl = window.location.href.toLowerCase();
+    const isSuperUrl =
+      hostname.includes('dewmina-super-admin') ||
+      hostname.includes('super-admin') ||
+      fullUrl.includes('dew_super') ||
+      fullUrl.includes('super-admin') ||
+      fullUrl.includes('super_admin');
+
+    const initialView = isSuperUrl ? 'admin-portal' : (HASH_VIEW_MAP[pathname] || HASH_VIEW_MAP[rawHash] || currentView);
     const initialHash = VIEW_HASH_MAP[initialView] || 'home';
 
     if (initialView !== currentView) {
@@ -114,10 +126,20 @@ export function App() {
       const state = (event as PopStateEvent)?.state;
       let targetView: AppView = 'passenger-search';
 
-      const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
-      const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+      const path = window.location.pathname.replace(/^\/+|\/+$/g, '').split('?')[0].toLowerCase();
+      const hash = window.location.hash.replace(/^#\/?/, '').split('?')[0].replace(/\/+$/, '').toLowerCase();
+      const currentFullUrl = window.location.href.toLowerCase();
 
-      if (path && HASH_VIEW_MAP[path]) {
+      const currentHostname = window.location.hostname.toLowerCase();
+      if (
+        currentHostname.includes('dewmina-super-admin') ||
+        currentHostname.includes('super-admin') ||
+        currentFullUrl.includes('dew_super') ||
+        currentFullUrl.includes('super-admin') ||
+        currentFullUrl.includes('super_admin')
+      ) {
+        targetView = 'admin-portal';
+      } else if (path && HASH_VIEW_MAP[path]) {
         targetView = HASH_VIEW_MAP[path];
       } else if (hash && HASH_VIEW_MAP[hash]) {
         targetView = HASH_VIEW_MAP[hash];
@@ -203,7 +225,12 @@ export function App() {
     };
   }, [loadRoutes, loadBookings]);
 
-  // ─── Backend offline splash (only if zero routes available) ─────────────────
+  // ─── Super Admin Portal View (Accessible directly, never blocked by route offline splash) ───
+  if (currentView === 'admin-portal') {
+    return <AdminLoginPage />;
+  }
+
+  // ─── Backend offline splash (only if zero routes available for passenger booking) ───
   if (backendError && routes.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 gap-6 px-4">
@@ -241,10 +268,6 @@ export function App() {
         </div>
       </div>
     );
-  }
-
-  if (currentView === 'admin-portal') {
-    return <AdminLoginPage />;
   }
 
   return (
