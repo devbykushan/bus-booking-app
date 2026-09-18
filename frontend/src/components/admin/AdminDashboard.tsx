@@ -21,10 +21,10 @@ import {
   SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
   Trash2, RefreshCw, Edit3, Clock, Star, Search,
   Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare, Menu, Shield,
-  Printer, Wrench, MapPin, ArrowLeft, ArrowRight, ChevronDown, ChevronUp, Layers, Filter
+  Printer, Wrench, MapPin, ArrowLeft, ChevronDown, ChevronUp, Layers, Filter
 } from 'lucide-react';
 
-export type AdminDashboardTab = 'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp' | 'counter-booking' | 'staff' | 'promos' | 'live-gps' | 'master-controls';
+export type AdminDashboardTab = 'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp' | 'counter-booking' | 'staff' | 'promos' | 'live-gps';
 
 export const AdminDashboard: React.FC = () => {
   const { bookings, routes, loadRoutes, loadBookings, currentUser, adminActiveTab, setAdminActiveTab } = useBookingStore();
@@ -40,13 +40,18 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const getDefaultTab = (): AdminDashboardTab => {
+    if (isSuperAdmin) return 'fleet';
+    if (hasPermission('fleet_management')) return 'fleet';
     if (hasPermission('counter_booking')) return 'counter-booking';
+    if (hasPermission('slips_approval')) return 'payment-slips';
+    if (hasPermission('timetable_management')) return 'timetables';
     if (hasPermission('analytics')) return 'analytics';
-    return 'master-controls';
+    if (hasPermission('whatsapp')) return 'whatsapp';
+    return 'fleet';
   };
 
   const [activeTab, setActiveTabState] = useState<AdminDashboardTab>(() => {
-    const validTabs = ['fleet', 'timetables', 'analytics', 'users', 'payment-slips', 'whatsapp', 'counter-booking', 'staff', 'promos', 'live-gps', 'master-controls'];
+    const validTabs = ['fleet', 'timetables', 'analytics', 'users', 'payment-slips', 'whatsapp', 'counter-booking', 'staff', 'promos', 'live-gps'];
     if (adminActiveTab && validTabs.includes(adminActiveTab)) {
       return adminActiveTab as AdminDashboardTab;
     }
@@ -59,7 +64,7 @@ export const AdminDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    const validTabs = ['fleet', 'timetables', 'analytics', 'users', 'payment-slips', 'whatsapp', 'counter-booking', 'staff', 'promos', 'live-gps', 'master-controls'];
+    const validTabs = ['fleet', 'timetables', 'analytics', 'users', 'payment-slips', 'whatsapp', 'counter-booking', 'staff', 'promos', 'live-gps'];
     if (adminActiveTab && validTabs.includes(adminActiveTab) && adminActiveTab !== activeTab) {
       setActiveTabState(adminActiveTab as AdminDashboardTab);
     }
@@ -415,8 +420,6 @@ export const AdminDashboard: React.FC = () => {
             {activeTab === 'whatsapp' && 'WhatsApp Gateway'}
             {activeTab === 'promos' && 'Promo Codes & Discounts'}
             {activeTab === 'live-gps' && 'Live GPS Fleet Tracking'}
-            {activeTab === 'staff' && 'Staff & Sub-Admins'}
-            {activeTab === 'master-controls' && 'System & Fleet Controls'}
           </span>
         </div>
       </div>
@@ -463,6 +466,27 @@ export const AdminDashboard: React.FC = () => {
                 </button>
               )}
 
+              {hasPermission('fleet_management') && (
+                <button
+                  onClick={() => { setActiveTab('fleet'); setIsMobileNavOpen(false); }}
+                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
+                    activeTab === 'fleet' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <Bus className="w-4 h-4" /> Fleet & Route Operations
+                </button>
+              )}
+
+              {hasPermission('timetable_management') && (
+                <button
+                  onClick={() => { setActiveTab('timetables'); setIsMobileNavOpen(false); }}
+                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
+                    activeTab === 'timetables' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <Calendar className="w-4 h-4" /> Master Timetables
+                </button>
+              )}
 
               {hasPermission('analytics') && (
                 <button
@@ -491,6 +515,24 @@ export const AdminDashboard: React.FC = () => {
                 </span>
               </button>
 
+              {hasPermission('whatsapp') && (
+                <button
+                  onClick={() => { setActiveTab('whatsapp'); setIsMobileNavOpen(false); }}
+                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                    activeTab === 'whatsapp' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4" /> WhatsApp Gateway
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                    activeTab === 'whatsapp' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
+                  }`}>
+                    BOT
+                  </span>
+                </button>
+              )}
+
               <button
                 onClick={() => { setActiveTab('promos'); setIsMobileNavOpen(false); }}
                 className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
@@ -508,50 +550,40 @@ export const AdminDashboard: React.FC = () => {
               </button>
 
               {isSuperAdmin && (
-                <button
-                  onClick={() => { setActiveTab('users'); setIsMobileNavOpen(false); }}
-                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                    activeTab === 'users' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4" /> User Accounts ({totalUsersCount})
-                  </div>
-                  {usersList.length > 0 && (
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                      activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
-                    }`}>
-                      {totalUsersCount}
-                    </span>
-                  )}
-                </button>
-              )}
+                <>
+                  <button
+                    onClick={() => { setActiveTab('users'); setIsMobileNavOpen(false); }}
+                    className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                      activeTab === 'users' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4" /> User Accounts ({totalUsersCount})
+                    </div>
+                    {usersList.length > 0 && (
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                        activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+                      }`}>
+                        {totalUsersCount}
+                      </span>
+                    )}
+                  </button>
 
-              {/* Master Controls Section */}
-              <div className="pt-2">
-                <div className="h-px bg-slate-200 mb-2" />
-                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-1 mb-2">Master Configuration</p>
-                <button
-                  onClick={() => { setActiveTab('master-controls'); setIsMobileNavOpen(false); }}
-                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                    activeTab === 'master-controls' || ['fleet', 'timetables', 'whatsapp', 'staff'].includes(activeTab)
-                      ? 'bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 text-white shadow-md'
-                      : 'text-slate-700 hover:bg-slate-100 bg-slate-50 border border-slate-200/80'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <SlidersHorizontal className="w-4 h-4 text-indigo-400" />
-                    <span>System & Fleet Controls</span>
-                  </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-black ${
-                    activeTab === 'master-controls' || ['fleet', 'timetables', 'whatsapp', 'staff'].includes(activeTab)
-                      ? 'bg-white/20 text-white'
-                      : 'bg-indigo-100 text-indigo-700'
-                  }`}>
-                    MASTER
-                  </span>
-                </button>
-              </div>
+                  <button
+                    onClick={() => { setActiveTab('staff'); setIsMobileNavOpen(false); }}
+                    className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                      activeTab === 'staff' ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-emerald-500" /> Staff & Sub-Admins
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
+                      SUPER
+                    </span>
+                  </button>
+                </>
+              )}
             </div>
 
             {activeTab === 'fleet' && (
@@ -642,6 +674,28 @@ export const AdminDashboard: React.FC = () => {
               </button>
             )}
 
+            {hasPermission('fleet_management') && (
+              <button
+                onClick={() => setActiveTab('fleet')}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'fleet' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Bus className="w-4 h-4" /> Fleet & Route Operations
+              </button>
+            )}
+
+            {hasPermission('timetable_management') && (
+              <button
+                onClick={() => setActiveTab('timetables')}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'timetables' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Calendar className="w-4 h-4" /> Master Timetables
+              </button>
+            )}
+
             {hasPermission('analytics') && (
               <button
                 onClick={() => setActiveTab('analytics')}
@@ -669,6 +723,24 @@ export const AdminDashboard: React.FC = () => {
               </span>
             </button>
 
+            {hasPermission('whatsapp') && (
+              <button
+                onClick={() => setActiveTab('whatsapp')}
+                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                  activeTab === 'whatsapp' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4" /> WhatsApp Gateway
+                </div>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                  activeTab === 'whatsapp' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
+                }`}>
+                  BOT
+                </span>
+              </button>
+            )}
+
             <button
               onClick={() => setActiveTab('promos')}
               className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
@@ -686,50 +758,40 @@ export const AdminDashboard: React.FC = () => {
             </button>
 
             {isSuperAdmin && (
-              <button
-                onClick={() => setActiveTab('users')}
-                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                  activeTab === 'users' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4" /> User Accounts ({totalUsersCount})
-                </div>
-                {usersList.length > 0 && (
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                    activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
-                  }`}>
-                    {totalUsersCount}
-                  </span>
-                )}
-              </button>
-            )}
+              <>
+                <button
+                  onClick={() => setActiveTab('users')}
+                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                    activeTab === 'users' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4" /> User Accounts ({totalUsersCount})
+                  </div>
+                  {usersList.length > 0 && (
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                      activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+                    }`}>
+                      {totalUsersCount}
+                    </span>
+                  )}
+                </button>
 
-            {/* Master Controls Section */}
-            <div className="pt-2">
-              <div className="h-px bg-slate-200 mb-2" />
-              <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-1 mb-2">Master Configuration</p>
-              <button
-                onClick={() => setActiveTab('master-controls')}
-                className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                  activeTab === 'master-controls' || ['fleet', 'timetables', 'whatsapp', 'staff'].includes(activeTab)
-                    ? 'bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 text-white shadow-md'
-                    : 'text-slate-700 hover:bg-slate-100 bg-slate-50 border border-slate-200/80'
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <SlidersHorizontal className="w-4 h-4 text-indigo-400" />
-                  <span>System & Fleet Controls</span>
-                </div>
-                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black ${
-                  activeTab === 'master-controls' || ['fleet', 'timetables', 'whatsapp', 'staff'].includes(activeTab)
-                    ? 'bg-white/20 text-white'
-                    : 'bg-indigo-100 text-indigo-700'
-                }`}>
-                  MASTER
-                </span>
-              </button>
-            </div>
+                <button
+                  onClick={() => setActiveTab('staff')}
+                  className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                    activeTab === 'staff' ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-emerald-500" /> Staff & Sub-Admins
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
+                    SUPER
+                  </span>
+                </button>
+              </>
+            )}
           </div>
 
           {activeTab === 'fleet' && (
@@ -765,173 +827,9 @@ export const AdminDashboard: React.FC = () => {
 
         <main className="min-w-0 flex-1 w-full animate-fade-in-up" style={{ animationDelay: '0.25s' }}>
 
-      {/* ─── TAB 0: SYSTEM & FLEET CONTROLS (MASTER HUB) ─── */}
-      {activeTab === 'master-controls' && (
-        <div className="space-y-6 animate-fade-in-up">
-          {/* Hero Banner */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 p-6 sm:p-8 text-white shadow-xl border border-indigo-900/40">
-            <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-[11px] font-black uppercase tracking-wider mb-3">
-                <SlidersHorizontal className="w-3.5 h-3.5" />
-                Master Configuration Suite
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white mb-2">
-                System & Fleet Controls
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Centralized control hub for core bus fleet operations, departure timetable master templates, automated WhatsApp bot communications, and administrative staff management.
-              </p>
-            </div>
-          </div>
-
-          {/* 4 Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {/* Card 1: Fleet & Route Operations */}
-            <div 
-              onClick={() => setActiveTab('fleet')}
-              className="group bg-white hover:bg-gradient-to-br hover:from-white hover:to-blue-50/50 rounded-3xl p-6 border border-slate-200 hover:border-blue-300 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between cursor-pointer"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 group-hover:bg-blue-600 text-blue-600 group-hover:text-white flex items-center justify-center transition-colors shadow-xs">
-                    <Bus className="w-6 h-6" />
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full bg-blue-100/70 text-blue-700 text-[10px] font-black uppercase tracking-wider">
-                    {routes.length} Active {routes.length === 1 ? 'Route' : 'Routes'}
-                  </span>
-                </div>
-                <h3 className="text-base sm:text-lg font-black text-slate-900 group-hover:text-blue-600 transition-colors mb-2">
-                  Fleet & Route Operations
-                </h3>
-                <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                  Manage active bus fleets, add or adjust express routes, configure customized seat layouts, and monitor real-time bus deployment.
-                </p>
-              </div>
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600">
-                <span>Manage Fleet & Schedules</span>
-                <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-
-            {/* Card 2: Master Timetables */}
-            <div 
-              onClick={() => setActiveTab('timetables')}
-              className="group bg-white hover:bg-gradient-to-br hover:from-white hover:to-emerald-50/50 rounded-3xl p-6 border border-slate-200 hover:border-emerald-300 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between cursor-pointer"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 group-hover:bg-emerald-600 text-emerald-600 group-hover:text-white flex items-center justify-center transition-colors shadow-xs">
-                    <Calendar className="w-6 h-6" />
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full bg-emerald-100/70 text-emerald-700 text-[10px] font-black uppercase tracking-wider">
-                    Schedules
-                  </span>
-                </div>
-                <h3 className="text-base sm:text-lg font-black text-slate-900 group-hover:text-emerald-600 transition-colors mb-2">
-                  Master Timetables
-                </h3>
-                <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                  Define recurring bus departure times, manage weekday/weekend templates, and automate schedule generation across expressway routes.
-                </p>
-              </div>
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-600">
-                <span>Manage Master Timetables</span>
-                <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-
-            {/* Card 3: WhatsApp Gateway */}
-            <div 
-              onClick={() => setActiveTab('whatsapp')}
-              className="group bg-white hover:bg-gradient-to-br hover:from-white hover:to-green-50/50 rounded-3xl p-6 border border-slate-200 hover:border-green-300 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between cursor-pointer"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-green-50 group-hover:bg-green-600 text-green-600 group-hover:text-white flex items-center justify-center transition-colors shadow-xs">
-                    <MessageSquare className="w-6 h-6" />
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full bg-green-100/70 text-green-700 text-[10px] font-black uppercase tracking-wider">
-                    Automated Bot
-                  </span>
-                </div>
-                <h3 className="text-base sm:text-lg font-black text-slate-900 group-hover:text-green-600 transition-colors mb-2">
-                  WhatsApp Gateway
-                </h3>
-                <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                  Test and configure the automated WhatsApp messaging bot, manage instant PDF/QR ticket notifications, and broadcast passenger updates.
-                </p>
-              </div>
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-green-600">
-                <span>Configure WhatsApp Gateway</span>
-                <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-
-            {/* Card 4: Staff & Sub-Admins */}
-            <div 
-              onClick={() => {
-                if (isSuperAdmin) {
-                  setActiveTab('staff');
-                }
-              }}
-              className={`group bg-white rounded-3xl p-6 border shadow-sm transition-all duration-300 flex flex-col justify-between ${
-                isSuperAdmin 
-                  ? 'hover:bg-gradient-to-br hover:from-white hover:to-purple-50/50 hover:border-purple-300 hover:shadow-md cursor-pointer border-slate-200' 
-                  : 'opacity-70 bg-slate-50/50 border-slate-200 cursor-not-allowed'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shadow-xs ${
-                    isSuperAdmin 
-                      ? 'bg-purple-50 group-hover:bg-purple-600 text-purple-600 group-hover:text-white' 
-                      : 'bg-slate-100 text-slate-400'
-                  }`}>
-                    <Shield className="w-6 h-6" />
-                  </div>
-                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                    isSuperAdmin ? 'bg-purple-100/70 text-purple-700' : 'bg-slate-200 text-slate-600'
-                  }`}>
-                    {isSuperAdmin ? 'Super Admin' : 'Restricted'}
-                  </span>
-                </div>
-                <h3 className={`text-base sm:text-lg font-black transition-colors mb-2 ${
-                  isSuperAdmin ? 'text-slate-900 group-hover:text-purple-600' : 'text-slate-700'
-                }`}>
-                  Staff & Sub-Admins
-                </h3>
-                <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                  Create and manage staff accounts, assign operational permissions (Counter booking, GPS, Analytics), and supervise active roles.
-                </p>
-              </div>
-              <div className={`pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold ${
-                isSuperAdmin ? 'text-purple-600' : 'text-slate-400'
-              }`}>
-                <span>{isSuperAdmin ? 'Manage Staff & Roles' : 'Super Admin Access Required'}</span>
-                {isSuperAdmin && <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ─── TAB 1: FLEET & ROUTE OPERATIONS ─── */}
       {activeTab === 'fleet' && (
         <div className="space-y-8">
-          {/* Back to Controls Hub button */}
-          <div className="flex items-center justify-between bg-white border border-slate-200/80 px-4 py-2.5 rounded-2xl shadow-2xs">
-            <button
-              onClick={() => setActiveTab('master-controls')}
-              className="flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4 text-indigo-500" />
-              <span>Back to System & Fleet Controls</span>
-            </button>
-            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-wider text-slate-400">
-              Master Controls Hub
-            </span>
-          </div>
           
           {/* Top Fleet Toolbar */}
           <div className="flex items-center justify-between">
@@ -1506,20 +1404,7 @@ export const AdminDashboard: React.FC = () => {
 
       {/* ─── TAB 1.5: TIMETABLES ─── */}
       {activeTab === 'timetables' && (
-        <div className="space-y-6 animate-fade-in-up">
-          {/* Back to Controls Hub button */}
-          <div className="flex items-center justify-between bg-white border border-slate-200/80 px-4 py-2.5 rounded-2xl shadow-2xs">
-            <button
-              onClick={() => setActiveTab('master-controls')}
-              className="flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4 text-indigo-500" />
-              <span>Back to System & Fleet Controls</span>
-            </button>
-            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-wider text-slate-400">
-              Master Controls Hub
-            </span>
-          </div>
+        <div className="space-y-8">
           <TimetableManager />
         </div>
       )}
@@ -2109,20 +1994,7 @@ export const AdminDashboard: React.FC = () => {
 
       {/* ─── TAB 6: WHATSAPP AUTOMATION GATEWAY ─── */}
       {activeTab === 'whatsapp' && (
-        <div className="animate-fade-in-up space-y-4">
-          {/* Back to Controls Hub button */}
-          <div className="flex items-center justify-between bg-white border border-slate-200/80 px-4 py-2.5 rounded-2xl shadow-2xs">
-            <button
-              onClick={() => setActiveTab('master-controls')}
-              className="flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4 text-indigo-500" />
-              <span>Back to System & Fleet Controls</span>
-            </button>
-            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-wider text-slate-400">
-              Master Controls Hub
-            </span>
-          </div>
+        <div className="animate-fade-in-up">
           <WhatsAppManagerSection />
         </div>
       )}
@@ -2140,30 +2012,9 @@ export const AdminDashboard: React.FC = () => {
       )}
 
       {/* ─── TAB 8: STAFF & SUB-ADMIN MANAGEMENT (Super Admin Only) ─── */}
-      {activeTab === 'staff' && (
-        <div className="animate-fade-in-up space-y-4">
-          {/* Back to Controls Hub button */}
-          <div className="flex items-center justify-between bg-white border border-slate-200/80 px-4 py-2.5 rounded-2xl shadow-2xs">
-            <button
-              onClick={() => setActiveTab('master-controls')}
-              className="flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4 text-indigo-500" />
-              <span>Back to System & Fleet Controls</span>
-            </button>
-            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-wider text-slate-400">
-              Master Controls Hub
-            </span>
-          </div>
-          {isSuperAdmin ? (
-            <StaffManagementSection />
-          ) : (
-            <div className="p-8 text-center bg-white rounded-3xl border border-slate-200">
-              <Shield className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-slate-700">Access Restricted</h3>
-              <p className="text-xs text-slate-500 mt-1">Only Super Admins are permitted to manage staff and system sub-admins.</p>
-            </div>
-          )}
+      {activeTab === 'staff' && isSuperAdmin && (
+        <div className="animate-fade-in-up">
+          <StaffManagementSection />
         </div>
       )}
 
