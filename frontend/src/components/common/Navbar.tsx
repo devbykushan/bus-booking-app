@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { AuthModal } from './AuthModal';
-import { Bus, MapPin, Ticket, Clock, ShieldCheck, LogOut, LogIn, ChevronDown, Globe, Route, Settings, Moon, Sun, User, Bell, DollarSign } from 'lucide-react';
+import { Bus, Ticket, Clock, ShieldCheck, LogOut, LogIn, ChevronDown, Globe, Route, Settings, Moon, Sun, User, Bell, DollarSign } from 'lucide-react';
 import { AnimatedLogoBadge } from './AnimatedLogoBadge';
 
 export const Navbar: React.FC = () => {
@@ -75,7 +75,16 @@ export const Navbar: React.FC = () => {
 
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || userRole === 'admin' || userRole === 'super_admin';
 
-  const navItems = isAdmin
+  interface NavItem {
+    key: string;
+    translationKey?: string;
+    label?: string;
+    icon: any;
+    activeOn: string[];
+    badgeCount?: number;
+  }
+
+  const navItems: NavItem[] = isAdmin
     ? [
         { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
         { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
@@ -91,8 +100,13 @@ export const Navbar: React.FC = () => {
     : [
         { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
         { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
-        { key: 'live-tracking', translationKey: 'liveGps', icon: MapPin, activeOn: ['live-tracking'] },
         { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
+        { 
+          key: 'passenger-settings', 
+          label: language === 'sinhala' ? 'ගිණුම' : language === 'tamil' ? 'கணக்கு' : 'Profile', 
+          icon: User, 
+          activeOn: ['passenger-settings'] 
+        },
       ];
 
   // Background polling for payment slips when admin is logged in
@@ -216,6 +230,10 @@ export const Navbar: React.FC = () => {
     }
 
     if (view === 'passenger-settings') {
+      if (!currentUser) {
+        setShowAuthModal(true);
+        return;
+      }
       setCurrentView('passenger-settings');
       return;
     }
@@ -288,13 +306,6 @@ export const Navbar: React.FC = () => {
                       {item.badgeCount !== undefined && item.badgeCount > 0 && (
                         <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-orange-600 text-white shadow-xs animate-pulse">
                           {item.badgeCount}
-                        </span>
-                      )}
-                      {item.key === 'live-tracking' && (
-                        <span className={`px-1.5 py-0.5 text-[9px] font-black uppercase rounded-md tracking-wider ${
-                          active ? 'bg-white/20 text-white border border-white/30' : 'bg-amber-100 text-amber-700 border border-amber-200/70'
-                        }`}>
-                          Soon
                         </span>
                       )}
                     </button>
