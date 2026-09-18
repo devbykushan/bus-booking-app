@@ -415,7 +415,7 @@ export const FloatingWhatsApp: React.FC = () => {
                     key={i}
                     disabled={isTyping}
                     onClick={() => handleSendMessage(opt.value)}
-                    className="text-[11px] font-bold px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#075E54] to-[#128C7E] hover:from-[#128C7E] hover:to-[#25D366] text-white shadow-sm shadow-emerald-900/30 hover:shadow-md hover:shadow-emerald-700/30 transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-40 flex items-center gap-1 whitespace-nowrap border border-white/10"
+                    className="text-[11px] font-bold px-3.5 py-1.5 rounded-full bg-emerald-800 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 text-white shadow-sm hover:shadow-md transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-40 flex items-center gap-1 whitespace-nowrap"
                   >
                     <span>{opt.label}</span>
                   </button>
