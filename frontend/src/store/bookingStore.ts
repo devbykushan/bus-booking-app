@@ -27,7 +27,8 @@ export type AppView =
   | 'admin-panel'
   | 'passenger-settings'
   | 'slip-upload'
-  | 'admin-portal';
+  | 'admin-portal'
+  | 'master-management';
 
 export const VIEW_HASH_MAP: Record<AppView, string> = {
   'passenger-search': 'home',
@@ -41,6 +42,7 @@ export const VIEW_HASH_MAP: Record<AppView, string> = {
   'passenger-settings': 'settings',
   'slip-upload': 'slip-upload',
   'admin-portal': 'dew_super-admin',
+  'master-management': 'master-management',
 };
 
 export const HASH_VIEW_MAP: Record<string, AppView> = {
@@ -71,6 +73,8 @@ export const HASH_VIEW_MAP: Record<string, AppView> = {
   'settings': 'passenger-settings',
   'passenger-settings': 'passenger-settings',
   'slip-upload': 'slip-upload',
+  'master-management': 'master-management',
+  'master': 'master-management',
 };
 
 export function getViewFromLocation(): AppView {

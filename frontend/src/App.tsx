@@ -17,6 +17,7 @@ import { UserBookings } from './components/passenger/UserBookings';
 import { PassengerSettings } from './components/passenger/PassengerSettings';
 import { SlipUploadPage } from './components/passenger/SlipUploadPage';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { MasterManagementDashboard } from './components/admin/MasterManagementDashboard';
 import { AdminLoginPage } from './components/admin/AdminLoginPage';
 import { AdminNotificationDrawer } from './components/admin/AdminNotificationDrawer';
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
@@ -325,6 +326,32 @@ export function App() {
                 <button
                   onClick={() => setCurrentView('passenger-search')}
                   className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-sm border border-slate-200 transition-all cursor-pointer"
+                >
+                  Return to Passenger Portal
+                </button>
+              </div>
+            </div>
+          )
+        ) : currentView === 'master-management' ? (
+          isAdmin ? (
+            <div key="master-management">
+              <MasterManagementDashboard />
+            </div>
+          ) : (
+            <div key="master-restricted" className="max-w-xl mx-auto my-12 px-6 py-10 bg-white dark:bg-slate-900 rounded-3xl border border-red-200 dark:border-red-900/50 shadow-xl text-center space-y-5 animate-fade-in-up">
+              <div className="w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/50 flex items-center justify-center mx-auto text-red-600 shadow-sm">
+                <ShieldAlert className="w-8 h-8 text-red-600" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight">Master Management Access Restricted</h2>
+                <p className="text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto leading-relaxed">
+                  The Master Management Dashboard is restricted to authorized fleet administrators.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button
+                  onClick={() => setCurrentView('passenger-search')}
+                  className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-extrabold text-sm border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
                 >
                   Return to Passenger Portal
                 </button>

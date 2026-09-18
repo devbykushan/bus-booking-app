@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { AuthModal } from './AuthModal';
-import { Bus, Ticket, Clock, ShieldCheck, LogOut, LogIn, ChevronDown, Globe, Route, Settings, Moon, Sun, User, Bell, DollarSign } from 'lucide-react';
+import { Bus, Ticket, Clock, ShieldCheck, LogOut, LogIn, ChevronDown, Globe, Route, Settings, Moon, Sun, User, Bell, DollarSign, Wrench } from 'lucide-react';
 import { AnimatedLogoBadge } from './AnimatedLogoBadge';
 
 export const Navbar: React.FC = () => {
@@ -95,6 +95,12 @@ export const Navbar: React.FC = () => {
           activeOn: ['admin-payment-slips'],
           badgeCount: pendingSlipsCount,
         },
+        { 
+          key: 'master-management', 
+          label: 'Master', 
+          icon: Wrench, 
+          activeOn: ['master-management'] 
+        },
         { key: 'my-bookings', translationKey: 'myTickets', icon: Ticket, activeOn: ['my-bookings'] },
       ]
     : [
@@ -122,8 +128,7 @@ export const Navbar: React.FC = () => {
 
   const mobileNavItems = isAdmin
     ? [
-        { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
-        { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
+        { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search', 'schedules-dashboard'] },
         { 
           key: 'admin-payment-slips', 
           label: language === 'sinhala' ? 'Slips' : language === 'tamil' ? 'ரசீது' : 'Payment Slips', 
@@ -137,6 +142,13 @@ export const Navbar: React.FC = () => {
           label: currentUser?.role === 'super_admin' || userRole === 'super_admin' ? 'Super Admin' : 'Admin', 
           icon: ShieldCheck, 
           activeOn: ['admin-panel'],
+          isAdminTab: true 
+        },
+        { 
+          key: 'master-management', 
+          label: 'Master', 
+          icon: Wrench, 
+          activeOn: ['master-management'],
           isAdminTab: true 
         },
         ...(currentUser
@@ -226,6 +238,12 @@ export const Navbar: React.FC = () => {
         setAdminActiveTab('fleet');
       }
       setCurrentView('admin-panel');
+      return;
+    }
+
+    if (view === 'master-management') {
+      setUserRole(currentUser?.role === 'super_admin' ? 'super_admin' : 'admin');
+      setCurrentView('master-management');
       return;
     }
 
@@ -505,17 +523,30 @@ export const Navbar: React.FC = () => {
                           {/* Menu Items */}
                           <div className="p-1.5 space-y-1">
                             {isAdmin && (
-                              <button
-                                onClick={() => {
-                                  setUserRole(currentUser?.role === 'super_admin' ? 'super_admin' : 'admin');
-                                  setCurrentView('admin-panel');
-                                  setProfileOpen(false);
-                                }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 dark:hover:bg-purple-500/20 border border-transparent hover:border-purple-400/30 transition-all duration-200 cursor-pointer active:scale-95"
-                              >
-                                <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400 drop-shadow-[0_1px_4px_rgba(168,85,247,0.3)]" />
-                                <span>Admin Dashboard</span>
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => {
+                                    setUserRole(currentUser?.role === 'super_admin' ? 'super_admin' : 'admin');
+                                    setCurrentView('admin-panel');
+                                    setProfileOpen(false);
+                                  }}
+                                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 dark:hover:bg-purple-500/20 border border-transparent hover:border-purple-400/30 transition-all duration-200 cursor-pointer active:scale-95"
+                                >
+                                  <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400 drop-shadow-[0_1px_4px_rgba(168,85,247,0.3)]" />
+                                  <span>Admin Dashboard</span>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setUserRole(currentUser?.role === 'super_admin' ? 'super_admin' : 'admin');
+                                    setCurrentView('master-management');
+                                    setProfileOpen(false);
+                                  }}
+                                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-amber-700 dark:text-amber-300 hover:bg-amber-500/15 dark:hover:bg-amber-500/20 border border-transparent hover:border-amber-400/30 transition-all duration-200 cursor-pointer active:scale-95"
+                                >
+                                  <Wrench className="w-4 h-4 text-amber-600 dark:text-amber-400 drop-shadow-[0_1px_4px_rgba(245,158,11,0.3)]" />
+                                  <span>Master Management</span>
+                                </button>
+                              </>
                             )}
                             <button
                               onClick={() => { setCurrentView('my-bookings'); setProfileOpen(false); }}
