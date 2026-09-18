@@ -78,7 +78,7 @@ export const Navbar: React.FC = () => {
   interface NavItem {
     key: string;
     translationKey?: string;
-    label?: string;
+    label?: React.ReactNode;
     icon: any;
     activeOn: string[];
     badgeCount?: number;
@@ -640,10 +640,19 @@ export const Navbar: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  <span className={`text-[9px] sm:text-[10px] text-center leading-tight truncate w-full mt-0.5 font-sans tracking-tight ${
+                  <span className={`text-[8.5px] sm:text-[9.5px] text-center w-full mt-0.5 font-sans tracking-tight ${
+                    item.key === 'admin-payment-slips' ? 'leading-[1.05]' : 'leading-tight truncate'
+                  } ${
                     isDangerItem ? 'text-red-500 dark:text-red-400 font-medium' : ''
                   }`}>
-                    {item.label || t(item.translationKey)}
+                    {item.key === 'admin-payment-slips' && language === 'english' ? (
+                      <span className="flex flex-col items-center">
+                        <span className="block leading-[1.05]">Payment</span>
+                        <span className="block leading-[1.05]">Slips</span>
+                      </span>
+                    ) : (
+                      item.label || t(item.translationKey)
+                    )}
                   </span>
                   {active && (
                     <span className={`w-1 h-1 rounded-full mt-0.5 ${
