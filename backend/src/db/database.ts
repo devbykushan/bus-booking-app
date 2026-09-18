@@ -105,6 +105,7 @@ export async function initializeSchema(p: Pool): Promise<void> {
       "password" TEXT NOT NULL,
       "role" TEXT NOT NULL DEFAULT 'passenger',
       "phone" TEXT,
+      "avatarUrl" TEXT,
       "permissions" TEXT NOT NULL DEFAULT '[]',
       "createdAt" TEXT NOT NULL
     );
@@ -114,6 +115,7 @@ export async function initializeSchema(p: Pool): Promise<void> {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS "emergencyContactPhone" TEXT;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS "notifyWhatsapp" BOOLEAN NOT NULL DEFAULT TRUE;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS "notifySms" BOOLEAN NOT NULL DEFAULT TRUE;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS "avatarUrl" TEXT;
 
     CREATE TABLE IF NOT EXISTS saved_passengers (
       "id" TEXT PRIMARY KEY,

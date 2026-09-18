@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import {
   User,
@@ -26,6 +26,10 @@ import {
   ExternalLink,
   ChevronRight,
   ShieldAlert,
+  Camera,
+  Upload,
+  Trash2,
+  Link as LinkIcon,
 } from 'lucide-react';
 
 export const PassengerSettings: React.FC = () => {
@@ -40,6 +44,7 @@ export const PassengerSettings: React.FC = () => {
     setCurrentView,
     goToHome,
     bookings,
+    language,
     t,
   } = useBookingStore();
 
@@ -53,6 +58,11 @@ export const PassengerSettings: React.FC = () => {
   const [emergencyPhone, setEmergencyPhone] = useState(currentUser?.emergencyContactPhone || '');
   const [notifyWhatsapp, setNotifyWhatsapp] = useState(currentUser?.notifyWhatsapp !== false);
   const [notifySms, setNotifySms] = useState(currentUser?.notifySms !== false);
+  const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || '');
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [showUrlModal, setShowUrlModal] = useState(false);
+  const [customImageUrl, setCustomImageUrl] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
@@ -92,8 +102,135 @@ export const PassengerSettings: React.FC = () => {
       setEmergencyPhone(currentUser.emergencyContactPhone || '');
       setNotifyWhatsapp(currentUser.notifyWhatsapp !== false);
       setNotifySms(currentUser.notifySms !== false);
+      setAvatarUrl(currentUser.avatarUrl || '');
     }
   }, [currentUser]);
+
+  const compressAndResizeImage = (file: File, maxDim = 320, quality = 0.85): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(e.target?.result as string);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject;
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleAvatarFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!currentUser) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setProfileError('Please select a valid image file (JPG, PNG, WEBP).');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setProfileError('Image file size must be under 10MB.');
+      return;
+    }
+
+    setAvatarUploading(true);
+    setProfileError(null);
+    try {
+      const resizedBase64 = await compressAndResizeImage(file, 320, 0.85);
+      setAvatarUrl(resizedBase64);
+      const res = await updateProfile({
+        name: currentUser.name,
+        avatarUrl: resizedBase64,
+      });
+      if (res.success) {
+        setProfileSuccess(language === 'sinhala' ? 'පැතිකඩ ඡායාරූපය සාර්ථකව යාවත්කාලීන විය!' : 'Profile picture updated successfully!');
+        setTimeout(() => setProfileSuccess(null), 4000);
+      } else {
+        setProfileError(res.message);
+      }
+    } catch (err: any) {
+      setProfileError(err.message || 'Failed to process image.');
+    } finally {
+      setAvatarUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!currentUser) return;
+    if (!confirm(language === 'sinhala' ? 'ඔබගේ පැතිකඩ ඡායාරූපය ඉවත් කිරීමට අවශ්‍යද?' : 'Remove your profile picture?')) return;
+    setAvatarUploading(true);
+    setProfileError(null);
+    try {
+      setAvatarUrl('');
+      const res = await updateProfile({
+        name: currentUser!.name,
+        avatarUrl: null,
+      });
+      if (res.success) {
+        setProfileSuccess(language === 'sinhala' ? 'පැතිකඩ ඡායාරූපය ඉවත් කරන ලදී.' : 'Profile photo removed.');
+        setTimeout(() => setProfileSuccess(null), 4000);
+      } else {
+        setProfileError(res.message);
+      }
+    } catch (err: any) {
+      setProfileError(err.message || 'Failed to remove photo.');
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  const handleSaveImageUrl = async () => {
+    if (!currentUser || !customImageUrl.trim()) return;
+    setAvatarUploading(true);
+    setShowUrlModal(false);
+    setProfileError(null);
+    try {
+      const url = customImageUrl.trim();
+      setAvatarUrl(url);
+      const res = await updateProfile({
+        name: currentUser!.name,
+        avatarUrl: url,
+      });
+      if (res.success) {
+        setProfileSuccess(language === 'sinhala' ? 'පැතිකඩ ඡායාරූපය සාර්ථකව යාවත්කාලීන විය!' : 'Profile picture updated successfully!');
+        setTimeout(() => setProfileSuccess(null), 4000);
+      } else {
+        setProfileError(res.message);
+      }
+    } catch (err: any) {
+      setProfileError(err.message || 'Failed to update photo URL.');
+    } finally {
+      setAvatarUploading(false);
+      setCustomImageUrl('');
+    }
+  };
 
   // ─── Validation Helpers ──────────────────────────────────────────────────
   const NAME_REGEX = /^[a-zA-Z\s.'-]+$/;
@@ -192,6 +329,7 @@ export const PassengerSettings: React.FC = () => {
       emergencyContactPhone: emergencyPhone.trim() || null,
       notifyWhatsapp,
       notifySms,
+      avatarUrl: avatarUrl || null,
     });
     setProfileLoading(false);
 
@@ -269,8 +407,28 @@ export const PassengerSettings: React.FC = () => {
             >
               <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
             </button>
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-black text-xl text-white shadow-lg border border-white/20">
-              {currentUser.name.charAt(0).toUpperCase()}
+            <div className="relative group flex-shrink-0">
+              {currentUser.avatarUrl ? (
+                <img
+                  src={currentUser.avatarUrl}
+                  alt={currentUser.name}
+                  referrerPolicy="no-referrer"
+                  className="w-14 h-14 rounded-2xl object-cover shadow-lg border border-white/20 ring-2 ring-white/10"
+                />
+              ) : (
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-black text-xl text-white shadow-lg border border-white/20">
+                  {currentUser.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={avatarUploading}
+                className="absolute -bottom-1 -right-1 p-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-md transition-all active:scale-90 border border-white/30 cursor-pointer disabled:opacity-50"
+                title={language === 'sinhala' ? 'ඡායාරූපය වෙනස් කරන්න' : 'Change Profile Picture'}
+              >
+                {avatarUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+              </button>
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -414,6 +572,84 @@ export const PassengerSettings: React.FC = () => {
           )}
 
           <form onSubmit={handleProfileSubmit} className="space-y-6">
+            {/* Profile Avatar Management Card */}
+            <div className="bg-slate-50/80 dark:bg-slate-800/40 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-slate-700/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="relative flex-shrink-0">
+                  {currentUser.avatarUrl ? (
+                    <img
+                      src={currentUser.avatarUrl}
+                      alt={currentUser.name}
+                      referrerPolicy="no-referrer"
+                      className="w-16 h-16 rounded-2xl object-cover ring-2 ring-blue-500/30 shadow-md"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-black text-2xl text-white shadow-md">
+                      {currentUser.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  {avatarUploading && (
+                    <div className="absolute inset-0 rounded-2xl bg-black/60 flex items-center justify-center backdrop-blur-xs">
+                      <Loader2 className="w-6 h-6 text-white animate-spin" />
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                    {language === 'sinhala' ? 'පැතිකඩ ඡායාරූපය (Avatar / DP)' : language === 'tamil' ? 'சுயவிவரப் படம் (DP)' : 'Profile Picture (Avatar / DP)'}
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {currentUser.avatarUrl 
+                      ? (language === 'sinhala' ? 'ඔබගේ ඡායාරූපය හෝ Gmail DP දර්ශනය වේ' : 'Custom / Gmail profile picture active') 
+                      : (language === 'sinhala' ? 'ඔබ කැමති ඡායාරූපයක් එක් කරන්න හෝ Gmail DP භාවිතා කරන්න' : 'Upload any picture or use your Gmail DP')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png, image/jpeg, image/webp"
+                  onChange={handleAvatarFileSelect}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={avatarUploading}
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>{language === 'sinhala' ? 'ඡායාරූපයක් තෝරන්න' : 'Upload Photo'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowUrlModal(true)}
+                  disabled={avatarUploading}
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-200/80 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 active:scale-95 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+                  title="Image URL"
+                >
+                  <LinkIcon className="w-3.5 h-3.5" />
+                  <span>URL</span>
+                </button>
+
+                {currentUser.avatarUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveAvatar}
+                    disabled={avatarUploading}
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 text-xs font-bold transition-all border border-rose-200 dark:border-rose-800/50 cursor-pointer disabled:opacity-50"
+                    title="Remove Photo"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{language === 'sinhala' ? 'ඉවත් කරන්න' : 'Remove'}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Full Name */}
               <div className="space-y-2">
@@ -899,6 +1135,47 @@ export const PassengerSettings: React.FC = () => {
                 className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md cursor-pointer"
               >
                 Understood
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Image URL Modal */}
+      {showUrlModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <LinkIcon className="w-4 h-4 text-blue-500" />
+              <span>{language === 'sinhala' ? 'ඡායාරූප සබැඳිය (Image URL)' : 'Enter Image URL'}</span>
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {language === 'sinhala' 
+                ? 'ඔබගේ Gmail DP සබැඳිය හෝ වෙනත් ඕනෑම ඡායාරූප සබැඳියක් (URL) මෙහි ඇතුළත් කරන්න:'
+                : 'Paste a direct link to any image (e.g. Google profile picture or web image URL):'}
+            </p>
+            <input
+              type="url"
+              value={customImageUrl}
+              onChange={(e) => setCustomImageUrl(e.target.value)}
+              placeholder="https://..."
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+            />
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => { setShowUrlModal(false); setCustomImageUrl(''); }}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                {language === 'sinhala' ? 'අවලංගු කරන්න' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveImageUrl}
+                disabled={!customImageUrl.trim()}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 cursor-pointer shadow-sm"
+              >
+                {language === 'sinhala' ? 'සුරකින්න' : 'Apply'}
               </button>
             </div>
           </div>

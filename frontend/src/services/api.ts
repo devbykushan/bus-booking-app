@@ -163,6 +163,7 @@ export const authApi = {
       emergencyContactPhone?: string | null;
       notifyWhatsapp?: boolean;
       notifySms?: boolean;
+      avatarUrl?: string | null;
     }
   ): Promise<{ success: boolean; message: string; user: any }> =>
     apiFetch('/auth/profile', {

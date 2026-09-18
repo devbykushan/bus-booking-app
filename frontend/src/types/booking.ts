@@ -124,6 +124,7 @@ export interface UserAccount {
   name: string;
   email: string;
   phone?: string;
+  avatarUrl?: string | null;
   role: 'passenger' | 'admin' | 'super_admin';
   emergencyContactName?: string | null;
   emergencyContactPhone?: string | null;

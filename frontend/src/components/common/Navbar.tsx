@@ -487,7 +487,20 @@ export const Navbar: React.FC = () => {
                             : 'bg-white/15 hover:bg-white/25 border border-white/20 text-white backdrop-blur-md'
                         }`}
                       >
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-xs shadow-xs">
+                        {currentUser.avatarUrl ? (
+                          <img
+                            src={currentUser.avatarUrl}
+                            alt={currentUser.name}
+                            referrerPolicy="no-referrer"
+                            className="w-8 h-8 rounded-xl object-cover ring-1 ring-white/20 shadow-xs"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLElement).style.display = 'none';
+                              const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div className={`w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 items-center justify-center text-white font-black text-xs shadow-xs ${currentUser.avatarUrl ? 'hidden' : 'flex'}`}>
                           {currentUser.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="hidden sm:flex flex-col items-start text-left">
@@ -516,9 +529,23 @@ export const Navbar: React.FC = () => {
                           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[85%] h-[1.5px] bg-gradient-to-r from-transparent via-white/95 dark:via-white/50 to-transparent pointer-events-none" />
 
                           {/* Frosted User Header Plate */}
-                          <div className="relative px-4 py-3 border-b border-white/40 dark:border-white/10 bg-white/40 dark:bg-white/5 backdrop-blur-md">
-                            <p className="text-xs font-black text-slate-900 dark:text-white truncate tracking-tight">{currentUser.name}</p>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate mt-0.5">{currentUser.phone || currentUser.email}</p>
+                          <div className="relative px-4 py-3 border-b border-white/40 dark:border-white/10 bg-white/40 dark:bg-white/5 backdrop-blur-md flex items-center gap-3">
+                            {currentUser.avatarUrl ? (
+                              <img
+                                src={currentUser.avatarUrl}
+                                alt={currentUser.name}
+                                referrerPolicy="no-referrer"
+                                className="w-10 h-10 rounded-xl object-cover ring-1 ring-white/20 shadow-xs flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white text-sm flex-shrink-0">
+                                {currentUser.name.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-black text-slate-900 dark:text-white truncate tracking-tight">{currentUser.name}</p>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate mt-0.5">{currentUser.phone || currentUser.email}</p>
+                            </div>
                           </div>
 
                           {/* Menu Items */}

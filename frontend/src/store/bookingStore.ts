@@ -120,6 +120,7 @@ interface BookingStore {
     emergencyContactPhone?: string | null;
     notifyWhatsapp?: boolean;
     notifySms?: boolean;
+    avatarUrl?: string | null;
   }) => Promise<{ success: boolean; message: string }>;
   deleteAccount: () => Promise<{ success: boolean; message: string }>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
@@ -262,6 +263,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
           email: res.user.email,
           role: res.user.role,
           phone: res.user.phone,
+          avatarUrl: res.user.avatarUrl || null,
           emergencyContactName: res.user.emergencyContactName || null,
           emergencyContactPhone: res.user.emergencyContactPhone || null,
           notifyWhatsapp: res.user.notifyWhatsapp !== false,
@@ -296,6 +298,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
           email: res.user.email,
           role: res.user.role,
           phone: res.user.phone,
+          avatarUrl: res.user.avatarUrl || res.user.picture || null,
           emergencyContactName: res.user.emergencyContactName || null,
           emergencyContactPhone: res.user.emergencyContactPhone || null,
           notifyWhatsapp: res.user.notifyWhatsapp !== false,
@@ -375,6 +378,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
           email: res.user.email,
           role: res.user.role,
           phone: res.user.phone,
+          avatarUrl: res.user.avatarUrl !== undefined ? res.user.avatarUrl : (data.avatarUrl !== undefined ? data.avatarUrl : currentUser?.avatarUrl),
           emergencyContactName: res.user.emergencyContactName || null,
           emergencyContactPhone: res.user.emergencyContactPhone || null,
           notifyWhatsapp: res.user.notifyWhatsapp !== false,

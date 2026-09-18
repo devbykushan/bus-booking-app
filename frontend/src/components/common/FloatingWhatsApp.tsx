@@ -409,13 +409,13 @@ export const FloatingWhatsApp: React.FC = () => {
               </div>
 
               {/* Quick Action Buttons */}
-              <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 flex flex-wrap gap-1.5 justify-center">
+              <div className="px-3 py-2.5 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 flex flex-wrap gap-2 justify-center">
                 {currentQuickOptions?.map((opt, i) => (
                   <button
                     key={i}
                     disabled={isTyping}
                     onClick={() => handleSendMessage(opt.value)}
-                    className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200/90 dark:border-emerald-800/60 transition-all shadow-2xs active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-1"
+                    className="text-[11px] font-bold px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#075E54] to-[#128C7E] hover:from-[#128C7E] hover:to-[#25D366] text-white shadow-sm shadow-emerald-900/30 hover:shadow-md hover:shadow-emerald-700/30 transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-40 flex items-center gap-1 whitespace-nowrap border border-white/10"
                   >
                     <span>{opt.label}</span>
                   </button>

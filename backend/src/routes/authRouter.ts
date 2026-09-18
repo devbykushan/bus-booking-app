@@ -241,7 +241,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
 
     // 1. Fetch user by email
     const result = await dbQuery(
-      'SELECT "id", "name", "email", "password", "role", "phone", "permissions", "emergencyContactName", "emergencyContactPhone", "notifyWhatsapp", "notifySms", "createdAt" FROM users WHERE LOWER("email") = $1',
+      'SELECT "id", "name", "email", "password", "role", "phone", "avatarUrl", "permissions", "emergencyContactName", "emergencyContactPhone", "notifyWhatsapp", "notifySms", "createdAt" FROM users WHERE LOWER("email") = $1',
       [cleanEmail]
     );
 
@@ -293,6 +293,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
       email: dbUser.email,
       role: dbUser.role,
       phone: dbUser.phone,
+      avatarUrl: dbUser.avatarUrl || null,
       emergencyContactName: dbUser.emergencyContactName || null,
       emergencyContactPhone: dbUser.emergencyContactPhone || null,
       notifyWhatsapp: dbUser.notifyWhatsapp !== false,
@@ -395,13 +396,17 @@ authRouter.post('/google', async (req: Request, res: Response) => {
 
     // Check if user already exists
     const existing = await dbQuery(
-      'SELECT "id", "name", "email", "role", "phone", "createdAt" FROM users WHERE LOWER("email") = $1',
+      'SELECT "id", "name", "email", "role", "phone", "avatarUrl", "createdAt" FROM users WHERE LOWER("email") = $1',
       [email]
     );
 
     let dbUser;
     if (existing.rows.length > 0) {
       dbUser = existing.rows[0];
+      if (picture && !dbUser.avatarUrl) {
+        await dbQuery('UPDATE users SET "avatarUrl" = $1 WHERE "id" = $2', [picture, dbUser.id]);
+        dbUser.avatarUrl = picture;
+      }
     } else {
       // Auto-register new passenger from Google
       const userId = `usr-g-${Date.now()}-${uuidv4().substring(0, 6)}`;
@@ -410,9 +415,9 @@ authRouter.post('/google', async (req: Request, res: Response) => {
       const userRole = role === 'admin' ? 'admin' : 'passenger';
 
       await dbQuery(
-        `INSERT INTO users ("id", "name", "email", "password", "role", "phone", "createdAt")
-         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [userId, name, email, randomPasswordHash, userRole, null, createdAt]
+        `INSERT INTO users ("id", "name", "email", "password", "role", "phone", "avatarUrl", "createdAt")
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [userId, name, email, randomPasswordHash, userRole, null, picture || null, createdAt]
       );
 
       // Send account creation confirmation email asynchronously
@@ -430,6 +435,7 @@ authRouter.post('/google', async (req: Request, res: Response) => {
         email,
         role: userRole,
         phone: null,
+        avatarUrl: picture || null,
         createdAt,
       };
     }
@@ -441,7 +447,8 @@ authRouter.post('/google', async (req: Request, res: Response) => {
       email: dbUser.email,
       role: dbUser.role,
       phone: dbUser.phone,
-      picture,
+      avatarUrl: dbUser.avatarUrl || picture || null,
+      picture: dbUser.avatarUrl || picture || null,
       createdAt: dbUser.createdAt,
     };
 
@@ -488,7 +495,7 @@ authRouter.get('/me', async (req: Request, res: Response) => {
     }
 
     const result = await dbQuery(
-      'SELECT "id", "name", "email", "role", "phone", "permissions", "emergencyContactName", "emergencyContactPhone", "notifyWhatsapp", "notifySms", "createdAt" FROM users WHERE "id" = $1',
+      'SELECT "id", "name", "email", "role", "phone", "avatarUrl", "permissions", "emergencyContactName", "emergencyContactPhone", "notifyWhatsapp", "notifySms", "createdAt" FROM users WHERE "id" = $1',
       [userId]
     );
 
@@ -546,7 +553,7 @@ authRouter.put('/profile', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Authentication token missing or invalid.' });
     }
 
-    const { name, phone, emergencyContactName, emergencyContactPhone, notifyWhatsapp, notifySms } = req.body;
+    const { name, phone, emergencyContactName, emergencyContactPhone, notifyWhatsapp, notifySms, avatarUrl } = req.body;
     if (!name || typeof name !== 'string' || name.trim().length < 3) {
       return res.status(400).json({ error: 'Full name / username must be at least 3 characters long.' });
     }
@@ -586,6 +593,15 @@ authRouter.put('/profile', async (req: Request, res: Response) => {
     const cleanNotifyWhatsapp = typeof notifyWhatsapp === 'boolean' ? notifyWhatsapp : null;
     const cleanNotifySms = typeof notifySms === 'boolean' ? notifySms : null;
 
+    let cleanAvatarUrl: string | null | undefined = undefined;
+    if (avatarUrl !== undefined) {
+      if (typeof avatarUrl === 'string' && avatarUrl.trim().length > 0) {
+        cleanAvatarUrl = avatarUrl.trim();
+      } else {
+        cleanAvatarUrl = null;
+      }
+    }
+
     const updated = await dbQuery(
       `UPDATE users
        SET "name" = $1,
@@ -593,10 +609,11 @@ authRouter.put('/profile', async (req: Request, res: Response) => {
            "emergencyContactName" = $3,
            "emergencyContactPhone" = $4,
            "notifyWhatsapp" = COALESCE($5, "notifyWhatsapp"),
-           "notifySms" = COALESCE($6, "notifySms")
-       WHERE "id" = $7
-       RETURNING "id", "name", "email", "role", "phone", "emergencyContactName", "emergencyContactPhone", "notifyWhatsapp", "notifySms", "createdAt"`,
-      [cleanName, cleanPhone, cleanEmergencyName, cleanEmergencyPhone, cleanNotifyWhatsapp, cleanNotifySms, userId]
+           "notifySms" = COALESCE($6, "notifySms"),
+           "avatarUrl" = CASE WHEN $7::boolean THEN $8 ELSE "avatarUrl" END
+       WHERE "id" = $9
+       RETURNING "id", "name", "email", "role", "phone", "avatarUrl", "emergencyContactName", "emergencyContactPhone", "notifyWhatsapp", "notifySms", "createdAt"`,
+      [cleanName, cleanPhone, cleanEmergencyName, cleanEmergencyPhone, cleanNotifyWhatsapp, cleanNotifySms, cleanAvatarUrl !== undefined, cleanAvatarUrl || null, userId]
     );
 
     if (updated.rows.length === 0) {
