@@ -759,8 +759,8 @@ authRouter.get('/trip-stats', async (req: Request, res: Response) => {
     const { email, phone } = userRes.rows[0];
     const statsRes = await dbQuery(
       `SELECT 
-         COUNT(*) FILTER (WHERE "travelDate" < TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD')) as completed,
-         COUNT(*) FILTER (WHERE "travelDate" >= TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD') AND "status" != 'cancelled') as upcoming,
+         COUNT(*) FILTER (WHERE "departureDate" < TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD')) as completed,
+         COUNT(*) FILTER (WHERE "departureDate" >= TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD') AND "bookingStatus" != 'cancelled') as upcoming,
          COUNT(*) as total
        FROM bookings 
        WHERE LOWER("passengerEmail") = LOWER($1) OR ("passengerPhone" = $2 AND $2 != '')`,
