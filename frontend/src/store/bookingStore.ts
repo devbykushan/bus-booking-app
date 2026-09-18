@@ -822,27 +822,26 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
           if (AudioCtx) {
             const ctx = new AudioCtx();
             const now = ctx.currentTime;
-            const osc1 = ctx.createOscillator();
-            const gain1 = ctx.createGain();
-            osc1.type = 'sine';
-            osc1.frequency.setValueAtTime(587.33, now);
-            gain1.gain.setValueAtTime(0.3, now);
-            gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-            osc1.connect(gain1);
-            gain1.connect(ctx.destination);
-            osc1.start(now);
-            osc1.stop(now + 0.25);
 
-            const osc2 = ctx.createOscillator();
-            const gain2 = ctx.createGain();
-            osc2.type = 'sine';
-            osc2.frequency.setValueAtTime(880, now + 0.12);
-            gain2.gain.setValueAtTime(0.35, now + 0.12);
-            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-            osc2.connect(gain2);
-            gain2.connect(ctx.destination);
-            osc2.start(now + 0.12);
-            osc2.stop(now + 0.5);
+            // iOS Notes-style: soft triple ascending chime (E5 → A5 → E6)
+            const notes = [
+              { freq: 659.25, delay: 0,    gain: 0.28, decay: 0.55 },
+              { freq: 880.00, delay: 0.18, gain: 0.26, decay: 0.75 },
+              { freq: 1318.5, delay: 0.36, gain: 0.18, decay: 1.00 },
+            ];
+            notes.forEach(({ freq, delay, gain, decay }) => {
+              const osc = ctx.createOscillator();
+              const g = ctx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, now + delay);
+              g.gain.setValueAtTime(0, now + delay);
+              g.gain.linearRampToValueAtTime(gain, now + delay + 0.015);
+              g.gain.exponentialRampToValueAtTime(0.001, now + delay + decay);
+              osc.connect(g);
+              g.connect(ctx.destination);
+              osc.start(now + delay);
+              osc.stop(now + delay + decay);
+            });
           }
         } catch {}
       }

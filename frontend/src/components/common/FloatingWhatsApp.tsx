@@ -30,8 +30,8 @@ const WHATSAPP_CONTACTS_SI = [
     message: 'Hello Dewmina Super Line, I would like to inquire about bus seat booking.',
   },
   {
-    number: '078 196 3397',
-    rawNumber: '94781963397',
+    number: '071 143 3520',
+    rawNumber: '94711433520',
     title: 'Express Dispatch & Helpline',
     subtitle: 'Route & Schedule Support',
     status: 'Active 24/7',
@@ -49,8 +49,8 @@ const WHATSAPP_CONTACTS_EN = [
     message: 'Hello Dewmina Super Line, I would like to inquire about bus seat booking.',
   },
   {
-    number: '078 196 3397',
-    rawNumber: '94781963397',
+    number: '071 143 3520',
+    rawNumber: '94711433520',
     title: 'Express Dispatch & Helpline',
     subtitle: 'Route & Schedule 24/7 Helpline',
     status: 'Active 24/7',
