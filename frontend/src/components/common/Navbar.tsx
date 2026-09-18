@@ -128,7 +128,8 @@ export const Navbar: React.FC = () => {
 
   const mobileNavItems = isAdmin
     ? [
-        { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search', 'schedules-dashboard'] },
+        { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
+        { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
         { 
           key: 'admin-payment-slips', 
           label: language === 'sinhala' ? 'Slips' : language === 'tamil' ? 'ரசீது' : 'Payment Slips', 
@@ -613,7 +614,7 @@ export const Navbar: React.FC = () => {
                 <button
                   key={item.key}
                   onClick={() => handleNavItemClick(item.key)}
-                  className={`relative flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-[20px] transition-all duration-200 cursor-pointer active:scale-90 select-none ${
+                  className={`relative flex flex-col items-center justify-center flex-1 py-1 px-0.5 rounded-[18px] transition-all duration-200 cursor-pointer active:scale-90 select-none ${
                     active
                       ? isAdminItem
                         ? 'bg-gradient-to-b from-purple-500/20 via-purple-500/10 to-indigo-600/20 text-purple-700 dark:text-purple-300 font-black border border-purple-400/50 shadow-[0_2px_12px_rgba(168,85,247,0.25),inset_0_1px_1.5px_rgba(255,255,255,0.9)] dark:shadow-[0_2px_14px_rgba(168,85,247,0.35),inset_0_1px_1.5px_rgba(255,255,255,0.3)]'
@@ -624,7 +625,7 @@ export const Navbar: React.FC = () => {
                   }`}
                 >
                   <div className="relative flex items-center justify-center">
-                    <Icon className={`w-5 h-5 transition-all duration-200 ${
+                    <Icon className={`w-4.5 h-4.5 sm:w-5 sm:h-5 transition-all duration-200 ${
                       active 
                         ? isAdminItem 
                           ? 'text-purple-600 dark:text-purple-300 drop-shadow-[0_2px_6px_rgba(168,85,247,0.4)] scale-105' 
@@ -639,7 +640,7 @@ export const Navbar: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  <span className={`text-[10px] text-center leading-tight truncate w-full mt-0.5 font-sans tracking-tight ${
+                  <span className={`text-[9px] sm:text-[10px] text-center leading-tight truncate w-full mt-0.5 font-sans tracking-tight ${
                     isDangerItem ? 'text-red-500 dark:text-red-400 font-medium' : ''
                   }`}>
                     {item.label || t(item.translationKey)}
