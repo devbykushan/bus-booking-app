@@ -21,7 +21,7 @@ import {
   SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
   Trash2, RefreshCw, Edit3, Clock, Star, Search,
   Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare, Menu, Shield,
-  Printer, Wrench, MapPin
+  Printer, Wrench, MapPin, ArrowLeft
 } from 'lucide-react';
 
 export type AdminDashboardTab = 'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp' | 'counter-booking' | 'staff' | 'promos' | 'live-gps';
@@ -99,6 +99,7 @@ export const AdminDashboard: React.FC = () => {
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
   const [showDailySettlementModal, setShowDailySettlementModal] = useState(false);
   const [showSeatBlockModal, setShowSeatBlockModal] = useState(false);
+  const [fleetMobileView, setFleetMobileView] = useState<'routes' | 'manifest'>('routes');
 
 
 
@@ -506,14 +507,41 @@ export const AdminDashboard: React.FC = () => {
 
             {activeTab === 'fleet' && (
               <div className="border-t border-slate-200 pt-4 space-y-2">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2 pb-1">Quick Actions</div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2 pb-1">Quick Actions ({selectedRoute ? selectedRoute.busNumber : 'Route'})</div>
+                <button
+                  onClick={() => {
+                    setIsMobileNavOpen(false);
+                    setShowManifestModal(true);
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" /> Print A4 Passenger Manifest
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMobileNavOpen(false);
+                    setShowBroadcastModal(true);
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left cursor-pointer"
+                >
+                  <MessageSquare className="w-4 h-4" /> Broadcast WhatsApp Alert
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMobileNavOpen(false);
+                    setShowSeatBlockModal(true);
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left cursor-pointer"
+                >
+                  <Wrench className="w-4 h-4" /> Seat Maintenance Lock
+                </button>
                 <button
                   onClick={() => {
                     setIsMobileNavOpen(false);
                     const target = routes.find(r => r.id === selectedRouteId) || routes[0];
                     if (target) setEditDetailsRoute(target);
                   }}
-                  className="w-full px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left cursor-pointer"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left cursor-pointer"
                 >
                   <Clock className="w-4 h-4" /> Edit Details & Timetable
                 </button>
@@ -532,7 +560,7 @@ export const AdminDashboard: React.FC = () => {
                     setIsMobileNavOpen(false);
                     setShowScanner(true);
                   }}
-                  className="w-full px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left cursor-pointer"
+                  className="w-full px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-sm flex items-center gap-2 text-left cursor-pointer"
                 >
                   <QrCode className="w-4 h-4" /> Conductor Ticket Validator
                 </button>
@@ -744,14 +772,45 @@ export const AdminDashboard: React.FC = () => {
             />
           )}
 
+          {/* Mobile View Segmented Switcher: Routes vs Manifest */}
+          <div className="flex lg:hidden bg-slate-200/90 p-1 rounded-2xl gap-1">
+            <button
+              type="button"
+              onClick={() => setFleetMobileView('routes')}
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
+                fleetMobileView === 'routes' 
+                  ? 'bg-blue-600 text-white shadow-xs' 
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <Bus className="w-4 h-4" />
+              <span>Fleet Buses ({routes.length})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFleetMobileView('manifest')}
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
+                fleetMobileView === 'manifest' 
+                  ? 'bg-blue-600 text-white shadow-xs' 
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              <span>Manifest ({selectedRoute ? selectedRoute.busNumber : 'Select Bus'})</span>
+            </button>
+          </div>
+
           {/* Fleet Grid & Passenger Manifest Split Panel */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
             {/* Bus Fleet Route Cards */}
-            <div className="lg:col-span-5 space-y-4">
-              <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
-                Fleet Routes ({routes.length})
-              </h4>
+            <div className={`lg:col-span-5 space-y-4 ${fleetMobileView === 'manifest' ? 'hidden lg:block' : 'block'}`}>
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
+                  Fleet Routes ({routes.length})
+                </h4>
+                <span className="text-[11px] text-slate-400 font-medium">Select a bus to view actions</span>
+              </div>
 
               <div className="space-y-3">
                 {routes.map(r => (
@@ -805,14 +864,79 @@ export const AdminDashboard: React.FC = () => {
                       <span>LKR {(r.priceStarting || 0).toLocaleString()}</span>
                       <span className="font-mono">{r.seats?.filter(s => s.status === 'booked').length || 0}/{r.seats?.length || 49} Booked</span>
                     </div>
+
+                    {/* Instant Mobile Actions Strip when selected */}
+                    {selectedRouteId === r.id && (
+                      <div className="mt-3 pt-3 border-t border-blue-200/80 space-y-2 lg:hidden">
+                        <div className="grid grid-cols-3 gap-1.5">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowSeatBlockModal(true);
+                            }}
+                            className="py-2 px-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-[11px] flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
+                          >
+                            <Wrench className="w-3.5 h-3.5" /> Seat Lock
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowBroadcastModal(true);
+                            }}
+                            className="py-2 px-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[11px] flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" /> Broadcast
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowManifestModal(true);
+                            }}
+                            className="py-2 px-1 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-[11px] flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
+                          >
+                            <Printer className="w-3.5 h-3.5" /> Print A4
+                          </button>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFleetMobileView('manifest');
+                          }}
+                          className="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
+                        >
+                          <FileText className="w-3.5 h-3.5" /> View Passenger Manifest ({manifestBookings.length} Bookings)
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Passenger Manifest Panel for Selected Route */}
-            <div className="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div className={`lg:col-span-7 bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6 ${fleetMobileView === 'routes' ? 'hidden lg:block' : 'block'}`}>
+              {/* Mobile Back Button to Fleet Buses */}
+              <div className="lg:hidden flex items-center justify-between bg-blue-50/90 border border-blue-200/90 p-2.5 rounded-2xl">
+                <button
+                  type="button"
+                  onClick={() => setFleetMobileView('routes')}
+                  className="flex items-center gap-1.5 text-xs font-black text-blue-700 hover:text-blue-900 cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Back to Fleet Buses
+                </button>
+                <span className="text-xs font-mono font-black text-slate-800 bg-white px-2.5 py-1 rounded-xl border border-slate-200 shadow-2xs">
+                  {selectedRoute?.busNumber || 'Selected Bus'}
+                </span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
                 <div>
                   <h3 className="text-base font-bold text-slate-800">
                     Manifest: {selectedRoute ? selectedRoute.busNumber : 'Select a Route'}
@@ -825,28 +949,31 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 {selectedRoute && (
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
                     <button
+                      type="button"
                       onClick={() => setShowSeatBlockModal(true)}
-                      className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs active:scale-95"
                       title="Block or release seats for maintenance / conductor"
                     >
                       <Wrench className="w-3.5 h-3.5 text-amber-600" />
-                      <span className="hidden sm:inline">Seat Lock</span>
+                      <span>Seat Lock</span>
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => setShowBroadcastModal(true)}
-                      className="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs active:scale-95"
                       title="Send WhatsApp broadcast to passengers of this bus"
                     >
                       <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="hidden sm:inline">Broadcast</span>
+                      <span>Broadcast</span>
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => setShowManifestModal(true)}
-                      className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                      className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer active:scale-95"
                       title="Print official passenger boarding manifest"
                     >
                       <Printer className="w-3.5 h-3.5" />
@@ -854,6 +981,7 @@ export const AdminDashboard: React.FC = () => {
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => {
                         const csvContent = "data:text/csv;charset=utf-8," 
                           + ["PNR,Passenger Name,Gender,Phone,Seat Count,Seat Numbers,Fare,Status"].join(",") + "\n"
@@ -873,9 +1001,9 @@ export const AdminDashboard: React.FC = () => {
                         link.click();
                         document.body.removeChild(link);
                       }}
-                      className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs active:scale-95"
                     >
-                      <Download className="w-3.5 h-3.5" /> <span className="hidden sm:inline">CSV</span>
+                      <Download className="w-3.5 h-3.5" /> <span>CSV Export</span>
                     </button>
                   </div>
                 )}
