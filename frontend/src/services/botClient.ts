@@ -312,23 +312,23 @@ async function generateClientFallback(incomingText: string, lang: 'si' | 'en' = 
       sender: 'bot',
       text: isEn
         ? `📞 **Dewmina Super Line Customer Support**\n\n` +
-          `You can connect with our conductors or main office anytime via WhatsApp or phone call:\n\n` +
+          `You can connect with us anytime via WhatsApp or phone call:\n\n` +
           `👤 **Seat Booking & Inquiries:**\n` +
-          `📱 076 258 1841 (Online Conductor Support)\n\n` +
+          `📱 076 258 1841 (Online Support)\n\n` +
           `👤 **Express Dispatch & Helpline:**\n` +
-          `📱 072 417 3143 (Route & Schedule 24/7 Helpline)\n\n` +
+          `📱 078 196 3397 (Route & Schedule 24/7 Helpline)\n\n` +
           `🏢 **Main Office:** Central Bus Stand, Monaragala`
         : `📞 **Dewmina Super Line සජීවී සහය සේවාව**\n\n` +
-          `අපගේ Conductor වරුන් සමඟ WhatsApp හරහා හෝ දුරකථන ඇමතුමකින් සම්බන්ධ විය හැක:\n\n` +
+          `අපව WhatsApp හරහා හෝ දුරකථන ඇමතුමකින් සම්බන්ධ විය හැක:\n\n` +
           `👤 **Seat Booking & Inquiries:**\n` +
-          `📱 076 258 1841 (Online Conductor Support)\n\n` +
+          `📱 076 258 1841 (Online Support)\n\n` +
           `👤 **Express Dispatch & Route Helpline:**\n` +
-          `📱 072 417 3143 (24/7 Schedule Helpline)\n\n` +
+          `📱 078 196 3397 (24/7 Schedule Helpline)\n\n` +
           `🏢 **ප්‍රධාන කාර්යාලය:** බස් නැවතුම්පළ, මොනරාගල`,
       options: defaultOptions,
       actions: [
         { type: 'WHATSAPP_CONTACT', label: '💬 WhatsApp (076 258 1841)', data: { number: '94762581841' } },
-        { type: 'WHATSAPP_CONTACT', label: '💬 WhatsApp (072 417 3143)', data: { number: '94724173143' } },
+        { type: 'WHATSAPP_CONTACT', label: '💬 WhatsApp (078 196 3397)', data: { number: '94781963397' } },
         { type: 'CALL_PHONE', label: isEn ? '📞 Call (076 258 1841)' : '📞 ඇමතුමක් ගන්න (076 258 1841)', data: { phone: '0762581841' } },
       ],
     };

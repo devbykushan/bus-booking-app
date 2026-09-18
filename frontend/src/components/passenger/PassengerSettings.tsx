@@ -781,7 +781,7 @@ export const PassengerSettings: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-black text-slate-900 dark:text-white">{t('callHotline')}</h4>
-                <p className="text-xs text-blue-600 dark:text-cyan-400 font-mono font-bold mt-0.5">076 258 1841 / 072 417 3143</p>
+                <p className="text-xs text-blue-600 dark:text-cyan-400 font-mono font-bold mt-0.5">076 258 1841 / 078 196 3397</p>
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">Available 24 hours for booking & seat inquiries</span>
               </div>
               <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors shrink-0" />

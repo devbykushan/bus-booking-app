@@ -319,7 +319,7 @@ export const Footer: React.FC = () => {
                       </a>
 
                       <a
-                        href="https://wa.me/94724173143"
+                        href="https://wa.me/94781963397"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-emerald-50 text-slate-800 hover:text-emerald-700 transition-colors text-left group/item"
@@ -328,7 +328,7 @@ export const Footer: React.FC = () => {
                           <PhoneCall className="w-3.5 h-3.5" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-mono font-bold text-slate-900 group-hover/item:text-emerald-700">072 417 3143</p>
+                          <p className="text-xs font-mono font-bold text-slate-900 group-hover/item:text-emerald-700">078 196 3397</p>
                           <p className="text-[10px] text-slate-500 truncate">Express Dispatch & Helpline</p>
                         </div>
                       </a>

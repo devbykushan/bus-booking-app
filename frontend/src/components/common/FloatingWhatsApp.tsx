@@ -25,13 +25,13 @@ const WHATSAPP_CONTACTS_SI = [
     number: '076 258 1841',
     rawNumber: '94762581841',
     title: 'Seat Booking & Inquiries',
-    subtitle: 'Conductor & Online Support',
+    subtitle: 'Online Support',
     status: 'Online Now',
     message: 'Hello Dewmina Super Line, I would like to inquire about bus seat booking.',
   },
   {
-    number: '072 417 3143',
-    rawNumber: '94724173143',
+    number: '078 196 3397',
+    rawNumber: '94781963397',
     title: 'Express Dispatch & Helpline',
     subtitle: 'Route & Schedule Support',
     status: 'Active 24/7',
@@ -44,13 +44,13 @@ const WHATSAPP_CONTACTS_EN = [
     number: '076 258 1841',
     rawNumber: '94762581841',
     title: 'Seat Booking & Inquiries',
-    subtitle: 'Conductor & Online Support',
+    subtitle: 'Online Support',
     status: 'Online Now',
     message: 'Hello Dewmina Super Line, I would like to inquire about bus seat booking.',
   },
   {
-    number: '072 417 3143',
-    rawNumber: '94724173143',
+    number: '078 196 3397',
+    rawNumber: '94781963397',
     title: 'Express Dispatch & Helpline',
     subtitle: 'Route & Schedule 24/7 Helpline',
     status: 'Active 24/7',
@@ -182,7 +182,7 @@ export const FloatingWhatsApp: React.FC = () => {
           id: `bot-err-${Date.now()}`,
           sender: 'bot',
           text: activeLang === 'en'
-            ? 'Sorry, a temporary response error occurred. Please try again or contact conductor.'
+            ? 'Sorry, a temporary response error occurred. Please try again or contact support.'
             : 'සමාවන්න, ප්‍රතිචාර දැක්වීමේදී සුළු දෝෂයක් ඇති විය. කරුණාකර නැවත උත්සාහ කරන්න.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
@@ -327,7 +327,7 @@ export const FloatingWhatsApp: React.FC = () => {
                     : 'text-emerald-100/70 hover:text-white'
                 }`}
               >
-                <Phone className="w-3.5 h-3.5" /> Conductor WhatsApp
+                <Phone className="w-3.5 h-3.5" /> WhatsApp
               </button>
             </div>
           </div>
@@ -424,13 +424,13 @@ export const FloatingWhatsApp: React.FC = () => {
             </div>
           )}
 
-          {/* ─── TAB 2: DIRECT WHATSAPP CONDUCTORS ─────────────────────────────────── */}
+          {/* ─── TAB 2: DIRECT WHATSAPP CONTACTS ─────────────────────────────────── */}
           {activeTab === 'whatsapp' && (
             <div className="flex-1 p-3.5 space-y-3 bg-slate-50/70 dark:bg-slate-950 overflow-y-auto">
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium px-1">
                 {botLang === 'en'
-                  ? 'Select a conductor number to connect directly via WhatsApp:'
-                  : 'WhatsApp හරහා Conductor වරුන් සමඟ සෘජුවම සම්බන්ධ වීමට අංකයක් තෝරන්න:'}
+                  ? 'Select a number to connect directly via WhatsApp:'
+                  : 'WhatsApp හරහා සෘජුවම සම්බන්ධ වීමට අංකයක් තෝරන්න:'}
               </p>
 
               {contactsList.map((contact, idx) => (
@@ -463,11 +463,11 @@ export const FloatingWhatsApp: React.FC = () => {
               <div className="mt-4 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[11px] text-emerald-900 dark:text-emerald-200">
                 {botLang === 'en' ? (
                   <>
-                    💡 <strong>Notice:</strong> Conductors can be contacted for seat reservations, ticket confirmation, and live bus dispatch details.
+                    💡 <strong>Notice:</strong> Contact us for seat reservations, ticket confirmation, and live bus dispatch details.
                   </>
                 ) : (
                   <>
-                    💡 <strong>දැනුවත් කිරීම:</strong> ආසන වෙන්කිරීම්, ප්‍රවේශපත්‍ර තහවුරු කිරීම් සහ බස් රථය ධාවනය වන වේලාවන් සජීවීව දැනගැනීමට Conductor වරුන් සම්බන්ධ කරගත හැක.
+                    💡 <strong>දැනුවත් කිරීම:</strong> ආසන වෙන්කිරීම්, ප්‍රවේශපත්‍ර තහවුරු කිරීම් සහ බස් රථය ධාවනය වන වේලාවන් සජීවීව දැනගැනීමට සම්බන්ධ කරගත හැක.
                   </>
                 )}
               </div>
