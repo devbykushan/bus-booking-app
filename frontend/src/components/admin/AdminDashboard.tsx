@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { RouteDeploymentForm } from './RouteDeploymentForm';
 import { SeatLayoutCustomizerModal } from './SeatLayoutCustomizerModal';
@@ -21,7 +21,7 @@ import {
   SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
   Trash2, RefreshCw, Edit3, Clock, Star, Search,
   Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare, Menu, Shield,
-  Printer, Wrench, MapPin, ArrowLeft
+  Printer, Wrench, MapPin, ArrowLeft, ChevronDown, ChevronUp, Layers, Filter
 } from 'lucide-react';
 
 export type AdminDashboardTab = 'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp' | 'counter-booking' | 'staff' | 'promos' | 'live-gps';
@@ -100,6 +100,87 @@ export const AdminDashboard: React.FC = () => {
   const [showDailySettlementModal, setShowDailySettlementModal] = useState(false);
   const [showSeatBlockModal, setShowSeatBlockModal] = useState(false);
   const [fleetMobileView, setFleetMobileView] = useState<'routes' | 'manifest'>('routes');
+
+  // ─── Fleet Filter & Organization State ───
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
+
+  const tomorrowStr = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
+
+  const [fleetDateFilter, setFleetDateFilter] = useState<'today' | 'tomorrow' | 'custom' | 'all'>('today');
+  const [customFleetDate, setCustomFleetDate] = useState<string>(todayStr);
+  const [fleetSearchQuery, setFleetSearchQuery] = useState<string>('');
+  const [fleetGroupByBus, setFleetGroupByBus] = useState<boolean>(false);
+  const [expandedBuses, setExpandedBuses] = useState<Record<string, boolean>>({});
+
+  const toggleExpandBus = (busNo: string) => {
+    setExpandedBuses(prev => ({ ...prev, [busNo]: !prev[busNo] }));
+  };
+
+  // Filtered Fleet Routes
+  const filteredFleetRoutes = useMemo(() => {
+    return routes.filter(r => {
+      // Search query filter
+      if (fleetSearchQuery.trim()) {
+        const q = fleetSearchQuery.toLowerCase();
+        const matchBus = r.busNumber?.toLowerCase().includes(q);
+        const matchOrigin = r.origin?.toLowerCase().includes(q);
+        const matchDest = r.destination?.toLowerCase().includes(q);
+        const matchType = r.busType?.toLowerCase().includes(q);
+        if (!matchBus && !matchOrigin && !matchDest && !matchType) return false;
+      }
+
+      // Date filter
+      const rDate = r.departureDate || '';
+      if (fleetDateFilter === 'today') {
+        return rDate === todayStr || !rDate;
+      }
+      if (fleetDateFilter === 'tomorrow') {
+        return rDate === tomorrowStr;
+      }
+      if (fleetDateFilter === 'custom') {
+        return rDate === customFleetDate;
+      }
+      return true; // 'all'
+    }).sort((a, b) => {
+      if ((a.departureDate || '') !== (b.departureDate || '')) {
+        return (a.departureDate || '').localeCompare(b.departureDate || '');
+      }
+      return (a.departureTime || '').localeCompare(b.departureTime || '');
+    });
+  }, [routes, fleetSearchQuery, fleetDateFilter, customFleetDate, todayStr, tomorrowStr]);
+
+  // Unique bus grouping
+  const uniqueBusesMap = useMemo(() => {
+    const map: Record<string, BusRoute[]> = {};
+    filteredFleetRoutes.forEach(r => {
+      const key = r.busNumber || 'Unknown';
+      if (!map[key]) map[key] = [];
+      map[key].push(r);
+    });
+    return map;
+  }, [filteredFleetRoutes]);
+
+  const countToday = useMemo(() => routes.filter(r => (r.departureDate || '') === todayStr || !r.departureDate).length, [routes, todayStr]);
+  const countTomorrow = useMemo(() => routes.filter(r => (r.departureDate || '') === tomorrowStr).length, [routes, tomorrowStr]);
+
+  useEffect(() => {
+    if (filteredFleetRoutes.length > 0 && !filteredFleetRoutes.some(r => r.id === selectedRouteId)) {
+      setSelectedRouteId(filteredFleetRoutes[0].id);
+    }
+  }, [filteredFleetRoutes, selectedRouteId]);
 
 
 
@@ -772,6 +853,114 @@ export const AdminDashboard: React.FC = () => {
             />
           )}
 
+          {/* Fleet Controls: Search Bar & Date Filter Tabs */}
+          <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-xs space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              {/* Search input */}
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={fleetSearchQuery}
+                  onChange={(e) => setFleetSearchQuery(e.target.value)}
+                  placeholder="Search Bus No (e.g. ND-2903), Origin, Destination..."
+                  className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                />
+                {fleetSearchQuery && (
+                  <button
+                    onClick={() => setFleetSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Group By Bus Toggle */}
+              <button
+                type="button"
+                onClick={() => setFleetGroupByBus(!fleetGroupByBus)}
+                className={`px-3.5 py-2.5 rounded-2xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  fleetGroupByBus 
+                    ? 'bg-purple-600 text-white border-purple-700 shadow-2xs' 
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+                title="Group schedules by unique Bus Number"
+              >
+                <Layers className="w-4 h-4" />
+                <span>{fleetGroupByBus ? 'Grouped by Bus' : 'Group by Bus'}</span>
+              </button>
+            </div>
+
+            {/* Date Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1">
+                <Filter className="w-3 h-3" /> Date:
+              </span>
+
+              {/* Today Button */}
+              <button
+                type="button"
+                onClick={() => setFleetDateFilter('today')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                  fleetDateFilter === 'today'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${fleetDateFilter === 'today' ? 'bg-white' : 'bg-emerald-500 animate-pulse'}`} />
+                <span>Today ({countToday})</span>
+              </button>
+
+              {/* Tomorrow Button */}
+              <button
+                type="button"
+                onClick={() => setFleetDateFilter('tomorrow')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                  fleetDateFilter === 'tomorrow'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200'
+                }`}
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Tomorrow ({countTomorrow})</span>
+              </button>
+
+              {/* Custom Date Input */}
+              <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border transition-all ${
+                fleetDateFilter === 'custom'
+                  ? 'bg-indigo-600 text-white border-indigo-700 shadow-xs'
+                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+              }`}>
+                <Calendar className={`w-3.5 h-3.5 ${fleetDateFilter === 'custom' ? 'text-white' : 'text-slate-500'}`} />
+                <input
+                  type="date"
+                  value={customFleetDate}
+                  onChange={(e) => {
+                    setCustomFleetDate(e.target.value);
+                    setFleetDateFilter('custom');
+                  }}
+                  className={`bg-transparent text-xs font-mono font-bold outline-none cursor-pointer ${
+                    fleetDateFilter === 'custom' ? 'text-white' : 'text-slate-800'
+                  }`}
+                />
+              </div>
+
+              {/* All Dates Button */}
+              <button
+                type="button"
+                onClick={() => setFleetDateFilter('all')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer sm:ml-auto ${
+                  fleetDateFilter === 'all'
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                <span>All Dates ({routes.length})</span>
+              </button>
+            </div>
+          </div>
+
           {/* Mobile View Segmented Switcher: Routes vs Manifest */}
           <div className="flex lg:hidden bg-slate-200/90 p-1 rounded-2xl gap-1">
             <button
@@ -784,7 +973,7 @@ export const AdminDashboard: React.FC = () => {
               }`}
             >
               <Bus className="w-4 h-4" />
-              <span>Fleet Buses ({routes.length})</span>
+              <span>Fleet Buses ({filteredFleetRoutes.length})</span>
             </button>
             <button
               type="button"
@@ -806,118 +995,240 @@ export const AdminDashboard: React.FC = () => {
             {/* Bus Fleet Route Cards */}
             <div className={`lg:col-span-5 space-y-4 ${fleetMobileView === 'manifest' ? 'hidden lg:block' : 'block'}`}>
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
-                  Fleet Routes ({routes.length})
-                </h4>
-                <span className="text-[11px] text-slate-400 font-medium">Select a bus to view actions</span>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
+                    Fleet Routes ({filteredFleetRoutes.length})
+                  </h4>
+                  <p className="text-[11px] text-slate-400 font-semibold">
+                    {fleetDateFilter === 'today' ? 'Showing: Today\'s Departures' : fleetDateFilter === 'tomorrow' ? 'Showing: Tomorrow\'s Departures' : fleetDateFilter === 'custom' ? `Showing: ${customFleetDate}` : 'Showing: All Departures'}
+                  </p>
+                </div>
+                <span className="text-[11px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100">
+                  {filteredFleetRoutes.length} of {routes.length}
+                </span>
               </div>
 
-              <div className="space-y-3">
-                {routes.map(r => (
-                  <div
-                    key={r.id}
-                    onClick={() => setSelectedRouteId(r.id)}
-                    className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                      selectedRouteId === r.id ? 'border-blue-500 bg-blue-50/70 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'
-                    }`}
+              {filteredFleetRoutes.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200 space-y-2">
+                  <Calendar className="w-8 h-8 mx-auto text-slate-300" />
+                  <p className="text-xs font-bold text-slate-600">No buses scheduled for this date or search.</p>
+                  <button
+                    onClick={() => { setFleetDateFilter('all'); setFleetSearchQuery(''); }}
+                    className="text-xs text-blue-600 font-extrabold underline cursor-pointer"
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-slate-800 text-sm">{r.busNumber}</h4>
-                          <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold flex items-center gap-0.5">
-                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> {r.operatorRating ? Number(r.operatorRating).toFixed(1) : '4.9'}
-                          </span>
-                        </div>
-                        <p className="text-xs text-blue-600 font-semibold">{r.origin} → {r.destination}</p>
-                        <p className="text-[11px] text-slate-500 font-mono mt-0.5">{(r.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}</p>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditDetailsRoute(r);
-                          }}
-                          title="Edit Details & Timetable"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                    View All Schedules ({routes.length})
+                  </button>
+                </div>
+              ) : fleetGroupByBus ? (
+                /* Grouped by Bus Accordion */
+                <div className="space-y-3">
+                  {Object.entries(uniqueBusesMap).map(([busNo, busRoutes]) => {
+                    const isExpanded = expandedBuses[busNo] ?? (selectedRoute?.busNumber === busNo);
+                    const primaryRoute = busRoutes[0];
+                    return (
+                      <div key={busNo} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs">
+                        <div
+                          onClick={() => toggleExpandBus(busNo)}
+                          className="p-3.5 bg-slate-50 hover:bg-slate-100 flex items-center justify-between cursor-pointer transition-colors border-b border-slate-100"
                         >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-
-                        <button
-                          onClick={(e) => handleDeleteRoute(e, r.id)}
-                          disabled={deletingRouteId === r.id}
-                          className={`p-1.5 rounded-lg transition-colors ${
-                            confirmDeleteRouteId === r.id 
-                              ? 'bg-rose-600 text-white font-bold animate-pulse px-2.5 text-[10px]' 
-                              : 'text-slate-400 hover:text-red-600 hover:bg-red-50'
-                          }`}
-                          title={confirmDeleteRouteId === r.id ? "Click again to confirm delete" : "Delete Route"}
-                        >
-                          {confirmDeleteRouteId === r.id ? 'Confirm?' : <Trash2 className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                      <span>LKR {(r.priceStarting || 0).toLocaleString()}</span>
-                      <span className="font-mono">{r.seats?.filter(s => s.status === 'booked').length || 0}/{r.seats?.length || 49} Booked</span>
-                    </div>
-
-                    {/* Instant Mobile Actions Strip when selected */}
-                    {selectedRouteId === r.id && (
-                      <div className="mt-3 pt-3 border-t border-blue-200/80 space-y-2 lg:hidden">
-                        <div className="grid grid-cols-3 gap-1.5">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowSeatBlockModal(true);
-                            }}
-                            className="py-2 px-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-[11px] flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
-                          >
-                            <Wrench className="w-3.5 h-3.5" /> Seat Lock
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowBroadcastModal(true);
-                            }}
-                            className="py-2 px-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[11px] flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
-                          >
-                            <MessageSquare className="w-3.5 h-3.5" /> Broadcast
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowManifestModal(true);
-                            }}
-                            className="py-2 px-1 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-[11px] flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
-                          >
-                            <Printer className="w-3.5 h-3.5" /> Print A4
-                          </button>
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-black text-xs">
+                              <Bus className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <h4 className="font-extrabold text-slate-900 text-sm">{busNo}</h4>
+                              <p className="text-[11px] text-slate-500 font-semibold">{primaryRoute?.origin} ⇄ {primaryRoute?.destination}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold">
+                              {busRoutes.length} Trips
+                            </span>
+                            {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                          </div>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setFleetMobileView('manifest');
-                          }}
-                          className="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
-                        >
-                          <FileText className="w-3.5 h-3.5" /> View Passenger Manifest ({manifestBookings.length} Bookings)
-                        </button>
+                        {isExpanded && (
+                          <div className="p-2 space-y-2 bg-slate-50/50">
+                            {busRoutes.map(r => (
+                              <div
+                                key={r.id}
+                                onClick={() => setSelectedRouteId(r.id)}
+                                className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                                  selectedRouteId === r.id ? 'border-blue-500 bg-blue-50/80 shadow-xs' : 'bg-white border-slate-200 hover:border-slate-300'
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="space-y-1">
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                      {r.departureDate === todayStr || !r.departureDate ? (
+                                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black flex items-center gap-1">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> TODAY
+                                        </span>
+                                      ) : r.departureDate === tomorrowStr ? (
+                                        <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-300 text-[10px] font-black">
+                                          TOMORROW
+                                        </span>
+                                      ) : (
+                                        <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold flex items-center gap-1">
+                                          <Calendar className="w-3 h-3 text-slate-400" /> {r.departureDate}
+                                        </span>
+                                      )}
+                                      {r.departureTime && (
+                                        <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-black flex items-center gap-1">
+                                          <Clock className="w-3 h-3 text-purple-600" /> {r.departureTime}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-blue-600 font-bold">{r.origin} → {r.destination}</p>
+                                  </div>
+                                  <div className="text-right text-xs">
+                                    <span className="font-mono font-bold text-slate-700">LKR {(r.priceStarting || 0).toLocaleString()}</span>
+                                    <p className="text-[10px] text-slate-500 font-mono">{r.seats?.filter(s => s.status === 'booked').length || 0}/{r.seats?.length || 49} Booked</p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* Standard List View with prominent Date & Time badges */
+                <div className="space-y-3">
+                  {filteredFleetRoutes.map(r => (
+                    <div
+                      key={r.id}
+                      onClick={() => setSelectedRouteId(r.id)}
+                      className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                        selectedRouteId === r.id ? 'border-blue-500 bg-blue-50/70 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="space-y-1 flex-1">
+                          {/* Top Badges: Bus No, Date, Time */}
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <h4 className="font-extrabold text-slate-900 text-sm">{r.busNumber}</h4>
+
+                            {/* Date Badge */}
+                            {r.departureDate === todayStr || !r.departureDate ? (
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> TODAY
+                              </span>
+                            ) : r.departureDate === tomorrowStr ? (
+                              <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-300 text-[10px] font-black">
+                                TOMORROW
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold flex items-center gap-1">
+                                <Calendar className="w-3 h-3 text-slate-400" /> {r.departureDate}
+                              </span>
+                            )}
+
+                            {/* Departure Time Badge */}
+                            {r.departureTime && (
+                              <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-black flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-purple-600" /> {r.departureTime}
+                              </span>
+                            )}
+
+                            <span className="px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold flex items-center gap-0.5">
+                              <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> {r.operatorRating ? Number(r.operatorRating).toFixed(1) : '4.8'}
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-blue-600 font-bold">{r.origin} → {r.destination}</p>
+                          <p className="text-[11px] text-slate-500 font-mono mt-0.5">{(r.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}</p>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditDetailsRoute(r);
+                            }}
+                            title="Edit Details & Timetable"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={(e) => handleDeleteRoute(e, r.id)}
+                            disabled={deletingRouteId === r.id}
+                            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                              confirmDeleteRouteId === r.id 
+                                ? 'bg-rose-600 text-white font-bold animate-pulse px-2 text-[10px]' 
+                                : 'text-slate-400 hover:text-red-600 hover:bg-red-50'
+                            }`}
+                            title={confirmDeleteRouteId === r.id ? "Click again to confirm delete" : "Delete Route"}
+                          >
+                            {confirmDeleteRouteId === r.id ? 'Confirm?' : <Trash2 className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                        <span className="font-bold text-slate-700">LKR {(r.priceStarting || 0).toLocaleString()}</span>
+                        <span className="font-mono font-bold text-slate-600">{r.seats?.filter(s => s.status === 'booked').length || 0}/{r.seats?.length || 49} Booked</span>
+                      </div>
+
+                      {/* Instant Mobile Actions Strip when selected */}
+                      {selectedRouteId === r.id && (
+                        <div className="mt-3 pt-3 border-t border-blue-200/80 space-y-2 lg:hidden">
+                          <div className="grid grid-cols-3 gap-1.5">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowSeatBlockModal(true);
+                              }}
+                              className="py-2 px-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-[11px] flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
+                            >
+                              <Wrench className="w-3.5 h-3.5" /> Seat Lock
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowBroadcastModal(true);
+                              }}
+                              className="py-2 px-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[11px] flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5" /> Broadcast
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowManifestModal(true);
+                              }}
+                              className="py-2 px-1 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-[11px] flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
+                            >
+                              <Printer className="w-3.5 h-3.5" /> Print A4
+                            </button>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFleetMobileView('manifest');
+                            }}
+                            className="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
+                          >
+                            <FileText className="w-3.5 h-3.5" /> View Passenger Manifest ({manifestBookings.length} Bookings)
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Passenger Manifest Panel for Selected Route */}
