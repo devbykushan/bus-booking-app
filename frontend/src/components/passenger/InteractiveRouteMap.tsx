@@ -170,45 +170,45 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
     (route.origin.toLowerCase().includes('monaragala') && route.destination.toLowerCase().includes('colombo')) ||
     (route.origin.toLowerCase().includes('colombo') && route.destination.toLowerCase().includes('monaragala'));
 
-  let polylineCoords: [number, number][] = [];
-  let intermediateWaypoints: { name: string; desc: string; coords: [number, number] }[] = [];
+  const { polylineCoords, intermediateWaypoints } = React.useMemo(() => {
+    let coords: [number, number][] = [];
+    let waypoints: { name: string; desc: string; coords: [number, number] }[] = [];
 
-  if (isMonaragalaColomboRoute) {
-    if (selectedServiceType === 'normal') {
-      // Exact Route 98 (Normal Service A4 Highway: Ratnapura, Balangoda, Wellawaya)
-      const normalSequence = route.origin.toLowerCase().includes('monaragala')
-        ? MONARAGALA_COLOMBO_NORMAL_ROUTE_98
-        : [...MONARAGALA_COLOMBO_NORMAL_ROUTE_98].reverse();
+    if (isMonaragalaColomboRoute) {
+      if (selectedServiceType === 'normal') {
+        const normalSequence = route.origin.toLowerCase().includes('monaragala')
+          ? MONARAGALA_COLOMBO_NORMAL_ROUTE_98
+          : [...MONARAGALA_COLOMBO_NORMAL_ROUTE_98].reverse();
 
-      polylineCoords = normalSequence.map((h) => h.coords);
-      intermediateWaypoints = normalSequence.slice(1, -1);
+        coords = normalSequence.map((h) => h.coords);
+        waypoints = normalSequence.slice(1, -1);
+      } else {
+        const highwaySequence = route.origin.toLowerCase().includes('monaragala')
+          ? MONARAGALA_COLOMBO_HIGHWAY_ROUTE
+          : [...MONARAGALA_COLOMBO_HIGHWAY_ROUTE].reverse();
+
+        coords = highwaySequence.map((h) => h.coords);
+        waypoints = highwaySequence.slice(1, -1).filter((_, idx) => idx % 2 === 0 || idx === 1 || idx === 2);
+      }
     } else {
-      // Southern Expressway E01 Highway Route
-      const highwaySequence = route.origin.toLowerCase().includes('monaragala')
-        ? MONARAGALA_COLOMBO_HIGHWAY_ROUTE
-        : [...MONARAGALA_COLOMBO_HIGHWAY_ROUTE].reverse();
-
-      polylineCoords = highwaySequence.map((h) => h.coords);
-      intermediateWaypoints = highwaySequence.slice(1, -1).filter((_, idx) => idx % 2 === 0 || idx === 1 || idx === 2);
+      const genericCoords: [number, number][] = [];
+      if (route.boardingPoints && route.boardingPoints.length > 1) {
+        route.boardingPoints.slice(1).forEach((bp) => {
+          if (bp.lat && bp.lng) {
+            genericCoords.push([bp.lat, bp.lng]);
+            waypoints.push({ name: bp.name, desc: bp.landmark || 'Scheduled Transit Stop', coords: [bp.lat, bp.lng] });
+          }
+        });
+      } else {
+        const midLat = (originCoord[0] + destCoord[0]) / 2 + (originCoord[0] < destCoord[0] ? -0.12 : 0.08);
+        const midLng = (originCoord[1] + destCoord[1]) / 2;
+        genericCoords.push([midLat, midLng]);
+        waypoints.push({ name: 'Highway Transit Corridor', desc: 'Transit Waypoint', coords: [midLat, midLng] });
+      }
+      coords = [originCoord, ...genericCoords, destCoord];
     }
-  } else {
-    // Generic route waypoints
-    const genericCoords: [number, number][] = [];
-    if (route.boardingPoints && route.boardingPoints.length > 1) {
-      route.boardingPoints.slice(1).forEach((bp) => {
-        if (bp.lat && bp.lng) {
-          genericCoords.push([bp.lat, bp.lng]);
-          intermediateWaypoints.push({ name: bp.name, desc: bp.landmark || 'Scheduled Transit Stop', coords: [bp.lat, bp.lng] });
-        }
-      });
-    } else {
-      const midLat = (originCoord[0] + destCoord[0]) / 2 + (originCoord[0] < destCoord[0] ? -0.12 : 0.08);
-      const midLng = (originCoord[1] + destCoord[1]) / 2;
-      genericCoords.push([midLat, midLng]);
-      intermediateWaypoints.push({ name: 'Highway Transit Corridor', desc: 'Transit Waypoint', coords: [midLat, midLng] });
-    }
-    polylineCoords = [originCoord, ...genericCoords, destCoord];
-  }
+    return { polylineCoords: coords, intermediateWaypoints: waypoints };
+  }, [isMonaragalaColomboRoute, selectedServiceType, route.origin, route.boardingPoints, originCoord, destCoord]);
 
   // Animated moving bus progress state
   const [busProgress, setBusProgress] = React.useState(0.05);
@@ -218,10 +218,10 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
     const interval = setInterval(() => {
       setBusProgress((prev) => {
         const max = polylineCoords.length - 1;
-        const next = prev + 0.025;
+        const next = prev + 0.15;
         return next >= max ? 0 : next;
       });
-    }, 60);
+    }, 1200);
     return () => clearInterval(interval);
   }, [polylineCoords]);
 

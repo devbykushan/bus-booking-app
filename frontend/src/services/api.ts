@@ -334,6 +334,10 @@ export const whatsappApi = {
     message: string;
   }> =>
     apiFetch('/whatsapp/broadcast', { method: 'POST', body: JSON.stringify({ routeId, message }) }),
+
+  /** Send trip departure reminder to a booking via WhatsApp */
+  sendReminder: (pnr: string): Promise<{ success: boolean; message: string }> =>
+    apiFetch('/whatsapp/send-reminder', { method: 'POST', body: JSON.stringify({ pnr }) }),
 };
 
 // ─── Promo Codes API ──────────────────────────────────────────────────────────

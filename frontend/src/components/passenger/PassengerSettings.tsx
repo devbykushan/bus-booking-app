@@ -684,7 +684,7 @@ export const PassengerSettings: React.FC = () => {
                     placeholder="07XXXXXXXX"
                   />
                 </div>
-                <p className="text-[11px] text-slate-400">Used for ticket WhatsApp and SMS delivery.</p>
+                <p className="text-[11px] text-slate-400">Used for ticket WhatsApp delivery and booking contact.</p>
               </div>
 
               {/* Email Address (Read-only) */}
@@ -817,30 +817,7 @@ export const PassengerSettings: React.FC = () => {
                 </label>
               </div>
 
-              {/* SMS Toggle */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/5">
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 flex items-center justify-center shrink-0">
-                    <Phone className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black text-slate-900 dark:text-white">{t('notifySmsTitle')}</h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t('notifySmsDesc')}</p>
-                  </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={notifySms}
-                    onChange={(e) => {
-                      setNotifySms(e.target.checked);
-                      updateProfile({ name: currentUser.name, notifySms: e.target.checked });
-                    }}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-              </div>
+
             </div>
           </div>
 

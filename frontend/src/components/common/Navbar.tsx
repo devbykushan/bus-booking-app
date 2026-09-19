@@ -235,8 +235,8 @@ export const Navbar: React.FC = () => {
 
     if (view === 'admin-panel') {
       setUserRole(currentUser?.role === 'super_admin' ? 'super_admin' : 'admin');
-      if (adminActiveTab === 'payment-slips') {
-        setAdminActiveTab('fleet');
+      if (adminActiveTab === 'payment-slips' || ['fleet', 'timetables', 'whatsapp', 'staff', 'users'].includes(adminActiveTab)) {
+        setAdminActiveTab('counter-booking');
       }
       setCurrentView('admin-panel');
       return;
@@ -244,6 +244,9 @@ export const Navbar: React.FC = () => {
 
     if (view === 'master-management') {
       setUserRole(currentUser?.role === 'super_admin' ? 'super_admin' : 'admin');
+      if (!['fleet', 'timetables', 'whatsapp', 'staff', 'users'].includes(adminActiveTab)) {
+        setAdminActiveTab('fleet');
+      }
       setCurrentView('master-management');
       return;
     }

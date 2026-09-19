@@ -105,3 +105,55 @@ ${message}
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+// POST /api/whatsapp/send-reminder - Send a trip reminder for a specific booking
+whatsappRouter.post('/send-reminder', async (req: Request, res: Response) => {
+  const { pnr } = req.body;
+  if (!pnr) {
+    res.status(400).json({ success: false, error: 'PNR is required.' });
+    return;
+  }
+
+  const pool = getPool();
+  try {
+    const bookingRes = await pool.query(`
+      SELECT b.*, r.title as "routeTitle", r."busNumber" as "routeBusNumber"
+      FROM bookings b
+      LEFT JOIN routes r ON b."routeId" = r.id
+      WHERE b.pnr = $1
+    `, [pnr]);
+
+    if (bookingRes.rows.length === 0) {
+      res.status(404).json({ success: false, error: 'Booking not found.' });
+      return;
+    }
+
+    const b = bookingRes.rows[0];
+    const seatsList = Array.isArray(b.seats) ? b.seats.map((s: any) => typeof s === 'string' ? s : s.number) : [];
+    const boardingPointName = typeof b.boardingPoint === 'object' ? b.boardingPoint?.name : b.boardingPoint;
+
+    const { sendWhatsAppDepartureReminder } = await import('../services/whatsappService');
+    const sent = await sendWhatsAppDepartureReminder({
+      pnr: b.pnr,
+      passengerName: b.passengerName || b.passenger?.fullName || 'Passenger',
+      passengerPhone: b.passengerPhone || b.passenger?.phone || '',
+      routeTitle: b.routeTitle || `${b.origin} ➔ ${b.destination}`,
+      origin: b.origin,
+      destination: b.destination,
+      boardingPoint: boardingPointName || b.origin,
+      departureTime: b.departureTime,
+      departureDate: b.departureDate,
+      busNumber: b.busNumber || b.routeBusNumber,
+      seats: seatsList,
+    });
+
+    if (sent) {
+      res.json({ success: true, message: `WhatsApp trip reminder sent for PNR ${pnr}` });
+    } else {
+      res.status(500).json({ success: false, error: 'Failed to send WhatsApp reminder. Check WhatsApp connection status.' });
+    }
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+

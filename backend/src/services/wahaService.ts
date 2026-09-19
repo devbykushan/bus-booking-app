@@ -8,4 +8,5 @@ export const sendWhatsAppPaymentUpdate = whatsappService.sendWhatsAppPaymentUpda
 export const getWhatsAppStatus = whatsappService.getWhatsAppStatus;
 export const restartWhatsAppSession = whatsappService.restartWhatsAppSession;
 export const sendWhatsAppMessage = whatsappService.sendWhatsAppMessage;
+export const sendWhatsAppDepartureReminder = whatsappService.sendWhatsAppDepartureReminder;
 export const initWhatsApp = whatsappService.initWhatsApp;

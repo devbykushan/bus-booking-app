@@ -450,3 +450,48 @@ Dewmina Super Line 🚌`;
 
   return sendWhatsAppMessage(payload.passengerPhone, message);
 }
+
+/**
+ * Send 1-Hour WhatsApp Departure Reminder to passenger
+ */
+export async function sendWhatsAppDepartureReminder(payload: {
+  pnr: string;
+  passengerName: string;
+  passengerPhone: string;
+  routeTitle: string;
+  origin: string;
+  destination: string;
+  boardingPoint: string;
+  departureTime: string;
+  departureDate: string;
+  busNumber?: string;
+  seats: string[];
+}): Promise<boolean> {
+  if (!payload.passengerPhone) return false;
+
+  const reminderMessage = 
+`🔔 *TRIP REMINDER — DEWMINA SUPER LINE* 🚌
+
+Dear *${payload.passengerName || 'Valued Passenger'}*,
+
+This is a gentle reminder that your bus is scheduled to depart soon! ⏰
+
+🎟️ *PNR Code:* \`${payload.pnr}\`
+🚍 *Bus / Route:* ${payload.routeTitle || `${payload.origin} ➔ ${payload.destination}`} ${payload.busNumber ? `(${payload.busNumber})` : ''}
+📍 *Boarding At:* ${payload.boardingPoint || payload.origin}
+📅 *Date:* ${payload.departureDate}
+⏰ *Scheduled Departure:* *${payload.departureTime}*
+💺 *Reserved Seat(s):* ${payload.seats.join(', ')}
+
+⚠️ *Important Instructions:*
+• Please arrive at the boarding point at least *15-20 minutes before* departure.
+• Keep your PNR \`${payload.pnr}\` or digital QR ticket ready on your phone for boarding.
+
+📞 *Need Assistance or Delayed?*
+Hotline: 076 258 1841 / 071 143 3520
+
+Have a pleasant and safe journey with *Dewmina Super Line*! 🌟`;
+
+  return sendWhatsAppMessage(payload.passengerPhone, reminderMessage);
+}
+
