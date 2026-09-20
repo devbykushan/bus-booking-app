@@ -398,10 +398,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
       )}
 
       {/* Super Admin & Fleet Manager Header */}
-      <div className="border-b border-slate-200 pb-6 animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-6 animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-2xl font-black text-slate-800 tracking-tight">
+            <h2 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">
               {isSlipsMode 
                 ? 'Payment Slips Verification & Approval' 
                 : isMasterMode 
@@ -410,22 +410,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
             </h2>
             <span className={`px-2.5 py-0.5 rounded-full border text-xs font-bold flex items-center gap-1 ${
               isSlipsMode
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60'
                 : isMasterMode
-                  ? 'bg-amber-50 text-amber-800 border-amber-300/70'
-                  : 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                  ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-300/70 dark:border-amber-800/60'
+                  : 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/60'
             }`}>
               {isSlipsMode ? (
                 <>
-                  <DollarSign className="w-3.5 h-3.5 text-emerald-600" /> Slip Management
+                  <DollarSign className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Slip Management
                 </>
               ) : isMasterMode ? (
                 <>
-                  <Wrench className="w-3.5 h-3.5 text-amber-600" /> Master Command
+                  <Wrench className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" /> Master Command
                 </>
               ) : (
                 <>
-                  <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" /> Daily Operations
+                  <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" /> Daily Operations
                 </>
               )}
             </span>
@@ -438,14 +438,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                   setActiveTab('counter-booking');
                   setCurrentView('admin-panel');
                 }}
-                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs shadow-xs flex items-center gap-2 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs shadow-xs flex items-center gap-2 transition-all cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" /> Return to Admin Operations
               </button>
             ) : isMasterMode ? (
               <button
                 onClick={() => setCurrentView('admin-panel')}
-                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs shadow-xs flex items-center gap-2 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs shadow-xs flex items-center gap-2 transition-all cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" /> Switch to Operations
               </button>
@@ -453,9 +453,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               <>
                 <button
                   onClick={() => setCurrentView('master-management')}
-                  className="px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300/80 font-black text-xs shadow-xs flex items-center gap-2 transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 text-amber-900 dark:text-amber-200 border border-amber-300/80 dark:border-amber-800/60 font-black text-xs shadow-xs flex items-center gap-2 transition-all cursor-pointer"
                 >
-                  <Wrench className="w-4 h-4 text-amber-600" /> Master Management →
+                  <Wrench className="w-4 h-4 text-amber-600 dark:text-amber-400" /> Master Management →
                 </button>
                 <button
                   onClick={() => setActiveTab('counter-booking')}
@@ -471,7 +471,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
 
       {/* ─── MOBILE TOP NAVIGATION BAR (Visible on mobile screens only) ─── */}
       {!isSlipsMode && (
-        <div className="lg:hidden bg-white rounded-2xl border border-slate-200/90 shadow-sm p-3 flex items-center justify-between animate-fade-in-up">
+        <div className="lg:hidden bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-sm p-3 flex items-center justify-between animate-fade-in-up">
           <button
             onClick={() => setIsMobileNavOpen(true)}
             className={`flex items-center gap-2 px-3 py-2 rounded-xl text-white font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer ${
@@ -483,7 +483,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
             <span>{isMasterMode ? 'Master Menu' : 'Admin Menu'}</span>
           </button>
 
-          <div className="flex items-center gap-2 font-black text-xs text-slate-800">
+          <div className="flex items-center gap-2 font-black text-xs text-slate-800 dark:text-white">
             <span className={`w-2 h-2 rounded-full animate-pulse ${isMasterMode ? 'bg-amber-500' : 'bg-blue-600'}`} />
             <span>
               {activeTab === 'counter-booking' && 'Counter & Phone Booking'}
@@ -511,15 +511,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
           />
 
           {/* Slide Drawer Content */}
-          <div className="relative w-[82vw] max-w-xs h-full bg-white shadow-2xl flex flex-col p-5 space-y-4 overflow-y-auto animate-slide-in-left z-10">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="relative w-[82vw] max-w-xs h-full bg-white dark:bg-slate-900 shadow-2xl flex flex-col p-5 space-y-4 overflow-y-auto animate-slide-in-left z-10">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
-                <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-400">Admin Navigation</h4>
-                <p className="text-xs font-extrabold text-slate-800">Dewmina Super Line</p>
+                <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Admin Navigation</h4>
+                <p className="text-xs font-extrabold text-slate-800 dark:text-white">Dewmina Super Line</p>
               </div>
               <button
                 onClick={() => setIsMobileNavOpen(false)}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 aria-label="Close Navigation"
               >
                 <X className="w-5 h-5" />
@@ -528,7 +528,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
 
             <div className="flex flex-col gap-2 flex-1">
               <div className={`px-2 pb-1 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 ${
-                isMasterMode ? 'text-amber-600' : 'text-blue-600'
+                isMasterMode ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400'
               }`}>
                 {isMasterMode ? (
                   <>
@@ -547,7 +547,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     <button
                       onClick={() => { setActiveTab('fleet'); setIsMobileNavOpen(false); }}
                       className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
-                        activeTab === 'fleet' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                        activeTab === 'fleet' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                       }`}
                     >
                       <Bus className="w-4 h-4" /> Fleet & Route Operations
@@ -558,7 +558,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     <button
                       onClick={() => { setActiveTab('timetables'); setIsMobileNavOpen(false); }}
                       className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
-                        activeTab === 'timetables' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                        activeTab === 'timetables' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                       }`}
                     >
                       <Calendar className="w-4 h-4" /> Master Timetables
@@ -569,14 +569,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     <button
                       onClick={() => { setActiveTab('whatsapp'); setIsMobileNavOpen(false); }}
                       className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                        activeTab === 'whatsapp' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                        activeTab === 'whatsapp' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         <MessageSquare className="w-4 h-4" /> WhatsApp Gateway
                       </div>
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                        activeTab === 'whatsapp' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
+                        activeTab === 'whatsapp' ? 'bg-white/20 text-white' : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
                       }`}>
                         BOT
                       </span>
@@ -588,13 +588,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                       <button
                         onClick={() => { setActiveTab('staff'); setIsMobileNavOpen(false); }}
                         className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                          activeTab === 'staff' ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                          activeTab === 'staff' ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <Shield className="w-4 h-4 text-emerald-500" /> Staff & Sub-Admins
+                          <Shield className="w-4 h-4 text-emerald-500 dark:text-emerald-400" /> Staff & Sub-Admins
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
                           SUPER
                         </span>
                       </button>
@@ -602,7 +602,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                       <button
                         onClick={() => { setActiveTab('users'); setIsMobileNavOpen(false); }}
                         className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                          activeTab === 'users' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                          activeTab === 'users' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
                       >
                         <div className="flex items-center gap-2">
@@ -610,7 +610,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                         </div>
                         {totalPassengersCount > 0 && (
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                            activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700'
+                            activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300'
                           }`}>
                             {totalPassengersCount}
                           </span>
@@ -620,14 +620,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                   )}
 
                   {/* Switch to Operations Button in Mobile Drawer */}
-                  <div className="pt-4 mt-auto border-t border-slate-100">
+                  <div className="pt-4 mt-auto border-t border-slate-100 dark:border-slate-800">
                     <button
                       onClick={() => {
                         setIsMobileNavOpen(false);
                         setAdminActiveTab('counter-booking');
                         setCurrentView('admin-panel');
                       }}
-                      className="w-full px-4 py-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-black flex items-center justify-between transition-colors cursor-pointer"
+                      className="w-full px-4 py-3 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 text-xs font-black flex items-center justify-between transition-colors cursor-pointer"
                     >
                       <span className="flex items-center gap-2">
                         <ArrowLeft className="w-4 h-4" /> Admin Operations
@@ -642,7 +642,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     <button
                       onClick={() => { setActiveTab('counter-booking'); setIsMobileNavOpen(false); }}
                       className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-black text-left cursor-pointer ${
-                        activeTab === 'counter-booking' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 bg-blue-50/60'
+                        activeTab === 'counter-booking' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 bg-blue-50/60 dark:bg-blue-950/30'
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -658,7 +658,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     <button
                       onClick={() => { setActiveTab('analytics'); setIsMobileNavOpen(false); }}
                       className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
-                        activeTab === 'analytics' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                        activeTab === 'analytics' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                       }`}
                     >
                       <BarChart2 className="w-4 h-4" /> Revenue & Analytics
@@ -668,14 +668,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                   <button
                     onClick={() => { setActiveTab('live-gps'); setIsMobileNavOpen(false); }}
                     className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                      activeTab === 'live-gps' ? 'bg-cyan-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                      activeTab === 'live-gps' ? 'bg-cyan-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4" /> Live GPS Fleet Tracking
                     </div>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                      activeTab === 'live-gps' ? 'bg-white/20 text-white' : 'bg-cyan-100 text-cyan-700'
+                      activeTab === 'live-gps' ? 'bg-white/20 text-white' : 'bg-cyan-100 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300'
                     }`}>
                       LIVE
                     </span>
@@ -684,14 +684,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                   <button
                     onClick={() => { setActiveTab('promos'); setIsMobileNavOpen(false); }}
                     className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                      activeTab === 'promos' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                      activeTab === 'promos' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <Ticket className="w-4 h-4 text-purple-500" /> Promo Codes & Discounts
                     </div>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                      activeTab === 'promos' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+                      activeTab === 'promos' ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300'
                     }`}>
                       DEALS
                     </span>
@@ -701,31 +701,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                   <button
                     onClick={() => { setActiveTab('payment-slips'); setIsMobileNavOpen(false); }}
                     className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                      activeTab === 'payment-slips' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                      activeTab === 'payment-slips' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <DollarSign className="w-4 h-4 text-emerald-500" /> Payment Slips
                     </div>
                     {paymentSlips.filter(s => s.status === 'pending').length > 0 && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-orange-100 text-orange-700 animate-pulse">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 animate-pulse">
                         {paymentSlips.filter(s => s.status === 'pending').length}
                       </span>
                     )}
                   </button>
 
                   {/* Switch to Master Management in Mobile Drawer */}
-                  <div className="pt-4 mt-auto border-t border-slate-100">
+                  <div className="pt-4 mt-auto border-t border-slate-100 dark:border-slate-800">
                     <button
                       onClick={() => {
                         setIsMobileNavOpen(false);
                         setAdminActiveTab('fleet');
                         setCurrentView('master-management');
                       }}
-                      className="w-full px-4 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300/70 text-xs font-black flex items-center justify-between transition-colors cursor-pointer"
+                      className="w-full px-4 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 text-amber-900 dark:text-amber-200 border border-amber-300/70 dark:border-amber-800/60 text-xs font-black flex items-center justify-between transition-colors cursor-pointer"
                     >
                       <span className="flex items-center gap-2">
-                        <Wrench className="w-4 h-4 text-amber-600" /> Master Management
+                        <Wrench className="w-4 h-4 text-amber-600 dark:text-amber-400" /> Master Management
                       </span>
                       <span className="text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded-full">OPEN</span>
                     </button>
@@ -735,8 +735,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
             </div>
 
             {isMasterMode && activeTab === 'fleet' && (
-              <div className="border-t border-slate-200 pt-4 space-y-2">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2 pb-1">Quick Actions ({selectedRoute ? selectedRoute.busNumber : 'Route'})</div>
+              <div className="border-t border-slate-200 dark:border-slate-800 pt-4 space-y-2">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 pb-1">Quick Actions ({selectedRoute ? selectedRoute.busNumber : 'Route'})</div>
                 <button
                   onClick={() => {
                     setIsMobileNavOpen(false);
@@ -802,13 +802,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
       <div className="flex flex-col lg:flex-row items-start gap-8">
         {/* ─── DESKTOP SIDEBAR (Hidden on mobile screens, sticky on desktop, hidden in Slips Mode) ─── */}
         {!isSlipsMode && (
-          <aside className="hidden lg:block w-72 shrink-0 bg-white rounded-3xl border border-slate-200 shadow-sm p-4 space-y-4 lg:sticky lg:top-24 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
+          <aside className="hidden lg:block w-72 shrink-0 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 space-y-4 lg:sticky lg:top-24 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
             <div className="flex items-center justify-between px-2">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 {isMasterMode ? 'Master Controls' : 'Operations Navigation'}
               </span>
               <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
-                isMasterMode ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-700'
+                isMasterMode ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300' : 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300'
               }`}>
                 {isMasterMode ? 'MASTER' : 'DAILY'}
               </span>
@@ -821,7 +821,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     <button
                       onClick={() => setActiveTab('fleet')}
                       className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
-                        activeTab === 'fleet' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                        activeTab === 'fleet' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
                       }`}
                     >
                       <Bus className="w-4 h-4" /> Fleet & Route Operations
@@ -832,7 +832,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     <button
                       onClick={() => setActiveTab('timetables')}
                       className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
-                        activeTab === 'timetables' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                        activeTab === 'timetables' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
                       }`}
                     >
                       <Calendar className="w-4 h-4" /> Master Timetables
@@ -843,14 +843,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     <button
                       onClick={() => setActiveTab('whatsapp')}
                       className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                        activeTab === 'whatsapp' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                        activeTab === 'whatsapp' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         <MessageSquare className="w-4 h-4" /> WhatsApp Gateway
                       </div>
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                        activeTab === 'whatsapp' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
+                        activeTab === 'whatsapp' ? 'bg-white/20 text-white' : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
                       }`}>
                         BOT
                       </span>
@@ -862,13 +862,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                       <button
                         onClick={() => setActiveTab('staff')}
                         className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                          activeTab === 'staff' ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                          activeTab === 'staff' ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <Shield className="w-4 h-4 text-emerald-500" /> Staff & Sub-Admins
+                          <Shield className="w-4 h-4 text-emerald-500 dark:text-emerald-400" /> Staff & Sub-Admins
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
                           SUPER
                         </span>
                       </button>
@@ -876,7 +876,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                       <button
                         onClick={() => setActiveTab('users')}
                         className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                          activeTab === 'users' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                          activeTab === 'users' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
                         }`}
                       >
                         <div className="flex items-center gap-2">
@@ -884,7 +884,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                         </div>
                         {totalPassengersCount > 0 && (
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                            activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700'
+                            activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300'
                           }`}>
                             {totalPassengersCount}
                           </span>
@@ -899,14 +899,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     <button
                       onClick={() => setActiveTab('counter-booking')}
                       className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-black text-left cursor-pointer ${
-                        activeTab === 'counter-booking' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 bg-blue-50/50'
+                        activeTab === 'counter-booking' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/60 bg-blue-50/50 dark:bg-blue-950/30'
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <Ticket className="w-4 h-4 text-blue-600" /> Counter Booking
+                        <Ticket className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Counter Booking
                       </div>
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                        activeTab === 'counter-booking' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700'
+                        activeTab === 'counter-booking' ? 'bg-white/20 text-white' : 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300'
                       }`}>
                         NEW
                       </span>
@@ -917,7 +917,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     <button
                       onClick={() => setActiveTab('analytics')}
                       className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-sm font-bold text-left cursor-pointer ${
-                        activeTab === 'analytics' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                        activeTab === 'analytics' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
                       }`}
                     >
                       <BarChart2 className="w-4 h-4" /> Revenue & Analytics
@@ -927,14 +927,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                   <button
                     onClick={() => setActiveTab('live-gps')}
                     className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                      activeTab === 'live-gps' ? 'bg-cyan-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                      activeTab === 'live-gps' ? 'bg-cyan-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4" /> Live GPS Fleet Tracking
                     </div>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                      activeTab === 'live-gps' ? 'bg-white/20 text-white' : 'bg-cyan-100 text-cyan-700'
+                      activeTab === 'live-gps' ? 'bg-white/20 text-white' : 'bg-cyan-100 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300'
                     }`}>
                       LIVE
                     </span>
@@ -943,14 +943,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                   <button
                     onClick={() => setActiveTab('promos')}
                     className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                      activeTab === 'promos' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                      activeTab === 'promos' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <Ticket className="w-4 h-4 text-purple-500" /> Promo Codes & Discounts
                     </div>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                      activeTab === 'promos' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+                      activeTab === 'promos' ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300'
                     }`}>
                       DEALS
                     </span>
@@ -962,15 +962,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
                       activeTab === 'payment-slips'
                         ? 'bg-emerald-600 text-white shadow-sm'
-                        : 'bg-slate-50 hover:bg-emerald-50/70 border border-slate-200/80 text-slate-700 hover:text-emerald-700'
+                        : 'bg-slate-50 dark:bg-slate-800/60 hover:bg-emerald-50/70 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-300'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <DollarSign className={`w-4 h-4 ${activeTab === 'payment-slips' ? 'text-white' : 'text-emerald-600'}`} /> Payment Slips
+                      <DollarSign className={`w-4 h-4 ${activeTab === 'payment-slips' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'}`} /> Payment Slips
                     </div>
                     {paymentSlips.filter(s => s.status === 'pending').length > 0 && (
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                        activeTab === 'payment-slips' ? 'bg-white/25 text-white' : 'bg-orange-100 text-orange-700 animate-pulse'
+                        activeTab === 'payment-slips' ? 'bg-white/25 text-white' : 'bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 animate-pulse'
                       }`}>
                         {paymentSlips.filter(s => s.status === 'pending').length}
                       </span>
@@ -981,8 +981,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
             </div>
 
             {isMasterMode && activeTab === 'fleet' && (
-              <div className="border-t border-slate-200 pt-4 space-y-2">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2 pb-1">Quick Actions</div>
+              <div className="border-t border-slate-200 dark:border-slate-800 pt-4 space-y-2">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 pb-1">Quick Actions</div>
                 <button
                   onClick={() => {
                     const target = routes.find(r => r.id === selectedRouteId) || routes[0];
@@ -1011,19 +1011,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
             )}
 
             {/* Switcher card at the bottom of sidebar */}
-            <div className="border-t border-slate-200 pt-3">
+            <div className="border-t border-slate-200 dark:border-slate-800 pt-3">
               {isMasterMode ? (
                 <button
                   onClick={() => {
                     setAdminActiveTab('counter-booking');
                     setCurrentView('admin-panel');
                   }}
-                  className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 text-slate-700 hover:text-blue-700 text-xs font-bold flex items-center justify-between transition-all cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-slate-200 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-800 text-slate-700 dark:text-slate-300 hover:text-blue-700 dark:hover:text-blue-300 text-xs font-bold flex items-center justify-between transition-all cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
-                    <ArrowLeft className="w-4 h-4 text-blue-600" /> Admin Operations
+                    <ArrowLeft className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Admin Operations
                   </span>
-                  <span className="text-[10px] text-blue-600 font-black">RETURN</span>
+                  <span className="text-[10px] text-blue-600 dark:text-blue-400 font-black">RETURN</span>
                 </button>
               ) : (
                 <button
@@ -1031,12 +1031,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     setAdminActiveTab('fleet');
                     setCurrentView('master-management');
                   }}
-                  className="w-full px-3.5 py-2.5 rounded-2xl bg-amber-50/60 hover:bg-amber-100 border border-amber-200/80 text-amber-900 text-xs font-bold flex items-center justify-between transition-all cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-amber-50/60 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200/80 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 text-xs font-bold flex items-center justify-between transition-all cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
-                    <Wrench className="w-4 h-4 text-amber-600" /> Master Management
+                    <Wrench className="w-4 h-4 text-amber-600 dark:text-amber-400" /> Master Management
                   </span>
-                  <span className="text-[10px] text-amber-700 font-black">OPEN →</span>
+                  <span className="text-[10px] text-amber-700 dark:text-amber-400 font-black">OPEN →</span>
                 </button>
               )}
             </div>
@@ -1051,7 +1051,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
           
           {/* Top Fleet Toolbar */}
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-extrabold text-slate-800 tracking-tight">Active Bus Fleet Management</h3>
+            <h3 className="text-lg font-extrabold text-slate-800 dark:text-white tracking-tight">Active Bus Fleet Management</h3>
             <button
               onClick={() => setShowSeatBuilder(!showSeatBuilder)}
               className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-2"
@@ -1072,7 +1072,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
           )}
 
           {/* Fleet Controls: Search Bar & Date Filter Tabs */}
-          <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-xs space-y-3.5">
+          <div className="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-3.5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               {/* Search input */}
               <div className="relative flex-1">
@@ -1082,12 +1082,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                   value={fleetSearchQuery}
                   onChange={(e) => setFleetSearchQuery(e.target.value)}
                   placeholder="Search Bus No (e.g. ND-2903), Origin, Destination..."
-                  className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                 />
                 {fleetSearchQuery && (
                   <button
                     onClick={() => setFleetSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -1101,7 +1101,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                 className={`px-3.5 py-2.5 rounded-2xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   fleetGroupByBus 
                     ? 'bg-purple-600 text-white border-purple-700 shadow-2xs' 
-                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    : 'bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
                 title="Group schedules by unique Bus Number"
               >
@@ -1111,7 +1111,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
             </div>
 
             {/* Date Filter Pills */}
-            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1">
                 <Filter className="w-3 h-3" /> Date:
               </span>
@@ -1123,7 +1123,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                 className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
                   fleetDateFilter === 'today'
                     ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200'
+                    : 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/60'
                 }`}
               >
                 <span className={`w-2 h-2 rounded-full ${fleetDateFilter === 'today' ? 'bg-white' : 'bg-emerald-500 animate-pulse'}`} />
@@ -1137,7 +1137,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                 className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
                   fleetDateFilter === 'tomorrow'
                     ? 'bg-blue-600 text-white shadow-xs'
-                    : 'bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200'
+                    : 'bg-blue-50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800/60'
                 }`}
               >
                 <Calendar className="w-3.5 h-3.5" />
@@ -1148,9 +1148,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border transition-all ${
                 fleetDateFilter === 'custom'
                   ? 'bg-indigo-600 text-white border-indigo-700 shadow-xs'
-                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  : 'bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}>
-                <Calendar className={`w-3.5 h-3.5 ${fleetDateFilter === 'custom' ? 'text-white' : 'text-slate-500'}`} />
+                <Calendar className={`w-3.5 h-3.5 ${fleetDateFilter === 'custom' ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`} />
                 <input
                   type="date"
                   value={customFleetDate}
@@ -1159,7 +1159,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     setFleetDateFilter('custom');
                   }}
                   className={`bg-transparent text-xs font-mono font-bold outline-none cursor-pointer ${
-                    fleetDateFilter === 'custom' ? 'text-white' : 'text-slate-800'
+                    fleetDateFilter === 'custom' ? 'text-white' : 'text-slate-800 dark:text-white'
                   }`}
                 />
               </div>
@@ -1170,8 +1170,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                 onClick={() => setFleetDateFilter('all')}
                 className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer sm:ml-auto ${
                   fleetDateFilter === 'all'
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-xs'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                 }`}
               >
                 <span>All Dates ({routes.length})</span>
@@ -1180,14 +1180,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
           </div>
 
           {/* Mobile View Segmented Switcher: Routes vs Manifest */}
-          <div className="flex lg:hidden bg-slate-200/90 p-1 rounded-2xl gap-1">
+          <div className="flex lg:hidden bg-slate-200/90 dark:bg-slate-800 p-1 rounded-2xl gap-1">
             <button
               type="button"
               onClick={() => setFleetMobileView('routes')}
               className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
                 fleetMobileView === 'routes' 
                   ? 'bg-blue-600 text-white shadow-xs' 
-                  : 'text-slate-700 hover:bg-slate-100'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
               }`}
             >
               <Bus className="w-4 h-4" />
@@ -1199,7 +1199,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
                 fleetMobileView === 'manifest' 
                   ? 'bg-blue-600 text-white shadow-xs' 
-                  : 'text-slate-700 hover:bg-slate-100'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
               }`}
             >
               <FileText className="w-4 h-4" />
@@ -1214,25 +1214,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
             <div className={`lg:col-span-5 space-y-4 ${fleetMobileView === 'manifest' ? 'hidden lg:block' : 'block'}`}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
+                  <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                     Fleet Routes ({filteredFleetRoutes.length})
                   </h4>
-                  <p className="text-[11px] text-slate-400 font-semibold">
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 font-semibold">
                     {fleetDateFilter === 'today' ? 'Showing: Today\'s Departures' : fleetDateFilter === 'tomorrow' ? 'Showing: Tomorrow\'s Departures' : fleetDateFilter === 'custom' ? `Showing: ${customFleetDate}` : 'Showing: All Departures'}
                   </p>
                 </div>
-                <span className="text-[11px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100">
+                <span className="text-[11px] text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-lg border border-blue-100 dark:border-blue-800/60">
                   {filteredFleetRoutes.length} of {routes.length}
                 </span>
               </div>
 
               {filteredFleetRoutes.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200 space-y-2">
-                  <Calendar className="w-8 h-8 mx-auto text-slate-300" />
-                  <p className="text-xs font-bold text-slate-600">No buses scheduled for this date or search.</p>
+                <div className="p-8 text-center text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700 space-y-2">
+                  <Calendar className="w-8 h-8 mx-auto text-slate-300 dark:text-slate-600" />
+                  <p className="text-xs font-bold text-slate-600 dark:text-slate-300">No buses scheduled for this date or search.</p>
                   <button
                     onClick={() => { setFleetDateFilter('all'); setFleetSearchQuery(''); }}
-                    className="text-xs text-blue-600 font-extrabold underline cursor-pointer"
+                    className="text-xs text-blue-600 dark:text-blue-400 font-extrabold underline cursor-pointer"
                   >
                     View All Schedules ({routes.length})
                   </button>
@@ -1244,22 +1244,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     const isExpanded = expandedBuses[busNo] ?? (selectedRoute?.busNumber === busNo);
                     const primaryRoute = busRoutes[0];
                     return (
-                      <div key={busNo} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs">
+                      <div key={busNo} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-2xs">
                         <div
                           onClick={() => toggleExpandBus(busNo)}
-                          className="p-3.5 bg-slate-50 hover:bg-slate-100 flex items-center justify-between cursor-pointer transition-colors border-b border-slate-100"
+                          className="p-3.5 bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-900 flex items-center justify-between cursor-pointer transition-colors border-b border-slate-100 dark:border-slate-700/60"
                         >
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-black text-xs">
+                            <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 flex items-center justify-center font-black text-xs">
                               <Bus className="w-4 h-4" />
                             </div>
                             <div>
-                              <h4 className="font-extrabold text-slate-900 text-sm">{busNo}</h4>
-                              <p className="text-[11px] text-slate-500 font-semibold">{primaryRoute?.origin} ⇄ {primaryRoute?.destination}</p>
+                              <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">{busNo}</h4>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">{primaryRoute?.origin} ⇄ {primaryRoute?.destination}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold">
+                            <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 text-[10px] font-bold">
                               {busRoutes.length} Trips
                             </span>
                             {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -1267,42 +1267,42 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                         </div>
 
                         {isExpanded && (
-                          <div className="p-2 space-y-2 bg-slate-50/50">
+                          <div className="p-2 space-y-2 bg-slate-50/50 dark:bg-slate-900/30">
                             {busRoutes.map(r => (
                               <div
                                 key={r.id}
                                 onClick={() => setSelectedRouteId(r.id)}
                                 className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                                  selectedRouteId === r.id ? 'border-blue-500 bg-blue-50/80 shadow-xs' : 'bg-white border-slate-200 hover:border-slate-300'
+                                  selectedRouteId === r.id ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-950/40 shadow-xs' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                                 }`}
                               >
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="space-y-1">
                                     <div className="flex flex-wrap items-center gap-1.5">
                                       {r.departureDate === todayStr || !r.departureDate ? (
-                                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black flex items-center gap-1">
+                                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 text-[10px] font-black flex items-center gap-1">
                                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> TODAY
                                         </span>
                                       ) : r.departureDate === tomorrowStr ? (
-                                        <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-300 text-[10px] font-black">
+                                        <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800 text-[10px] font-black">
                                           TOMORROW
                                         </span>
                                       ) : (
-                                        <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold flex items-center gap-1">
+                                        <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 text-[10px] font-bold flex items-center gap-1">
                                           <Calendar className="w-3 h-3 text-slate-400" /> {r.departureDate}
                                         </span>
                                       )}
                                       {r.departureTime && (
-                                        <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-black flex items-center gap-1">
-                                          <Clock className="w-3 h-3 text-purple-600" /> {r.departureTime}
+                                        <span className="px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-[10px] font-black flex items-center gap-1">
+                                          <Clock className="w-3 h-3 text-purple-600 dark:text-purple-400" /> {r.departureTime}
                                         </span>
                                       )}
                                     </div>
-                                    <p className="text-xs text-blue-600 font-bold">{r.origin} → {r.destination}</p>
+                                    <p className="text-xs text-blue-600 dark:text-blue-400 font-bold">{r.origin} → {r.destination}</p>
                                   </div>
                                   <div className="text-right text-xs">
-                                    <span className="font-mono font-bold text-slate-700">LKR {(r.priceStarting || 0).toLocaleString()}</span>
-                                    <p className="text-[10px] text-slate-500 font-mono">{r.seats?.filter(s => s.status === 'booked').length || 0}/{r.seats?.length || 49} Booked</p>
+                                    <span className="font-mono font-bold text-slate-700 dark:text-slate-200">LKR {(r.priceStarting || 0).toLocaleString()}</span>
+                                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">{r.seats?.filter(s => s.status === 'booked').length || 0}/{r.seats?.length || 49} Booked</p>
                                   </div>
                                 </div>
                               </div>
@@ -1321,44 +1321,44 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                       key={r.id}
                       onClick={() => setSelectedRouteId(r.id)}
                       className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                        selectedRouteId === r.id ? 'border-blue-500 bg-blue-50/70 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'
+                        selectedRouteId === r.id ? 'border-blue-500 bg-blue-50/70 dark:bg-blue-950/40 shadow-sm' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="space-y-1 flex-1">
                           {/* Top Badges: Bus No, Date, Time */}
                           <div className="flex flex-wrap items-center gap-1.5">
-                            <h4 className="font-extrabold text-slate-900 text-sm">{r.busNumber}</h4>
+                            <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">{r.busNumber}</h4>
 
                             {/* Date Badge */}
                             {r.departureDate === todayStr || !r.departureDate ? (
-                              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black flex items-center gap-1">
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 text-[10px] font-black flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> TODAY
                               </span>
                             ) : r.departureDate === tomorrowStr ? (
-                              <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-300 text-[10px] font-black">
+                              <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800 text-[10px] font-black">
                                 TOMORROW
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold flex items-center gap-1">
+                              <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 text-[10px] font-bold flex items-center gap-1">
                                 <Calendar className="w-3 h-3 text-slate-400" /> {r.departureDate}
                               </span>
                             )}
 
                             {/* Departure Time Badge */}
                             {r.departureTime && (
-                              <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-black flex items-center gap-1">
-                                <Clock className="w-3 h-3 text-purple-600" /> {r.departureTime}
+                              <span className="px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-[10px] font-black flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-purple-600 dark:text-purple-400" /> {r.departureTime}
                               </span>
                             )}
 
-                            <span className="px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold flex items-center gap-0.5">
+                            <span className="px-1.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 text-[10px] font-bold flex items-center gap-0.5">
                               <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> {r.operatorRating ? Number(r.operatorRating).toFixed(1) : '4.8'}
                             </span>
                           </div>
 
-                          <p className="text-xs text-blue-600 font-bold">{r.origin} → {r.destination}</p>
-                          <p className="text-[11px] text-slate-500 font-mono mt-0.5">{(r.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}</p>
+                          <p className="text-xs text-blue-600 dark:text-blue-400 font-bold">{r.origin} → {r.destination}</p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">{(r.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}</p>
                         </div>
 
                         <div className="flex items-center gap-1 shrink-0">
@@ -1368,7 +1368,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                               setEditDetailsRoute(r);
                             }}
                             title="Edit Details & Timetable"
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors cursor-pointer"
                           >
                             <Edit3 className="w-4 h-4" />
                           </button>
@@ -1379,7 +1379,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                             className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                               confirmDeleteRouteId === r.id 
                                 ? 'bg-rose-600 text-white font-bold animate-pulse px-2 text-[10px]' 
-                                : 'text-slate-400 hover:text-red-600 hover:bg-red-50'
+                                : 'text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50'
                             }`}
                             title={confirmDeleteRouteId === r.id ? "Click again to confirm delete" : "Delete Route"}
                           >
@@ -1388,14 +1388,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                         </div>
                       </div>
 
-                      <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                        <span className="font-bold text-slate-700">LKR {(r.priceStarting || 0).toLocaleString()}</span>
-                        <span className="font-mono font-bold text-slate-600">{r.seats?.filter(s => s.status === 'booked').length || 0}/{r.seats?.length || 49} Booked</span>
+                      <div className="mt-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                        <span className="font-bold text-slate-700 dark:text-slate-200">LKR {(r.priceStarting || 0).toLocaleString()}</span>
+                        <span className="font-mono font-bold text-slate-600 dark:text-slate-300">{r.seats?.filter(s => s.status === 'booked').length || 0}/{r.seats?.length || 49} Booked</span>
                       </div>
 
                       {/* Instant Mobile Actions Strip when selected */}
                       {selectedRouteId === r.id && (
-                        <div className="mt-3 pt-3 border-t border-blue-200/80 space-y-2 lg:hidden">
+                        <div className="mt-3 pt-3 border-t border-blue-200/80 dark:border-blue-800/60 space-y-2 lg:hidden">
                           <div className="grid grid-cols-3 gap-1.5">
                             <button
                               type="button"
@@ -1437,7 +1437,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                               e.stopPropagation();
                               setFleetMobileView('manifest');
                             }}
-                            className="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
+                            className="w-full py-2 px-3 rounded-xl bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
                           >
                             <FileText className="w-3.5 h-3.5" /> View Passenger Manifest ({manifestBookings.length} Bookings)
                           </button>
@@ -1450,28 +1450,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
             </div>
 
             {/* Passenger Manifest Panel for Selected Route */}
-            <div className={`lg:col-span-7 bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6 ${fleetMobileView === 'routes' ? 'hidden lg:block' : 'block'}`}>
+            <div className={`lg:col-span-7 bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-6 ${fleetMobileView === 'routes' ? 'hidden lg:block' : 'block'}`}>
               {/* Mobile Back Button to Fleet Buses */}
-              <div className="lg:hidden flex items-center justify-between bg-blue-50/90 border border-blue-200/90 p-2.5 rounded-2xl">
+              <div className="lg:hidden flex items-center justify-between bg-blue-50/90 dark:bg-blue-950/50 border border-blue-200/90 dark:border-blue-800 p-2.5 rounded-2xl">
                 <button
                   type="button"
                   onClick={() => setFleetMobileView('routes')}
-                  className="flex items-center gap-1.5 text-xs font-black text-blue-700 hover:text-blue-900 cursor-pointer"
+                  className="flex items-center gap-1.5 text-xs font-black text-blue-700 dark:text-blue-300 hover:text-blue-900 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" /> Back to Fleet Buses
                 </button>
-                <span className="text-xs font-mono font-black text-slate-800 bg-white px-2.5 py-1 rounded-xl border border-slate-200 shadow-2xs">
+                <span className="text-xs font-mono font-black text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
                   {selectedRoute?.busNumber || 'Selected Bus'}
                 </span>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-700 pb-4">
                 <div>
-                  <h3 className="text-base font-bold text-slate-800">
+                  <h3 className="text-base font-bold text-slate-800 dark:text-white">
                     Manifest: {selectedRoute ? selectedRoute.busNumber : 'Select a Route'}
                   </h3>
                   {selectedRoute && (
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       {selectedRoute.origin} to {selectedRoute.destination} • {manifestBookings.length} Bookings
                     </p>
                   )}
@@ -1482,20 +1482,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     <button
                       type="button"
                       onClick={() => setShowSeatBlockModal(true)}
-                      className="px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs active:scale-95"
+                      className="px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs active:scale-95"
                       title="Block or release seats for maintenance / conductor"
                     >
-                      <Wrench className="w-3.5 h-3.5 text-amber-600" />
+                      <Wrench className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                       <span>Seat Lock</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setShowBroadcastModal(true)}
-                      className="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs active:scale-95"
+                      className="px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs active:scale-95"
                       title="Send WhatsApp broadcast to passengers of this bus"
                     >
-                      <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                      <MessageSquare className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                       <span>Broadcast</span>
                     </button>
 
@@ -1530,7 +1530,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                         link.click();
                         document.body.removeChild(link);
                       }}
-                      className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs active:scale-95"
+                      className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs active:scale-95"
                     >
                       <Download className="w-3.5 h-3.5" /> <span>CSV Export</span>
                     </button>
@@ -1539,8 +1539,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               </div>
 
               {manifestBookings.length === 0 ? (
-                <div className="py-12 text-center text-slate-400 space-y-2">
-                  <Ticket className="w-8 h-8 mx-auto text-slate-300" />
+                <div className="py-12 text-center text-slate-400 dark:text-slate-500 space-y-2">
+                  <Ticket className="w-8 h-8 mx-auto text-slate-300 dark:text-slate-600" />
                   <p className="text-sm font-semibold">No passenger bookings recorded for this route yet.</p>
                 </div>
               ) : (
@@ -1564,32 +1564,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     const gender = b.passenger?.gender || (b as any).gender || 'female';
 
                     return (
-                      <div key={b.id} className="p-3.5 rounded-2xl bg-slate-50/80 hover:bg-slate-100/90 border border-slate-200/80 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                      <div key={b.id} className="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-900/60 hover:bg-slate-100/90 dark:hover:bg-slate-900 border border-slate-200/80 dark:border-slate-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                         
                         {/* Passenger Name, PNR, Phone & Gender */}
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="font-extrabold text-slate-900 text-sm">{passengerName}</p>
+                            <p className="font-extrabold text-slate-900 dark:text-white text-sm">{passengerName}</p>
 
                             {/* Gender Badge (Male ♂️ / Female ♀️) */}
                             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
                               gender === 'female'
-                                ? 'bg-pink-50 text-pink-700 border-pink-200'
+                                ? 'bg-pink-50 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-800/60'
                                 : gender === 'male'
-                                ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                : 'bg-slate-100 text-slate-700 border-slate-200'
+                                ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/60'
+                                : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600'
                             }`}>
                               {gender === 'female' ? '♀ Female' : gender === 'male' ? '♂ Male' : '👤 Passenger'}
                             </span>
 
                             {/* Booked Seat Count Badge */}
-                            <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold">
+                            <span className="px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60 text-[10px] font-bold">
                               {seatCount} {seatCount === 1 ? 'Seat' : 'Seats'}
                             </span>
                           </div>
 
-                          <p className="text-slate-500 text-[11px] font-mono flex items-center gap-2">
-                            <span>PNR: <strong className="text-blue-600 font-bold">{b.pnr}</strong></span>
+                          <p className="text-slate-500 dark:text-slate-400 text-[11px] font-mono flex items-center gap-2">
+                            <span>PNR: <strong className="text-blue-600 dark:text-blue-400 font-bold">{b.pnr}</strong></span>
                             <span>•</span>
                             <span>{passengerPhone}</span>
                           </p>
@@ -1598,12 +1598,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                         {/* Seat Numbers & Total Price */}
                         <div className="text-left sm:text-right space-y-1 shrink-0">
                           <div className="flex items-center sm:justify-end gap-1.5">
-                            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Seat(s):</span>
-                            <span className="font-mono font-black text-slate-900 text-sm bg-white px-2.5 py-1 rounded-xl border border-slate-300 shadow-2xs">
+                            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Seat(s):</span>
+                            <span className="font-mono font-black text-slate-900 dark:text-white text-sm bg-white dark:bg-slate-800 px-2.5 py-1 rounded-xl border border-slate-300 dark:border-slate-600 shadow-2xs">
                               {formattedSeatNumbers}
                             </span>
                           </div>
-                          <p className="text-[11px] font-bold font-mono text-emerald-600">
+                          <p className="text-[11px] font-bold font-mono text-emerald-600 dark:text-emerald-400">
                             LKR {(b.totalFare || 0).toLocaleString()}
                           </p>
                         </div>
@@ -1632,10 +1632,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
         <div className="space-y-8">
           
           {/* Analytics Header with Daily Settlement Action */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-200 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xs">
             <div>
-              <h3 className="text-lg font-black text-slate-900">Revenue & Accounting Analytics</h3>
-              <p className="text-xs text-slate-500">Real-time revenue metrics, daily collections & fleet operator commissions</p>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">Revenue & Accounting Analytics</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Real-time revenue metrics, daily collections & fleet operator commissions</p>
             </div>
 
             <button
@@ -1649,59 +1649,59 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
 
           {/* Revenue KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-slate-500">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
                 <span className="text-xs font-bold uppercase tracking-wider">Total Gross Revenue</span>
-                <DollarSign className="w-5 h-5 text-emerald-600" />
+                <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <p className="text-2xl font-black text-slate-900 font-mono">LKR {totalRevenue.toLocaleString()}</p>
-              <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+              <p className="text-2xl font-black text-slate-900 dark:text-white font-mono">LKR {totalRevenue.toLocaleString()}</p>
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
                 <TrendingUp className="w-3.5 h-3.5" /> +14.2% from last month
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-slate-500">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
                 <span className="text-xs font-bold uppercase tracking-wider">Confirmed Tickets</span>
-                <Ticket className="w-5 h-5 text-blue-600" />
+                <Ticket className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <p className="text-2xl font-black text-slate-900 font-mono">{confirmedBookingsCount}</p>
-              <p className="text-xs text-blue-600 font-semibold">Across {routes.length} active fleet routes</p>
+              <p className="text-2xl font-black text-slate-900 dark:text-white font-mono">{confirmedBookingsCount}</p>
+              <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold">Across {routes.length} active fleet routes</p>
             </div>
 
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-slate-500">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
                 <span className="text-xs font-bold uppercase tracking-wider">Registered Accounts</span>
-                <Users className="w-5 h-5 text-indigo-600" />
+                <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               </div>
-              <p className="text-2xl font-black text-slate-900 font-mono">{usersList.length}</p>
-              <p className="text-xs text-indigo-600 font-semibold">{totalPassengersCount} Passengers • {systemAdminsCount} Admins & Staff</p>
+              <p className="text-2xl font-black text-slate-900 dark:text-white font-mono">{usersList.length}</p>
+              <p className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">{totalPassengersCount} Passengers • {systemAdminsCount} Admins & Staff</p>
             </div>
           </div>
 
           {/* Operator Commission Summary */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-            <h3 className="text-base font-bold text-slate-800 flex items-center gap-2 border-b border-slate-200 pb-3">
-              <Award className="w-5 h-5 text-indigo-600" /> Fleet Operator Revenue Shares
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+            <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-3">
+              <Award className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> Fleet Operator Revenue Shares
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-                <p className="font-bold text-slate-800">Dewmina Super Line</p>
-                <p className="text-slate-500 text-[11px]">8 Active Buses • 10% Platform Fee</p>
-                <p className="font-mono font-bold text-emerald-600 text-sm pt-2">LKR 684,000.00</p>
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-1">
+                <p className="font-bold text-slate-800 dark:text-slate-200">Dewmina Super Line</p>
+                <p className="text-slate-500 dark:text-slate-400 text-[11px]">8 Active Buses • 10% Platform Fee</p>
+                <p className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm pt-2">LKR 684,000.00</p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-                <p className="font-bold text-slate-800">Royal Express LK</p>
-                <p className="text-slate-500 text-[11px]">6 Active Buses • 10% Platform Fee</p>
-                <p className="font-mono font-bold text-emerald-600 text-sm pt-2">LKR 492,000.00</p>
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-1">
+                <p className="font-bold text-slate-800 dark:text-slate-200">Royal Express LK</p>
+                <p className="text-slate-500 dark:text-slate-400 text-[11px]">6 Active Buses • 10% Platform Fee</p>
+                <p className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm pt-2">LKR 492,000.00</p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-                <p className="font-bold text-slate-800">Lanka Ashok Leyland Air Bus</p>
-                <p className="text-slate-500 text-[11px]">4 Active Buses • 12% Platform Fee</p>
-                <p className="font-mono font-bold text-emerald-600 text-sm pt-2">LKR 315,000.00</p>
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-1">
+                <p className="font-bold text-slate-800 dark:text-slate-200">Lanka Ashok Leyland Air Bus</p>
+                <p className="text-slate-500 dark:text-slate-400 text-[11px]">4 Active Buses • 12% Platform Fee</p>
+                <p className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm pt-2">LKR 315,000.00</p>
               </div>
             </div>
           </div>
@@ -1722,16 +1722,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               className={`p-5 rounded-3xl cursor-pointer transition-all duration-200 transform hover:-translate-y-1 hover:shadow-xl select-none ${
                 passengerFilter === 'all'
                   ? 'bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900 text-white shadow-xl ring-4 ring-blue-500/40 scale-[1.02]'
-                  : 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-sm'
+                  : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 shadow-sm'
               }`}
             >
               <div className="flex items-center justify-between opacity-80">
                 <span className="text-xs font-bold uppercase tracking-wider">Total Passengers</span>
-                <Users className={`w-5 h-5 ${passengerFilter === 'all' ? 'text-blue-300' : 'text-blue-600'}`} />
+                <Users className={`w-5 h-5 ${passengerFilter === 'all' ? 'text-blue-300' : 'text-blue-600 dark:text-blue-400'}`} />
               </div>
               <p className="text-3xl font-black font-mono tracking-tight my-1">{totalPassengersCount}</p>
               <div className="flex items-center justify-between">
-                <p className={`text-[11px] font-medium ${passengerFilter === 'all' ? 'text-blue-200' : 'text-slate-500'}`}>
+                <p className={`text-[11px] font-medium ${passengerFilter === 'all' ? 'text-blue-200' : 'text-slate-500 dark:text-slate-400'}`}>
                   Registered in OmniBus Neon DB
                 </p>
                 {passengerFilter === 'all' && (
@@ -1748,18 +1748,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               className={`p-5 rounded-3xl cursor-pointer transition-all duration-200 transform hover:-translate-y-1 hover:shadow-xl select-none ${
                 passengerFilter === 'with-bookings'
                   ? 'bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-xl ring-4 ring-blue-400/40 scale-[1.02]'
-                  : 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-sm'
+                  : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 shadow-sm'
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className={`text-xs font-bold uppercase tracking-wider ${passengerFilter === 'with-bookings' ? 'text-blue-100' : 'text-slate-500'}`}>
+                <span className={`text-xs font-bold uppercase tracking-wider ${passengerFilter === 'with-bookings' ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'}`}>
                   Active Bookers
                 </span>
-                <UserCheck className={`w-5 h-5 ${passengerFilter === 'with-bookings' ? 'text-white' : 'text-blue-600'}`} />
+                <UserCheck className={`w-5 h-5 ${passengerFilter === 'with-bookings' ? 'text-white' : 'text-blue-600 dark:text-blue-400'}`} />
               </div>
               <p className="text-3xl font-black font-mono tracking-tight my-1">{passengersWithBookingsCount}</p>
               <div className="flex items-center justify-between">
-                <p className={`text-xs font-semibold ${passengerFilter === 'with-bookings' ? 'text-blue-100' : 'text-blue-600'}`}>
+                <p className={`text-xs font-semibold ${passengerFilter === 'with-bookings' ? 'text-blue-100' : 'text-blue-600 dark:text-blue-400'}`}>
                   Passengers with 1+ bookings
                 </p>
                 {passengerFilter === 'with-bookings' && (
@@ -1776,18 +1776,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               className={`p-5 rounded-3xl cursor-pointer transition-all duration-200 transform hover:-translate-y-1 hover:shadow-xl select-none ${
                 passengerFilter === 'without-bookings'
                   ? 'bg-gradient-to-br from-amber-600 to-orange-700 text-white shadow-xl ring-4 ring-amber-400/40 scale-[1.02]'
-                  : 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-sm'
+                  : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 shadow-sm'
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className={`text-xs font-bold uppercase tracking-wider ${passengerFilter === 'without-bookings' ? 'text-amber-100' : 'text-slate-500'}`}>
+                <span className={`text-xs font-bold uppercase tracking-wider ${passengerFilter === 'without-bookings' ? 'text-amber-100' : 'text-slate-500 dark:text-slate-400'}`}>
                   No Bookings Yet
                 </span>
-                <Sparkles className={`w-5 h-5 ${passengerFilter === 'without-bookings' ? 'text-white' : 'text-amber-600'}`} />
+                <Sparkles className={`w-5 h-5 ${passengerFilter === 'without-bookings' ? 'text-white' : 'text-amber-600 dark:text-amber-400'}`} />
               </div>
               <p className="text-3xl font-black font-mono tracking-tight my-1">{passengersWithoutBookingsCount}</p>
               <div className="flex items-center justify-between">
-                <p className={`text-xs font-semibold ${passengerFilter === 'without-bookings' ? 'text-amber-100' : 'text-amber-600'}`}>
+                <p className={`text-xs font-semibold ${passengerFilter === 'without-bookings' ? 'text-amber-100' : 'text-amber-600 dark:text-amber-400'}`}>
                   Registered, yet to reserve
                 </p>
                 {passengerFilter === 'without-bookings' && (
@@ -1804,21 +1804,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               className={`p-5 rounded-3xl cursor-pointer transition-all duration-200 transform hover:-translate-y-1 hover:shadow-xl select-none ${
                 passengerFilter === 'with-bookings'
                   ? 'bg-gradient-to-br from-emerald-700 to-teal-800 text-white shadow-xl ring-4 ring-emerald-400/40 scale-[1.02]'
-                  : 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-sm'
+                  : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 shadow-sm'
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className={`text-xs font-bold uppercase tracking-wider ${passengerFilter === 'with-bookings' ? 'text-emerald-100' : 'text-slate-500'}`}>
+                <span className={`text-xs font-bold uppercase tracking-wider ${passengerFilter === 'with-bookings' ? 'text-emerald-100' : 'text-slate-500 dark:text-slate-400'}`}>
                   Total Reservations
                 </span>
-                <Ticket className={`w-5 h-5 ${passengerFilter === 'with-bookings' ? 'text-white' : 'text-emerald-600'}`} />
+                <Ticket className={`w-5 h-5 ${passengerFilter === 'with-bookings' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'}`} />
               </div>
               <p className="text-3xl font-black font-mono tracking-tight my-1">{totalPassengerBookings}</p>
               <div className="flex items-center justify-between">
-                <p className={`text-xs font-semibold ${passengerFilter === 'with-bookings' ? 'text-emerald-100' : 'text-emerald-600'}`}>
+                <p className={`text-xs font-semibold ${passengerFilter === 'with-bookings' ? 'text-emerald-100' : 'text-emerald-600 dark:text-emerald-400'}`}>
                   Total seats booked by passengers
                 </p>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-emerald-100 text-emerald-700 border border-emerald-200">
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
                   Volume
                 </span>
               </div>
@@ -1827,16 +1827,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
           </div>
 
           {/* Passenger Accounts Management Card */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
             
             {/* Table Header Controls */}
-            <div className="p-6 border-b border-slate-200 space-y-4">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
-                    <Users className="w-5 h-5 text-blue-600" /> Registered Passenger Accounts
+                  <h3 className="text-lg font-extrabold text-slate-800 dark:text-white tracking-tight flex items-center gap-2">
+                    <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" /> Registered Passenger Accounts
                   </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     Inspect passenger registration details, mobile contacts, and travel booking history.
                   </p>
                 </div>
@@ -1844,7 +1844,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                 <button
                   onClick={fetchUsers}
                   disabled={usersLoading}
-                  className="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-2 transition-colors self-start sm:self-auto cursor-pointer"
+                  className="px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center gap-2 transition-colors self-start sm:self-auto cursor-pointer"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${usersLoading ? 'animate-spin text-blue-600' : ''}`} />
                   <span>Refresh Passengers</span>
@@ -1862,12 +1862,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     value={usersSearchQuery}
                     onChange={(e) => setUsersSearchQuery(e.target.value)}
                     placeholder="Search passengers by name, email, or Sri Lankan phone number…"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                   />
                   {usersSearchQuery && (
                     <button
                       onClick={() => setUsersSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -1875,13 +1875,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                 </div>
 
                 {/* Filter Tabs */}
-                <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200/80 w-full sm:w-auto shrink-0">
+                <div className="flex items-center bg-slate-100 dark:bg-slate-900 p-1 rounded-2xl border border-slate-200/80 dark:border-slate-700 w-full sm:w-auto shrink-0">
                   <button
                     onClick={() => setPassengerFilter('all')}
                     className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                       passengerFilter === 'all'
-                        ? 'bg-white text-blue-700 shadow-xs'
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     All ({totalPassengersCount})
@@ -1890,8 +1890,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     onClick={() => setPassengerFilter('with-bookings')}
                     className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                       passengerFilter === 'with-bookings'
-                        ? 'bg-white text-emerald-600 shadow-xs'
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     With Bookings ({passengersWithBookingsCount})
@@ -1900,8 +1900,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     onClick={() => setPassengerFilter('without-bookings')}
                     className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                       passengerFilter === 'without-bookings'
-                        ? 'bg-white text-amber-600 shadow-xs'
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     No Bookings ({passengersWithoutBookingsCount})
@@ -1912,15 +1912,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
 
             {/* Passengers List Data Table */}
             {usersLoading ? (
-              <div className="py-16 text-center text-slate-400 space-y-3">
+              <div className="py-16 text-center text-slate-400 dark:text-slate-500 space-y-3">
                 <RefreshCw className="w-8 h-8 mx-auto animate-spin text-blue-500" />
                 <p className="text-xs font-semibold">Loading passenger accounts from Neon DB…</p>
               </div>
             ) : filteredUsers.length === 0 ? (
-              <div className="py-16 text-center text-slate-400 space-y-3">
-                <UserX className="w-10 h-10 mx-auto text-slate-300" />
-                <p className="text-sm font-bold text-slate-700">No passenger accounts found</p>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              <div className="py-16 text-center text-slate-400 dark:text-slate-500 space-y-3">
+                <UserX className="w-10 h-10 mx-auto text-slate-300 dark:text-slate-600" />
+                <p className="text-sm font-bold text-slate-700 dark:text-slate-300">No passenger accounts found</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 max-w-sm mx-auto">
                   {usersSearchQuery
                     ? `No passenger accounts matching "${usersSearchQuery}". Try clearing search keywords.`
                     : 'No passenger accounts recorded in database.'}
@@ -1928,8 +1928,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-700">
-                  <thead className="bg-slate-50 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                  <thead className="bg-slate-50 dark:bg-slate-900/70 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
                     <tr>
                       <th className="px-6 py-4">Passenger Details</th>
                       <th className="px-6 py-4">Mobile Phone</th>
@@ -1939,7 +1939,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                       <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
                     {filteredUsers.map((u) => {
                       const formattedDate = u.createdAt ? new Date(u.createdAt).toLocaleString('en-US', {
                         dateStyle: 'medium',
@@ -1947,7 +1947,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                       }) : 'N/A';
 
                       return (
-                        <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
+                        <tr key={u.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors">
                           
                           {/* User Name & Email */}
                           <td className="px-6 py-4">
@@ -1956,8 +1956,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                                 {(u.name || 'P').charAt(0).toUpperCase()}
                               </div>
                               <div>
-                                <p className="font-extrabold text-slate-900 text-sm">{u.name || 'Passenger'}</p>
-                                <p className="text-slate-500 font-mono text-[11px] flex items-center gap-1">
+                                <p className="font-extrabold text-slate-900 dark:text-white text-sm">{u.name || 'Passenger'}</p>
+                                <p className="text-slate-500 dark:text-slate-400 font-mono text-[11px] flex items-center gap-1">
                                   <Mail className="w-3 h-3 text-slate-400" /> {u.email || 'N/A'}
                                 </p>
                               </div>
@@ -1965,27 +1965,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                           </td>
 
                           {/* Mobile Phone */}
-                          <td className="px-6 py-4 font-mono font-semibold text-slate-800">
+                          <td className="px-6 py-4 font-mono font-semibold text-slate-800 dark:text-slate-200">
                             {u.phone ? (
                               <span className="flex items-center gap-1.5">
-                                <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                                <Phone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                                 {u.phone}
                               </span>
                             ) : (
-                              <span className="text-slate-400 font-normal italic">Not provided</span>
+                              <span className="text-slate-400 dark:text-slate-500 font-normal italic">Not provided</span>
                             )}
                           </td>
 
                           {/* Role Badge */}
                           <td className="px-6 py-4">
-                            <span className="px-2.5 py-1 rounded-xl text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1 w-fit bg-blue-100 text-blue-700 border border-blue-200">
+                            <span className="px-2.5 py-1 rounded-xl text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1 w-fit bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60">
                               <UserCheck className="w-3 h-3" />
                               Passenger
                             </span>
                           </td>
 
                           {/* Registered Date */}
-                          <td className="px-6 py-4 text-slate-600 font-mono text-[11px]">
+                          <td className="px-6 py-4 text-slate-600 dark:text-slate-400 font-mono text-[11px]">
                             <div className="flex items-center gap-1.5">
                               <Calendar className="w-3.5 h-3.5 text-slate-400" />
                               {formattedDate}
@@ -1996,8 +1996,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                           <td className="px-6 py-4 text-center">
                             <span className={`inline-block px-2.5 py-1 rounded-full font-mono font-extrabold text-xs ${
                               u.totalBookings > 0
-                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                                : 'bg-slate-100 text-slate-500'
+                                ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
+                                : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                             }`}>
                               {u.totalBookings || 0}
                             </span>
@@ -2009,7 +2009,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                               <button
                                 onClick={() => setSelectedUserForModal(u)}
                                 title="View Passenger Account Details"
-                                className="p-2 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-colors cursor-pointer"
+                                className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
@@ -2019,7 +2019,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                                 className={`p-2 rounded-xl transition-all cursor-pointer ${
                                   confirmDeleteUserId === u.id
                                     ? 'bg-rose-600 text-white font-bold text-[10px] animate-pulse px-3'
-                                    : 'bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600'
+                                    : 'bg-slate-100 dark:bg-slate-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400'
                                 }`}
                                 title={confirmDeleteUserId === u.id ? 'Click again to confirm deletion' : 'Delete Account'}
                               >
@@ -2056,44 +2056,44 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               onClick={() => setSlipFilter(slipFilter === 'pending' ? 'all' : 'pending')}
               className={`rounded-2xl p-4 text-center cursor-pointer transition-all border-2 ${
                 slipFilter === 'pending' 
-                  ? 'bg-orange-100 border-orange-500 shadow-md scale-[1.02]' 
-                  : 'bg-orange-50 border-orange-200 hover:border-orange-300'
+                  ? 'bg-orange-100 dark:bg-orange-950/40 border-orange-500 shadow-md scale-[1.02]' 
+                  : 'bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-900/40 hover:border-orange-300 dark:hover:border-orange-800'
               }`}
             >
-              <p className="text-2xl font-black text-orange-600">{paymentSlips.filter(s => s.status === 'pending').length}</p>
-              <p className="text-xs text-orange-700 font-bold mt-1">Pending Review</p>
-              <span className="text-[10px] text-orange-500 font-semibold block mt-0.5">Click to filter</span>
+              <p className="text-2xl font-black text-orange-600 dark:text-orange-400">{paymentSlips.filter(s => s.status === 'pending').length}</p>
+              <p className="text-xs text-orange-700 dark:text-orange-300 font-bold mt-1">Pending Review</p>
+              <span className="text-[10px] text-orange-500 dark:text-orange-400 font-semibold block mt-0.5">Click to filter</span>
             </div>
             <div 
               onClick={() => setSlipFilter(slipFilter === 'approved' ? 'all' : 'approved')}
               className={`rounded-2xl p-4 text-center cursor-pointer transition-all border-2 ${
                 slipFilter === 'approved' 
-                  ? 'bg-emerald-100 border-emerald-500 shadow-md scale-[1.02]' 
-                  : 'bg-emerald-50 border-emerald-200 hover:border-emerald-300'
+                  ? 'bg-emerald-100 dark:bg-emerald-950/40 border-emerald-500 shadow-md scale-[1.02]' 
+                  : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/40 hover:border-emerald-300 dark:hover:border-emerald-800'
               }`}
             >
-              <p className="text-2xl font-black text-emerald-600">{paymentSlips.filter(s => s.status === 'approved').length}</p>
-              <p className="text-xs text-emerald-700 font-bold mt-1">Approved</p>
-              <span className="text-[10px] text-emerald-500 font-semibold block mt-0.5">Click to filter</span>
+              <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{paymentSlips.filter(s => s.status === 'approved').length}</p>
+              <p className="text-xs text-emerald-700 dark:text-emerald-300 font-bold mt-1">Approved</p>
+              <span className="text-[10px] text-emerald-500 dark:text-emerald-400 font-semibold block mt-0.5">Click to filter</span>
             </div>
             <div 
               onClick={() => setSlipFilter(slipFilter === 'rejected' ? 'all' : 'rejected')}
               className={`rounded-2xl p-4 text-center cursor-pointer transition-all border-2 ${
                 slipFilter === 'rejected' 
-                  ? 'bg-red-100 border-red-500 shadow-md scale-[1.02]' 
-                  : 'bg-red-50 border-red-200 hover:border-red-300'
+                  ? 'bg-red-100 dark:bg-red-950/40 border-red-500 shadow-md scale-[1.02]' 
+                  : 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/40 hover:border-red-300 dark:hover:border-red-800'
               }`}
             >
-              <p className="text-2xl font-black text-red-600">{paymentSlips.filter(s => s.status === 'rejected').length}</p>
-              <p className="text-xs text-red-700 font-bold mt-1">Rejected</p>
-              <span className="text-[10px] text-red-500 font-semibold block mt-0.5">Click to filter</span>
+              <p className="text-2xl font-black text-red-600 dark:text-red-400">{paymentSlips.filter(s => s.status === 'rejected').length}</p>
+              <p className="text-xs text-red-700 dark:text-red-300 font-bold mt-1">Rejected</p>
+              <span className="text-[10px] text-red-500 dark:text-red-400 font-semibold block mt-0.5">Click to filter</span>
             </div>
           </div>
 
           {/* Filter Bar and Actions */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-800 p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs">
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-              <span className="text-xs font-bold text-slate-400 mr-1 flex items-center gap-1">
+              <span className="text-xs font-bold text-slate-400 dark:text-slate-400 mr-1 flex items-center gap-1">
                 <Filter className="w-3.5 h-3.5" /> Filter:
               </span>
               {(['all', 'pending', 'approved', 'rejected'] as const).map((filterVal) => {
@@ -2113,13 +2113,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                             ? 'bg-emerald-600 text-white shadow-xs'
                             : filterVal === 'rejected'
                               ? 'bg-red-600 text-white shadow-xs'
-                              : 'bg-slate-800 text-white shadow-xs'
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                              : 'bg-slate-800 dark:bg-blue-600 text-white shadow-xs'
+                        : 'bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300'
                     }`}
                   >
                     <span className="capitalize">{filterVal}</span>
                     <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
-                      isActive ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-700'
+                      isActive ? 'bg-white/25 text-white' : 'bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200'
                     }`}>
                       {count}
                     </span>
@@ -2130,7 +2130,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
 
             <button
               onClick={() => fetchPaymentSlips()}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition-colors self-start sm:self-auto cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 text-xs font-semibold transition-colors self-start sm:self-auto cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               Refresh
@@ -2138,23 +2138,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
           </div>
 
           {slipsLoading ? (
-            <div className="text-center py-12 text-slate-400">
-              <div className="w-8 h-8 border-2 border-slate-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-3" />
+            <div className="text-center py-12 text-slate-400 dark:text-slate-500">
+              <div className="w-8 h-8 border-2 border-slate-200 dark:border-slate-700 border-t-blue-500 rounded-full animate-spin mx-auto mb-3" />
               Loading slips...
             </div>
           ) : filteredSlips.length === 0 ? (
-            <div className="text-center py-12 text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">
+            <div className="text-center py-12 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
               <p className="text-4xl mb-3">💳</p>
-              <p className="text-sm font-semibold">
+              <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
                 {slipFilter === 'all' 
                   ? 'No payment slips yet.' 
                   : `No ${slipFilter} payment slips found.`}
               </p>
-              <p className="text-xs mt-1">Slips will appear here when passengers submit bank transfers.</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Slips will appear here when passengers submit bank transfers.</p>
               {slipFilter !== 'all' && (
                 <button
                   onClick={() => setSlipFilter('all')}
-                  className="mt-3 px-4 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer transition-colors"
+                  className="mt-3 px-4 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold cursor-pointer transition-colors"
                 >
                   Show All Slips
                 </button>
@@ -2165,16 +2165,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               {filteredSlips.map((slip) => (
                 <div
                   key={slip.id}
-                  className={`bg-white rounded-2xl border-2 shadow-xs hover:shadow-md transition-all overflow-hidden flex flex-col justify-between ${
-                    slip.status === 'pending' ? 'border-orange-300' :
-                    slip.status === 'approved' ? 'border-emerald-300' : 'border-red-200'
+                  className={`bg-white dark:bg-slate-800 rounded-2xl border-2 shadow-xs hover:shadow-md transition-all overflow-hidden flex flex-col justify-between ${
+                    slip.status === 'pending' ? 'border-orange-300 dark:border-orange-700/70' :
+                    slip.status === 'approved' ? 'border-emerald-300 dark:border-emerald-700/70' : 'border-red-200 dark:border-red-800/70'
                   }`}
                 >
                   <div className="flex items-stretch gap-4 p-4">
                     {/* Slip thumbnail */}
                     {slip.imageData && (
                       <div
-                        className="w-24 h-24 flex-shrink-0 cursor-pointer rounded-xl overflow-hidden border border-slate-200 hover:border-blue-400 transition-colors flex items-center justify-center bg-slate-50"
+                        className="w-24 h-24 flex-shrink-0 cursor-pointer rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:border-blue-400 transition-colors flex items-center justify-center bg-slate-50 dark:bg-slate-900"
                         onClick={() => setSelectedSlipImage({ src: `data:${slip.imageMime || 'application/pdf'};base64,${slip.imageData}`, pnr: slip.pnr, isPdf: slip.imageMime === 'application/pdf' || slip.imageData.startsWith('JVBERi0') })}
                       >
                         {slip.imageMime === 'application/pdf' || slip.imageData.startsWith('JVBERi0') ? (
@@ -2196,20 +2196,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     <div className="flex-1 space-y-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                          slip.status === 'pending' ? 'bg-orange-100 text-orange-700' :
-                          slip.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                          slip.status === 'pending' ? 'bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300' :
+                          slip.status === 'approved' ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300'
                         }`}>
                           {slip.status.toUpperCase()}
                         </span>
-                        <span className="text-xs font-mono font-bold text-blue-600">{slip.pnr}</span>
+                        <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">{slip.pnr}</span>
                       </div>
-                      <p className="text-base font-bold text-slate-800 truncate">{slip.passengerName}</p>
-                      <p className="text-lg font-extrabold text-slate-900">LKR {Number(slip.amount).toLocaleString()}</p>
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-base font-bold text-slate-800 dark:text-white truncate">{slip.passengerName}</p>
+                      <p className="text-lg font-extrabold text-slate-900 dark:text-white">LKR {Number(slip.amount).toLocaleString()}</p>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500">
                         Submitted: {new Date(slip.uploadedAt).toLocaleString()}
                       </p>
                       {slip.reviewedAt && (
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500">
                           Reviewed: {new Date(slip.reviewedAt).toLocaleString()} by {slip.reviewedBy}
                         </p>
                       )}
@@ -2217,10 +2217,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                   </div>
 
                   {/* Action buttons footer */}
-                  <div className="px-4 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+                  <div className="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-100 dark:border-slate-700 flex items-center justify-end gap-2">
                     <button
                       onClick={() => setSelectedSlipImage({ src: `data:${slip.imageMime || 'application/pdf'};base64,${slip.imageData}`, pnr: slip.pnr, isPdf: slip.imageMime === 'application/pdf' || slip.imageData.startsWith('JVBERi0') })}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" /> View Slip
                     </button>
@@ -2289,9 +2289,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
       {/* ── Modal 1: User Account Details Inspect Modal ── */}
       {selectedUserForModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in-up">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-6 relative overflow-hidden">
+          <div className="bg-white dark:bg-slate-850 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 space-y-6 relative overflow-hidden">
             
-            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+            <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
               <div className="flex items-center gap-3">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-lg shadow-md ${
                   selectedUserForModal.role === 'admin'
@@ -2301,9 +2301,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                   {(selectedUserForModal.name || 'U').charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">{selectedUserForModal.name || 'User'}</h3>
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white">{selectedUserForModal.name || 'User'}</h3>
                   <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
-                    selectedUserForModal.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                    selectedUserForModal.role === 'admin' ? 'bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60' : 'bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60'
                   }`}>
                     {selectedUserForModal.role || 'passenger'} Account
                   </span>
@@ -2312,7 +2312,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
 
               <button
                 onClick={() => setSelectedUserForModal(null)}
-                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors cursor-pointer"
+                className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2320,38 +2320,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
 
             {/* Account Details Box */}
             <div className="space-y-3 text-xs">
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex justify-between items-center">
-                <span className="text-slate-500 font-bold">User Account ID</span>
-                <span className="font-mono font-bold text-slate-800 text-[11px]">{selectedUserForModal.id}</span>
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400 font-bold">User Account ID</span>
+                <span className="font-mono font-bold text-slate-800 dark:text-slate-200 text-[11px]">{selectedUserForModal.id}</span>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex justify-between items-center">
-                <span className="text-slate-500 font-bold">Email Address</span>
-                <span className="font-mono font-bold text-slate-900">{selectedUserForModal.email || 'N/A'}</span>
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400 font-bold">Email Address</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white">{selectedUserForModal.email || 'N/A'}</span>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex justify-between items-center">
-                <span className="text-slate-500 font-bold">Mobile Phone</span>
-                <span className="font-mono font-bold text-slate-900">{selectedUserForModal.phone || 'N/A'}</span>
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400 font-bold">Mobile Phone</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white">{selectedUserForModal.phone || 'N/A'}</span>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex justify-between items-center">
-                <span className="text-slate-500 font-bold">Registration Timestamp</span>
-                <span className="font-mono text-slate-700">
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400 font-bold">Registration Timestamp</span>
+                <span className="font-mono text-slate-700 dark:text-slate-300">
                   {selectedUserForModal.createdAt ? new Date(selectedUserForModal.createdAt).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' }) : 'N/A'}
                 </span>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex justify-between items-center text-emerald-900">
+              <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 flex justify-between items-center text-emerald-900 dark:text-emerald-200">
                 <span className="font-bold">Total Confirmed Bookings</span>
                 <span className="font-mono font-black text-sm">{selectedUserForModal.totalBookings || 0} Tickets</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-700">
               <button
                 onClick={() => setSelectedUserForModal(null)}
-                className="w-full py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
+                className="w-full py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors cursor-pointer"
               >
                 Close Details
               </button>
@@ -2419,16 +2419,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
           onClick={() => setSelectedSlipImage(null)}
         >
           <div
-            className="bg-white rounded-2xl p-4 max-w-2xl w-full shadow-2xl"
+            className="bg-white dark:bg-slate-850 rounded-2xl p-4 max-w-2xl w-full shadow-2xl border border-slate-200 dark:border-slate-700"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-3">
-              <p className="font-bold text-slate-800">Slip — {selectedSlipImage.pnr}</p>
+              <p className="font-bold text-slate-800 dark:text-white">Slip — {selectedSlipImage.pnr}</p>
               <div className="flex items-center gap-2">
                 <a
                   href={selectedSlipImage.src}
                   download={`slip_${selectedSlipImage.pnr}.${selectedSlipImage.src.includes('application/pdf') || selectedSlipImage.isPdf ? 'pdf' : 'jpg'}`}
-                  className="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-bold transition-colors inline-flex items-center gap-1"
+                  className="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 text-xs font-bold transition-colors inline-flex items-center gap-1"
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -2436,7 +2436,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                 </a>
                 <button
                   onClick={() => setSelectedSlipImage(null)}
-                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600"
+                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -2446,13 +2446,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               <iframe
                 src={selectedSlipImage.src}
                 title="Payment Slip PDF"
-                className="w-full rounded-xl border border-slate-200 h-[70vh]"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 h-[70vh]"
               />
             ) : (
               <img
                 src={selectedSlipImage.src}
                 alt="Payment slip full view"
-                className="w-full rounded-xl border border-slate-200 max-h-[70vh] object-contain mx-auto"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 max-h-[70vh] object-contain mx-auto"
               />
             )}
           </div>

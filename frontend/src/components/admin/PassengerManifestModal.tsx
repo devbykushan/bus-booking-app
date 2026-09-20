@@ -99,23 +99,23 @@ export const PassengerManifestModal: React.FC<Props> = ({ route, bookings, onClo
         }
       `}</style>
 
-      <div className="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[92vh] flex flex-col">
+      <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto max-h-[92vh] flex flex-col">
         {/* Modal Top Action Bar (hidden in print) */}
-        <div className="no-print p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
+        <div className="no-print p-4 sm:p-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/90 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+            <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold">
               <Bus className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-extrabold text-slate-900 text-base sm:text-lg">Passenger Travel Manifest</h3>
-              <p className="text-xs text-slate-500">Official passenger boarding register & printable sheet</p>
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg">Passenger Travel Manifest</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Official passenger boarding register & printable sheet</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handleExportCsv}
-              className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Export CSV</span>
@@ -129,7 +129,7 @@ export const PassengerManifestModal: React.FC<Props> = ({ route, bookings, onClo
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -139,23 +139,23 @@ export const PassengerManifestModal: React.FC<Props> = ({ route, bookings, onClo
         {/* Scrollable Manifest Document Content */}
         <div className="overflow-y-auto p-4 sm:p-8 space-y-6" id="printable-manifest">
           {/* Official Document Header */}
-          <div className="border-b-2 border-slate-800 pb-5">
+          <div className="border-b-2 border-slate-800 dark:border-slate-700 pb-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <span className="text-[10px] font-black tracking-widest uppercase px-2.5 py-0.5 rounded bg-slate-900 text-white">
+                <span className="text-[10px] font-black tracking-widest uppercase px-2.5 py-0.5 rounded bg-slate-900 dark:bg-slate-800 text-white border border-slate-700/50">
                   OFFICIAL PASSENGER MANIFEST
                 </span>
-                <h2 className="text-2xl font-black text-slate-900 mt-1">
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-1">
                   {route.operatorName || 'National Express Transit'}
                 </h2>
-                <p className="text-sm font-semibold text-slate-600 flex items-center gap-2 mt-0.5">
-                  <span>Bus No: <strong className="font-mono text-slate-900">{route.busNumber}</strong></span>
+                <p className="text-sm font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-2 mt-0.5">
+                  <span>Bus No: <strong className="font-mono text-slate-900 dark:text-white">{route.busNumber}</strong></span>
                   <span>•</span>
-                  <span>Type: <strong className="text-slate-900">{route.busType}</strong></span>
+                  <span>Type: <strong className="text-slate-900 dark:text-white">{route.busType}</strong></span>
                 </p>
               </div>
 
-              <div className="text-left sm:text-right text-xs space-y-1 text-slate-600 bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-xl border sm:border-0 border-slate-200">
+              <div className="text-left sm:text-right text-xs space-y-1 text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-850 sm:bg-transparent sm:dark:bg-transparent p-3 sm:p-0 rounded-xl border sm:border-0 border-slate-200 dark:border-slate-700">
                 <p><strong>Route:</strong> {route.origin} → {route.destination}</p>
                 <p><strong>Departure:</strong> {route.departureTime} ({route.departureDate || 'Daily Service'})</p>
                 <p><strong>Printed On:</strong> {new Date().toLocaleString()}</p>
@@ -164,28 +164,28 @@ export const PassengerManifestModal: React.FC<Props> = ({ route, bookings, onClo
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 dark:bg-slate-850 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs">
             <div>
-              <span className="text-slate-500 font-bold block">Capacity & Load</span>
-              <span className="text-base font-black text-slate-900">
-                {bookedSeatsCount} / {totalSeats} <span className="text-xs font-normal text-slate-500">Seats ({Math.round((bookedSeatsCount / totalSeats) * 100)}%)</span>
+              <span className="text-slate-500 dark:text-slate-400 font-bold block">Capacity & Load</span>
+              <span className="text-base font-black text-slate-900 dark:text-white">
+                {bookedSeatsCount} / {totalSeats} <span className="text-xs font-normal text-slate-500 dark:text-slate-400">Seats ({Math.round((bookedSeatsCount / totalSeats) * 100)}%)</span>
               </span>
             </div>
             <div>
-              <span className="text-slate-500 font-bold block">Passenger Gender</span>
-              <span className="text-base font-black text-slate-900">
+              <span className="text-slate-500 dark:text-slate-400 font-bold block">Passenger Gender</span>
+              <span className="text-base font-black text-slate-900 dark:text-white">
                 ♂ {maleCount} <span className="text-slate-400 font-normal">|</span> ♀ {femaleCount}
               </span>
             </div>
             <div>
-              <span className="text-slate-500 font-bold block">Total Fare Revenue</span>
-              <span className="text-base font-black text-emerald-600">
+              <span className="text-slate-500 dark:text-slate-400 font-bold block">Total Fare Revenue</span>
+              <span className="text-base font-black text-emerald-600 dark:text-emerald-400">
                 LKR {totalRevenue.toLocaleString()}
               </span>
             </div>
             <div>
-              <span className="text-slate-500 font-bold block">Available Vacant</span>
-              <span className="text-base font-black text-blue-600">
+              <span className="text-slate-500 dark:text-slate-400 font-bold block">Available Vacant</span>
+              <span className="text-base font-black text-blue-600 dark:text-blue-400">
                 {totalSeats - bookedSeatsCount} Seats
               </span>
             </div>
@@ -193,12 +193,12 @@ export const PassengerManifestModal: React.FC<Props> = ({ route, bookings, onClo
 
           {/* Manifest Passenger Table */}
           {activeBookings.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 border border-dashed border-slate-200 rounded-2xl">
-              <Users className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+            <div className="py-12 text-center text-slate-400 dark:text-slate-500 border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
+              <Users className="w-10 h-10 mx-auto text-slate-300 dark:text-slate-600 mb-2" />
               <p className="text-sm font-bold">No active bookings recorded for this schedule.</p>
             </div>
           ) : (
-            <div className="border border-slate-300 rounded-xl overflow-hidden shadow-2xs">
+            <div className="border border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden shadow-2xs">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-900 text-white font-extrabold uppercase text-[10px] tracking-wider">
@@ -213,7 +213,7 @@ export const PassengerManifestModal: React.FC<Props> = ({ route, bookings, onClo
                     <th className="p-2.5 text-center w-24">Boarded?</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200 font-medium text-slate-700">
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-700 font-medium text-slate-700 dark:text-slate-300">
                   {activeBookings.map((b, idx) => {
                     const seatNumsList = (b.seatNumbers && b.seatNumbers.length > 0)
                       ? b.seatNumbers
@@ -226,25 +226,25 @@ export const PassengerManifestModal: React.FC<Props> = ({ route, bookings, onClo
                     const boarding = b.boardingPoint?.name || route.origin;
 
                     return (
-                      <tr key={b.id || b.pnr} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/70'}>
-                        <td className="p-2 text-center font-bold text-slate-500 border-r border-slate-200">{idx + 1}</td>
-                        <td className="p-2 text-center font-mono font-black text-slate-900 border-r border-slate-200 bg-blue-50/30">
+                      <tr key={b.id || b.pnr} className={idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/70 dark:bg-slate-850/60'}>
+                        <td className="p-2 text-center font-bold text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-700">{idx + 1}</td>
+                        <td className="p-2 text-center font-mono font-black text-slate-900 dark:text-blue-300 border-r border-slate-200 dark:border-slate-700 bg-blue-50/30 dark:bg-blue-950/20">
                           {seatNumsList.join(', ')}
                         </td>
-                        <td className="p-2 font-bold text-slate-900 border-r border-slate-200">
+                        <td className="p-2 font-bold text-slate-900 dark:text-white border-r border-slate-200 dark:border-slate-700">
                           {name}
                         </td>
-                        <td className="p-2 text-center border-r border-slate-200 capitalize">
+                        <td className="p-2 text-center border-r border-slate-200 dark:border-slate-700 capitalize">
                           {gender === 'female' ? '♀ F' : gender === 'male' ? '♂ M' : '-'}
                         </td>
-                        <td className="p-2 font-mono text-slate-600 border-r border-slate-200">{phone}</td>
-                        <td className="p-2 border-r border-slate-200">{boarding}</td>
-                        <td className="p-2 font-mono font-bold text-blue-600 border-r border-slate-200">{b.pnr}</td>
-                        <td className="p-2 text-right font-mono font-bold text-slate-900 border-r border-slate-200">
+                        <td className="p-2 font-mono text-slate-600 dark:text-slate-300 border-r border-slate-200 dark:border-slate-700">{phone}</td>
+                        <td className="p-2 border-r border-slate-200 dark:border-slate-700">{boarding}</td>
+                        <td className="p-2 font-mono font-bold text-blue-600 dark:text-blue-400 border-r border-slate-200 dark:border-slate-700">{b.pnr}</td>
+                        <td className="p-2 text-right font-mono font-bold text-slate-900 dark:text-white border-r border-slate-200 dark:border-slate-700">
                           {(b.totalFare || 0).toLocaleString()}
                         </td>
                         <td className="p-2 text-center">
-                          <div className="w-5 h-5 border-2 border-slate-400 rounded mx-auto" />
+                          <div className="w-5 h-5 border-2 border-slate-400 dark:border-slate-500 rounded mx-auto" />
                         </td>
                       </tr>
                     );
@@ -255,21 +255,21 @@ export const PassengerManifestModal: React.FC<Props> = ({ route, bookings, onClo
           )}
 
           {/* Official Signatures Section for Bus Crew */}
-          <div className="pt-8 border-t border-slate-300 grid grid-cols-2 sm:grid-cols-3 gap-6 text-xs text-slate-600">
+          <div className="pt-8 border-t border-slate-300 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-3 gap-6 text-xs text-slate-600 dark:text-slate-400">
             <div className="space-y-10">
-              <p className="font-bold text-slate-800">Conductor In-Charge:</p>
-              <div className="border-b border-dashed border-slate-400 w-44" />
-              <p className="text-[11px] text-slate-400">Name & Signature</p>
+              <p className="font-bold text-slate-800 dark:text-slate-200">Conductor In-Charge:</p>
+              <div className="border-b border-dashed border-slate-400 dark:border-slate-600 w-44" />
+              <p className="text-[11px] text-slate-400 dark:text-slate-500">Name & Signature</p>
             </div>
             <div className="space-y-10">
-              <p className="font-bold text-slate-800">Driver / Co-Driver:</p>
-              <div className="border-b border-dashed border-slate-400 w-44" />
-              <p className="text-[11px] text-slate-400">Name & Signature</p>
+              <p className="font-bold text-slate-800 dark:text-slate-200">Driver / Co-Driver:</p>
+              <div className="border-b border-dashed border-slate-400 dark:border-slate-600 w-44" />
+              <p className="text-[11px] text-slate-400 dark:text-slate-500">Name & Signature</p>
             </div>
             <div className="space-y-10 col-span-2 sm:col-span-1">
-              <p className="font-bold text-slate-800">Station Inspector Stamp:</p>
-              <div className="border-b border-dashed border-slate-400 w-44" />
-              <p className="text-[11px] text-slate-400">Date & Seal</p>
+              <p className="font-bold text-slate-800 dark:text-slate-200">Station Inspector Stamp:</p>
+              <div className="border-b border-dashed border-slate-400 dark:border-slate-600 w-44" />
+              <p className="text-[11px] text-slate-400 dark:text-slate-500">Date & Seal</p>
             </div>
           </div>
         </div>

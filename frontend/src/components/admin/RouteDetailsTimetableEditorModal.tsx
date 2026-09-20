@@ -440,7 +440,7 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in-up">
-      <div className="bg-white rounded-3xl max-w-4xl w-full border border-slate-200 shadow-2xl flex flex-col overflow-hidden max-h-[90vh] my-auto animate-pop-in">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden max-h-[90vh] my-auto animate-pop-in">
         
         {/* Header */}
         <div className="p-5 sm:p-6 bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 text-white flex items-center justify-between relative overflow-hidden flex-shrink-0">
@@ -463,21 +463,21 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
 
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors relative z-10"
+            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors relative z-10 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-slate-200 bg-slate-50 px-6 pt-3 gap-2 flex-shrink-0">
+        <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 px-6 pt-3 gap-2 flex-shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab('details')}
-            className={`px-4 py-2.5 rounded-t-xl font-bold text-xs flex items-center gap-2 transition-all border-b-2 ${
+            className={`px-4 py-2.5 rounded-t-xl font-bold text-xs flex items-center gap-2 transition-all border-b-2 cursor-pointer ${
               activeTab === 'details'
-                ? 'bg-white text-blue-600 border-blue-600 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 border-transparent'
+                ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 border-blue-600 shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-transparent'
             }`}
           >
             <Info className="w-4 h-4" />
@@ -487,10 +487,10 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
           <button
             type="button"
             onClick={() => setActiveTab('timetable')}
-            className={`px-4 py-2.5 rounded-t-xl font-bold text-xs flex items-center gap-2 transition-all border-b-2 ${
+            className={`px-4 py-2.5 rounded-t-xl font-bold text-xs flex items-center gap-2 transition-all border-b-2 cursor-pointer ${
               activeTab === 'timetable'
-                ? 'bg-white text-indigo-600 border-indigo-600 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 border-transparent'
+                ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-indigo-600 shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-transparent'
             }`}
           >
             <Clock className="w-4 h-4" />
@@ -500,10 +500,10 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
           <button
             type="button"
             onClick={() => setActiveTab('preview')}
-            className={`px-4 py-2.5 rounded-t-xl font-bold text-xs flex items-center gap-2 transition-all border-b-2 ${
+            className={`px-4 py-2.5 rounded-t-xl font-bold text-xs flex items-center gap-2 transition-all border-b-2 cursor-pointer ${
               activeTab === 'preview'
-                ? 'bg-white text-emerald-600 border-emerald-600 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 border-transparent'
+                ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 border-emerald-600 shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-transparent'
             }`}
           >
             <Eye className="w-4 h-4" />
@@ -513,13 +513,13 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
 
         {/* Alerts / Error & Success */}
         {errorMessage && (
-          <div className="mx-6 mt-4 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center gap-2 animate-shake">
+          <div className="mx-6 mt-4 p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-xs font-bold flex items-center gap-2 animate-shake">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{errorMessage}</span>
           </div>
         )}
         {successMessage && (
-          <div className="mx-6 mt-4 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-2">
+          <div className="mx-6 mt-4 p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2">
             <CheckCircle className="w-4 h-4 flex-shrink-0" />
             <span>{successMessage}</span>
           </div>
@@ -539,19 +539,19 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                 
                 {/* Operator Name */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Operator Fleet Name</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Operator Fleet Name</label>
                   <input
                     type="text"
                     value={operatorName}
                     onChange={(e) => setOperatorName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                     placeholder="Dewmina Super Line"
                   />
                 </div>
 
                 {/* Bus Number */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
                     <span>Bus Reg. Number</span>
                     <span className="text-[10px] text-slate-400">Max 4 digits (SL Plate)</span>
                   </label>
@@ -559,14 +559,14 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                     type="text"
                     value={busNumber}
                     onChange={(e) => setBusNumber(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono font-bold focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                     placeholder="ND-7788"
                   />
                 </div>
 
                 {/* Operator Rating */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Operator Rating (1.0 - 5.0)</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Operator Rating (1.0 - 5.0)</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -575,9 +575,9 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                       max="5.0"
                       value={operatorRating}
                       onChange={(e) => setOperatorRating(Number(e.target.value))}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold font-mono focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                     />
-                    <div className="px-3 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold flex items-center gap-1 flex-shrink-0">
+                    <div className="px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 text-xs font-bold flex items-center gap-1 flex-shrink-0">
                       <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> {operatorRating.toFixed(1)}
                     </div>
                   </div>
@@ -585,7 +585,7 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
 
                 {/* Starting Price */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Base Ticket Fare (LKR)</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Base Ticket Fare (LKR)</label>
                   <input
                     type="number"
                     step="any"
@@ -593,50 +593,50 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                     max="50000"
                     value={priceStarting}
                     onChange={(e) => setPriceStarting(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-blue-700 dark:text-blue-400 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                     placeholder="2670"
                   />
                 </div>
 
                 {/* Origin */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Origin City</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Origin City</label>
                   <input
                     type="text"
                     value={origin}
                     onChange={(e) => setOrigin(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                     placeholder="Monaragala"
                   />
                 </div>
 
                 {/* Destination */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Destination City</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Destination City</label>
                   <input
                     type="text"
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                     placeholder="Colombo"
                   />
                 </div>
 
                 {/* Journey Duration */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Estimated Duration</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Estimated Duration</label>
                   <input
                     type="text"
                     value={duration}
                     onChange={(e) => setDuration(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                     placeholder="6h 00m"
                   />
                 </div>
 
                 {/* Bus Capacity */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Bus Capacity (Seats)</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Bus Capacity (Seats)</label>
                   <input
                     type="number"
                     min="10"
@@ -644,7 +644,7 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                     step="1"
                     value={capacity}
                     onChange={(e) => setCapacity(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                     placeholder="49"
                   />
                 </div>
@@ -652,16 +652,16 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                 {/* Bus Class */}
                 <div className="space-y-2 sm:col-span-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-slate-700">Bus Class & Service Profile</label>
-                    <span className="text-[11px] font-semibold text-blue-600">Auto-syncs price, layout & amenities</span>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Bus Class & Service Profile</label>
+                    <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400">Auto-syncs price, layout & amenities</span>
                   </div>
                   <select
                     value={busType}
                     onChange={(e) => handleBusTypeChange(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-slate-900 shadow-xs"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold focus:ring-2 focus:ring-blue-500 focus:outline-hidden bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs cursor-pointer"
                   >
                     {BUS_CLASSES.map((bc) => (
-                      <option key={bc.id} value={bc.id}>
+                      <option key={bc.id} value={bc.id} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
                         {bc.label}
                       </option>
                     ))}
@@ -669,19 +669,19 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
 
                   {/* Auto-update Notice Banner */}
                   {classUpdateNotice && (
-                    <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-xs font-semibold flex items-center gap-2 animate-fade-in">
-                      <Zap className="w-4 h-4 text-blue-600 flex-shrink-0 animate-pulse" />
+                    <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-xs font-semibold flex items-center gap-2 animate-fade-in">
+                      <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 animate-pulse" />
                       <span>{classUpdateNotice}</span>
                     </div>
                   )}
 
                   {/* Selected Bus Class Profile Card */}
                   {BUS_CLASS_PRESETS[busType] && (
-                    <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-50 to-blue-50/50 border border-slate-200 space-y-2.5">
+                    <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-50 to-blue-50/50 dark:from-slate-850 dark:to-slate-800 border border-slate-200 dark:border-slate-700 space-y-2.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-base">{BUS_CLASS_PRESETS[busType].icon}</span>
-                          <span className="text-xs font-bold text-slate-800">{BUS_CLASS_PRESETS[busType].shortName}</span>
+                          <span className="text-xs font-bold text-slate-800 dark:text-white">{BUS_CLASS_PRESETS[busType].shortName}</span>
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${BUS_CLASS_PRESETS[busType].badgeColor}`}>
                             {BUS_CLASS_PRESETS[busType].badge}
                           </span>
@@ -689,29 +689,29 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                         <button
                           type="button"
                           onClick={() => applyClassDefaults(busType)}
-                          className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-blue-400 text-slate-700 hover:text-blue-600 text-[11px] font-bold flex items-center gap-1 shadow-xs transition-all"
+                          className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-400 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 text-[11px] font-bold flex items-center gap-1 shadow-xs transition-all cursor-pointer"
                           title="Reset price, duration, and amenities to this class's defaults"
                         >
                           <RefreshCw className="w-3 h-3" /> Re-apply Defaults
                         </button>
                       </div>
 
-                      <p className="text-[11px] text-slate-600 leading-relaxed">
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
                         {BUS_CLASS_PRESETS[busType].description}
                       </p>
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-                        <div className="p-2 rounded-xl bg-white border border-slate-200/80">
+                        <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700">
                           <span className="text-[10px] text-slate-400 font-medium block">Capacity</span>
-                          <span className="text-xs font-bold text-slate-800 font-mono">{capacity || BUS_CLASS_PRESETS[busType]?.seatsCount || 49} Seats</span>
+                          <span className="text-xs font-bold text-slate-800 dark:text-white font-mono">{capacity || BUS_CLASS_PRESETS[busType]?.seatsCount || 49} Seats</span>
                         </div>
-                        <div className="p-2 rounded-xl bg-white border border-slate-200/80">
+                        <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700">
                           <span className="text-[10px] text-slate-400 font-medium block">Default Fare</span>
-                          <span className="text-xs font-bold text-blue-600 font-mono">LKR {BUS_CLASS_PRESETS[busType].defaultPrice}</span>
+                          <span className="text-xs font-bold text-blue-600 dark:text-blue-400 font-mono">LKR {BUS_CLASS_PRESETS[busType].defaultPrice}</span>
                         </div>
-                        <div className="p-2 rounded-xl bg-white border border-slate-200/80">
+                        <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700">
                           <span className="text-[10px] text-slate-400 font-medium block">Duration</span>
-                          <span className="text-xs font-bold text-slate-800 font-mono">{BUS_CLASS_PRESETS[busType].defaultDuration}</span>
+                          <span className="text-xs font-bold text-slate-800 dark:text-white font-mono">{BUS_CLASS_PRESETS[busType].defaultDuration}</span>
                         </div>
                       </div>
                     </div>
@@ -721,12 +721,12 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
               </div>
 
               {/* Luxury Amenities Management */}
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                     <Zap className="w-4 h-4 text-amber-500" /> Premium Onboard Amenities ({amenities.length})
                   </h4>
-                  <span className="text-[11px] text-slate-500">Click to toggle amenities for passengers</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Click to toggle amenities for passengers</span>
                 </div>
 
                 {/* Preset Chips */}
@@ -738,13 +738,13 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                         key={item}
                         type="button"
                         onClick={() => toggleAmenity(item)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-300'
-                            : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
+                            ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-300 dark:ring-blue-900'
+                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                         }`}
                       >
-                        <CheckCircle className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-slate-300'}`} />
+                        <CheckCircle className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-slate-300 dark:text-slate-600'}`} />
                         <span>{item}</span>
                       </button>
                     );
@@ -752,7 +752,7 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                 </div>
 
                 {/* Add Custom Amenity Tag */}
-                <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
+                <div className="flex items-center gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
                   <input
                     type="text"
                     value={customAmenityInput}
@@ -764,12 +764,12 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                       }
                     }}
                     placeholder="Add custom amenity (e.g. Refreshment Box, USB-C 65W)..."
-                    className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                   />
                   <button
                     type="button"
                     onClick={handleAddCustomAmenity}
-                    className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm"
+                    className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" /> Add Tag
                   </button>
@@ -786,42 +786,42 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
             <div className="space-y-6">
               
               {/* Departure & Arrival Time Overview */}
-              <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-indigo-950 flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-indigo-600" /> Main Departure Time
+                  <label className="text-xs font-bold text-indigo-950 dark:text-indigo-300 flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" /> Main Departure Time
                   </label>
                   <input
                     type="text"
                     value={departureTime}
                     onChange={(e) => setDepartureTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-indigo-200 text-xs font-mono font-bold bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-indigo-200 dark:border-indigo-800 text-xs font-mono font-bold bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                     placeholder="06:30 AM"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-indigo-950 flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-indigo-600" /> Estimated Arrival Time
+                  <label className="text-xs font-bold text-indigo-950 dark:text-indigo-300 flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" /> Estimated Arrival Time
                   </label>
                   <input
                     type="text"
                     value={arrivalTime}
                     onChange={(e) => setArrivalTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-indigo-200 text-xs font-mono font-bold bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-indigo-200 dark:border-indigo-800 text-xs font-mono font-bold bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                     placeholder="12:30 PM"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-indigo-950 flex items-center gap-1">
-                    <Navigation className="w-3.5 h-3.5 text-indigo-600" /> Trip Duration
+                  <label className="text-xs font-bold text-indigo-950 dark:text-indigo-300 flex items-center gap-1">
+                    <Navigation className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" /> Trip Duration
                   </label>
                   <input
                     type="text"
                     value={duration}
                     onChange={(e) => setDuration(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-indigo-200 text-xs font-bold bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-indigo-200 dark:border-indigo-800 text-xs font-bold bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                     placeholder="6h 00m"
                   />
                 </div>
@@ -830,13 +830,13 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
               {/* 1. Boarding Stops List */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Boarding Stops / Pick-up Points ({boardingPoints.length})
                   </h4>
                   <button
                     type="button"
                     onClick={handleAddBoardingPoint}
-                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-all"
+                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-all cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" /> Add Boarding Stop
                   </button>
@@ -844,18 +844,18 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
 
                 <div className="space-y-3">
                   {boardingPoints.map((bp, idx) => (
-                    <div key={bp.id || idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:border-emerald-300 transition-colors space-y-3">
+                    <div key={bp.id || idx} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-500/50 transition-colors space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold flex items-center justify-center">
+                          <span className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold flex items-center justify-center">
                             {idx + 1}
                           </span>
-                          <span className="text-xs font-bold text-slate-700">Pickup Location #{idx + 1}</span>
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Pickup Location #{idx + 1}</span>
                         </div>
                         <button
                           type="button"
                           onClick={() => handleRemoveBoardingPoint(idx)}
-                          className="p-1 rounded-lg text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition-colors"
+                          className="p-1 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:text-rose-700 dark:hover:text-rose-400 transition-colors cursor-pointer"
                           title="Remove stop"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -864,58 +864,58 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
 
                       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                         <div className="sm:col-span-5 space-y-1">
-                          <label className="text-[11px] font-semibold text-slate-500">Stop Name</label>
+                          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Stop Name</label>
                           <input
                             type="text"
                             value={bp.name}
                             onChange={(e) => handleUpdateBoardingPoint(idx, 'name', e.target.value)}
-                            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                             placeholder="Monaragala Main Station"
                           />
                         </div>
 
                         <div className="sm:col-span-3 space-y-1">
-                          <label className="text-[11px] font-semibold text-slate-500">Pickup Time</label>
+                          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Pickup Time</label>
                           <input
                             type="text"
                             value={bp.time}
                             onChange={(e) => handleUpdateBoardingPoint(idx, 'time', e.target.value)}
-                            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono font-bold bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-mono font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                             placeholder="06:30 AM"
                           />
                         </div>
 
                         <div className="sm:col-span-4 space-y-1">
-                          <label className="text-[11px] font-semibold text-slate-500">Landmark / Station Gate</label>
+                          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Landmark / Station Gate</label>
                           <input
                             type="text"
                             value={bp.landmark}
                             onChange={(e) => handleUpdateBoardingPoint(idx, 'landmark', e.target.value)}
-                            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                             placeholder="Platform 1 Gate"
                           />
                         </div>
 
                         <div className="sm:col-span-6 space-y-1">
-                          <label className="text-[11px] font-semibold text-slate-500">Latitude (GPS)</label>
+                          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Latitude (GPS)</label>
                           <input
                             type="number"
                             step="0.0001"
                             value={bp.lat || 0}
                             onChange={(e) => handleUpdateBoardingPoint(idx, 'lat', Number(e.target.value))}
-                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-mono bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                             placeholder="6.8722"
                           />
                         </div>
 
                         <div className="sm:col-span-6 space-y-1">
-                          <label className="text-[11px] font-semibold text-slate-500">Longitude (GPS)</label>
+                          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Longitude (GPS)</label>
                           <input
                             type="number"
                             step="0.0001"
                             value={bp.lng || 0}
                             onChange={(e) => handleUpdateBoardingPoint(idx, 'lng', Number(e.target.value))}
-                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-mono bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                             placeholder="81.3507"
                           />
                         </div>
@@ -926,15 +926,15 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
               </div>
 
               {/* 2. Dropping Stops List */}
-              <div className="space-y-3 pt-4 border-t border-slate-200">
+              <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Dropping Stops / Drop-off Points ({dropPoints.length})
                   </h4>
                   <button
                     type="button"
                     onClick={handleAddDropPoint}
-                    className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-all"
+                    className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-all cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" /> Add Dropping Stop
                   </button>
@@ -942,18 +942,18 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
 
                 <div className="space-y-3">
                   {dropPoints.map((dp, idx) => (
-                    <div key={dp.id || idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-colors space-y-3">
+                    <div key={dp.id || idx} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-colors space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-[11px] font-bold flex items-center justify-center">
+                          <span className="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400 text-[11px] font-bold flex items-center justify-center">
                             {idx + 1}
                           </span>
-                          <span className="text-xs font-bold text-slate-700">Drop-off Location #{idx + 1}</span>
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Drop-off Location #{idx + 1}</span>
                         </div>
                         <button
                           type="button"
                           onClick={() => handleRemoveDropPoint(idx)}
-                          className="p-1 rounded-lg text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition-colors"
+                          className="p-1 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:text-rose-700 dark:hover:text-rose-400 transition-colors cursor-pointer"
                           title="Remove stop"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -962,58 +962,58 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
 
                       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                         <div className="sm:col-span-5 space-y-1">
-                          <label className="text-[11px] font-semibold text-slate-500">Stop Name</label>
+                          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Stop Name</label>
                           <input
                             type="text"
                             value={dp.name}
                             onChange={(e) => handleUpdateDropPoint(idx, 'name', e.target.value)}
-                            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                             placeholder="Colombo Fort Terminal"
                           />
                         </div>
 
                         <div className="sm:col-span-3 space-y-1">
-                          <label className="text-[11px] font-semibold text-slate-500">Drop-off Time</label>
+                          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Drop-off Time</label>
                           <input
                             type="text"
                             value={dp.time}
                             onChange={(e) => handleUpdateDropPoint(idx, 'time', e.target.value)}
-                            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono font-bold bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-mono font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                             placeholder="12:30 PM"
                           />
                         </div>
 
                         <div className="sm:col-span-4 space-y-1">
-                          <label className="text-[11px] font-semibold text-slate-500">Landmark / Drop Bay</label>
+                          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Landmark / Drop Bay</label>
                           <input
                             type="text"
                             value={dp.landmark}
                             onChange={(e) => handleUpdateDropPoint(idx, 'landmark', e.target.value)}
-                            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                             placeholder="Main Passenger Gate"
                           />
                         </div>
 
                         <div className="sm:col-span-6 space-y-1">
-                          <label className="text-[11px] font-semibold text-slate-500">Latitude (GPS)</label>
+                          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Latitude (GPS)</label>
                           <input
                             type="number"
                             step="0.0001"
                             value={dp.lat || 0}
                             onChange={(e) => handleUpdateDropPoint(idx, 'lat', Number(e.target.value))}
-                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-mono bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                             placeholder="6.9344"
                           />
                         </div>
 
                         <div className="sm:col-span-6 space-y-1">
-                          <label className="text-[11px] font-semibold text-slate-500">Longitude (GPS)</label>
+                          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Longitude (GPS)</label>
                           <input
                             type="number"
                             step="0.0001"
                             value={dp.lng || 0}
                             onChange={(e) => handleUpdateDropPoint(idx, 'lng', Number(e.target.value))}
-                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-mono bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                             placeholder="79.8510"
                           />
                         </div>
@@ -1050,14 +1050,14 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
               </div>
 
               {/* Amenities Grid Preview */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                <h5 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 space-y-3">
+                <h5 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                   <Zap className="w-4 h-4 text-amber-500" /> Active Amenities
                 </h5>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {amenities.map((item, idx) => (
-                    <div key={idx} className="p-2.5 rounded-xl bg-white border border-slate-200 text-xs font-medium text-slate-700 flex items-center gap-2 shadow-xs">
-                      <CheckCircle className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                    <div key={idx} className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2 shadow-xs">
+                      <CheckCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                       <span className="truncate">{item}</span>
                     </div>
                   ))}
@@ -1066,18 +1066,18 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
 
               {/* Timetable Stops Preview */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100 space-y-3">
-                  <h5 className="text-xs font-bold text-emerald-900 uppercase tracking-wider flex items-center gap-1.5">
+                <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 space-y-3">
+                  <h5 className="text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Pick-up Stops ({boardingPoints.length})
                   </h5>
                   <div className="space-y-2">
                     {boardingPoints.map((bp, idx) => (
-                      <div key={idx} className="p-2.5 rounded-xl bg-white border border-emerald-200 text-xs flex items-center justify-between">
+                      <div key={idx} className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-900/60 text-xs flex items-center justify-between">
                         <div>
-                          <p className="font-bold text-slate-800">{bp.name}</p>
+                          <p className="font-bold text-slate-800 dark:text-slate-100">{bp.name}</p>
                           <p className="text-[10px] text-slate-400">{bp.landmark}</p>
                         </div>
-                        <span className="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                        <span className="font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded">
                           {bp.time}
                         </span>
                       </div>
@@ -1085,18 +1085,18 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 space-y-3">
-                  <h5 className="text-xs font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-1.5">
+                <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 space-y-3">
+                  <h5 className="text-xs font-bold text-indigo-950 dark:text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Drop-off Stops ({dropPoints.length})
                   </h5>
                   <div className="space-y-2">
                     {dropPoints.map((dp, idx) => (
-                      <div key={idx} className="p-2.5 rounded-xl bg-white border border-indigo-200 text-xs flex items-center justify-between">
+                      <div key={idx} className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-900/60 text-xs flex items-center justify-between">
                         <div>
-                          <p className="font-bold text-slate-800">{dp.name}</p>
+                          <p className="font-bold text-slate-800 dark:text-slate-100">{dp.name}</p>
                           <p className="text-[10px] text-slate-400">{dp.landmark}</p>
                         </div>
-                        <span className="font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">
+                        <span className="font-mono font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded">
                           {dp.time}
                         </span>
                       </div>
@@ -1111,9 +1111,9 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 sm:p-5 border-t border-slate-200 bg-slate-50 flex items-center justify-between flex-shrink-0">
+        <div className="p-4 sm:p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
               {boardingPoints.length} Boarding Stops • {dropPoints.length} Drop Stops • {amenities.length} Amenities
             </span>
           </div>
@@ -1122,7 +1122,7 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200 transition-colors"
+              className="px-5 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
             >
               Cancel
             </button>
@@ -1130,7 +1130,7 @@ export const RouteDetailsTimetableEditorModal: React.FC<RouteDetailsTimetableEdi
               type="button"
               onClick={handleSave}
               disabled={isSaving}
-              className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all hover:scale-105 flex items-center gap-2 disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all hover:scale-105 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {isSaving ? (
                 <>

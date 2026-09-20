@@ -152,7 +152,7 @@ export const AdminLoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden font-sans select-none antialiased">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden font-sans select-none antialiased">
       {/* ── Ambient Liquid Color Fields (Refracted through the glass) ── */}
       <div className="absolute -top-32 -left-20 w-[480px] h-[480px] rounded-full bg-gradient-to-tr from-blue-400/40 via-sky-300/30 to-indigo-400/35 blur-[100px] pointer-events-none animate-orb-1" />
       <div className="absolute -bottom-32 -right-20 w-[520px] h-[520px] rounded-full bg-gradient-to-bl from-indigo-400/35 via-purple-300/25 to-blue-500/30 blur-[110px] pointer-events-none animate-orb-2" />
@@ -170,33 +170,33 @@ export const AdminLoginPage: React.FC = () => {
           }
           setCurrentView('passenger-search');
         }}
-        className="absolute top-6 left-6 flex items-center gap-2 text-slate-700 hover:text-blue-600 text-xs sm:text-sm font-semibold transition px-4 py-2.5 rounded-2xl bg-white/60 hover:bg-white/90 border border-white/80 shadow-sm backdrop-blur-xl active:scale-95 cursor-pointer"
+        className="absolute top-6 left-6 flex items-center gap-2 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 text-xs sm:text-sm font-semibold transition px-4 py-2.5 rounded-2xl bg-white/60 dark:bg-slate-800/80 hover:bg-white/90 dark:hover:bg-slate-700 border border-white/80 dark:border-slate-700 shadow-sm backdrop-blur-xl active:scale-95 cursor-pointer"
       >
-        <ArrowLeft className="w-4 h-4 text-blue-600" />
+        <ArrowLeft className="w-4 h-4 text-blue-600 dark:text-blue-400" />
         <span>Back to Passenger Portal</span>
       </button>
 
       {/* ── Apple iOS Liquid Frosted Glass Card ── */}
-      <div className={`w-full max-w-md ios-liquid-glass rounded-[32px] p-7 sm:p-9 relative z-10 transition-all duration-300 ${shake ? 'animate-shake' : ''}`}>
+      <div className={`w-full max-w-md ios-liquid-glass dark:bg-slate-900/90 dark:border-slate-800 rounded-[32px] p-7 sm:p-9 relative z-10 transition-all duration-300 ${shake ? 'animate-shake' : ''}`}>
         
         {/* Specular Top Edge Light Refraction */}
-        <div className="absolute inset-x-8 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none" />
+        <div className="absolute inset-x-8 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
 
         {/* Brand Header */}
         <div className="text-center mb-6">
           <div className="relative w-18 h-18 mx-auto mb-4">
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 blur-sm opacity-30 animate-pulse" />
-            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-b from-white/95 to-white/70 border border-white p-2.5 shadow-md flex items-center justify-center mx-auto backdrop-blur-md">
+            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-b from-white/95 to-white/70 dark:from-slate-800 dark:to-slate-900 border border-white dark:border-slate-700 p-2.5 shadow-md flex items-center justify-center mx-auto backdrop-blur-md">
               <AnimatedLogoBadge size="lg" />
             </div>
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-blue-600/10 text-blue-700 border border-blue-500/20 mb-2.5 shadow-xs">
-            <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-blue-600/10 text-blue-700 dark:text-blue-400 border border-blue-500/20 mb-2.5 shadow-xs">
+            <ShieldCheck className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
             <span>Master Fleet Command</span>
           </div>
-          <h1 className="text-2xl sm:text-[26px] font-black text-slate-900 tracking-tight">Dewmina Master Admin</h1>
-          <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto font-medium">
+          <h1 className="text-2xl sm:text-[26px] font-black text-slate-900 dark:text-white tracking-tight">Dewmina Master Admin</h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto font-medium">
             Super Administrator Portal & Operations Control
           </p>
         </div>
@@ -206,7 +206,7 @@ export const AdminLoginPage: React.FC = () => {
           type="button"
           disabled={isInstalling}
           onClick={handleInstallClick}
-          className="w-full mb-6 py-3 px-4 rounded-2xl bg-white/60 hover:bg-white/90 border border-white/80 hover:border-blue-400/40 text-blue-700 text-xs font-extrabold flex items-center justify-center gap-2 transition-all shadow-sm backdrop-blur-md active:scale-98 cursor-pointer disabled:opacity-60"
+          className="w-full mb-6 py-3 px-4 rounded-2xl bg-white/60 dark:bg-slate-800/80 hover:bg-white/90 dark:hover:bg-slate-700 border border-white/80 dark:border-slate-700 hover:border-blue-400/40 text-blue-700 dark:text-blue-400 text-xs font-extrabold flex items-center justify-center gap-2 transition-all shadow-sm backdrop-blur-md active:scale-98 cursor-pointer disabled:opacity-60"
         >
           {isInstalling ? (
             <>
@@ -215,7 +215,7 @@ export const AdminLoginPage: React.FC = () => {
             </>
           ) : (
             <>
-              <Download className="w-4 h-4 text-blue-600 group-hover:translate-y-0.5 transition-transform" />
+              <Download className="w-4 h-4 text-blue-600 dark:text-blue-400 group-hover:translate-y-0.5 transition-transform" />
               <span>Install "Dewmina Master Admin" App{canInstall ? ' (Ready)' : ''}</span>
             </>
           )}
@@ -223,7 +223,7 @@ export const AdminLoginPage: React.FC = () => {
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5 animate-fadeIn">
+          <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2.5 animate-fadeIn">
             <AlertCircle className="w-4 h-4 text-rose-500 flex-shrink-0 mt-0.5" />
             <span>{errorMessage}</span>
           </div>
@@ -232,7 +232,7 @@ export const AdminLoginPage: React.FC = () => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 ml-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5 ml-1">
               Super Admin Email
             </label>
             <div className="relative">
@@ -244,13 +244,13 @@ export const AdminLoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin.dewminasuperline@gmail.com"
-                className="w-full pl-11 pr-4 py-3.5 rounded-2xl ios-input-glass text-slate-900 text-sm font-medium placeholder-slate-400 focus:outline-none transition shadow-xs"
+                className="w-full pl-11 pr-4 py-3.5 rounded-2xl ios-input-glass dark:bg-slate-800/80 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-medium placeholder-slate-400 dark:placeholder-slate-500 focus:outline-hidden transition shadow-xs"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 ml-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5 ml-1">
               Password
             </label>
             <div className="relative">
@@ -262,12 +262,12 @@ export const AdminLoginPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full pl-11 pr-11 py-3.5 rounded-2xl ios-input-glass text-slate-900 text-sm font-medium placeholder-slate-400 focus:outline-none transition shadow-xs"
+                className="w-full pl-11 pr-11 py-3.5 rounded-2xl ios-input-glass dark:bg-slate-800/80 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-medium placeholder-slate-400 dark:placeholder-slate-500 focus:outline-hidden transition shadow-xs"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition p-1"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition p-1 cursor-pointer"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -291,12 +291,12 @@ export const AdminLoginPage: React.FC = () => {
         </form>
 
         {/* Security Notice Footer */}
-        <div className="mt-7 pt-5 border-t border-slate-200/60 text-center">
-          <div className="inline-flex items-center justify-center gap-1.5 text-xs text-slate-600 font-semibold">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+        <div className="mt-7 pt-5 border-t border-slate-200/60 dark:border-slate-800 text-center">
+          <div className="inline-flex items-center justify-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 font-semibold">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>Executive Session • End-to-End Encrypted</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
             Authorized Dewmina Super Line Personnel Only
           </p>
         </div>
@@ -304,35 +304,35 @@ export const AdminLoginPage: React.FC = () => {
 
       {/* Modern In-App Installation Guide Modal (Frosted Glass) */}
       {showInstallGuide && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fadeIn">
-          <div className="relative w-full max-w-sm rounded-3xl ios-liquid-glass p-6 shadow-2xl text-slate-900 border border-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
+          <div className="relative w-full max-w-sm rounded-3xl ios-liquid-glass dark:bg-slate-900/95 dark:border-slate-800 p-6 shadow-2xl text-slate-900 dark:text-white border border-white/80">
             <button
               type="button"
               onClick={() => setShowInstallGuide(false)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition cursor-pointer"
+              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
 
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 rounded-2xl bg-blue-50 border border-blue-200/80 text-blue-600 shadow-xs">
+              <div className="p-2.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800 text-blue-600 dark:text-blue-400 shadow-xs">
                 <Smartphone className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-900">Install "Dewmina Master Admin"</h3>
-                <p className="text-xs text-slate-500">Add to your device home screen</p>
+                <h3 className="text-base font-black text-slate-900 dark:text-white">Install "Dewmina Master Admin"</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Add to your device home screen</p>
               </div>
             </div>
 
-            <div className="space-y-3 text-xs text-slate-600 mb-6 bg-slate-50/80 p-4 rounded-2xl border border-slate-200/80">
-              <div className="font-bold text-blue-600 flex items-center gap-1.5">
+            <div className="space-y-3 text-xs text-slate-600 dark:text-slate-300 mb-6 bg-slate-50/80 dark:bg-slate-850 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+              <div className="font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Quick Install Steps:</span>
               </div>
-              <p>1. Tap the <strong className="text-slate-900">three dots (⋮)</strong> or browser menu.</p>
-              <p>2. Select <strong className="text-slate-900">"Install app"</strong> (or <strong className="text-slate-900">"Add to Home screen"</strong>).</p>
-              <p>3. Tap <strong className="text-slate-900">Install</strong> to add the Super Admin app directly.</p>
-              <div className="pt-2 border-t border-slate-200 text-[11px] text-slate-500">
+              <p>1. Tap the <strong className="text-slate-900 dark:text-white">three dots (⋮)</strong> or browser menu.</p>
+              <p>2. Select <strong className="text-slate-900 dark:text-white">"Install app"</strong> (or <strong className="text-slate-900 dark:text-white">"Add to Home screen"</strong>).</p>
+              <p>3. Tap <strong className="text-slate-900 dark:text-white">Install</strong> to add the Super Admin app directly.</p>
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
                 <span>iOS Safari: Tap Share (⎋) ➔ "Add to Home Screen"</span>
               </div>
             </div>
@@ -351,7 +351,7 @@ export const AdminLoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowInstallGuide(false)}
-                className="px-4 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer border border-slate-200"
+                className="px-4 py-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer border border-slate-200 dark:border-slate-700"
               >
                 Close
               </button>

@@ -102,34 +102,34 @@ export const DailyFinancialSettlementModal: React.FC<Props> = ({ bookings, onClo
         }
       `}</style>
 
-      <div className="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[92vh] flex flex-col">
+      <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden my-auto max-h-[92vh] flex flex-col">
         {/* Top bar */}
-        <div className="no-print p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-3">
+        <div className="no-print p-4 sm:p-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/90 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold">
               <DollarSign className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-extrabold text-slate-900 text-base sm:text-lg">Daily Financial Settlement Sheet</h3>
-              <p className="text-xs text-slate-500">Accounting reconciliation for counter cash, bank slips & card transactions</p>
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg">Daily Financial Settlement Sheet</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Accounting reconciliation for counter cash, bank slips & card transactions</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             {/* Date filter */}
-            <div className="flex items-center gap-1.5 bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700">
+            <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200">
               <Calendar className="w-3.5 h-3.5 text-slate-400" />
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-transparent border-0 outline-hidden font-mono text-xs cursor-pointer"
+                className="bg-transparent border-0 outline-hidden font-mono text-xs cursor-pointer text-slate-800 dark:text-white"
               />
             </div>
 
             <button
               onClick={handleExportCsv}
-              className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Export CSV</span>
@@ -143,7 +143,7 @@ export const DailyFinancialSettlementModal: React.FC<Props> = ({ bookings, onClo
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -151,23 +151,23 @@ export const DailyFinancialSettlementModal: React.FC<Props> = ({ bookings, onClo
         </div>
 
         {/* Printable Document Body */}
-        <div className="overflow-y-auto p-4 sm:p-8 space-y-6" id="printable-settlement">
+        <div className="overflow-y-auto p-4 sm:p-8 space-y-6 text-slate-900 dark:text-slate-100" id="printable-settlement">
           {/* Header */}
-          <div className="border-b-2 border-slate-800 pb-5">
+          <div className="border-b-2 border-slate-800 dark:border-slate-600 pb-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <span className="text-[10px] font-black tracking-widest uppercase px-2.5 py-0.5 rounded bg-emerald-700 text-white">
                   OFFICIAL REVENUE SETTLEMENT
                 </span>
-                <h2 className="text-2xl font-black text-slate-900 mt-1">
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-1">
                   Daily Collections & Reconciliation Report
                 </h2>
-                <p className="text-sm font-semibold text-slate-600 mt-0.5">
-                  Reconciliation Date: <strong className="font-mono text-slate-900">{selectedDate}</strong>
+                <p className="text-sm font-semibold text-slate-600 dark:text-slate-300 mt-0.5">
+                  Reconciliation Date: <strong className="font-mono text-slate-900 dark:text-white">{selectedDate}</strong>
                 </p>
               </div>
 
-              <div className="text-left sm:text-right text-xs space-y-1 text-slate-600 bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-xl border sm:border-0 border-slate-200">
+              <div className="text-left sm:text-right text-xs space-y-1 text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 sm:bg-transparent p-3 sm:p-0 rounded-xl border sm:border-0 border-slate-200 dark:border-slate-700">
                 <p><strong>Generated At:</strong> {new Date().toLocaleString()}</p>
                 <p><strong>Total Transactions:</strong> {dayBookings.length}</p>
                 <p><strong>Total Passenger Seats:</strong> {totalPassengers}</p>
@@ -178,39 +178,39 @@ export const DailyFinancialSettlementModal: React.FC<Props> = ({ bookings, onClo
           {/* Settlement Breakdown Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             {/* Cash */}
-            <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 space-y-1">
+            <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">Counter Cash</span>
-                <Banknote className="w-4 h-4 text-amber-600" />
+                <span className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider">Counter Cash</span>
+                <Banknote className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               </div>
-              <p className="text-xl font-black text-amber-900 font-mono">
+              <p className="text-xl font-black text-amber-900 dark:text-amber-200 font-mono">
                 LKR {cashTotal.toLocaleString()}
               </p>
-              <p className="text-[11px] text-amber-700">{cashBookings.length} Counter Bookings</p>
+              <p className="text-[11px] text-amber-700 dark:text-amber-400">{cashBookings.length} Counter Bookings</p>
             </div>
 
             {/* Bank Slip */}
-            <div className="p-4 rounded-2xl bg-orange-50/80 border border-orange-200 space-y-1">
+            <div className="p-4 rounded-2xl bg-orange-50/80 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800/60 space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-orange-800 uppercase tracking-wider">Bank Slips</span>
-                <FileSpreadsheet className="w-4 h-4 text-orange-600" />
+                <span className="text-xs font-bold text-orange-800 dark:text-orange-300 uppercase tracking-wider">Bank Slips</span>
+                <FileSpreadsheet className="w-4 h-4 text-orange-600 dark:text-orange-400" />
               </div>
-              <p className="text-xl font-black text-orange-900 font-mono">
+              <p className="text-xl font-black text-orange-900 dark:text-orange-200 font-mono">
                 LKR {slipTotal.toLocaleString()}
               </p>
-              <p className="text-[11px] text-orange-700">{slipBookings.length} Verified Transfers</p>
+              <p className="text-[11px] text-orange-700 dark:text-orange-400">{slipBookings.length} Verified Transfers</p>
             </div>
 
             {/* Card / Online */}
-            <div className="p-4 rounded-2xl bg-blue-50/80 border border-blue-200 space-y-1">
+            <div className="p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/60 space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-blue-800 uppercase tracking-wider">Card / Online</span>
-                <CreditCard className="w-4 h-4 text-blue-600" />
+                <span className="text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wider">Card / Online</span>
+                <CreditCard className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
-              <p className="text-xl font-black text-blue-900 font-mono">
+              <p className="text-xl font-black text-blue-900 dark:text-blue-200 font-mono">
                 LKR {cardTotal.toLocaleString()}
               </p>
-              <p className="text-[11px] text-blue-700">{cardBookings.length} Gateway Payments</p>
+              <p className="text-[11px] text-blue-700 dark:text-blue-400">{cardBookings.length} Gateway Payments</p>
             </div>
 
             {/* Grand Total */}
@@ -228,20 +228,20 @@ export const DailyFinancialSettlementModal: React.FC<Props> = ({ bookings, onClo
 
           {/* Transactions Table */}
           <div className="space-y-3">
-            <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+            <h4 className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
               Settlement Ledger Entries ({dayBookings.length})
             </h4>
 
             {dayBookings.length === 0 ? (
-              <div className="py-12 text-center text-slate-400 border border-dashed border-slate-200 rounded-2xl">
-                <Calendar className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+              <div className="py-12 text-center text-slate-400 dark:text-slate-500 border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
+                <Calendar className="w-8 h-8 mx-auto text-slate-300 dark:text-slate-600 mb-2" />
                 <p className="text-xs font-bold">No completed transactions recorded for {selectedDate}.</p>
               </div>
             ) : (
-              <div className="border border-slate-300 rounded-xl overflow-hidden shadow-2xs">
+              <div className="border border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden shadow-2xs">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-900 text-white font-extrabold uppercase text-[10px] tracking-wider">
+                    <tr className="bg-slate-900 dark:bg-slate-950 text-white font-extrabold uppercase text-[10px] tracking-wider">
                       <th className="p-2.5 font-mono">PNR</th>
                       <th className="p-2.5">Passenger</th>
                       <th className="p-2.5">Route</th>
@@ -251,7 +251,7 @@ export const DailyFinancialSettlementModal: React.FC<Props> = ({ bookings, onClo
                       <th className="p-2.5 text-right">Amount (LKR)</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 font-medium text-slate-700">
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-700/70 font-medium text-slate-700 dark:text-slate-300">
                     {dayBookings.map((b, idx) => {
                       const name = b.passenger?.fullName || (b as any).passengerName || 'Passenger';
                       const seatCount = (b.seats && b.seats.length > 0) ? b.seats.length : (b.seatNumbers && b.seatNumbers.length > 0) ? b.seatNumbers.length : 1;
@@ -259,24 +259,28 @@ export const DailyFinancialSettlementModal: React.FC<Props> = ({ bookings, onClo
                       const isSlip = b.paymentMethod === 'bank_transfer';
 
                       return (
-                        <tr key={b.id || b.pnr} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/70'}>
-                          <td className="p-2 font-mono font-bold text-blue-600">{b.pnr}</td>
-                          <td className="p-2 font-bold text-slate-900">{name}</td>
-                          <td className="p-2 text-slate-600">{b.busNumber} • {b.origin} → {b.destination}</td>
+                        <tr key={b.id || b.pnr} className={idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/70 dark:bg-slate-800/50'}>
+                          <td className="p-2 font-mono font-bold text-blue-600 dark:text-blue-400">{b.pnr}</td>
+                          <td className="p-2 font-bold text-slate-900 dark:text-white">{name}</td>
+                          <td className="p-2 text-slate-600 dark:text-slate-300">{b.busNumber} • {b.origin} → {b.destination}</td>
                           <td className="p-2 text-center font-mono font-bold">{seatCount}</td>
                           <td className="p-2 text-center">
                             <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                              isCash ? 'bg-amber-100 text-amber-800' : isSlip ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'
+                              isCash 
+                                ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300' 
+                                : isSlip 
+                                  ? 'bg-orange-100 dark:bg-orange-950/50 text-orange-800 dark:text-orange-300' 
+                                  : 'bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300'
                             }`}>
                               {isCash ? 'Cash (Counter)' : isSlip ? 'Bank Slip' : 'Card / Online'}
                             </span>
                           </td>
                           <td className="p-2 text-center">
-                            <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
                               PAID
                             </span>
                           </td>
-                          <td className="p-2 text-right font-mono font-black text-slate-900">
+                          <td className="p-2 text-right font-mono font-black text-slate-900 dark:text-white">
                             {(b.totalFare || 0).toLocaleString()}
                           </td>
                         </tr>
@@ -284,11 +288,11 @@ export const DailyFinancialSettlementModal: React.FC<Props> = ({ bookings, onClo
                     })}
                   </tbody>
                   <tfoot>
-                    <tr className="bg-slate-100 font-extrabold text-slate-900 border-t-2 border-slate-300">
+                    <tr className="bg-slate-100 dark:bg-slate-800 font-extrabold text-slate-900 dark:text-white border-t-2 border-slate-300 dark:border-slate-700">
                       <td colSpan={6} className="p-3 text-right uppercase tracking-wider text-[11px]">
                         Grand Total Settlement:
                       </td>
-                      <td className="p-3 text-right font-mono text-sm font-black text-emerald-700">
+                      <td className="p-3 text-right font-mono text-sm font-black text-emerald-700 dark:text-emerald-400">
                         LKR {grandTotal.toLocaleString()}
                       </td>
                     </tr>
@@ -299,21 +303,21 @@ export const DailyFinancialSettlementModal: React.FC<Props> = ({ bookings, onClo
           </div>
 
           {/* Signatures */}
-          <div className="pt-8 border-t border-slate-300 grid grid-cols-2 sm:grid-cols-3 gap-6 text-xs text-slate-600">
+          <div className="pt-8 border-t border-slate-300 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-3 gap-6 text-xs text-slate-600 dark:text-slate-400">
             <div className="space-y-10">
-              <p className="font-bold text-slate-800">Counter Cashier / Officer:</p>
-              <div className="border-b border-dashed border-slate-400 w-44" />
-              <p className="text-[11px] text-slate-400">Signature & Date</p>
+              <p className="font-bold text-slate-800 dark:text-slate-200">Counter Cashier / Officer:</p>
+              <div className="border-b border-dashed border-slate-400 dark:border-slate-600 w-44" />
+              <p className="text-[11px] text-slate-400 dark:text-slate-500">Signature & Date</p>
             </div>
             <div className="space-y-10">
-              <p className="font-bold text-slate-800">Finance Manager / Accountant:</p>
-              <div className="border-b border-dashed border-slate-400 w-44" />
-              <p className="text-[11px] text-slate-400">Signature & Date</p>
+              <p className="font-bold text-slate-800 dark:text-slate-200">Finance Manager / Accountant:</p>
+              <div className="border-b border-dashed border-slate-400 dark:border-slate-600 w-44" />
+              <p className="text-[11px] text-slate-400 dark:text-slate-500">Signature & Date</p>
             </div>
             <div className="space-y-10 col-span-2 sm:col-span-1">
-              <p className="font-bold text-slate-800">Managing Director Stamp:</p>
-              <div className="border-b border-dashed border-slate-400 w-44" />
-              <p className="text-[11px] text-slate-400">Official Seal</p>
+              <p className="font-bold text-slate-800 dark:text-slate-200">Managing Director Stamp:</p>
+              <div className="border-b border-dashed border-slate-400 dark:border-slate-600 w-44" />
+              <p className="text-[11px] text-slate-400 dark:text-slate-500">Official Seal</p>
             </div>
           </div>
         </div>

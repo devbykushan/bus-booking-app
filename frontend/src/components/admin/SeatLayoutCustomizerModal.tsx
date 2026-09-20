@@ -461,30 +461,30 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fade-in-up">
-      <div className="bg-white rounded-3xl max-w-5xl w-full border border-slate-200 shadow-2xl space-y-5 p-6 my-6 max-h-[92vh] overflow-y-auto animate-pop-in">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-5xl w-full border border-slate-200 dark:border-slate-700 shadow-2xl space-y-5 p-6 my-6 max-h-[92vh] overflow-y-auto animate-pop-in">
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-xl font-extrabold text-slate-800 flex items-center gap-2">
-                <LayoutGrid className="w-6 h-6 text-blue-600" />
+              <h3 className="text-xl font-extrabold text-slate-800 dark:text-white flex items-center gap-2">
+                <LayoutGrid className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 Comprehensive Seat Layout Customizer
               </h3>
               <span className={`px-2.5 py-0.5 rounded-full border font-bold text-xs flex items-center gap-1.5 shadow-2xs ${
-                isLiveSyncing ? 'bg-amber-50 text-amber-800 border-amber-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                isLiveSyncing ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800' : 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
               }`}>
-                <Zap className={`w-3.5 h-3.5 ${isLiveSyncing ? 'text-amber-600 animate-spin' : 'text-emerald-600 animate-pulse'}`} />
+                <Zap className={`w-3.5 h-3.5 ${isLiveSyncing ? 'text-amber-600 animate-spin' : 'text-emerald-600 dark:text-emerald-400 animate-pulse'}`} />
                 <span>{isLiveSyncing ? 'Syncing...' : 'Real-Time Live Sync'}</span>
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
-              {route.operatorName} • <strong className="text-slate-700">{route.busNumber}</strong> ({route.origin} → {route.destination})
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              {route.operatorName} • <strong className="text-slate-700 dark:text-slate-200">{route.busNumber}</strong> ({route.origin} → {route.destination})
             </p>
           </div>
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors cursor-pointer"
+            className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -493,7 +493,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
         {/* In-Modal Feedback Banner */}
         {feedbackMsg && (
           <div className={`p-3 rounded-2xl text-xs font-bold flex items-center gap-2 animate-fade-in-up ${
-            feedbackMsg.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+            feedbackMsg.type === 'success' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
           }`}>
             <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
             <span>{feedbackMsg.text}</span>
@@ -501,25 +501,25 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
         )}
 
         {/* Bus Model & Real-Time Auto-Matched Category Banner */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-blue-50/80 border border-blue-200 text-xs">
-          <div className="flex items-center gap-2 font-bold text-blue-900">
-            <Bus className="w-4.5 h-4.5 text-blue-600 shrink-0" />
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 text-xs">
+          <div className="flex items-center gap-2 font-bold text-blue-900 dark:text-blue-200">
+            <Bus className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400 shrink-0" />
             <span>Auto-Loaded Bus Category:</span>
-            <span className="px-3 py-1 rounded-xl bg-white border border-blue-300 font-extrabold text-blue-800 shadow-2xs">
+            <span className="px-3 py-1 rounded-xl bg-white dark:bg-slate-900 border border-blue-300 dark:border-blue-700 font-extrabold text-blue-800 dark:text-blue-300 shadow-2xs">
               {busType || route.busType}
             </span>
           </div>
-          <span className="text-[11px] font-bold text-slate-600 flex items-center gap-1.5">
+          <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             Real-Time Auto-Selected ({seats.length} Seats Layout)
           </span>
         </div>
 
         {/* Global Toolbar & Statistics */}
-        <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs">
           <div className="flex items-center gap-3">
-            <span className="font-semibold text-slate-700 flex items-center gap-1">
-              <DollarSign className="w-4 h-4 text-emerald-600" /> Default Fare (LKR):
+            <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+              <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Default Fare (LKR):
             </span>
             <input
               type="number"
@@ -528,36 +528,36 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                 const val = Number(e.target.value);
                 setBasePrice(val);
               }}
-              className="w-24 bg-white border border-slate-300 rounded-xl px-3 py-1.5 font-bold font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-24 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 font-bold font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               type="button"
               onClick={() => bulkSetAllPrices(basePrice)}
-              className="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300 font-bold rounded-xl transition-colors cursor-pointer"
+              className="px-3 py-1.5 bg-emerald-100 dark:bg-emerald-950/50 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 font-bold rounded-xl transition-colors cursor-pointer"
               title="Apply this fare to all seats in bus"
             >
               Apply Fare to All Seats
             </button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-slate-600 text-[11px]">
-            <span>Total Seats: <strong className="text-blue-600 font-mono text-xs">{seats.length}</strong></span>
-            <span>Blocked / Reserved: <strong className="text-slate-800 font-mono text-xs">{seats.filter(s => s.status === 'booked').length}</strong></span>
+          <div className="flex flex-wrap items-center gap-4 text-slate-600 dark:text-slate-400 text-[11px]">
+            <span>Total Seats: <strong className="text-blue-600 dark:text-blue-400 font-mono text-xs">{seats.length}</strong></span>
+            <span>Blocked / Reserved: <strong className="text-slate-800 dark:text-slate-200 font-mono text-xs">{seats.filter(s => s.status === 'booked').length}</strong></span>
           </div>
         </div>
 
         {/* Batch Operations Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-2xl bg-blue-50/60 border border-blue-200 text-xs">
-          <div className="flex items-center gap-2 font-bold text-blue-900">
-            <Settings2 className="w-4 h-4 text-blue-600" /> Admin Quick Tools:
+        <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/60 text-xs">
+          <div className="flex items-center gap-2 font-bold text-blue-900 dark:text-blue-200">
+            <Settings2 className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Admin Quick Tools:
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={bulkMakeAllAvailable}
-              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-[11px] flex items-center gap-1 cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 font-bold text-[11px] flex items-center gap-1 cursor-pointer"
             >
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Clear All Blocks
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Clear All Blocks
             </button>
             <button
               type="button"
@@ -571,9 +571,9 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
 
         {/* Deck Switcher (If Multi-Deck) */}
         {hasUpperDeck && (
-          <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-            <span className="text-xs font-bold text-slate-600 flex items-center gap-1 mr-2">
-              <Layers className="w-4 h-4 text-indigo-600" /> Bus Decks:
+          <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2">
+            <span className="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1 mr-2">
+              <Layers className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /> Bus Decks:
             </span>
             <button
               type="button"
@@ -581,7 +581,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeDeck === 'lower'
                   ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
               Lower Deck ({seats.filter(s => s.deck === 'lower').length} Seats)
@@ -592,7 +592,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeDeck === 'upper'
                   ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
               Upper Deck ({seats.filter(s => s.deck === 'upper').length} Seats)
@@ -605,15 +605,15 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
           
           {/* Left / Main Visual Grid */}
           <div className="lg:col-span-8 space-y-3">
-            <div className="flex items-center justify-between text-xs text-slate-500">
-              <span className="font-semibold text-slate-700">
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span className="font-semibold text-slate-700 dark:text-slate-300">
                 Interactive Grid ({activeDeck.toUpperCase()} DECK) — Click seat to inspect & modify properties
               </span>
-              <span className="text-[11px] font-semibold text-blue-600">Front Cockpit (Top) • Rear Engine (Bottom)</span>
+              <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400">Front Cockpit (Top) • Rear Engine (Bottom)</span>
             </div>
 
             {/* Bus Body Container */}
-            <div className={`bg-slate-50/90 rounded-3xl p-4 border border-slate-200/90 space-y-4 shadow-sm mx-auto transition-all ${
+            <div className={`bg-slate-50/90 dark:bg-slate-900/90 rounded-3xl p-4 border border-slate-200/90 dark:border-slate-700 space-y-4 shadow-sm mx-auto transition-all ${
               is3By2 ? 'max-w-[500px]' : 'max-w-[440px]'
             }`}>
               
@@ -649,12 +649,12 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               {/* Seating Matrix */}
               <div className="relative space-y-2.5 py-1 flex flex-col items-center">
                 {/* Ambient Aisle Strip - positioned at exact aisle location */}
-                <div className={`absolute inset-y-0 pointer-events-none z-0 rounded-full bg-indigo-100/60 border-x border-indigo-200/40 ${
+                <div className={`absolute inset-y-0 pointer-events-none z-0 rounded-full bg-indigo-100/60 dark:bg-slate-800/60 border-x border-indigo-200/40 dark:border-slate-700/50 ${
                   is3By2 ? 'left-[60%] -translate-x-1/2 w-8' : 'left-1/2 -translate-x-1/2 w-9'
                 }`} />
 
                 {rowNumbers.length === 0 ? (
-                  <div className="text-center py-10 text-slate-400 text-xs font-medium">
+                  <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-xs font-medium">
                     No seats configured on {activeDeck} deck. Click a preset above or "Add Custom Seat" to insert seats.
                   </div>
                 ) : (
@@ -675,30 +675,30 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                           onClick={() => handleSeatClick(seat.id)}
                           className={`w-10 h-12 sm:w-11 sm:h-13 rounded-xl flex flex-col items-center justify-between p-1.5 font-bold transition-all relative z-10 shadow-2xs hover:z-20 cursor-pointer ${
                             isSelected
-                              ? 'ring-2 ring-blue-600 bg-blue-100 border-2 border-blue-500 text-blue-900 shadow-md scale-105'
+                              ? 'ring-2 ring-blue-600 bg-blue-100 dark:bg-blue-900/50 border-2 border-blue-500 dark:border-blue-400 text-blue-900 dark:text-blue-100 shadow-md scale-105'
                               : seat.status === 'booked'
-                              ? 'bg-slate-200 border-2 border-slate-300 text-slate-500 opacity-80'
+                              ? 'bg-slate-200 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 opacity-80'
                               : seat.isFemaleOnly
-                              ? 'bg-pink-50 border-2 border-pink-400 text-pink-700 hover:bg-pink-100 shadow-2xs'
-                              : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-blue-500 hover:bg-blue-50/50'
+                              ? 'bg-pink-50 dark:bg-pink-950/40 border-2 border-pink-400 dark:border-pink-500/80 text-pink-700 dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/50 shadow-2xs'
+                              : 'bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-slate-700'
                           }`}
                           title={`Seat ${seat.number} • LKR ${seat.price || basePrice} • ${seat.status}${seat.isFemaleOnly ? ' • Female Priority' : ''}`}
                         >
                           {/* Headrest Cushion Bar */}
                           <div className={`w-full h-1.5 rounded-t-sm ${
-                            isSelected ? 'bg-blue-500' : seat.status === 'booked' ? 'bg-slate-400' : seat.isFemaleOnly ? 'bg-pink-400' : 'bg-slate-200'
+                            isSelected ? 'bg-blue-500 dark:bg-blue-400' : seat.status === 'booked' ? 'bg-slate-400 dark:bg-slate-600' : seat.isFemaleOnly ? 'bg-pink-400 dark:bg-pink-500' : 'bg-slate-200 dark:bg-slate-700'
                           }`} />
 
-                          <span className={`text-[11px] sm:text-xs font-black tracking-tight ${seat.isFemaleOnly ? 'text-pink-800' : ''}`}>
+                          <span className={`text-[11px] sm:text-xs font-black tracking-tight ${seat.isFemaleOnly ? 'text-pink-800 dark:text-pink-300' : ''}`}>
                             {seat.number}
                           </span>
 
                           {/* Bottom Accent Bar or Custom Price */}
                           {hasCustomPrice ? (
-                            <span className="text-[8px] font-mono font-extrabold text-amber-700">LKR {seat.price}</span>
+                            <span className="text-[8px] font-mono font-extrabold text-amber-700 dark:text-amber-400">LKR {seat.price}</span>
                           ) : (
                             <div className={`w-3/4 h-1 rounded-full ${
-                              isSelected ? 'bg-blue-600' : seat.isFemaleOnly ? 'bg-pink-500' : 'bg-blue-500/80'
+                              isSelected ? 'bg-blue-600 dark:bg-blue-400' : seat.isFemaleOnly ? 'bg-pink-500 dark:bg-pink-400' : 'bg-blue-500/80 dark:bg-blue-400/80'
                             }`} />
                           )}
                         </button>
@@ -719,7 +719,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                               {centerSeats.map(renderSeatButton)}
                             </div>
                           ) : (
-                            <div className="text-[9px] font-mono font-black text-slate-400/60 select-none">│</div>
+                            <div className="text-[9px] font-mono font-black text-slate-400/60 dark:text-slate-600 select-none">│</div>
                           )}
                         </div>
 
@@ -734,7 +734,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               </div>
 
               {/* Bottom Rear Engine Footer Bar */}
-              <div className="p-2.5 rounded-2xl bg-slate-100 border border-slate-200 text-center flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+              <div className="p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 <span className="flex items-center gap-1 text-rose-500">
                   <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" /> REAR ENGINE
                 </span>
@@ -746,72 +746,72 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
             </div>
 
             {/* Grid Legend */}
-            <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 pt-1 justify-center">
+            <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 dark:text-slate-400 pt-1 justify-center">
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-white border-2 border-slate-300" /> Available
+                <span className="w-3 h-3 rounded bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600" /> Available
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-pink-50 border-2 border-pink-400" /> Female Reserved (Pink)
+                <span className="w-3 h-3 rounded bg-pink-50 dark:bg-pink-950/50 border-2 border-pink-400 dark:border-pink-500/80" /> Female Reserved (Pink)
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-slate-200 border-2 border-slate-300" /> Admin Blocked / Booked
+                <span className="w-3 h-3 rounded bg-slate-200 dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600" /> Admin Blocked / Booked
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-blue-100 border-2 border-blue-600 ring-2 ring-blue-600" /> Currently Selected
+                <span className="w-3 h-3 rounded bg-blue-100 dark:bg-blue-900/50 border-2 border-blue-600 ring-2 ring-blue-600" /> Currently Selected
               </span>
             </div>
           </div>
 
           {/* Right Seat Inspector Panel */}
-          <div className="lg:col-span-4 h-full min-h-[560px] bg-gradient-to-b from-slate-50 to-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm animate-inspector-in">
-            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between border-b border-slate-200 pb-3 animate-fade-in-up">
+          <div className="lg:col-span-4 h-full min-h-[560px] bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-850 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-4 shadow-sm animate-inspector-in">
+            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3 animate-fade-in-up">
               <span className="flex items-center gap-1.5">
-                <Edit3 className="w-4 h-4 text-blue-600" /> Seat Property Inspector
+                <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Seat Property Inspector
               </span>
               {selectedSeat && (
-                <span className="font-mono text-blue-600 font-bold text-xs">{selectedSeat.number}</span>
+                <span className="font-mono text-blue-600 dark:text-blue-400 font-bold text-xs">{selectedSeat.number}</span>
               )}
             </h4>
 
             {selectedSeat ? (
               <div className="flex flex-1 flex-col space-y-3 text-xs animate-fade-in-up" key={selectedSeat.id}>
                 <div>
-                  <label className="block text-slate-600 font-semibold mb-1">Seat Label / Number</label>
+                  <label className="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Seat Label / Number</label>
                   <input
                     type="text"
                     value={selectedSeat.number}
                     onChange={(e) => updateSelectedSeatProperty('number', e.target.value.toUpperCase())}
-                    className="w-full bg-white border border-slate-300 rounded-xl p-2 font-mono font-bold text-slate-800"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-2 font-mono font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 font-semibold mb-1">Individual Seat Price (LKR)</label>
+                  <label className="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Individual Seat Price (LKR)</label>
                   <input
                     type="number"
                     value={selectedSeat.price}
                     onChange={(e) => updateSelectedSeatProperty('price', Number(e.target.value))}
-                    className="w-full bg-white border border-slate-300 rounded-xl p-2 font-mono font-bold text-emerald-700"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-2 font-mono font-bold text-emerald-700 dark:text-emerald-400 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 font-semibold mb-1">Seat Status</label>
+                  <label className="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Seat Status</label>
                   <select
                     value={selectedSeat.status}
                     onChange={(e) => updateSelectedSeatProperty('status', e.target.value as SeatStatus)}
-                    className="w-full bg-white border border-slate-300 rounded-xl p-2 text-slate-800 font-medium"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-2 text-slate-800 dark:text-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                   >
-                    <option value="available">Available (Open for passengers)</option>
-                    <option value="booked">Booked / Blocked (Admin lock)</option>
-                    <option value="locked">Locked (Hold status)</option>
+                    <option value="available" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">Available (Open for passengers)</option>
+                    <option value="booked" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">Booked / Blocked (Admin lock)</option>
+                    <option value="locked" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">Locked (Hold status)</option>
                   </select>
                 </div>
 
-                <div className="space-y-2 pt-1 border-t border-slate-200">
-                  <label className="flex items-center justify-between p-2.5 rounded-xl bg-pink-50/70 border border-pink-200 cursor-pointer">
-                    <span className="font-semibold text-pink-900 flex items-center gap-1.5">
-                      <Shield className="w-4 h-4 text-pink-600" /> Female Reserved Priority (Pink)
+                <div className="space-y-2 pt-1 border-t border-slate-200 dark:border-slate-700">
+                  <label className="flex items-center justify-between p-2.5 rounded-xl bg-pink-50/70 dark:bg-pink-950/30 border border-pink-200 dark:border-pink-900/50 cursor-pointer">
+                    <span className="font-semibold text-pink-900 dark:text-pink-300 flex items-center gap-1.5">
+                      <Shield className="w-4 h-4 text-pink-600 dark:text-pink-400" /> Female Reserved Priority (Pink)
                     </span>
                     <input
                       type="checkbox"
@@ -821,9 +821,9 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                     />
                   </label>
 
-                  <label className="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200 cursor-pointer">
-                    <span className="font-semibold text-slate-700 flex items-center gap-1.5">
-                      <Bus className="w-4 h-4 text-purple-600" /> Sleeper Berth Type
+                  <label className="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 cursor-pointer">
+                    <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                      <Bus className="w-4 h-4 text-purple-600 dark:text-purple-400" /> Sleeper Berth Type
                     </span>
                     <input
                       type="checkbox"
@@ -834,14 +834,14 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                   </label>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-slate-600">
+                <div className="grid grid-cols-2 gap-2 text-slate-600 dark:text-slate-300">
                   <div>
                     <label className="block font-semibold mb-1">Row Pos</label>
                     <input
                       type="number"
                       value={selectedSeat.row}
                       onChange={(e) => updateSelectedSeatProperty('row', Number(e.target.value))}
-                      className="w-full bg-white border border-slate-300 rounded-xl p-1.5 font-mono text-slate-800"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-1.5 font-mono text-slate-800 dark:text-white"
                     />
                   </div>
                   <div>
@@ -850,7 +850,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                       type="number"
                       value={selectedSeat.col}
                       onChange={(e) => updateSelectedSeatProperty('col', Number(e.target.value))}
-                      className="w-full bg-white border border-slate-300 rounded-xl p-1.5 font-mono text-slate-800"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-1.5 font-mono text-slate-800 dark:text-white"
                     />
                   </div>
                 </div>
@@ -859,22 +859,22 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
                   <button
                     type="button"
                     onClick={() => handleDeleteSeat(selectedSeat.id)}
-                    className="w-full py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors border border-rose-200"
+                    className="w-full py-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors border border-rose-200 dark:border-rose-800 cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" /> Remove Seat from Layout
                   </button>
                 </div>
 
-                <div className="mt-auto rounded-xl border border-blue-100 bg-blue-50/70 p-3 text-[11px] text-blue-800">
+                <div className="mt-auto rounded-xl border border-blue-100 dark:border-blue-900/50 bg-blue-50/70 dark:bg-blue-950/30 p-3 text-[11px] text-blue-800 dark:text-blue-300">
                   <p className="font-bold">Layout guidance</p>
-                  <p className="mt-1 leading-relaxed text-blue-700/80">
+                  <p className="mt-1 leading-relaxed text-blue-700/80 dark:text-blue-400/80">
                     Changes apply to this seat only. Use row and column positions to fine-tune its placement in the bus grid.
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-1 flex-col items-center justify-center text-center py-12 text-slate-400 text-xs space-y-2 animate-fade-in-up">
-                <Sliders className="w-8 h-8 mx-auto text-slate-300" />
+              <div className="flex flex-1 flex-col items-center justify-center text-center py-12 text-slate-400 dark:text-slate-500 text-xs space-y-2 animate-fade-in-up">
+                <Sliders className="w-8 h-8 mx-auto text-slate-300 dark:text-slate-600" />
                 <p>Click any seat on the grid to inspect and edit its properties individually.</p>
               </div>
             )}
@@ -883,9 +883,9 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
         </div>
 
         {/* Modal Action Buttons */}
-        <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-          <div className="text-xs text-slate-500">
-            Total active layout seats: <strong className="text-blue-600 font-mono">{seats.length}</strong>
+        <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-700 pt-4">
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            Total active layout seats: <strong className="text-blue-600 dark:text-blue-400 font-mono">{seats.length}</strong>
           </div>
 
           <div className="flex items-center gap-3">
@@ -893,10 +893,10 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               type="button"
               onClick={handleDeleteLayout}
               disabled={isDeleting || isSaving}
-              className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition-all duration-200 ${
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 border transition-all duration-200 cursor-pointer ${
                 confirmDelete
                   ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-700 shadow-md ring-2 ring-rose-400'
-                  : 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200'
+                  : 'bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800'
               } disabled:opacity-60`}
             >
               {isDeleting ? (
@@ -915,7 +915,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs"
+              className="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs cursor-pointer transition-colors"
             >
               Cancel
             </button>
@@ -924,7 +924,7 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               type="button"
               onClick={handleSaveLayout}
               disabled={isSaving}
-              className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 shadow-md transition-all hover:scale-105"
+              className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 shadow-md transition-all hover:scale-105 cursor-pointer disabled:opacity-60"
             >
               {isSaving ? (
                 <>
@@ -945,76 +945,76 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
 
       {/* Add Custom Seat Dialog */}
       {showAddSeatModal && (
-        <div className="fixed inset-0 z-60 bg-slate-900/60 flex items-center justify-center p-4">
-          <form onSubmit={handleAddNewSeat} className="bg-white rounded-3xl p-6 max-w-md w-full border border-slate-200 shadow-2xl space-y-4 animate-pop-in">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h4 className="font-extrabold text-slate-800 text-sm flex items-center gap-2">
-                <Plus className="w-5 h-5 text-blue-600" /> Add Custom Seat to Layout
+        <div className="fixed inset-0 z-60 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <form onSubmit={handleAddNewSeat} className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4 animate-pop-in">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
+              <h4 className="font-extrabold text-slate-800 dark:text-white text-sm flex items-center gap-2">
+                <Plus className="w-5 h-5 text-blue-600 dark:text-blue-400" /> Add Custom Seat to Layout
               </h4>
-              <button type="button" onClick={() => setShowAddSeatModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button type="button" onClick={() => setShowAddSeatModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="col-span-2">
-                <label className="block text-slate-600 font-semibold mb-1">Seat Number / Code</label>
+                <label className="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Seat Number / Code</label>
                 <input
                   type="text"
                   placeholder="e.g. 1A or VIP1"
                   value={newSeatNum}
                   onChange={e => setNewSeatNum(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 font-mono font-bold text-slate-800"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-2 font-mono font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-slate-600 font-semibold mb-1">Price (LKR)</label>
+                <label className="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Price (LKR)</label>
                 <input
                   type="number"
                   value={newSeatPrice}
                   onChange={e => setNewSeatPrice(Number(e.target.value))}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-slate-800 font-bold"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-2 text-slate-800 dark:text-white font-bold focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-600 font-semibold mb-1">Deck</label>
+                <label className="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Deck</label>
                 <select
                   value={newSeatDeck}
                   onChange={e => setNewSeatDeck(e.target.value as DeckType)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-slate-800"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-2 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                 >
-                  <option value="lower">Lower Deck</option>
-                  <option value="upper">Upper Deck</option>
+                  <option value="lower" className="bg-white dark:bg-slate-800 text-slate-800 dark:text-white">Lower Deck</option>
+                  <option value="upper" className="bg-white dark:bg-slate-800 text-slate-800 dark:text-white">Upper Deck</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-slate-600 font-semibold mb-1">Row (1-20)</label>
+                <label className="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Row (1-20)</label>
                 <input
                   type="number"
                   value={newSeatRow}
                   onChange={e => setNewSeatRow(Number(e.target.value))}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-slate-800"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-2 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-600 font-semibold mb-1">Column (1-6)</label>
+                <label className="block text-slate-600 dark:text-slate-300 font-semibold mb-1">Column (1-6)</label>
                 <input
                   type="number"
                   value={newSeatCol}
                   onChange={e => setNewSeatCol(Number(e.target.value))}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-slate-800"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-2 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                 />
               </div>
 
-              <div className="col-span-2 space-y-2 pt-1 border-t border-slate-200">
-                <label className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
-                  <span className="font-semibold text-slate-700 flex items-center gap-1.5">
-                    <Bus className="w-4 h-4 text-purple-600" /> Sleeper Berth Type
+              <div className="col-span-2 space-y-2 pt-1 border-t border-slate-200 dark:border-slate-700">
+                <label className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <Bus className="w-4 h-4 text-purple-600 dark:text-purple-400" /> Sleeper Berth Type
                   </span>
                   <input
                     type="checkbox"
@@ -1026,17 +1026,17 @@ export const SeatLayoutCustomizerModal: React.FC<Props> = ({ route, onClose }) =
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
               <button
                 type="button"
                 onClick={() => setShowAddSeatModal(false)}
-                className="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs"
+                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-xs cursor-pointer transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs shadow-sm"
+                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm cursor-pointer transition-colors"
               >
                 Insert Seat
               </button>
