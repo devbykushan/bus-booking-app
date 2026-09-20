@@ -21,7 +21,7 @@ import {
   SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
   Trash2, RefreshCw, Edit3, Clock, Star, Search,
   Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare, Menu, Shield,
-  Printer, Wrench, MapPin, ArrowLeft, ChevronDown, ChevronUp, Layers, Filter
+  Printer, Wrench, MapPin, ArrowLeft, ChevronDown, ChevronUp, Layers, Filter, Sparkles
 } from 'lucide-react';
 
 export type AdminDashboardTab = 'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp' | 'counter-booking' | 'staff' | 'promos' | 'live-gps';
@@ -103,8 +103,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
   const [usersList, setUsersList] = useState<any[]>([]);
   const [usersLoading, setUsersLoading] = useState<boolean>(false);
   const [usersSearchQuery, setUsersSearchQuery] = useState<string>('');
-  const [usersRoleFilter, setUsersRoleFilter] = useState<'all' | 'passenger' | 'admin'>('all');
-  const [onlyWithBookings, setOnlyWithBookings] = useState<boolean>(false);
+  const [passengerFilter, setPassengerFilter] = useState<'all' | 'with-bookings' | 'without-bookings'>('all');
   const [selectedUserForModal, setSelectedUserForModal] = useState<any | null>(null);
   const [confirmDeleteUserId, setConfirmDeleteUserId] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
@@ -308,19 +307,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
     setTimeout(() => setActionMessage(null), 3500);
   };
 
-  const handleToggleRole = async (user: any) => {
-    const newRole = user.role === 'admin' ? 'passenger' : 'admin';
-    try {
-      const res = await authApi.updateUserRole(user.id, newRole);
-      if (res.success) {
-        showToast(`User role for ${user.name} changed to ${newRole.toUpperCase()}.`);
-        await fetchUsers();
-      }
-    } catch (err: any) {
-      alert(`Failed to update role: ${err.message}`);
-    }
-  };
-
   const handleDeleteUser = async (userId: string) => {
     if (confirmDeleteUserId !== userId) {
       setConfirmDeleteUserId(userId);
@@ -364,33 +350,41 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
     }
   };
 
-  // Filter users by search query, role, and bookings count with safe null checks
-  const filteredUsers = usersList.filter(u => {
-    if (!u) return false;
-    const nameStr = (u.name || '').toLowerCase();
-    const emailStr = (u.email || '').toLowerCase();
-    const phoneStr = u.phone ? String(u.phone) : '';
-    const query = usersSearchQuery.trim().toLowerCase();
+  // Isolate passengers from system administrators (admins & super_admins belong to Staff tab)
+  const passengerUsersList = useMemo(() => {
+    return usersList.filter(u => u && u.role === 'passenger');
+  }, [usersList]);
 
-    const matchesSearch = 
-      !query ||
-      nameStr.includes(query) ||
-      emailStr.includes(query) ||
-      phoneStr.includes(query);
+  // Filter passengers by search query and bookings status
+  const filteredUsers = useMemo(() => {
+    return passengerUsersList.filter(u => {
+      if (!u) return false;
+      const nameStr = (u.name || '').toLowerCase();
+      const emailStr = (u.email || '').toLowerCase();
+      const phoneStr = u.phone ? String(u.phone) : '';
+      const query = usersSearchQuery.trim().toLowerCase();
 
-    const matchesRole = 
-      usersRoleFilter === 'all' || u.role === usersRoleFilter;
+      const matchesSearch = 
+        !query ||
+        nameStr.includes(query) ||
+        emailStr.includes(query) ||
+        phoneStr.includes(query);
 
-    const matchesBookings = 
-      !onlyWithBookings || (u.totalBookings && Number(u.totalBookings) > 0);
+      const hasBookings = Boolean(u.totalBookings && Number(u.totalBookings) > 0);
+      const matchesFilter = 
+        passengerFilter === 'all' ||
+        (passengerFilter === 'with-bookings' && hasBookings) ||
+        (passengerFilter === 'without-bookings' && !hasBookings);
 
-    return matchesSearch && matchesRole && matchesBookings;
-  });
+      return matchesSearch && matchesFilter;
+    });
+  }, [passengerUsersList, usersSearchQuery, passengerFilter]);
 
-  const totalUsersCount = usersList.length;
-  const passengerCount = usersList.filter(u => u && u.role === 'passenger').length;
-  const adminCount = usersList.filter(u => u && u.role === 'admin').length;
-  const totalUserBookings = usersList.reduce((acc, u) => acc + (u && u.totalBookings ? Number(u.totalBookings) : 0), 0);
+  const totalPassengersCount = passengerUsersList.length;
+  const passengersWithBookingsCount = passengerUsersList.filter(u => u.totalBookings && Number(u.totalBookings) > 0).length;
+  const passengersWithoutBookingsCount = totalPassengersCount - passengersWithBookingsCount;
+  const totalPassengerBookings = passengerUsersList.reduce((acc, u) => acc + (u && u.totalBookings ? Number(u.totalBookings) : 0), 0);
+  const systemAdminsCount = usersList.filter(u => u && (u.role === 'admin' || u.role === 'super_admin')).length;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
@@ -496,7 +490,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               {activeTab === 'fleet' && 'Fleet & Route Operations'}
               {activeTab === 'timetables' && 'Master Timetables'}
               {activeTab === 'analytics' && 'Revenue & Analytics'}
-              {activeTab === 'users' && `User Accounts (${totalUsersCount})`}
+              {activeTab === 'users' && `Passenger Accounts (${totalPassengersCount})`}
               {activeTab === 'payment-slips' && 'Payment Slips'}
               {activeTab === 'whatsapp' && 'WhatsApp Gateway'}
               {activeTab === 'promos' && 'Promo Codes & Discounts'}
@@ -608,17 +602,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                       <button
                         onClick={() => { setActiveTab('users'); setIsMobileNavOpen(false); }}
                         className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                          activeTab === 'users' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                          activeTab === 'users' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4" /> User Accounts ({totalUsersCount})
+                          <Users className="w-4 h-4" /> Passenger Accounts ({totalPassengersCount})
                         </div>
-                        {usersList.length > 0 && (
+                        {totalPassengersCount > 0 && (
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                            activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+                            activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700'
                           }`}>
-                            {totalUsersCount}
+                            {totalPassengersCount}
                           </span>
                         )}
                       </button>
@@ -882,17 +876,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                       <button
                         onClick={() => setActiveTab('users')}
                         className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
-                          activeTab === 'users' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+                          activeTab === 'users' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4" /> User Accounts ({totalUsersCount})
+                          <Users className="w-4 h-4" /> Passenger Accounts ({totalPassengersCount})
                         </div>
-                        {usersList.length > 0 && (
+                        {totalPassengersCount > 0 && (
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                            activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'
+                            activeTab === 'users' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700'
                           }`}>
-                            {totalUsersCount}
+                            {totalPassengersCount}
                           </span>
                         )}
                       </button>
@@ -1680,8 +1674,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                 <span className="text-xs font-bold uppercase tracking-wider">Registered Accounts</span>
                 <Users className="w-5 h-5 text-indigo-600" />
               </div>
-              <p className="text-2xl font-black text-slate-900 font-mono">{totalUsersCount}</p>
-              <p className="text-xs text-indigo-600 font-semibold">{passengerCount} Passengers • {adminCount} Admins</p>
+              <p className="text-2xl font-black text-slate-900 font-mono">{usersList.length}</p>
+              <p className="text-xs text-indigo-600 font-semibold">{totalPassengersCount} Passengers • {systemAdminsCount} Admins & Staff</p>
             </div>
           </div>
 
@@ -1719,62 +1713,56 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
       {activeTab === 'users' && (
         <div className="space-y-8 animate-fade-in-up">
           
-          {/* User Metrics Banner with Interactive Filtering */}
+          {/* Passenger Metrics Banner with Interactive Filtering */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             
-            {/* Card 1: Total Accounts */}
+            {/* Card 1: Total Passengers */}
             <div
-              onClick={() => {
-                setUsersRoleFilter('all');
-                setOnlyWithBookings(false);
-              }}
+              onClick={() => setPassengerFilter('all')}
               className={`p-5 rounded-3xl cursor-pointer transition-all duration-200 transform hover:-translate-y-1 hover:shadow-xl select-none ${
-                usersRoleFilter === 'all' && !onlyWithBookings
-                  ? 'bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 text-white shadow-xl ring-4 ring-purple-500/40 scale-[1.02]'
+                passengerFilter === 'all'
+                  ? 'bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900 text-white shadow-xl ring-4 ring-blue-500/40 scale-[1.02]'
                   : 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-sm'
               }`}
             >
               <div className="flex items-center justify-between opacity-80">
-                <span className="text-xs font-bold uppercase tracking-wider">Total Accounts</span>
-                <Users className={`w-5 h-5 ${usersRoleFilter === 'all' && !onlyWithBookings ? 'text-purple-300' : 'text-purple-600'}`} />
+                <span className="text-xs font-bold uppercase tracking-wider">Total Passengers</span>
+                <Users className={`w-5 h-5 ${passengerFilter === 'all' ? 'text-blue-300' : 'text-blue-600'}`} />
               </div>
-              <p className="text-3xl font-black font-mono tracking-tight my-1">{totalUsersCount}</p>
+              <p className="text-3xl font-black font-mono tracking-tight my-1">{totalPassengersCount}</p>
               <div className="flex items-center justify-between">
-                <p className={`text-[11px] font-medium ${usersRoleFilter === 'all' && !onlyWithBookings ? 'text-purple-200' : 'text-slate-500'}`}>
+                <p className={`text-[11px] font-medium ${passengerFilter === 'all' ? 'text-blue-200' : 'text-slate-500'}`}>
                   Registered in OmniBus Neon DB
                 </p>
-                {usersRoleFilter === 'all' && !onlyWithBookings && (
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-purple-400/30 text-purple-200 border border-purple-300/30">
+                {passengerFilter === 'all' && (
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-blue-400/30 text-blue-200 border border-blue-300/30">
                     Showing All
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Card 2: Passenger Accounts */}
+            {/* Card 2: Active Bookers */}
             <div
-              onClick={() => {
-                setUsersRoleFilter('passenger');
-                setOnlyWithBookings(false);
-              }}
+              onClick={() => setPassengerFilter('with-bookings')}
               className={`p-5 rounded-3xl cursor-pointer transition-all duration-200 transform hover:-translate-y-1 hover:shadow-xl select-none ${
-                usersRoleFilter === 'passenger' && !onlyWithBookings
+                passengerFilter === 'with-bookings'
                   ? 'bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-xl ring-4 ring-blue-400/40 scale-[1.02]'
                   : 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-sm'
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className={`text-xs font-bold uppercase tracking-wider ${usersRoleFilter === 'passenger' && !onlyWithBookings ? 'text-blue-100' : 'text-slate-500'}`}>
-                  Passenger Accounts
+                <span className={`text-xs font-bold uppercase tracking-wider ${passengerFilter === 'with-bookings' ? 'text-blue-100' : 'text-slate-500'}`}>
+                  Active Bookers
                 </span>
-                <UserCheck className={`w-5 h-5 ${usersRoleFilter === 'passenger' && !onlyWithBookings ? 'text-white' : 'text-blue-600'}`} />
+                <UserCheck className={`w-5 h-5 ${passengerFilter === 'with-bookings' ? 'text-white' : 'text-blue-600'}`} />
               </div>
-              <p className="text-3xl font-black font-mono tracking-tight my-1">{passengerCount}</p>
+              <p className="text-3xl font-black font-mono tracking-tight my-1">{passengersWithBookingsCount}</p>
               <div className="flex items-center justify-between">
-                <p className={`text-xs font-semibold ${usersRoleFilter === 'passenger' && !onlyWithBookings ? 'text-blue-100' : 'text-blue-600'}`}>
-                  Standard passengers & travelers
+                <p className={`text-xs font-semibold ${passengerFilter === 'with-bookings' ? 'text-blue-100' : 'text-blue-600'}`}>
+                  Passengers with 1+ bookings
                 </p>
-                {usersRoleFilter === 'passenger' && !onlyWithBookings && (
+                {passengerFilter === 'with-bookings' && (
                   <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-white/20 text-white border border-white/30">
                     Filtered
                   </span>
@@ -1782,30 +1770,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               </div>
             </div>
 
-            {/* Card 3: System Admins */}
+            {/* Card 3: No Bookings Yet */}
             <div
-              onClick={() => {
-                setUsersRoleFilter('admin');
-                setOnlyWithBookings(false);
-              }}
+              onClick={() => setPassengerFilter('without-bookings')}
               className={`p-5 rounded-3xl cursor-pointer transition-all duration-200 transform hover:-translate-y-1 hover:shadow-xl select-none ${
-                usersRoleFilter === 'admin' && !onlyWithBookings
-                  ? 'bg-gradient-to-br from-purple-700 to-indigo-800 text-white shadow-xl ring-4 ring-purple-400/40 scale-[1.02]'
+                passengerFilter === 'without-bookings'
+                  ? 'bg-gradient-to-br from-amber-600 to-orange-700 text-white shadow-xl ring-4 ring-amber-400/40 scale-[1.02]'
                   : 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-sm'
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className={`text-xs font-bold uppercase tracking-wider ${usersRoleFilter === 'admin' && !onlyWithBookings ? 'text-purple-100' : 'text-slate-500'}`}>
-                  System Admins
+                <span className={`text-xs font-bold uppercase tracking-wider ${passengerFilter === 'without-bookings' ? 'text-amber-100' : 'text-slate-500'}`}>
+                  No Bookings Yet
                 </span>
-                <ShieldCheck className={`w-5 h-5 ${usersRoleFilter === 'admin' && !onlyWithBookings ? 'text-white' : 'text-purple-600'}`} />
+                <Sparkles className={`w-5 h-5 ${passengerFilter === 'without-bookings' ? 'text-white' : 'text-amber-600'}`} />
               </div>
-              <p className="text-3xl font-black font-mono tracking-tight my-1">{adminCount}</p>
+              <p className="text-3xl font-black font-mono tracking-tight my-1">{passengersWithoutBookingsCount}</p>
               <div className="flex items-center justify-between">
-                <p className={`text-xs font-semibold ${usersRoleFilter === 'admin' && !onlyWithBookings ? 'text-purple-100' : 'text-purple-600'}`}>
-                  Fleet managers & super admins
+                <p className={`text-xs font-semibold ${passengerFilter === 'without-bookings' ? 'text-amber-100' : 'text-amber-600'}`}>
+                  Registered, yet to reserve
                 </p>
-                {usersRoleFilter === 'admin' && !onlyWithBookings && (
+                {passengerFilter === 'without-bookings' && (
                   <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-white/20 text-white border border-white/30">
                     Filtered
                   </span>
@@ -1813,39 +1798,35 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               </div>
             </div>
 
-            {/* Card 4: User Bookings Total */}
+            {/* Card 4: Total Passenger Bookings */}
             <div
-              onClick={() => {
-                setOnlyWithBookings(!onlyWithBookings);
-              }}
+              onClick={() => setPassengerFilter('with-bookings')}
               className={`p-5 rounded-3xl cursor-pointer transition-all duration-200 transform hover:-translate-y-1 hover:shadow-xl select-none ${
-                onlyWithBookings
+                passengerFilter === 'with-bookings'
                   ? 'bg-gradient-to-br from-emerald-700 to-teal-800 text-white shadow-xl ring-4 ring-emerald-400/40 scale-[1.02]'
                   : 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-sm'
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className={`text-xs font-bold uppercase tracking-wider ${onlyWithBookings ? 'text-emerald-100' : 'text-slate-500'}`}>
-                  User Bookings Total
+                <span className={`text-xs font-bold uppercase tracking-wider ${passengerFilter === 'with-bookings' ? 'text-emerald-100' : 'text-slate-500'}`}>
+                  Total Reservations
                 </span>
-                <Ticket className={`w-5 h-5 ${onlyWithBookings ? 'text-white' : 'text-emerald-600'}`} />
+                <Ticket className={`w-5 h-5 ${passengerFilter === 'with-bookings' ? 'text-white' : 'text-emerald-600'}`} />
               </div>
-              <p className="text-3xl font-black font-mono tracking-tight my-1">{totalUserBookings}</p>
+              <p className="text-3xl font-black font-mono tracking-tight my-1">{totalPassengerBookings}</p>
               <div className="flex items-center justify-between">
-                <p className={`text-xs font-semibold ${onlyWithBookings ? 'text-emerald-100' : 'text-emerald-600'}`}>
-                  Associated with user accounts
+                <p className={`text-xs font-semibold ${passengerFilter === 'with-bookings' ? 'text-emerald-100' : 'text-emerald-600'}`}>
+                  Total seats booked by passengers
                 </p>
-                {onlyWithBookings && (
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-white/20 text-white border border-white/30">
-                    Has Bookings
-                  </span>
-                )}
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-emerald-100 text-emerald-700 border border-emerald-200">
+                  Volume
+                </span>
               </div>
             </div>
 
           </div>
 
-          {/* User Accounts Management Card */}
+          {/* Passenger Accounts Management Card */}
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
             
             {/* Table Header Controls */}
@@ -1853,10 +1834,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-lg font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
-                    <Users className="w-5 h-5 text-purple-600" /> Registered User Accounts
+                    <Users className="w-5 h-5 text-blue-600" /> Registered Passenger Accounts
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Inspect user registration details, mobile contacts, role privileges, and account history.
+                    Inspect passenger registration details, mobile contacts, and travel booking history.
                   </p>
                 </div>
 
@@ -1865,12 +1846,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                   disabled={usersLoading}
                   className="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-2 transition-colors self-start sm:self-auto cursor-pointer"
                 >
-                  <RefreshCw className={`w-3.5 h-3.5 ${usersLoading ? 'animate-spin text-purple-600' : ''}`} />
-                  <span>Refresh Users</span>
+                  <RefreshCw className={`w-3.5 h-3.5 ${usersLoading ? 'animate-spin text-blue-600' : ''}`} />
+                  <span>Refresh Passengers</span>
                 </button>
               </div>
 
-              {/* Real-time Search & Role Filter Bar */}
+              {/* Real-time Search & Filter Bar */}
               <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
                 
                 {/* Search Input */}
@@ -1880,8 +1861,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                     type="text"
                     value={usersSearchQuery}
                     onChange={(e) => setUsersSearchQuery(e.target.value)}
-                    placeholder="Search users by name, email, or Sri Lankan phone number…"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+                    placeholder="Search passengers by name, email, or Sri Lankan phone number…"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                   />
                   {usersSearchQuery && (
                     <button
@@ -1893,56 +1874,56 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                   )}
                 </div>
 
-                {/* Role Filter Tabs */}
+                {/* Filter Tabs */}
                 <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200/80 w-full sm:w-auto shrink-0">
                   <button
-                    onClick={() => setUsersRoleFilter('all')}
+                    onClick={() => setPassengerFilter('all')}
                     className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                      usersRoleFilter === 'all'
-                        ? 'bg-white text-purple-700 shadow-xs'
+                      passengerFilter === 'all'
+                        ? 'bg-white text-blue-700 shadow-xs'
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    All ({totalUsersCount})
+                    All ({totalPassengersCount})
                   </button>
                   <button
-                    onClick={() => setUsersRoleFilter('passenger')}
+                    onClick={() => setPassengerFilter('with-bookings')}
                     className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                      usersRoleFilter === 'passenger'
-                        ? 'bg-white text-blue-600 shadow-xs'
+                      passengerFilter === 'with-bookings'
+                        ? 'bg-white text-emerald-600 shadow-xs'
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    Passengers ({passengerCount})
+                    With Bookings ({passengersWithBookingsCount})
                   </button>
                   <button
-                    onClick={() => setUsersRoleFilter('admin')}
+                    onClick={() => setPassengerFilter('without-bookings')}
                     className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                      usersRoleFilter === 'admin'
-                        ? 'bg-white text-purple-600 shadow-xs'
+                      passengerFilter === 'without-bookings'
+                        ? 'bg-white text-amber-600 shadow-xs'
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    Admins ({adminCount})
+                    No Bookings ({passengersWithoutBookingsCount})
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Users List Data Table */}
+            {/* Passengers List Data Table */}
             {usersLoading ? (
               <div className="py-16 text-center text-slate-400 space-y-3">
-                <RefreshCw className="w-8 h-8 mx-auto animate-spin text-purple-500" />
-                <p className="text-xs font-semibold">Loading user accounts from Neon DB…</p>
+                <RefreshCw className="w-8 h-8 mx-auto animate-spin text-blue-500" />
+                <p className="text-xs font-semibold">Loading passenger accounts from Neon DB…</p>
               </div>
             ) : filteredUsers.length === 0 ? (
               <div className="py-16 text-center text-slate-400 space-y-3">
                 <UserX className="w-10 h-10 mx-auto text-slate-300" />
-                <p className="text-sm font-bold text-slate-700">No user accounts found</p>
+                <p className="text-sm font-bold text-slate-700">No passenger accounts found</p>
                 <p className="text-xs text-slate-400 max-w-sm mx-auto">
                   {usersSearchQuery
-                    ? `No accounts matching "${usersSearchQuery}". Try clearing search keywords.`
-                    : 'No user accounts recorded in database.'}
+                    ? `No passenger accounts matching "${usersSearchQuery}". Try clearing search keywords.`
+                    : 'No passenger accounts recorded in database.'}
                 </p>
               </div>
             ) : (
@@ -1950,9 +1931,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                 <table className="w-full text-left text-xs text-slate-700">
                   <thead className="bg-slate-50 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                     <tr>
-                      <th className="px-6 py-4">User Details</th>
+                      <th className="px-6 py-4">Passenger Details</th>
                       <th className="px-6 py-4">Mobile Phone</th>
-                      <th className="px-6 py-4">Role & Access</th>
+                      <th className="px-6 py-4">Account Role</th>
                       <th className="px-6 py-4">Registered Date</th>
                       <th className="px-6 py-4 text-center">Bookings</th>
                       <th className="px-6 py-4 text-right">Actions</th>
@@ -1971,15 +1952,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                           {/* User Name & Email */}
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className={`w-9 h-9 rounded-2xl flex items-center justify-center text-white font-black text-xs shadow-xs ${
-                                u.role === 'admin'
-                                  ? 'bg-gradient-to-tr from-purple-600 to-indigo-600'
-                                  : 'bg-gradient-to-tr from-blue-600 to-cyan-600'
-                              }`}>
-                                {(u.name || 'U').charAt(0).toUpperCase()}
+                              <div className="w-9 h-9 rounded-2xl flex items-center justify-center text-white font-black text-xs shadow-xs bg-gradient-to-tr from-blue-600 to-indigo-600">
+                                {(u.name || 'P').charAt(0).toUpperCase()}
                               </div>
                               <div>
-                                <p className="font-extrabold text-slate-900 text-sm">{u.name || 'User'}</p>
+                                <p className="font-extrabold text-slate-900 text-sm">{u.name || 'Passenger'}</p>
                                 <p className="text-slate-500 font-mono text-[11px] flex items-center gap-1">
                                   <Mail className="w-3 h-3 text-slate-400" /> {u.email || 'N/A'}
                                 </p>
@@ -2001,24 +1978,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
 
                           {/* Role Badge */}
                           <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              <span className={`px-2.5 py-1 rounded-xl text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1 ${
-                                u.role === 'admin'
-                                  ? 'bg-purple-100 text-purple-700 border border-purple-200'
-                                  : 'bg-blue-100 text-blue-700 border border-blue-200'
-                              }`}>
-                                {u.role === 'admin' ? <ShieldCheck className="w-3 h-3" /> : <UserCheck className="w-3 h-3" />}
-                                {u.role}
-                              </span>
-
-                              <button
-                                onClick={() => handleToggleRole(u)}
-                                title={`Switch role to ${u.role === 'admin' ? 'passenger' : 'admin'}`}
-                                className="text-[10px] font-bold text-slate-400 hover:text-purple-600 hover:bg-purple-50 px-2 py-1 rounded-lg border border-slate-200 transition-all cursor-pointer"
-                              >
-                                Toggle
-                              </button>
-                            </div>
+                            <span className="px-2.5 py-1 rounded-xl text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1 w-fit bg-blue-100 text-blue-700 border border-blue-200">
+                              <UserCheck className="w-3 h-3" />
+                              Passenger
+                            </span>
                           </td>
 
                           {/* Registered Date */}
@@ -2045,8 +2008,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 onClick={() => setSelectedUserForModal(u)}
-                                title="View User Account Details"
-                                className="p-2 rounded-xl bg-slate-100 hover:bg-purple-50 text-slate-600 hover:text-purple-600 transition-colors cursor-pointer"
+                                title="View Passenger Account Details"
+                                className="p-2 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-colors cursor-pointer"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
