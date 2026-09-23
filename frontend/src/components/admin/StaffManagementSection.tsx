@@ -70,7 +70,7 @@ const AVAILABLE_PERMISSIONS: { key: string; label: string; desc: string; icon: s
 
 export const StaffManagementSection: React.FC = () => {
   const { currentUser } = useBookingStore();
-  const token = localStorage.getItem('auth_token') || '';
+  const token = sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token') || '';
 
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

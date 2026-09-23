@@ -107,8 +107,12 @@ export function getViewFromLocation(): AppView {
 interface BookingStore {
   // Authentication
   currentUser: UserAccount | null;
-  login: (email: string, pass: string, role?: 'passenger' | 'admin') => Promise<{ success: boolean; message: string }>;
-  loginWithGoogle: (credential: string, role?: 'passenger' | 'admin') => Promise<{ success: boolean; message: string }>;
+  sessionExpiredNotice: boolean;
+  setSessionExpiredNotice: (val: boolean) => void;
+  checkSessionExpiry: () => boolean;
+  touchLastActive: () => void;
+  login: (email: string, pass: string, role?: 'passenger' | 'admin', rememberMe?: boolean) => Promise<{ success: boolean; message: string }>;
+  loginWithGoogle: (credential: string, role?: 'passenger' | 'admin', rememberMe?: boolean) => Promise<{ success: boolean; message: string }>;
   verifyEmailOtp: (email: string, otp: string) => Promise<{ success: boolean; message: string }>;
   sendOtp: (name: string, email: string) => Promise<{ success: boolean; message: string }>;
   register: (name: string, email: string, pass: string, otp: string, role?: 'passenger' | 'admin', phone?: string) => Promise<{ success: boolean; message: string }>;
@@ -235,8 +239,85 @@ interface BookingStore {
   t: (key: TranslationKey | string) => string;
 }
 
+export const ADMIN_INACTIVITY_LIMIT_MS = 30 * 60 * 1000; // 30 minutes
+
+export const getAuthToken = (): string | null => {
+  try {
+    return sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token') || null;
+  } catch {
+    return null;
+  }
+};
+
+export const clearStoredAuth = () => {
+  try {
+    sessionStorage.removeItem('dewmina_user');
+    sessionStorage.removeItem('auth_token');
+    sessionStorage.removeItem('dewmina_last_active');
+    localStorage.removeItem('dewmina_user');
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('dewmina_last_active');
+  } catch {}
+};
+
+export const getStoredAuthUser = (): UserAccount | null => {
+  try {
+    const raw = sessionStorage.getItem('dewmina_user') || localStorage.getItem('dewmina_user');
+    if (!raw) return null;
+    const user: UserAccount = JSON.parse(raw);
+    const isAdmin = user.role === 'admin' || user.role === 'super_admin';
+    if (isAdmin) {
+      const lastActiveRaw = sessionStorage.getItem('dewmina_last_active') || localStorage.getItem('dewmina_last_active');
+      const lastActive = lastActiveRaw ? Number(lastActiveRaw) : 0;
+      if (lastActive > 0 && Date.now() - lastActive > ADMIN_INACTIVITY_LIMIT_MS) {
+        clearStoredAuth();
+        return null;
+      }
+    }
+    return user;
+  } catch {
+    return null;
+  }
+};
+
+export const setStoredAuth = (user: UserAccount, token: string, rememberMe: boolean = true) => {
+  clearStoredAuth();
+  const storage = rememberMe ? localStorage : sessionStorage;
+  storage.setItem('dewmina_user', JSON.stringify(user));
+  storage.setItem('auth_token', token);
+  storage.setItem('dewmina_last_active', String(Date.now()));
+};
+
+export const touchAdminActivity = () => {
+  const now = String(Date.now());
+  if (sessionStorage.getItem('dewmina_user')) {
+    sessionStorage.setItem('dewmina_last_active', now);
+  }
+  if (localStorage.getItem('dewmina_user')) {
+    localStorage.setItem('dewmina_last_active', now);
+  }
+};
+
 export const useBookingStore = create<BookingStore>((set, get) => ({
-  currentUser: JSON.parse(localStorage.getItem('dewmina_user') || 'null'),
+  currentUser: getStoredAuthUser(),
+  sessionExpiredNotice: false,
+  setSessionExpiredNotice: (val) => set({ sessionExpiredNotice: val }),
+  checkSessionExpiry: () => {
+    const user = get().currentUser;
+    const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+    if (!isAdmin) return false;
+    const lastActiveRaw = sessionStorage.getItem('dewmina_last_active') || localStorage.getItem('dewmina_last_active');
+    const lastActive = lastActiveRaw ? Number(lastActiveRaw) : 0;
+    if (lastActive > 0 && Date.now() - lastActive > ADMIN_INACTIVITY_LIMIT_MS) {
+      get().logout();
+      set({ sessionExpiredNotice: true });
+      return true;
+    }
+    return false;
+  },
+  touchLastActive: () => {
+    touchAdminActivity();
+  },
   showAuthModal: false,
   setShowAuthModal: (val) => set({ showAuthModal: val }),
   isPwaPromptOpen: false,
@@ -253,7 +334,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     set({ theme });
   },
 
-  login: async (email, password, role) => {
+  login: async (email, password, role, rememberMe = true) => {
     try {
       const res = await authApi.login({ email, password, role });
       if (res.success && res.user) {
@@ -271,12 +352,12 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
           permissions: res.user.permissions || [],
           createdAt: res.user.createdAt,
         };
-        localStorage.setItem('dewmina_user', JSON.stringify(user));
-        localStorage.setItem('auth_token', res.token);
+        setStoredAuth(user, res.token, rememberMe);
         set({
           currentUser: user,
           userRole: user.role as any,
           showAuthModal: false,
+          sessionExpiredNotice: false,
         });
         const isAdmin = user.role === 'admin' || user.role === 'super_admin';
         get().setCurrentView(isAdmin ? 'admin-panel' : 'passenger-search');
@@ -288,7 +369,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     }
   },
 
-  loginWithGoogle: async (credential, role) => {
+  loginWithGoogle: async (credential, role, rememberMe = true) => {
     try {
       const res = await authApi.loginWithGoogle({ credential, role });
       if (res.success && res.user) {
@@ -306,12 +387,12 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
           permissions: res.user.permissions || [],
           createdAt: res.user.createdAt,
         };
-        localStorage.setItem('dewmina_user', JSON.stringify(user));
-        localStorage.setItem('auth_token', res.token);
+        setStoredAuth(user, res.token, rememberMe);
         set({
           currentUser: user,
           userRole: user.role as any,
           showAuthModal: false,
+          sessionExpiredNotice: false,
         });
         const isAdmin = user.role === 'admin' || user.role === 'super_admin';
         get().setCurrentView(isAdmin ? 'admin-panel' : 'passenger-search');
@@ -356,16 +437,17 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   },
 
   logout: () => {
-    localStorage.removeItem('dewmina_user');
-    localStorage.removeItem('auth_token');
-    set({ currentUser: null, userRole: 'passenger', tripStats: null, savedPassengers: [] });
+    clearStoredAuth();
+    const currentView = get().currentView;
     const hostname = window.location.hostname.toLowerCase();
     const isSuperHost = hostname.includes('dewmina-super-admin') || hostname.includes('super-admin');
-    get().setCurrentView(isSuperHost ? 'admin-portal' : 'passenger-search');
+    const wasInAdmin = currentView === 'admin-panel' || currentView === 'admin-portal' || currentView === 'master-management' || isSuperHost;
+    set({ currentUser: null, userRole: 'passenger', tripStats: null, savedPassengers: [] });
+    get().setCurrentView(wasInAdmin ? 'admin-portal' : 'passenger-search');
   },
 
   updateProfile: async (data) => {
-    const token = localStorage.getItem('auth_token');
+    const token = getAuthToken();
     if (!token) return { success: false, message: 'Not authenticated.' };
     try {
       const res = await authApi.updateProfile(token, data);
@@ -384,7 +466,12 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
           notifyWhatsapp: res.user.notifyWhatsapp !== false,
           notifySms: res.user.notifySms !== false,
         };
-        localStorage.setItem('dewmina_user', JSON.stringify(updatedUser));
+        if (sessionStorage.getItem('dewmina_user')) {
+          sessionStorage.setItem('dewmina_user', JSON.stringify(updatedUser));
+        }
+        if (localStorage.getItem('dewmina_user')) {
+          localStorage.setItem('dewmina_user', JSON.stringify(updatedUser));
+        }
         set({ currentUser: updatedUser });
         return { success: true, message: res.message || 'Profile updated successfully.' };
       }
@@ -395,7 +482,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   },
 
   deleteAccount: async () => {
-    const token = localStorage.getItem('auth_token');
+    const token = getAuthToken();
     if (!token) return { success: false, message: 'Not authenticated.' };
     try {
       const res = await authApi.deleteAccount(token);
@@ -411,7 +498,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
 
   savedPassengers: [],
   loadSavedPassengers: async () => {
-    const token = localStorage.getItem('auth_token');
+    const token = getAuthToken();
     if (!token) return;
     try {
       const list = await authApi.getSavedPassengers(token);
@@ -419,7 +506,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     } catch (_) {}
   },
   addSavedPassenger: async (data) => {
-    const token = localStorage.getItem('auth_token');
+    const token = getAuthToken();
     if (!token) return { success: false, message: 'Not authenticated.' };
     try {
       const res = await authApi.addSavedPassenger(token, data);
@@ -433,7 +520,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     }
   },
   deleteSavedPassenger: async (id) => {
-    const token = localStorage.getItem('auth_token');
+    const token = getAuthToken();
     if (!token) return { success: false, message: 'Not authenticated.' };
     try {
       const res = await authApi.deleteSavedPassenger(token, id);
@@ -449,7 +536,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
 
   tripStats: null,
   loadTripStats: async () => {
-    const token = localStorage.getItem('auth_token');
+    const token = getAuthToken();
     if (!token) return;
     try {
       const stats = await authApi.getTripStats(token);
@@ -458,7 +545,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   },
 
   changePassword: async (currentPassword, newPassword) => {
-    const token = localStorage.getItem('auth_token');
+    const token = getAuthToken();
     if (!token) return { success: false, message: 'Not authenticated.' };
     try {
       const res = await authApi.changePassword(token, { currentPassword, newPassword });
@@ -500,7 +587,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     get().setCurrentView('passenger-search');
   },
 
-  userRole: JSON.parse(localStorage.getItem('dewmina_user') || 'null')?.role || 'passenger',
+  userRole: getStoredAuthUser()?.role || 'passenger',
   setUserRole: (role) => set({ userRole: role }),
 
   sessionId: getSessionId(),

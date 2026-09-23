@@ -8,10 +8,11 @@ import {
 import { AnimatedLogoBadge } from '../common/AnimatedLogoBadge';
 
 export const AdminLoginPage: React.FC = () => {
-  const { login, setCurrentView } = useBookingStore();
+  const { login, setCurrentView, sessionExpiredNotice, setSessionExpiredNotice } = useBookingStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -133,7 +134,7 @@ export const AdminLoginPage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      const res = await login(email.trim().toLowerCase(), password, 'admin');
+      const res = await login(email.trim().toLowerCase(), password, 'admin', rememberMe);
       if (res.success) {
         if (typeof window !== 'undefined') {
           window.history.pushState({ view: 'admin-panel' }, '', '/#admin');
@@ -221,6 +222,26 @@ export const AdminLoginPage: React.FC = () => {
           )}
         </button>
 
+        {/* Session Inactivity Expiry Notice */}
+        {sessionExpiredNotice && (
+          <div className="mb-5 p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-200 text-xs flex items-start gap-2.5 animate-fadeIn">
+            <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-bold">Session Timed Out</p>
+              <p className="mt-0.5 text-amber-700/90 dark:text-amber-300/90">
+                You were signed out after 30 minutes of inactivity for security. Please sign in again.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSessionExpiredNotice(false)}
+              className="text-amber-600 hover:text-amber-800 dark:text-amber-400 p-0.5"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
         {/* Error Alert */}
         {errorMessage && (
           <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2.5 animate-fadeIn">
@@ -243,7 +264,7 @@ export const AdminLoginPage: React.FC = () => {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin.dewminasuperline@gmail.com"
+                placeholder="Enter admin email..."
                 className="w-full pl-11 pr-4 py-3.5 rounded-2xl ios-input-glass dark:bg-slate-800/80 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-medium placeholder-slate-400 dark:placeholder-slate-500 focus:outline-hidden transition shadow-xs"
               />
             </div>
@@ -261,7 +282,7 @@ export const AdminLoginPage: React.FC = () => {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
+                placeholder="Enter password..."
                 className="w-full pl-11 pr-11 py-3.5 rounded-2xl ios-input-glass dark:bg-slate-800/80 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-medium placeholder-slate-400 dark:placeholder-slate-500 focus:outline-hidden transition shadow-xs"
               />
               <button
@@ -272,6 +293,19 @@ export const AdminLoginPage: React.FC = () => {
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+          </div>
+
+          {/* Session Persistence Toggle */}
+          <div className="flex items-center justify-between px-1 py-1">
+            <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600 dark:text-slate-400 select-none">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 dark:border-slate-700 dark:bg-slate-800 cursor-pointer"
+              />
+              <span>Keep me signed in on this device</span>
+            </label>
           </div>
 
           <button

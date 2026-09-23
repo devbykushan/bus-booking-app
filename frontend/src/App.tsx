@@ -22,7 +22,7 @@ import { AdminLoginPage } from './components/admin/AdminLoginPage';
 import { AdminNotificationDrawer } from './components/admin/AdminNotificationDrawer';
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
 import { PwaInstallPrompt } from './components/common/PwaInstallPrompt';
-import { Bus, AlertCircle, Wifi, RefreshCw, ShieldAlert, ShieldCheck, Lock } from 'lucide-react';
+import { Bus, AlertCircle, Wifi, RefreshCw, ShieldAlert, Lock } from 'lucide-react';
 import { BASE_URL } from './services/api';
 
 export function App() {
@@ -35,8 +35,9 @@ export function App() {
     setError,
     currentUser,
     userRole,
-    setShowAuthModal,
     setCurrentView,
+    checkSessionExpiry,
+    touchLastActive,
   } = useBookingStore();
 
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || userRole === 'admin' || userRole === 'super_admin';
@@ -47,6 +48,39 @@ export function App() {
       setCurrentView('admin-panel');
     }
   }, [isAdmin, currentView, setCurrentView]);
+
+  // Check session inactivity expiry on app mount (e.g. re-opening tab or pasting link)
+  useEffect(() => {
+    checkSessionExpiry();
+  }, [checkSessionExpiry]);
+
+  // Track admin activity and periodic 30-min inactivity check
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    // Periodic check every 30 seconds
+    const interval = setInterval(() => {
+      checkSessionExpiry();
+    }, 30000);
+
+    // Throttled activity tracker (at most once every 10 seconds)
+    let lastThrottled = 0;
+    const handleActivity = () => {
+      const now = Date.now();
+      if (now - lastThrottled > 10000) {
+        lastThrottled = now;
+        touchLastActive();
+      }
+    };
+
+    const events = ['mousedown', 'keydown', 'touchstart', 'scroll', 'pointerdown'];
+    events.forEach((evt) => window.addEventListener(evt, handleActivity, { passive: true }));
+
+    return () => {
+      clearInterval(interval);
+      events.forEach((evt) => window.removeEventListener(evt, handleActivity));
+    };
+  }, [isAdmin, checkSessionExpiry, touchLastActive]);
 
   const [backendReady, setBackendReady] = useState(routes.length > 0);
   const [backendError, setBackendError] = useState(false);
@@ -312,20 +346,14 @@ export function App() {
               </div>
               <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
                 <button
-                  onClick={() => useBookingStore.getState().setUserRole('admin')}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-extrabold text-sm shadow-md transition-all cursor-pointer flex items-center gap-2 active:scale-95"
-                >
-                  <ShieldCheck className="w-4 h-4" /> Enable Admin Portal Access
-                </button>
-                <button
-                  onClick={() => setShowAuthModal(true)}
-                  className="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-sm shadow-md transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+                  onClick={() => setCurrentView('admin-portal')}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-sm shadow-md transition-all cursor-pointer flex items-center gap-2 active:scale-95"
                 >
                   <Lock className="w-4 h-4" /> Sign In as Admin
                 </button>
                 <button
                   onClick={() => setCurrentView('passenger-search')}
-                  className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-sm border border-slate-200 transition-all cursor-pointer"
+                  className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-extrabold text-sm border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
                 >
                   Return to Passenger Portal
                 </button>
