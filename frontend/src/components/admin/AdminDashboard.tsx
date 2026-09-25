@@ -12,12 +12,13 @@ import { PassengerManifestModal } from './PassengerManifestModal';
 import { BroadcastAnnouncementModal } from './BroadcastAnnouncementModal';
 import { PromoCodesManager } from './PromoCodesManager';
 import { DailyFinancialSettlementModal } from './DailyFinancialSettlementModal';
+import { FinancialAnalyticsSection } from './FinancialAnalyticsSection';
 import { SeatBlockManagerModal } from './SeatBlockManagerModal';
 import { LiveMap } from '../passenger/LiveMap';
 import { routesApi, authApi, paymentSlipsApi } from '../../services/api';
 import type { BusRoute } from '../../types/booking';
 import { 
-  TrendingUp, Users, DollarSign, Bus, Award, BarChart2, 
+  Users, DollarSign, Bus, BarChart2, 
   SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
   Trash2, RefreshCw, Edit3, Clock, Star, Search,
   Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare, Menu, Shield,
@@ -213,9 +214,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
   const selectedRoute = routes.find(r => r.id === selectedRouteId) || routes[0] || null;
   const manifestBookings = bookings.filter(b => b.routeId === selectedRoute?.id);
 
-  const totalRevenue = bookings.reduce((sum, b) => sum + (b.bookingStatus !== 'cancelled' ? b.totalFare : 0), 0);
-  const confirmedBookingsCount = bookings.filter(b => b.bookingStatus !== 'cancelled').length;
-
   // Load users list from backend API
   const fetchUsers = async () => {
     setUsersLoading(true);
@@ -384,7 +382,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
   const passengersWithBookingsCount = passengerUsersList.filter(u => u.totalBookings && Number(u.totalBookings) > 0).length;
   const passengersWithoutBookingsCount = totalPassengersCount - passengersWithBookingsCount;
   const totalPassengerBookings = passengerUsersList.reduce((acc, u) => acc + (u && u.totalBookings ? Number(u.totalBookings) : 0), 0);
-  const systemAdminsCount = usersList.filter(u => u && (u.role === 'admin' || u.role === 'super_admin')).length;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
@@ -1627,86 +1624,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
         </div>
       )}
 
-      {/* ─── TAB 2: REVENUE & ANALYTICS ─── */}
+      {/* ─── TAB 2: REVENUE & FINANCIAL ANALYTICS ─── */}
       {activeTab === 'analytics' && (
-        <div className="space-y-8">
-          
-          {/* Analytics Header with Daily Settlement Action */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xs">
-            <div>
-              <h3 className="text-lg font-black text-slate-900 dark:text-white">Revenue & Accounting Analytics</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Real-time revenue metrics, daily collections & fleet operator commissions</p>
-            </div>
-
-            <button
-              onClick={() => setShowDailySettlementModal(true)}
-              className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
-            >
-              <DollarSign className="w-4 h-4" />
-              <span>Daily Settlement Sheet (Cash / Slips / Card)</span>
-            </button>
-          </div>
-
-          {/* Revenue KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                <span className="text-xs font-bold uppercase tracking-wider">Total Gross Revenue</span>
-                <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <p className="text-2xl font-black text-slate-900 dark:text-white font-mono">LKR {totalRevenue.toLocaleString()}</p>
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-                <TrendingUp className="w-3.5 h-3.5" /> +14.2% from last month
-              </p>
-            </div>
-
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                <span className="text-xs font-bold uppercase tracking-wider">Confirmed Tickets</span>
-                <Ticket className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <p className="text-2xl font-black text-slate-900 dark:text-white font-mono">{confirmedBookingsCount}</p>
-              <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold">Across {routes.length} active fleet routes</p>
-            </div>
-
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                <span className="text-xs font-bold uppercase tracking-wider">Registered Accounts</span>
-                <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-              </div>
-              <p className="text-2xl font-black text-slate-900 dark:text-white font-mono">{usersList.length}</p>
-              <p className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">{totalPassengersCount} Passengers • {systemAdminsCount} Admins & Staff</p>
-            </div>
-          </div>
-
-          {/* Operator Commission Summary */}
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-            <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-3">
-              <Award className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> Fleet Operator Revenue Shares
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-1">
-                <p className="font-bold text-slate-800 dark:text-slate-200">Dewmina Super Line</p>
-                <p className="text-slate-500 dark:text-slate-400 text-[11px]">8 Active Buses • 10% Platform Fee</p>
-                <p className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm pt-2">LKR 684,000.00</p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-1">
-                <p className="font-bold text-slate-800 dark:text-slate-200">Royal Express LK</p>
-                <p className="text-slate-500 dark:text-slate-400 text-[11px]">6 Active Buses • 10% Platform Fee</p>
-                <p className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm pt-2">LKR 492,000.00</p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-1">
-                <p className="font-bold text-slate-800 dark:text-slate-200">Lanka Ashok Leyland Air Bus</p>
-                <p className="text-slate-500 dark:text-slate-400 text-[11px]">4 Active Buses • 12% Platform Fee</p>
-                <p className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm pt-2">LKR 315,000.00</p>
-              </div>
-            </div>
-          </div>
-
-        </div>
+        <FinancialAnalyticsSection />
       )}
 
       {/* ─── TAB 3: USER ACCOUNTS & MANAGEMENT ─── */}
