@@ -417,11 +417,15 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         set({
           currentUser: user,
           userRole: user.role as any,
-          showAuthModal: false,
           sessionExpiredNotice: false,
         });
+        // Note: showAuthModal is intentionally NOT set here so AuthModal can
+        // show the Google login success screen before closing itself.
         const isAdmin = user.role === 'admin' || user.role === 'super_admin';
-        get().setCurrentView(isAdmin ? 'admin-panel' : 'passenger-search');
+        // Delay navigation slightly so the success screen has time to show
+        setTimeout(() => {
+          get().setCurrentView(isAdmin ? 'admin-panel' : 'passenger-search');
+        }, 1900);
         return { success: true, message: res.message || 'Logged in successfully' };
       }
       return { success: false, message: res.message || 'Google login failed' };
