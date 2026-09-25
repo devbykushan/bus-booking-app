@@ -23,6 +23,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [googleLoginSuccess, setGoogleLoginSuccess] = useState<{ name: string } | null>(null);
 
   // Real-time validation touched states
   const [nameTouched, setNameTouched] = useState(false);
@@ -155,7 +156,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     try {
       const res = await loginWithGoogle(credentialResponse.credential, role);
       if (res.success) {
-        onClose();
+        // Decode JWT to get name for success screen
+        let userName = 'User';
+        try {
+          const payload = JSON.parse(atob(credentialResponse.credential.split('.')[1]));
+          userName = payload.given_name || payload.name || 'User';
+        } catch {}
+        setGoogleLoginSuccess({ name: userName });
+        setTimeout(() => {
+          setGoogleLoginSuccess(null);
+          onClose();
+        }, 1800);
       } else {
         setShakeError(true);
         setErrorMsg(res.message || 'Google Sign-In failed.');
@@ -228,7 +239,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             </button>
           </div>
 
-          {registrationSuccess ? (
+
+          {googleLoginSuccess ? (
+            <div className="text-center py-10 animate-fade-in-up space-y-4 px-6">
+              <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center shadow-md">
+                <span className="text-emerald-500 text-4xl">✓</span>
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-xl font-black text-slate-800">Welcome back, {googleLoginSuccess.name}!</h3>
+                <p className="text-sm text-slate-500">You've signed in successfully with Google.</p>
+              </div>
+              <div className="flex justify-center pt-1">
+                <div className="w-8 h-1 rounded-full bg-emerald-400 animate-pulse" />
+              </div>
+            </div>
+          ) : registrationSuccess ? (
             <div className="text-center py-6 animate-fade-in-up space-y-4">
               <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4 shadow-sm">
                 <span className="text-emerald-500 text-3xl font-bold">✓</span>
