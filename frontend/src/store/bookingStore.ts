@@ -109,6 +109,9 @@ interface BookingStore {
   currentUser: UserAccount | null;
   sessionExpiredNotice: boolean;
   setSessionExpiredNotice: (val: boolean) => void;
+  sessionWarningOpen: boolean;
+  sessionWarningRemainingSeconds: number;
+  staySignedIn: () => void;
   checkSessionExpiry: () => boolean;
   touchLastActive: () => void;
   login: (email: string, pass: string, role?: 'passenger' | 'admin', rememberMe?: boolean) => Promise<{ success: boolean; message: string }>;
@@ -240,6 +243,7 @@ interface BookingStore {
 }
 
 export const ADMIN_INACTIVITY_LIMIT_MS = 30 * 60 * 1000; // 30 minutes
+export const ADMIN_WARNING_THRESHOLD_MS = 28 * 60 * 1000; // 28 minutes (2-minute warning)
 
 export const getAuthToken = (): string | null => {
   try {
@@ -302,16 +306,38 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   currentUser: getStoredAuthUser(),
   sessionExpiredNotice: false,
   setSessionExpiredNotice: (val) => set({ sessionExpiredNotice: val }),
+  sessionWarningOpen: false,
+  sessionWarningRemainingSeconds: 0,
+  staySignedIn: () => {
+    touchAdminActivity();
+    set({ sessionWarningOpen: false, sessionWarningRemainingSeconds: 0 });
+  },
   checkSessionExpiry: () => {
     const user = get().currentUser;
     const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
-    if (!isAdmin) return false;
+    if (!isAdmin) {
+      if (get().sessionWarningOpen) {
+        set({ sessionWarningOpen: false, sessionWarningRemainingSeconds: 0 });
+      }
+      return false;
+    }
     const lastActiveRaw = sessionStorage.getItem('dewmina_last_active') || localStorage.getItem('dewmina_last_active');
     const lastActive = lastActiveRaw ? Number(lastActiveRaw) : 0;
-    if (lastActive > 0 && Date.now() - lastActive > ADMIN_INACTIVITY_LIMIT_MS) {
-      get().logout();
-      set({ sessionExpiredNotice: true });
-      return true;
+    if (lastActive > 0) {
+      const elapsed = Date.now() - lastActive;
+      if (elapsed >= ADMIN_INACTIVITY_LIMIT_MS) {
+        get().logout();
+        set({ sessionExpiredNotice: true, sessionWarningOpen: false, sessionWarningRemainingSeconds: 0 });
+        return true;
+      }
+      if (elapsed >= ADMIN_WARNING_THRESHOLD_MS) {
+        const remainingSec = Math.max(0, Math.ceil((ADMIN_INACTIVITY_LIMIT_MS - elapsed) / 1000));
+        set({ sessionWarningOpen: true, sessionWarningRemainingSeconds: remainingSec });
+        return false;
+      }
+    }
+    if (get().sessionWarningOpen) {
+      set({ sessionWarningOpen: false, sessionWarningRemainingSeconds: 0 });
     }
     return false;
   },

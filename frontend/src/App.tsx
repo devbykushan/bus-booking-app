@@ -22,6 +22,7 @@ import { AdminLoginPage } from './components/admin/AdminLoginPage';
 import { AdminNotificationDrawer } from './components/admin/AdminNotificationDrawer';
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
 import { PwaInstallPrompt } from './components/common/PwaInstallPrompt';
+import { SessionTimeoutWarningModal } from './components/common/SessionTimeoutWarningModal';
 import { Bus, AlertCircle, Wifi, RefreshCw, ShieldAlert, Lock } from 'lucide-react';
 import { BASE_URL } from './services/api';
 
@@ -38,6 +39,7 @@ export function App() {
     setCurrentView,
     checkSessionExpiry,
     touchLastActive,
+    sessionWarningOpen,
   } = useBookingStore();
 
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || userRole === 'admin' || userRole === 'super_admin';
@@ -54,14 +56,15 @@ export function App() {
     checkSessionExpiry();
   }, [checkSessionExpiry]);
 
-  // Track admin activity and periodic 30-min inactivity check
+  // Track admin activity and periodic inactivity check (fast 1s live countdown when warning modal is open)
   useEffect(() => {
     if (!isAdmin) return;
 
-    // Periodic check every 30 seconds
+    // Check every 1 second when warning is open for smooth countdown, otherwise every 10 seconds
+    const tickInterval = sessionWarningOpen ? 1000 : 10000;
     const interval = setInterval(() => {
       checkSessionExpiry();
-    }, 30000);
+    }, tickInterval);
 
     // Throttled activity tracker (at most once every 10 seconds)
     let lastThrottled = 0;
@@ -80,7 +83,7 @@ export function App() {
       clearInterval(interval);
       events.forEach((evt) => window.removeEventListener(evt, handleActivity));
     };
-  }, [isAdmin, checkSessionExpiry, touchLastActive]);
+  }, [isAdmin, sessionWarningOpen, checkSessionExpiry, touchLastActive]);
 
   const [backendReady, setBackendReady] = useState(routes.length > 0);
   const [backendError, setBackendError] = useState(false);
@@ -417,6 +420,7 @@ export function App() {
       <FloatingWhatsApp />
       <PwaInstallPrompt />
       <AdminNotificationDrawer />
+      <SessionTimeoutWarningModal />
     </div>
   );
 }
