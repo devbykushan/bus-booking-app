@@ -12,6 +12,10 @@ export const FareBreakdown: React.FC = () => {
     discountRate,
     applyPromoCode,
     createBooking,
+    createRoundTripBooking,
+    tripType,
+    outboundLeg,
+    returnLeg,
     setCurrentView,
     goToSearchSchedules,
     t
@@ -23,7 +27,9 @@ export const FareBreakdown: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'wallet'>('bank_transfer');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  if (!selectedRoute || selectedSeatIds.length === 0) {
+  const isRoundTrip = tripType === 'round-trip' && Boolean(outboundLeg && returnLeg);
+
+  if (isRoundTrip ? (!outboundLeg || !returnLeg) : (!selectedRoute || selectedSeatIds.length === 0)) {
     return (
       <div className="text-center py-16 space-y-4">
         <p className="text-slate-500 text-base">{t('noRecentTicket')}</p>
@@ -37,8 +43,16 @@ export const FareBreakdown: React.FC = () => {
     );
   }
 
-  const selectedSeats = selectedRoute.seats.filter(s => selectedSeatIds.includes(s.id));
-  const baseFare = selectedSeats.reduce((sum, s) => sum + s.price, 0);
+  const outboundSeats = outboundLeg?.seats || [];
+  const returnSeats = returnLeg?.seats || [];
+  const singleSeats = selectedRoute ? selectedRoute.seats.filter(s => selectedSeatIds.includes(s.id)) : [];
+
+  const totalSeatsCount = isRoundTrip ? (outboundSeats.length + returnSeats.length) : singleSeats.length;
+
+  const baseFare = isRoundTrip
+    ? (outboundLeg!.baseFare + returnLeg!.baseFare)
+    : singleSeats.reduce((sum, s) => sum + s.price, 0);
+
   const taxAmount = 0; // Removed extra tax surcharge
   const discountAmount = Number((baseFare * discountRate).toFixed(2));
   const finalTotal = Number((baseFare - discountAmount).toFixed(2));
@@ -63,11 +77,18 @@ export const FareBreakdown: React.FC = () => {
 
     setIsProcessing(true);
 
-    const booking = await createBooking(paymentMethod, false);
-    setIsProcessing(false);
-
-    if (!booking) {
-      // Error is surfaced via global error banner
+    if (isRoundTrip) {
+      const res = await createRoundTripBooking(paymentMethod, false);
+      setIsProcessing(false);
+      if (!res) {
+        // Handled via store error
+      }
+    } else {
+      const booking = await createBooking(paymentMethod, false);
+      setIsProcessing(false);
+      if (!booking) {
+        // Error is surfaced via global error banner
+      }
     }
   };
 
@@ -235,16 +256,54 @@ export const FareBreakdown: React.FC = () => {
             <h3 className="text-base font-bold text-slate-800 tracking-tight border-b border-slate-200 pb-3 flex items-center justify-between">
               <span>{t('bookingSummary')}</span>
               <span className="text-xs text-blue-600 font-mono font-normal">
-                {selectedSeats.length} {t('seatsLocked')}
+                {totalSeatsCount} {t('seatsLocked')}
               </span>
             </h3>
 
             {/* Trip Details Summary */}
-            <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-xs space-y-1">
-              <p className="font-bold text-slate-800">{selectedRoute.operatorName}</p>
-              <p className="text-slate-600">{t(selectedRoute.origin.split(',')[0])} → {t(selectedRoute.destination.split(',')[0])}</p>
-              <p className="text-blue-600 font-mono">Seats: {selectedSeatIds.join(', ')}</p>
-            </div>
+            {isRoundTrip ? (
+              <div className="space-y-3">
+                {/* Outbound Leg Card */}
+                <div className="bg-blue-50/70 dark:bg-blue-950/40 p-3.5 rounded-2xl border border-blue-200/80 dark:border-blue-800 text-xs space-y-1.5 shadow-2xs">
+                  <div className="flex items-center justify-between text-blue-700 dark:text-blue-300 font-bold">
+                    <span className="flex items-center gap-1.5">
+                      <span className="px-1.5 py-0.5 rounded bg-blue-600 text-white text-[9px] font-black uppercase">Outbound</span>
+                      <span>{outboundLeg!.route.origin.split(',')[0]} ➔ {outboundLeg!.route.destination.split(',')[0]}</span>
+                    </span>
+                    <span className="font-mono text-slate-800 dark:text-white">LKR {outboundLeg!.baseFare.toLocaleString()}</span>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-400 text-[11px]">
+                    {outboundLeg!.travelDate} • {outboundLeg!.route.departureTime} • {outboundLeg!.route.busNumber}
+                  </p>
+                  <p className="text-blue-600 dark:text-blue-400 font-mono text-[11px] font-bold">
+                    Seats: {outboundLeg!.seats.map(s => s.number).join(', ')}
+                  </p>
+                </div>
+
+                {/* Return Leg Card */}
+                <div className="bg-emerald-50/70 dark:bg-emerald-950/40 p-3.5 rounded-2xl border border-emerald-200/80 dark:border-emerald-800 text-xs space-y-1.5 shadow-2xs">
+                  <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-300 font-bold">
+                    <span className="flex items-center gap-1.5">
+                      <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white text-[9px] font-black uppercase">Return</span>
+                      <span>{returnLeg!.route.origin.split(',')[0]} ➔ {returnLeg!.route.destination.split(',')[0]}</span>
+                    </span>
+                    <span className="font-mono text-slate-800 dark:text-white">LKR {returnLeg!.baseFare.toLocaleString()}</span>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-400 text-[11px]">
+                    {returnLeg!.travelDate} • {returnLeg!.route.departureTime} • {returnLeg!.route.busNumber}
+                  </p>
+                  <p className="text-emerald-600 dark:text-emerald-400 font-mono text-[11px] font-bold">
+                    Seats: {returnLeg!.seats.map(s => s.number).join(', ')}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-xs space-y-1">
+                <p className="font-bold text-slate-800">{selectedRoute?.operatorName}</p>
+                <p className="text-slate-600">{t(selectedRoute?.origin.split(',')[0] || '')} → {t(selectedRoute?.destination.split(',')[0] || '')}</p>
+                <p className="text-blue-600 font-mono">Seats: {selectedSeatIds.join(', ')}</p>
+              </div>
+            )}
 
             {/* Promo Code Input */}
             <form onSubmit={handleApplyPromo} className="space-y-2">

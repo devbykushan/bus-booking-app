@@ -1,10 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { QRCodeSVG } from 'qrcode.react';
-import { CheckCircle2, Printer, MapPin, MessageSquare, Bus, Clock, Calendar, Send, Copy, Check, ExternalLink, X, Smartphone, Settings2, Zap, Download } from 'lucide-react';
+import { CheckCircle2, Printer, MapPin, MessageSquare, Bus, Clock, Calendar, Send, Copy, Check, ExternalLink, X, Smartphone, Settings2, Zap, Download, ArrowRightLeft } from 'lucide-react';
 
 export const TicketModal: React.FC = () => {
-  const { latestConfirmedBooking, setCurrentView, goToSearchSchedules, setTrackingRouteId, validateTicketByPNR, t } = useBookingStore();
+  const { 
+    latestConfirmedBooking, 
+    latestConfirmedRoundTrip,
+    setCurrentView, 
+    goToSearchSchedules, 
+    setTrackingRouteId, 
+    validateTicketByPNR, 
+    t 
+  } = useBookingStore();
+
+  const [activePass, setActivePass] = useState<'outbound' | 'return'>('outbound');
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   const [phoneInput, setPhoneInput] = useState('');
   const [copied, setCopied] = useState(false);
@@ -14,7 +24,10 @@ export const TicketModal: React.FC = () => {
   const [isValidatingQr, setIsValidatingQr] = useState(false);
   const hasAutoSent = useRef(false);
 
-  const booking = latestConfirmedBooking;
+  const isRoundTrip = Boolean(latestConfirmedRoundTrip);
+  const booking = isRoundTrip
+    ? (activePass === 'outbound' ? latestConfirmedRoundTrip!.outbound : latestConfirmedRoundTrip!.return)
+    : latestConfirmedBooking;
 
   // Auto-send WhatsApp alert on screen load
   useEffect(() => {
@@ -108,6 +121,54 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       
+      {/* ── Round-Trip Dual Pass Selector ── */}
+      {isRoundTrip && latestConfirmedRoundTrip && (
+        <div className="no-print bg-slate-900 text-white p-5 rounded-3xl shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-slate-700 animate-fade-in">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-md flex-shrink-0">
+              <ArrowRightLeft className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-400 text-slate-950">
+                  Round-Trip Confirmed
+                </span>
+                <span className="text-xs font-mono text-slate-400">
+                  {latestConfirmedRoundTrip.groupId}
+                </span>
+              </div>
+              <p className="text-sm font-extrabold text-white">
+                Dual Boarding Passes (ගමන් වාර 2ක ටිකට්පත්) • Total: LKR {latestConfirmedRoundTrip.combinedTotalFare.toLocaleString()}
+              </p>
+            </div>
+          </div>
+
+          {/* Pass Switcher Buttons */}
+          <div className="inline-flex p-1 bg-slate-800 rounded-2xl border border-slate-700 self-start sm:self-auto">
+            <button
+              onClick={() => setActivePass('outbound')}
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                activePass === 'outbound'
+                  ? 'bg-blue-600 text-white shadow-md ring-2 ring-blue-400/30'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <span>🎫 1. Outbound Pass</span>
+            </button>
+            <button
+              onClick={() => setActivePass('return')}
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                activePass === 'return'
+                  ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-400/30'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <span>🎫 2. Return Pass</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Confirmation Banner */}
       <div className="no-print p-6 rounded-3xl border border-emerald-200 bg-emerald-50 text-center space-y-3 shadow-sm">
         <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">

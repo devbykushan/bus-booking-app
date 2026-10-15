@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { BusRoute, BoardingPoint, Booking, PassengerDetails, UserAccount, SavedPassenger, TripStats, PaymentSlip } from '../types/booking';
+import type { BusRoute, BoardingPoint, Booking, PassengerDetails, UserAccount, SavedPassenger, TripStats, PaymentSlip, TripType, RoundTripLeg, ConfirmedRoundTrip } from '../types/booking';
 import { routesApi, bookingsApi, seatsApi, validateApi, authApi, paymentSlipsApi } from '../services/api';
 import confetti from 'canvas-confetti';
 import { translations } from './translations';
@@ -147,6 +147,11 @@ interface BookingStore {
   isPwaPromptOpen: boolean;
   setIsPwaPromptOpen: (val: boolean) => void;
 
+  // Login success toast
+  loginToast: { name: string; avatarUrl?: string | null; isNewUser?: boolean } | null;
+  setLoginToast: (val: { name: string; avatarUrl?: string | null; isNewUser?: boolean } | null) => void;
+
+
   // Loading & errors
   isLoading: boolean;
   error: string | null;
@@ -178,6 +183,25 @@ interface BookingStore {
   setSearchCriteria: (origin: string, dest: string, date: string) => void;
   setSoloFemaleOnly: (val: boolean) => void;
   setBusTypeFilter: (val: string) => void;
+
+  // Round-trip booking
+  tripType: TripType;
+  setTripType: (type: TripType) => void;
+  returnDate: string;
+  setReturnDate: (date: string) => void;
+  roundTripStep: 1 | 2;
+  setRoundTripStep: (step: 1 | 2) => void;
+  outboundLeg: RoundTripLeg | null;
+  returnLeg: RoundTripLeg | null;
+  latestConfirmedRoundTrip: ConfirmedRoundTrip | null;
+  setLatestConfirmedRoundTrip: (rt: ConfirmedRoundTrip | null) => void;
+  confirmOutboundLeg: (customTravelDate?: string) => boolean;
+  confirmReturnLeg: (customTravelDate?: string) => boolean;
+  resetRoundTrip: () => void;
+  createRoundTripBooking: (
+    paymentMethod: 'card' | 'upi' | 'netbanking' | 'wallet' | 'bank_transfer',
+    insuranceSelected: boolean
+  ) => Promise<ConfirmedRoundTrip | null>;
 
   // Bus routes (loaded from API)
   routes: BusRoute[];
@@ -348,6 +372,9 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   setShowAuthModal: (val) => set({ showAuthModal: val }),
   isPwaPromptOpen: false,
   setIsPwaPromptOpen: (val) => set({ isPwaPromptOpen: val }),
+  loginToast: null,
+  setLoginToast: (val) => set({ loginToast: val }),
+
 
   theme: (localStorage.getItem('dewmina_theme') as 'light' | 'dark') || 'light',
   setTheme: (theme) => {
@@ -422,9 +449,12 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
         // Note: showAuthModal is intentionally NOT set here so AuthModal can
         // show the Google login success screen before closing itself.
         const isAdmin = user.role === 'admin' || user.role === 'super_admin';
+        const isNewUser = !!res.isNewUser;
         // Delay navigation slightly so the success screen has time to show
         setTimeout(() => {
           get().setCurrentView(isAdmin ? 'admin-panel' : 'passenger-search');
+          // Show global toast notification after modal closes
+          set({ loginToast: { name: user.name.split(' ')[0], avatarUrl: user.avatarUrl, isNewUser } });
         }, 1900);
         return { success: true, message: res.message || 'Logged in successfully' };
       }
@@ -627,6 +657,21 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   searchDate: new Date().toISOString().split('T')[0],
   soloFemaleOnly: false,
   busTypeFilter: 'all',
+
+  tripType: 'one-way',
+  setTripType: (type) => set({ tripType: type }),
+  returnDate: (() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 2);
+    return d.toISOString().split('T')[0];
+  })(),
+  setReturnDate: (date) => set({ returnDate: date }),
+  roundTripStep: 1,
+  setRoundTripStep: (step) => set({ roundTripStep: step }),
+  outboundLeg: null,
+  returnLeg: null,
+  latestConfirmedRoundTrip: null,
+  setLatestConfirmedRoundTrip: (rt) => set({ latestConfirmedRoundTrip: rt }),
 
   setSearchCriteria: (origin, dest, date) => {
     const today = new Date().toISOString().split('T')[0];
@@ -893,6 +938,186 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
       return newBooking;
     } catch (err: any) {
       set({ isLoading: false, error: err.message });
+      return null;
+    }
+  },
+
+  confirmOutboundLeg: (customTravelDate) => {
+    const {
+      selectedRoute, selectedSeatIds, selectedBoardingPoint, selectedDropPoint,
+      searchDate, returnDate
+    } = get();
+
+    if (!selectedRoute || selectedSeatIds.length === 0 || !selectedBoardingPoint || !selectedDropPoint) {
+      set({ error: 'Please select seats, boarding point, and drop-off point for your outbound journey.' });
+      return false;
+    }
+
+    const selectedSeats = selectedRoute.seats.filter(s => selectedSeatIds.includes(s.id));
+    const baseFare = selectedSeats.reduce((sum, s) => sum + s.price, 0);
+
+    const outboundLeg: RoundTripLeg = {
+      route: selectedRoute,
+      seatIds: [...selectedSeatIds],
+      seats: selectedSeats,
+      boardingPoint: selectedBoardingPoint,
+      dropPoint: selectedDropPoint,
+      travelDate: customTravelDate || searchDate || new Date().toISOString().split('T')[0],
+      baseFare,
+    };
+
+    // Reversal: Origin becomes return origin (which was outbound destination),
+    // Destination becomes return destination (which was outbound origin).
+    const newOrigin = selectedRoute.destination.split(',')[0].trim();
+    const newDestination = selectedRoute.origin.split(',')[0].trim();
+    const targetReturnDate = returnDate || outboundLeg.travelDate;
+
+    set({
+      outboundLeg,
+      roundTripStep: 2,
+      selectedSeatIds: [],
+      selectedBoardingPoint: null,
+      selectedDropPoint: null,
+      selectedRoute: null,
+      searchOrigin: newOrigin,
+      searchDestination: newDestination,
+      searchDate: targetReturnDate,
+      currentView: 'schedules-dashboard',
+      error: null,
+    });
+
+    return true;
+  },
+
+  confirmReturnLeg: (customTravelDate) => {
+    const { selectedRoute, selectedSeatIds, selectedBoardingPoint, selectedDropPoint, searchDate } = get();
+
+    if (!selectedRoute || selectedSeatIds.length === 0 || !selectedBoardingPoint || !selectedDropPoint) {
+      set({ error: 'Please select seats, boarding point, and drop-off point for your return journey.' });
+      return false;
+    }
+
+    const selectedSeats = selectedRoute.seats.filter(s => selectedSeatIds.includes(s.id));
+    const baseFare = selectedSeats.reduce((sum, s) => sum + s.price, 0);
+
+    const returnLeg: RoundTripLeg = {
+      route: selectedRoute,
+      seatIds: [...selectedSeatIds],
+      seats: selectedSeats,
+      boardingPoint: selectedBoardingPoint,
+      dropPoint: selectedDropPoint,
+      travelDate: customTravelDate || searchDate || new Date().toISOString().split('T')[0],
+      baseFare,
+    };
+
+    set({
+      returnLeg,
+      currentView: 'checkout',
+      error: null,
+    });
+
+    return true;
+  },
+
+  resetRoundTrip: () => {
+    set({
+      tripType: 'one-way',
+      roundTripStep: 1,
+      outboundLeg: null,
+      returnLeg: null,
+      latestConfirmedRoundTrip: null,
+    });
+  },
+
+  createRoundTripBooking: async (paymentMethod, insuranceSelected) => {
+    const {
+      outboundLeg, returnLeg, passengerInfo, appliedPromo, sessionId
+    } = get();
+
+    if (!outboundLeg || !returnLeg) {
+      set({ error: 'Both outbound and return journey details are required.' });
+      return null;
+    }
+
+    // Canonical seat IDs
+    const canonicalOutboundSeatIds = outboundLeg.seatIds.map((id: string) => {
+      if (id.startsWith(`${outboundLeg.route.id}-`)) return id;
+      const num = id.replace(/^[^-]+-/, '').replace(/^seat-/, '').replace(/^0+/, '');
+      return `${outboundLeg.route.id}-${num}`;
+    });
+
+    const canonicalReturnSeatIds = returnLeg.seatIds.map((id: string) => {
+      if (id.startsWith(`${returnLeg.route.id}-`)) return id;
+      const num = id.replace(/^[^-]+-/, '').replace(/^seat-/, '').replace(/^0+/, '');
+      return `${returnLeg.route.id}-${num}`;
+    });
+
+    set({ isLoading: true, error: null });
+
+    try {
+      const res = await bookingsApi.createRoundTrip({
+        outbound: {
+          routeId: outboundLeg.route.id,
+          boardingPointId: outboundLeg.boardingPoint.id,
+          dropPointId: outboundLeg.dropPoint.id,
+          seatIds: canonicalOutboundSeatIds,
+          searchDate: outboundLeg.travelDate,
+        },
+        returnTrip: {
+          routeId: returnLeg.route.id,
+          boardingPointId: returnLeg.boardingPoint.id,
+          dropPointId: returnLeg.dropPoint.id,
+          seatIds: canonicalReturnSeatIds,
+          searchDate: returnLeg.travelDate,
+        },
+        sessionId,
+        passenger: {
+          fullName: passengerInfo.fullName,
+          email: passengerInfo.email,
+          phone: passengerInfo.phone,
+          gender: passengerInfo.gender,
+          age: passengerInfo.age,
+        },
+        paymentMethod,
+        promoCode: appliedPromo || undefined,
+        insuranceSelected,
+      });
+
+      const confirmedRoundTrip: ConfirmedRoundTrip = {
+        groupId: res.groupId,
+        outbound: res.outbound,
+        return: res.return,
+        combinedTotalFare: res.combinedTotalFare,
+      };
+
+      // Confetti
+      if (paymentMethod !== 'bank_transfer') {
+        try { confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } }); } catch (_) {}
+      }
+
+      const updatedRoutes = await routesApi.getAll();
+
+      set({
+        routes: updatedRoutes,
+        bookings: [res.outbound, res.return, ...get().bookings],
+        latestConfirmedBooking: res.outbound,
+        latestConfirmedRoundTrip: confirmedRoundTrip,
+        isLoading: false,
+        selectedSeatIds: [],
+        lockActive: false,
+        appliedPromo: '',
+        discountRate: 0,
+      });
+
+      if (paymentMethod === 'bank_transfer') {
+        get().setCurrentView('slip-upload');
+      } else {
+        get().setCurrentView('ticket-confirmation');
+      }
+
+      return confirmedRoundTrip;
+    } catch (err: any) {
+      set({ isLoading: false, error: err.message || 'Round-trip booking failed. Please try again.' });
       return null;
     }
   },

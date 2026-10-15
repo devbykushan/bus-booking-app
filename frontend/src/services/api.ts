@@ -77,6 +77,31 @@ export const bookingsApi = {
   }): Promise<any> =>
     apiFetch('/bookings', { method: 'POST', body: JSON.stringify(payload) }),
 
+  /** Create atomic round-trip booking (both outbound and return) */
+  createRoundTrip: (payload: {
+    outbound: {
+      routeId: string;
+      boardingPointId: string;
+      dropPointId: string;
+      seatIds: string[];
+      searchDate?: string;
+    };
+    returnTrip: {
+      routeId: string;
+      boardingPointId: string;
+      dropPointId: string;
+      seatIds: string[];
+      searchDate?: string;
+    };
+    sessionId?: string;
+    passenger: { fullName: string; email?: string; phone: string; gender?: string; age?: number };
+    paymentMethod: string;
+    promoCode?: string;
+    insuranceSelected?: boolean;
+    isCounterBooking?: boolean;
+  }): Promise<any> =>
+    apiFetch('/bookings/round-trip', { method: 'POST', body: JSON.stringify(payload) }),
+
   /** Cancel a booking by PNR (releases seats, marks refunded) */
   cancel: (pnr: string): Promise<any> =>
     apiFetch(`/bookings/${pnr}/cancel`, { method: 'PATCH' }),
@@ -146,7 +171,7 @@ export const authApi = {
   loginWithGoogle: (payload: {
     credential: string;
     role?: 'passenger' | 'admin';
-  }): Promise<{ success: boolean; message: string; token: string; user: any }> =>
+  }): Promise<{ success: boolean; message: string; token: string; user: any; isNewUser?: boolean }> =>
     apiFetch('/auth/google', { method: 'POST', body: JSON.stringify(payload) }),
 
   /** Get authenticated user profile */

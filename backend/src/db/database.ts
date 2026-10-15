@@ -230,6 +230,10 @@ export async function initializeSchema(p: Pool): Promise<void> {
       FOREIGN KEY ("routeId") REFERENCES routes("id")
     );
 
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS "roundTripGroupId" TEXT;
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS "legType" TEXT;
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS "linkedPnr" TEXT;
+
     CREATE TABLE IF NOT EXISTS payment_slips (
       "id" TEXT PRIMARY KEY,
       "bookingId" TEXT NOT NULL,

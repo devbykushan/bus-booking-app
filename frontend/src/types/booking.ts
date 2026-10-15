@@ -87,6 +87,25 @@ export interface PassengerDetails {
   isSoloFemale?: boolean;
 }
 
+export type TripType = 'one-way' | 'round-trip';
+
+export interface RoundTripLeg {
+  route: BusRoute;
+  seatIds: string[];
+  seats: Seat[];
+  boardingPoint: BoardingPoint;
+  dropPoint: BoardingPoint;
+  travelDate: string;
+  baseFare: number;
+}
+
+export interface ConfirmedRoundTrip {
+  groupId: string;
+  outbound: Booking;
+  return: Booking;
+  combinedTotalFare: number;
+}
+
 export interface Booking {
   id: string;
   pnr: string;
@@ -117,6 +136,9 @@ export interface Booking {
   passengerName?: string;
   passengerPhone?: string;
   gender?: string;
+  roundTripGroupId?: string;
+  legType?: 'outbound' | 'return';
+  linkedPnr?: string;
 }
 
 export interface UserAccount {

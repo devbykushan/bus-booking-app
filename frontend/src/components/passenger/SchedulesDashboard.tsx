@@ -42,6 +42,10 @@ export const SchedulesDashboard: React.FC = () => {
     setBusTypeFilter,
     goToHome,
     t,
+    tripType,
+    roundTripStep,
+    outboundLeg,
+    returnDate,
   } = useBookingStore();
 
   const [focusedRoute, setFocusedRoute] = useState<BusRoute | null>(null);
@@ -387,6 +391,66 @@ export const SchedulesDashboard: React.FC = () => {
               <span>{t('officialPortal')}</span>
             </div>
           </div>
+
+          {/* ── Round-Trip Stepper Header Bar ── */}
+          {tripType === 'round-trip' && (
+            <div className="bg-gradient-to-r from-blue-900/60 via-indigo-900/60 to-purple-900/60 border border-blue-400/40 rounded-3xl p-5 shadow-xl backdrop-blur-md animate-fade-in-up space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center justify-center w-9 h-9 rounded-2xl bg-blue-600 text-white font-black text-sm shadow-md ring-2 ring-blue-400/40">
+                    {roundTripStep}
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black uppercase tracking-wider text-amber-300">
+                        Round Trip Booking (දෙපැත්තටම ගමන් වාරය)
+                      </span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-400/20 text-blue-200 font-bold border border-blue-400/30">
+                        Step {roundTripStep} of 2
+                      </span>
+                    </div>
+                    <h2 className="text-base sm:text-lg font-black text-white">
+                      {roundTripStep === 1
+                        ? `Step 1: Select Outbound Bus (${t(searchOrigin)} ➔ ${t(searchDestination)})`
+                        : `Step 2: Select Return Bus (${t(searchOrigin)} ➔ ${t(searchDestination)})`}
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 text-xs font-bold text-blue-200 bg-black/40 px-3.5 py-2 rounded-2xl border border-white/10 self-start sm:self-auto">
+                  <Calendar className="w-4 h-4 text-amber-400" />
+                  <span>
+                    {roundTripStep === 1
+                      ? `Return scheduled for: ${returnDate || 'Pending'}`
+                      : `Outbound Journey Selected`}
+                  </span>
+                </div>
+              </div>
+
+              {/* If Step 2, show Outbound Confirmed summary badge */}
+              {roundTripStep === 2 && outboundLeg && (
+                <div className="bg-emerald-950/70 border border-emerald-500/40 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs text-emerald-200 shadow-inner">
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <div>
+                      <span className="font-extrabold text-white">
+                        Outbound Journey: {t(outboundLeg.route.origin.split(',')[0])} ➔ {t(outboundLeg.route.destination.split(',')[0])}
+                      </span>
+                      <span className="text-emerald-300 ml-2">
+                        ({outboundLeg.travelDate} • {outboundLeg.route.departureTime})
+                      </span>
+                      <span className="ml-2 px-2 py-0.5 bg-emerald-900/80 rounded-md font-mono text-[11px] font-bold text-emerald-300">
+                        Seats: {outboundLeg.seats.map(s => s.number).join(', ')}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-emerald-400 font-bold font-mono text-sm">
+                    LKR {outboundLeg.baseFare.toLocaleString()}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Main Title & Search Summary Card */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white/10 backdrop-blur-xl border border-white/15 p-5 md:p-6 rounded-3xl shadow-2xl">

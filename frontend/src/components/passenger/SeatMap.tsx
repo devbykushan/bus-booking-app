@@ -31,6 +31,11 @@ export const SeatMap: React.FC = () => {
     lockExpirySeconds,
     tickLockTimer,
     currentUser,
+    tripType,
+    roundTripStep,
+    outboundLeg,
+    confirmOutboundLeg,
+    confirmReturnLeg,
     t
   } = useBookingStore();
 
@@ -570,6 +575,22 @@ export const SeatMap: React.FC = () => {
       gender: 'female',
     });
 
+    if (tripType === 'round-trip') {
+      if (roundTripStep === 1) {
+        const ok = confirmOutboundLeg(travelDate);
+        if (ok) {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        return;
+      } else if (roundTripStep === 2) {
+        const ok = confirmReturnLeg(travelDate);
+        if (ok) {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     const booking = await createBooking(paymentMethod, false);
     setIsSubmitting(false);
@@ -611,6 +632,61 @@ export const SeatMap: React.FC = () => {
           Change Bus
         </button>
       </div>
+
+      {/* ── Round-Trip Progress Banner ── */}
+      {tripType === 'round-trip' && (
+        <div className="bg-gradient-to-r from-blue-900/90 via-indigo-900/90 to-slate-900/90 border border-blue-400/30 text-white rounded-3xl p-5 shadow-xl space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center justify-center w-8 h-8 rounded-2xl bg-blue-500 text-white font-black text-sm shadow-md ring-2 ring-blue-400/40">
+                {roundTripStep}
+              </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-black uppercase tracking-wider text-amber-300">
+                    Round Trip Seat Selection
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-400/20 text-blue-200 font-bold border border-blue-400/30">
+                    Step {roundTripStep} of 2
+                  </span>
+                </div>
+                <h3 className="text-base font-extrabold text-white">
+                  {roundTripStep === 1
+                    ? `Step 1 of 2: Outbound Journey (${selectedRoute.origin} ➔ ${selectedRoute.destination})`
+                    : `Step 2 of 2: Return Journey (${selectedRoute.origin} ➔ ${selectedRoute.destination})`}
+                </h3>
+              </div>
+            </div>
+
+            <span className="text-xs font-bold text-amber-300 bg-black/40 px-3 py-1.5 rounded-xl border border-white/10 self-start sm:self-auto">
+              {roundTripStep === 1
+                ? 'Next: Select return bus & seats'
+                : 'Final: Combined checkout for both journeys'}
+            </span>
+          </div>
+
+          {/* Outbound confirmed summary card in Step 2 */}
+          {roundTripStep === 2 && outboundLeg && (
+            <div className="bg-emerald-950/70 border border-emerald-500/40 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-200">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <span className="font-extrabold text-white">
+                  Outbound Confirmed: {outboundLeg.route.origin} ➔ {outboundLeg.route.destination}
+                </span>
+                <span className="text-emerald-300">
+                  ({outboundLeg.travelDate} • {outboundLeg.route.departureTime})
+                </span>
+                <span className="px-2 py-0.5 bg-emerald-900/80 rounded-md font-mono text-[11px] font-bold text-emerald-300">
+                  Seats: {outboundLeg.seats.map(s => s.number).join(', ')}
+                </span>
+              </div>
+              <span className="text-emerald-400 font-bold font-mono">
+                LKR {outboundLeg.baseFare.toLocaleString()}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Centered Bus Route Header (Mockup Style) ─────────────────────────── */}
       <div className="text-center space-y-2 pt-2">
@@ -1686,7 +1762,13 @@ export const SeatMap: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <span>Proceed To Checkout</span>
+                        <span>
+                          {tripType === 'round-trip'
+                            ? roundTripStep === 1
+                              ? 'Confirm Outbound Seats & Choose Return Bus'
+                              : 'Confirm Return Seats & Proceed to Combined Checkout'
+                            : 'Proceed To Checkout'}
+                        </span>
                         <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </>
                     )}

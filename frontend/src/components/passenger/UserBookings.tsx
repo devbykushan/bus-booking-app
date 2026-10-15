@@ -191,6 +191,16 @@ export const UserBookings: React.FC = () => {
                     <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-mono">
                       PNR: {b.pnr}
                     </span>
+                    {b.legType && (
+                      <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-black uppercase flex items-center gap-1 ${
+                        b.legType === 'outbound'
+                          ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                          : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                      }`}>
+                        <span>🔄</span>
+                        <span>{b.legType === 'outbound' ? 'Outbound Leg' : 'Return Leg'}</span>
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-blue-600 font-medium">
                     {b.origin} → {b.destination} ({b.departureTime})

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
+import type { TripType } from '../../types/booking';
 import {
   MapPin, Calendar, ArrowRightLeft, Search,
   Shield, Filter, Clock, Star, ChevronDown, ChevronRight
@@ -37,6 +38,12 @@ export const HeroSearch: React.FC = () => {
     setCurrentView,
     language,
     t,
+    tripType,
+    setTripType,
+    returnDate,
+    setReturnDate,
+    setRoundTripStep,
+    resetRoundTrip,
   } = useBookingStore();
 
   const toISODateString = (d: Date) => {
@@ -60,6 +67,15 @@ export const HeroSearch: React.FC = () => {
     return (!searchDate || searchDate < now) ? now : searchDate;
   });
 
+  const [localTripType, setLocalTripType] = useState<TripType>(tripType || 'one-way');
+  const [localReturnDate, setLocalReturnDate] = useState(() => {
+    if (returnDate && returnDate >= date) return returnDate;
+    const d = new Date(date);
+    d.setDate(d.getDate() + 2);
+    const ret = toISODateString(d);
+    return ret > maxDateStr ? maxDateStr : ret;
+  });
+
   // Auto-heal past dates or dates beyond 1-week limit
   React.useEffect(() => {
     const now = toISODateString(new Date());
@@ -71,6 +87,15 @@ export const HeroSearch: React.FC = () => {
       setSearchCriteria(origin, destination, maxDateStr);
     }
   }, [todayStr, maxDateStr]);
+
+  // Keep return date valid relative to departure date
+  React.useEffect(() => {
+    if (localReturnDate < date) {
+      setLocalReturnDate(date);
+    } else if (localReturnDate > maxDateStr) {
+      setLocalReturnDate(maxDateStr);
+    }
+  }, [date, maxDateStr, localReturnDate]);
 
   const handleSwap = () => {
     const temp = origin;
@@ -84,12 +109,26 @@ export const HeroSearch: React.FC = () => {
     if (!val || val < now) {
       setDate(now);
       setSearchCriteria(origin, destination, now);
+      if (localReturnDate < now) setLocalReturnDate(now);
     } else if (val > maxDateStr) {
       setDate(maxDateStr);
       setSearchCriteria(origin, destination, maxDateStr);
+      setLocalReturnDate(maxDateStr);
     } else {
       setDate(val);
       setSearchCriteria(origin, destination, val);
+      if (localReturnDate < val) setLocalReturnDate(val);
+    }
+  };
+
+  const handleReturnDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (!val || val < date) {
+      setLocalReturnDate(date);
+    } else if (val > maxDateStr) {
+      setLocalReturnDate(maxDateStr);
+    } else {
+      setLocalReturnDate(val);
     }
   };
 
@@ -104,6 +143,20 @@ export const HeroSearch: React.FC = () => {
       targetDate = maxDateStr;
       setDate(maxDateStr);
     }
+
+    setTripType(localTripType);
+    setRoundTripStep(1);
+
+    if (localTripType === 'round-trip') {
+      let finalReturn = localReturnDate;
+      if (!finalReturn || finalReturn < targetDate) {
+        finalReturn = targetDate;
+      }
+      setReturnDate(finalReturn);
+    } else {
+      resetRoundTrip();
+    }
+
     setSearchCriteria(origin, destination, targetDate);
     setCurrentView('schedules-dashboard');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -224,13 +277,50 @@ export const HeroSearch: React.FC = () => {
             {/* Inner highlight */}
             <div className="absolute inset-0 rounded-2.5xl md:rounded-3xl bg-gradient-to-br from-white/10 via-transparent to-white/5 pointer-events-none" />
 
+            {/* Trip Type Segmented Toggle */}
+            <div className="relative flex flex-wrap items-center justify-between gap-2 pb-1">
+              <div className="inline-flex p-1 bg-black/40 backdrop-blur-md rounded-2xl border border-white/20">
+                <button
+                  type="button"
+                  onClick={() => setLocalTripType('one-way')}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    localTripType === 'one-way'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'text-white/80 hover:text-white'
+                  }`}
+                >
+                  <span>One Way (තනි ගමන)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLocalTripType('round-trip')}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    localTripType === 'round-trip'
+                      ? 'bg-blue-600 text-white shadow-md ring-2 ring-blue-400/40'
+                      : 'text-white/80 hover:text-white'
+                  }`}
+                >
+                  <ArrowRightLeft className="w-3.5 h-3.5" />
+                  <span>Round Trip (දෙපැත්තටම)</span>
+                  <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase">NEW</span>
+                </button>
+              </div>
+
+              {localTripType === 'round-trip' && (
+                <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-amber-300 font-bold bg-amber-950/40 border border-amber-500/30 px-3 py-1 rounded-xl">
+                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Step 1: Select Outbound ➔ Step 2: Return</span>
+                </span>
+              )}
+            </div>
+
             <div className="relative grid grid-cols-1 md:grid-cols-12 gap-1.5 sm:gap-2.5 md:gap-3 items-center">
 
               {/* Origin */}
-              <div className="md:col-span-4 relative bg-white/95 dark:bg-slate-900/95 backdrop-blur rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4
+              <div className={`${localTripType === 'round-trip' ? 'md:col-span-3' : 'md:col-span-4'} relative bg-white/95 dark:bg-slate-900/95 backdrop-blur rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4
                               border border-white/60 dark:border-slate-700 focus-within:border-blue-400 focus-within:ring-4
                               focus-within:ring-blue-400/20 transition-all duration-300 shadow-xs md:shadow-sm
-                              hover:shadow-blue-200/40 dark:hover:shadow-black/40 hover:shadow-md group/from">
+                              hover:shadow-blue-200/40 dark:hover:shadow-black/40 hover:shadow-md group/from`}>
                 <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center justify-between gap-1 mb-0.5 md:mb-1.5">
                   <span className="flex items-center gap-1.5">
                     <span className="relative flex items-center justify-center w-4.5 h-4.5 md:w-5 md:h-5 rounded-md bg-blue-50 dark:bg-blue-900/50 border border-blue-200/80 dark:border-blue-700 text-blue-600 dark:text-blue-400 shadow-2xs transition-transform duration-300 group-hover/from:scale-110 group-hover/from:-translate-y-0.5">
@@ -267,10 +357,10 @@ export const HeroSearch: React.FC = () => {
               </div>
 
               {/* Destination */}
-              <div className="md:col-span-4 relative bg-white/95 dark:bg-slate-900/95 backdrop-blur rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4
+              <div className={`${localTripType === 'round-trip' ? 'md:col-span-3' : 'md:col-span-4'} relative bg-white/95 dark:bg-slate-900/95 backdrop-blur rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4
                               border border-white/60 dark:border-slate-700 focus-within:border-blue-400 focus-within:ring-4
                               focus-within:ring-blue-400/20 transition-all duration-300 shadow-xs md:shadow-sm
-                              hover:shadow-blue-200/40 dark:hover:shadow-black/40 hover:shadow-md group/to">
+                              hover:shadow-blue-200/40 dark:hover:shadow-black/40 hover:shadow-md group/to`}>
                 <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center justify-between gap-1 mb-0.5 md:mb-1.5">
                   <span className="flex items-center gap-1.5">
                     <span className="relative flex items-center justify-center w-4.5 h-4.5 md:w-5 md:h-5 rounded-md bg-blue-50 dark:bg-blue-900/50 border border-blue-200/80 dark:border-blue-700 text-blue-600 dark:text-blue-400 shadow-2xs transition-transform duration-300 group-hover/to:scale-110 group-hover/to:-translate-y-0.5">
@@ -292,16 +382,16 @@ export const HeroSearch: React.FC = () => {
                 </select>
               </div>
 
-              {/* Date */}
-              <div className="md:col-span-3 relative bg-white/95 backdrop-blur rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4
+              {/* Departure Date */}
+              <div className={`${localTripType === 'round-trip' ? 'md:col-span-2 lg:col-span-2' : 'md:col-span-3'} relative bg-white/95 backdrop-blur rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4
                               border border-white/60 focus-within:border-amber-400 focus-within:ring-4
                               focus-within:ring-amber-400/20 transition-all duration-300 shadow-xs md:shadow-sm
-                              hover:shadow-amber-200/40 hover:shadow-md group/date">
+                              hover:shadow-amber-200/40 hover:shadow-md group/date`}>
                 <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1 mb-0.5 md:mb-1.5">
                   <span className="relative flex items-center justify-center w-4.5 h-4.5 md:w-5 md:h-5 rounded-md bg-amber-50 border border-amber-200/80 text-amber-600 shadow-2xs transition-transform duration-300 group-hover/date:scale-110 group-hover/date:rotate-6">
                     <Calendar className="w-3 h-3 md:w-3.5 md:h-3.5 animate-date-icon relative z-10" />
                   </span>
-                  <span className="font-extrabold">{t('journeyDate')}</span>
+                  <span className="font-extrabold">{localTripType === 'round-trip' ? 'Departure (යන දිනය)' : t('journeyDate')}</span>
                 </label>
                 <input
                   type="date"
@@ -312,6 +402,34 @@ export const HeroSearch: React.FC = () => {
                   className="w-full bg-transparent text-slate-900 font-extrabold text-xs md:text-sm focus:outline-none cursor-pointer py-0.5"
                 />
               </div>
+
+              {/* Return Date (Round Trip Only) */}
+              {localTripType === 'round-trip' && (
+                <div className="md:col-span-3 lg:col-span-3 relative bg-white/95 backdrop-blur rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4
+                                border border-white/60 focus-within:border-emerald-400 focus-within:ring-4
+                                focus-within:ring-emerald-400/20 transition-all duration-300 shadow-xs md:shadow-sm
+                                hover:shadow-emerald-200/40 hover:shadow-md group/retdate animate-fade-in">
+                  <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-emerald-600 flex items-center justify-between gap-1 mb-0.5 md:mb-1.5">
+                    <span className="flex items-center gap-1">
+                      <span className="relative flex items-center justify-center w-4.5 h-4.5 md:w-5 md:h-5 rounded-md bg-emerald-50 border border-emerald-200/80 text-emerald-600 shadow-2xs transition-transform duration-300 group-hover/retdate:scale-110 group-hover/retdate:rotate-6">
+                        <Calendar className="w-3 h-3 md:w-3.5 md:h-3.5 relative z-10" />
+                      </span>
+                      <span className="font-extrabold">Return (නැවත එන දිනය)</span>
+                    </span>
+                    <span className="text-[8px] md:text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 font-semibold normal-case">
+                      Step 2
+                    </span>
+                  </label>
+                  <input
+                    type="date"
+                    value={localReturnDate}
+                    min={date}
+                    max={maxDateStr}
+                    onChange={handleReturnDateChange}
+                    className="w-full bg-transparent text-slate-900 font-extrabold text-xs md:text-sm focus:outline-none cursor-pointer py-0.5"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Filters + Submit */}

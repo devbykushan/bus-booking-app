@@ -23,6 +23,7 @@ import { AdminNotificationDrawer } from './components/admin/AdminNotificationDra
 import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
 import { PwaInstallPrompt } from './components/common/PwaInstallPrompt';
 import { SessionTimeoutWarningModal } from './components/common/SessionTimeoutWarningModal';
+import { LoginSuccessToast } from './components/common/LoginSuccessToast';
 import { Bus, AlertCircle, Wifi, RefreshCw, ShieldAlert, Lock } from 'lucide-react';
 import { BASE_URL } from './services/api';
 
@@ -40,6 +41,8 @@ export function App() {
     checkSessionExpiry,
     touchLastActive,
     sessionWarningOpen,
+    loginToast,
+    setLoginToast,
   } = useBookingStore();
 
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || userRole === 'admin' || userRole === 'super_admin';
@@ -421,6 +424,14 @@ export function App() {
       <PwaInstallPrompt />
       <AdminNotificationDrawer />
       <SessionTimeoutWarningModal />
+      {loginToast && (
+        <LoginSuccessToast
+          name={loginToast.name}
+          avatarUrl={loginToast.avatarUrl}
+          isNewUser={loginToast.isNewUser}
+          onDismiss={() => setLoginToast(null)}
+        />
+      )}
     </div>
   );
 }

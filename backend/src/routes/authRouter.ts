@@ -401,6 +401,8 @@ authRouter.post('/google', async (req: Request, res: Response) => {
     );
 
     let dbUser;
+    let isNewUser = false;
+
     if (existing.rows.length > 0) {
       dbUser = existing.rows[0];
       if (picture && !dbUser.avatarUrl) {
@@ -409,6 +411,7 @@ authRouter.post('/google', async (req: Request, res: Response) => {
       }
     } else {
       // Auto-register new passenger from Google
+      isNewUser = true;
       const userId = `usr-g-${Date.now()}-${uuidv4().substring(0, 6)}`;
       const randomPasswordHash = hashPassword(`google-auth-${uuidv4()}`);
       const createdAt = new Date().toISOString();
@@ -454,7 +457,10 @@ authRouter.post('/google', async (req: Request, res: Response) => {
 
     return res.json({
       success: true,
-      message: `Signed in successfully as ${user.name}.`,
+      isNewUser,
+      message: isNewUser
+        ? `Welcome! Your account has been created successfully, ${user.name}.`
+        : `Signed in successfully as ${user.name}.`,
       token,
       user,
     });
