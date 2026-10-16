@@ -393,30 +393,41 @@ export const PassengerSettings: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in-up">
-      {/* ── Top Header Banner ── */}
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 animate-fade-in-up">
+      {/* ── Top Navigation Bar (Outside Profile Card) ── */}
+      <div className="flex items-center justify-between gap-4">
+        <button
+          onClick={goToHome}
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer group active:scale-95"
+          title={t('backToHome')}
+        >
+          <ArrowLeft className="w-4 h-4 text-blue-600 dark:text-blue-400 group-hover:-translate-x-1 transition-transform" />
+          <span>{t('backToHome')}</span>
+        </button>
+
+        <div className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 bg-white/60 dark:bg-slate-800/60 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-700/60 shadow-2xs">
+          <Shield className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+          <span>Passenger Profile</span>
+        </div>
+      </div>
+
+      {/* ── Top Header Banner (Profile Card) ── */}
       <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-900 rounded-3xl p-6 sm:p-8 text-white shadow-2xl border border-slate-800">
         <div className="absolute top-0 right-0 -mt-12 -mr-12 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
         
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={goToHome}
-              className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all cursor-pointer group"
-              title={t('backToHome')}
-            >
-              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
-            </button>
+          <div className="flex items-center gap-4 sm:gap-5">
+            {/* Avatar with change button */}
             <div className="relative group flex-shrink-0">
               {currentUser.avatarUrl ? (
                 <img
                   src={currentUser.avatarUrl}
                   alt={currentUser.name}
                   referrerPolicy="no-referrer"
-                  className="w-14 h-14 rounded-2xl object-cover shadow-lg border border-white/20 ring-2 ring-white/10"
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl object-cover shadow-xl border-2 border-white/20 ring-4 ring-white/10"
                 />
               ) : (
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-black text-xl text-white shadow-lg border border-white/20">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-black text-2xl sm:text-3xl text-white shadow-xl border-2 border-white/20">
                   {currentUser.name.charAt(0).toUpperCase()}
                 </div>
               )}
@@ -424,27 +435,30 @@ export const PassengerSettings: React.FC = () => {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={avatarUploading}
-                className="absolute -bottom-1 -right-1 p-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-md transition-all active:scale-90 border border-white/30 cursor-pointer disabled:opacity-50"
+                className="absolute -bottom-1 -right-1 p-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-md transition-all active:scale-90 border-2 border-slate-900 cursor-pointer disabled:opacity-50"
                 title={language === 'sinhala' ? 'ඡායාරූපය වෙනස් කරන්න' : 'Change Profile Picture'}
               >
                 {avatarUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
               </button>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{currentUser.name}</h1>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-blue-500/30 border border-blue-400/40 text-blue-200">
+
+            {/* User Name, Role and Email */}
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white">{currentUser.name}</h1>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider bg-blue-500/30 border border-blue-400/40 text-blue-200">
                   {currentUser.role}
                 </span>
               </div>
-              <p className="text-slate-300 text-xs sm:text-sm font-medium mt-0.5 flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-blue-400" />
-                {currentUser.email}
+              <p className="text-slate-300 text-xs sm:text-sm font-medium flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                <span className="break-all">{currentUser.email}</span>
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/15 px-4 py-2 rounded-2xl text-xs font-semibold text-slate-200">
+          {/* Verified Account Badge */}
+          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/15 px-4 py-2 sm:px-4.5 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-bold text-slate-200 shadow-sm shrink-0 self-start sm:self-auto">
             <UserCheck className="w-4 h-4 text-emerald-400" />
             <span>Verified Account</span>
           </div>
