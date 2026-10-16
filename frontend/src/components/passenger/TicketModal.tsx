@@ -138,7 +138,7 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
                 </span>
               </div>
               <p className="text-sm font-extrabold text-white">
-                Dual Boarding Passes (ගමන් වාර 2ක ටිකට්පත්) • Total: LKR {latestConfirmedRoundTrip.combinedTotalFare.toLocaleString()}
+                {t('dualBoardingPasses')} • Total: LKR {latestConfirmedRoundTrip.combinedTotalFare.toLocaleString()}
               </p>
             </div>
           </div>

@@ -403,7 +403,7 @@ export const SchedulesDashboard: React.FC = () => {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-black uppercase tracking-wider text-amber-300">
-                        Round Trip Booking (දෙපැත්තටම ගමන් වාරය)
+                        {t('roundTrip')}
                       </span>
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-400/20 text-blue-200 font-bold border border-blue-400/30">
                         Step {roundTripStep} of 2

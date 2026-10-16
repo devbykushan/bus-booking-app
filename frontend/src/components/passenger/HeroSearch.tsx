@@ -289,7 +289,7 @@ export const HeroSearch: React.FC = () => {
                       : 'text-white/80 hover:text-white'
                   }`}
                 >
-                  <span>One Way (තනි ගමන)</span>
+                  <span>{t('oneWay')}</span>
                 </button>
                 <button
                   type="button"
@@ -301,7 +301,7 @@ export const HeroSearch: React.FC = () => {
                   }`}
                 >
                   <ArrowRightLeft className="w-3.5 h-3.5" />
-                  <span>Round Trip (දෙපැත්තටම)</span>
+                  <span>{t('roundTrip')}</span>
                   <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase">NEW</span>
                 </button>
               </div>
@@ -309,7 +309,7 @@ export const HeroSearch: React.FC = () => {
               {localTripType === 'round-trip' && (
                 <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-amber-300 font-bold bg-amber-950/40 border border-amber-500/30 px-3 py-1 rounded-xl">
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Step 1: Select Outbound ➔ Step 2: Return</span>
+                  <span>{t('step1SelectOutbound')}</span>
                 </span>
               )}
             </div>
@@ -391,7 +391,7 @@ export const HeroSearch: React.FC = () => {
                   <span className="relative flex items-center justify-center w-4.5 h-4.5 md:w-5 md:h-5 rounded-md bg-amber-50 border border-amber-200/80 text-amber-600 shadow-2xs transition-transform duration-300 group-hover/date:scale-110 group-hover/date:rotate-6">
                     <Calendar className="w-3 h-3 md:w-3.5 md:h-3.5 animate-date-icon relative z-10" />
                   </span>
-                  <span className="font-extrabold">{localTripType === 'round-trip' ? 'Departure (යන දිනය)' : t('journeyDate')}</span>
+                  <span className="font-extrabold">{localTripType === 'round-trip' ? t('departureDay') : t('journeyDate')}</span>
                 </label>
                 <input
                   type="date"
@@ -414,7 +414,7 @@ export const HeroSearch: React.FC = () => {
                       <span className="relative flex items-center justify-center w-4.5 h-4.5 md:w-5 md:h-5 rounded-md bg-emerald-50 border border-emerald-200/80 text-emerald-600 shadow-2xs transition-transform duration-300 group-hover/retdate:scale-110 group-hover/retdate:rotate-6">
                         <Calendar className="w-3 h-3 md:w-3.5 md:h-3.5 relative z-10" />
                       </span>
-                      <span className="font-extrabold">Return (නැවත එන දිනය)</span>
+                      <span className="font-extrabold">{t('returnDay')}</span>
                     </span>
                     <span className="text-[8px] md:text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 font-semibold normal-case">
                       Step 2
