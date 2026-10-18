@@ -1665,52 +1665,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
       {/* ─── TAB 2: REVENUE & FINANCIAL ANALYTICS ─── */}
       {activeTab === 'analytics' && (
         <div className="space-y-6">
-          {/* Sub Navigation Bar */}
-          <div className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-fit border border-slate-200/80 dark:border-slate-700/60">
-            <button
-              onClick={() => setActiveTab('analytics')}
-              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm cursor-pointer"
-            >
-              <span>💰 Revenue & Bookings</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('traffic')}
-              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
-            >
-              <span>📈 Passenger Reach & Traffic</span>
-              <span className="px-2 py-0.5 text-[10px] font-extrabold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded-full">
-                NEW
-              </span>
-            </button>
-          </div>
-
-          <FinancialAnalyticsSection onSwitchToTraffic={() => setActiveTab('traffic')} />
+          <FinancialAnalyticsSection />
         </div>
       )}
 
       {/* ─── TAB 2.5: PASSENGER REACH & TRAFFIC ANALYTICS ─── */}
       {activeTab === 'traffic' && (
         <div className="space-y-6">
-          {/* Sub Navigation Bar */}
-          <div className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-fit border border-slate-200/80 dark:border-slate-700/60">
-            <button
-              onClick={() => setActiveTab('analytics')}
-              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
-            >
-              <span>💰 Revenue & Bookings</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('traffic')}
-              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm cursor-pointer"
-            >
-              <span>📈 Passenger Reach & Traffic</span>
-              <span className="px-2 py-0.5 text-[10px] font-extrabold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded-full">
-                NEW
-              </span>
-            </button>
-          </div>
-
-          <WebsiteTrafficAnalyticsSection onSwitchToRevenue={() => setActiveTab('analytics')} />
+          <WebsiteTrafficAnalyticsSection />
         </div>
       )}
 
