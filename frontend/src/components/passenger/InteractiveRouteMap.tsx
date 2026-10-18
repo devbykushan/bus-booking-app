@@ -297,7 +297,7 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
           )}
           <div className="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-[11px] font-extrabold font-mono whitespace-nowrap flex-shrink-0 flex items-center gap-1 border border-blue-200">
             <span>⏱️</span>
-            <span>{selectedServiceType === 'normal' && isMonaragalaColomboRoute ? '6h 30m' : route.duration}</span>
+            <span>{selectedServiceType === 'normal' && isMonaragalaColomboRoute ? '7h 45m' : route.duration}</span>
           </div>
         </div>
       </div>

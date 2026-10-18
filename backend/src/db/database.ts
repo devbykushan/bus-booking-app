@@ -295,6 +295,10 @@ export async function initializeSchema(p: Pool): Promise<void> {
       SELECT "id" FROM routes 
       WHERE "busType" LIKE '%Normal%' OR "busNumber" LIKE '%Route 98%' OR "busNumber" LIKE '%ND-3223%'
     );
+
+    UPDATE routes 
+    SET "duration" = '7h 45m' 
+    WHERE "duration" = '6h 30m' OR "duration" LIKE '%6h 30%';
   `);
 }
 
@@ -657,7 +661,7 @@ export async function generateTripsFromTimetables(p: Pool): Promise<void> {
           departureDate: dateStr,
           departureTime: turn.out,
           arrivalTime: 'N/A', // We can estimate later if needed
-          duration: '6h 30m',
+          duration: '7h 45m',
           priceStarting: tt.price,
           hasUpperDeck: 0,
           amenities: JSON.stringify(['Normal Service', 'Live GPS Tracking']),
@@ -685,7 +689,7 @@ export async function generateTripsFromTimetables(p: Pool): Promise<void> {
           departureDate: dateStr,
           departureTime: turn.in,
           arrivalTime: 'N/A',
-          duration: '6h 30m',
+          duration: '7h 45m',
           priceStarting: tt.price,
           hasUpperDeck: 0,
           amenities: JSON.stringify(['Normal Service', 'Live GPS Tracking']),
