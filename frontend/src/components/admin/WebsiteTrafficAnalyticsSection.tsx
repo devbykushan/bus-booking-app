@@ -5,7 +5,11 @@ import {
 } from 'lucide-react';
 import { analyticsApi, type AnalyticsStatsResponse } from '../../services/api';
 
-export const WebsiteTrafficAnalyticsSection: React.FC = () => {
+interface WebsiteTrafficAnalyticsSectionProps {
+  onSwitchToRevenue?: () => void;
+}
+
+export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSectionProps> = ({ onSwitchToRevenue }) => {
   const [stats, setStats] = useState<AnalyticsStatsResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +73,16 @@ export const WebsiteTrafficAnalyticsSection: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {onSwitchToRevenue && (
+            <button
+              onClick={onSwitchToRevenue}
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded-xl transition-colors border border-indigo-200/60 dark:border-indigo-800/60"
+            >
+              <span>💰 Revenue & Bookings</span>
+            </button>
+          )}
+
           <a
             href="https://dewminatravels-schedule.vercel.app/"
             target="_blank"

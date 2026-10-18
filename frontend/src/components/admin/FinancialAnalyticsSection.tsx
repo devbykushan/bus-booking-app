@@ -3,12 +3,16 @@ import { useBookingStore } from '../../store/bookingStore';
 import {
   DollarSign, TrendingUp, Calendar,
   Download, Printer, RefreshCw, Bus, CreditCard,
-  Building, Filter, PieChart, BarChart3, Banknote
+  Building, Filter, PieChart, BarChart3, Banknote, Globe
 } from 'lucide-react';
 
 type DateFilterType = 'today' | 'yesterday' | '7days' | 'this_month' | 'last_month' | 'all' | 'custom';
 
-export const FinancialAnalyticsSection: React.FC = () => {
+interface FinancialAnalyticsSectionProps {
+  onSwitchToTraffic?: () => void;
+}
+
+export const FinancialAnalyticsSection: React.FC<FinancialAnalyticsSectionProps> = ({ onSwitchToTraffic }) => {
   const { bookings, routes, loadBookings, loadRoutes, isLoading } = useBookingStore();
 
   const [dateFilter, setDateFilter] = useState<DateFilterType>('this_month');
@@ -363,6 +367,17 @@ export const FinancialAnalyticsSection: React.FC = () => {
             <Printer className="w-4 h-4" />
             <span>Print Report</span>
           </button>
+
+          {onSwitchToTraffic && (
+            <button
+              type="button"
+              onClick={onSwitchToTraffic}
+              className="px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold flex items-center gap-2 transition cursor-pointer shadow-md shadow-blue-600/20"
+            >
+              <Globe className="w-4 h-4" />
+              <span>Website Traffic</span>
+            </button>
+          )}
         </div>
       </div>
 

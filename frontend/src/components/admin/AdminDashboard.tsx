@@ -1658,9 +1658,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
           </div>
 
           {analyticsSubTab === 'revenue' ? (
-            <FinancialAnalyticsSection />
+            <FinancialAnalyticsSection onSwitchToTraffic={() => setAnalyticsSubTab('traffic')} />
           ) : (
-            <WebsiteTrafficAnalyticsSection />
+            <WebsiteTrafficAnalyticsSection onSwitchToRevenue={() => setAnalyticsSubTab('revenue')} />
           )}
         </div>
       )}
