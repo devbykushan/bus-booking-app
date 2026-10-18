@@ -430,4 +430,32 @@ export const healthApi = {
   ping: (): Promise<{ status: string; timestamp: string }> => apiFetch('/health'),
 };
 
+// ─── Website Traffic Analytics API ───────────────────────────────────────────
+
+export interface AnalyticsStatsResponse {
+  summary: {
+    totalToday: number;
+    uniqueToday: number;
+    totalAllTime: number;
+    uniqueAllTime: number;
+  };
+  sources: Array<{ source: string; count: number }>;
+  devices: Array<{ device: string; count: number }>;
+  trend: Array<{ date: string; visits: number; uniqueVisitors: number }>;
+  recent: Array<{
+    id: number;
+    source: string;
+    referrer: string;
+    isMobile: boolean;
+    city: string;
+    path: string;
+    createdAt: string;
+  }>;
+  lastUpdated: string;
+}
+
+export const analyticsApi = {
+  getStats: (): Promise<AnalyticsStatsResponse> => apiFetch<AnalyticsStatsResponse>('/analytics/stats'),
+};
+
 

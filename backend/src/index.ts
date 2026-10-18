@@ -12,6 +12,7 @@ import { paymentSlipsRouter } from './routes/paymentSlipsRouter';
 import { whatsappRouter } from './routes/whatsappRouter';
 import { promoCodesRouter } from './routes/promoCodesRouter';
 import { botRouter } from './routes/botRouter';
+import { analyticsRouter } from './routes/analyticsRouter';
 import { initWhatsApp } from './services/whatsappService';
 
 const app = express();
@@ -48,6 +49,7 @@ app.use('/api/payment-slips', paymentSlipsRouter);
 app.use('/api/whatsapp', whatsappRouter);
 app.use('/api/promo-codes', promoCodesRouter);
 app.use('/api/bot', botRouter);
+app.use('/api/analytics', analyticsRouter);
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

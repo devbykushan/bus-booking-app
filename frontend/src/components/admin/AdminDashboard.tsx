@@ -13,6 +13,7 @@ import { BroadcastAnnouncementModal } from './BroadcastAnnouncementModal';
 import { PromoCodesManager } from './PromoCodesManager';
 import { DailyFinancialSettlementModal } from './DailyFinancialSettlementModal';
 import { FinancialAnalyticsSection } from './FinancialAnalyticsSection';
+import { WebsiteTrafficAnalyticsSection } from './WebsiteTrafficAnalyticsSection';
 import { SeatBlockManagerModal } from './SeatBlockManagerModal';
 import { LiveMap } from '../passenger/LiveMap';
 import { routesApi, authApi, paymentSlipsApi } from '../../services/api';
@@ -69,6 +70,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
     setActiveTabState(tab);
     setAdminActiveTab(tab);
   };
+
+  const [analyticsSubTab, setAnalyticsSubTab] = useState<'revenue' | 'traffic'>('revenue');
 
   useEffect(() => {
     if (isMasterMode) {
@@ -1626,7 +1629,40 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
 
       {/* ─── TAB 2: REVENUE & FINANCIAL ANALYTICS ─── */}
       {activeTab === 'analytics' && (
-        <FinancialAnalyticsSection />
+        <div className="space-y-6">
+          {/* Sub Navigation Bar */}
+          <div className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-fit border border-slate-200/80 dark:border-slate-700/60">
+            <button
+              onClick={() => setAnalyticsSubTab('revenue')}
+              className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                analyticsSubTab === 'revenue'
+                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <span>💰 Revenue & Bookings</span>
+            </button>
+            <button
+              onClick={() => setAnalyticsSubTab('traffic')}
+              className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                analyticsSubTab === 'traffic'
+                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <span>🌐 Website Traffic & Passenger Reach</span>
+              <span className="px-2 py-0.5 text-[10px] font-extrabold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded-full">
+                NEW
+              </span>
+            </button>
+          </div>
+
+          {analyticsSubTab === 'revenue' ? (
+            <FinancialAnalyticsSection />
+          ) : (
+            <WebsiteTrafficAnalyticsSection />
+          )}
+        </div>
       )}
 
       {/* ─── TAB 3: USER ACCOUNTS & MANAGEMENT ─── */}

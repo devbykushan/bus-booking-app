@@ -267,6 +267,20 @@ export async function initializeSchema(p: Pool): Promise<void> {
       "createdAt" TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS website_analytics (
+      "id" SERIAL PRIMARY KEY,
+      "source" TEXT NOT NULL,
+      "referrer" TEXT,
+      "isMobile" BOOLEAN DEFAULT TRUE,
+      "screenWidth" INTEGER,
+      "city" TEXT,
+      "ipHash" TEXT,
+      "path" TEXT DEFAULT '/',
+      "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_website_analytics_created ON website_analytics("createdAt");
+
     UPDATE routes 
     SET "busType" = 'Normal Service', "priceStarting" = 1157 
     WHERE "busType" LIKE '%Normal Service%' OR "busType" LIKE '%58 Seats%' OR "busType" LIKE '%54 Seats%' OR "busNumber" LIKE '%Route 98%' OR "busNumber" LIKE '%ND-3223%';
