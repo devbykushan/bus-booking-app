@@ -159,7 +159,7 @@ export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSec
             {totalAllTime.toLocaleString()}
           </div>
           <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            Total lifetime timetable sessions
+            {uniqueAllTime > 0 ? `${uniqueAllTime.toLocaleString()} unique passengers` : 'Total lifetime timetable sessions'}
           </div>
         </div>
 
