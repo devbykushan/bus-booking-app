@@ -23,10 +23,10 @@ import {
   SlidersHorizontal, Plus, QrCode, Download, ShieldCheck,
   Trash2, RefreshCw, Edit3, Clock, Star, Search,
   Mail, Phone, Calendar, Ticket, UserCheck, UserX, Eye, X, CheckCircle2, FileText, MessageSquare, Menu, Shield,
-  Printer, Wrench, MapPin, ArrowLeft, ChevronDown, ChevronUp, Layers, Filter, Sparkles
+  Printer, Wrench, MapPin, ArrowLeft, ChevronDown, ChevronUp, Layers, Filter, Sparkles, TrendingUp
 } from 'lucide-react';
 
-export type AdminDashboardTab = 'fleet' | 'timetables' | 'analytics' | 'users' | 'payment-slips' | 'whatsapp' | 'counter-booking' | 'staff' | 'promos' | 'live-gps';
+export type AdminDashboardTab = 'fleet' | 'timetables' | 'analytics' | 'traffic' | 'users' | 'payment-slips' | 'whatsapp' | 'counter-booking' | 'staff' | 'promos' | 'live-gps';
 
 interface AdminDashboardProps {
   mode?: 'operations' | 'master';
@@ -55,7 +55,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
       }
       return 'fleet';
     }
-    if (adminActiveTab && ['counter-booking', 'analytics', 'live-gps', 'promos', 'payment-slips'].includes(adminActiveTab)) {
+    if (adminActiveTab && ['counter-booking', 'analytics', 'traffic', 'live-gps', 'promos', 'payment-slips'].includes(adminActiveTab)) {
       return adminActiveTab as AdminDashboardTab;
     }
     if (hasPermission('counter_booking')) return 'counter-booking';
@@ -71,8 +71,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
     setAdminActiveTab(tab);
   };
 
-  const [analyticsSubTab, setAnalyticsSubTab] = useState<'revenue' | 'traffic'>('revenue');
-
   useEffect(() => {
     if (isMasterMode) {
       const masterTabs = ['fleet', 'timetables', 'whatsapp', 'staff', 'users'];
@@ -84,7 +82,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
         setActiveTabState('fleet');
       }
     } else {
-      const opsTabs = ['counter-booking', 'analytics', 'live-gps', 'promos', 'payment-slips'];
+      const opsTabs = ['counter-booking', 'analytics', 'traffic', 'live-gps', 'promos', 'payment-slips'];
       if (adminActiveTab && opsTabs.includes(adminActiveTab)) {
         if (adminActiveTab !== activeTab) {
           setActiveTabState(adminActiveTab as AdminDashboardTab);
@@ -490,6 +488,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
               {activeTab === 'fleet' && 'Fleet & Route Operations'}
               {activeTab === 'timetables' && 'Master Timetables'}
               {activeTab === 'analytics' && 'Revenue & Analytics'}
+              {activeTab === 'traffic' && 'Passenger Reach & Traffic'}
               {activeTab === 'users' && `Passenger Accounts (${totalPassengersCount})`}
               {activeTab === 'payment-slips' && 'Payment Slips'}
               {activeTab === 'whatsapp' && 'WhatsApp Gateway'}
@@ -662,6 +661,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                       }`}
                     >
                       <BarChart2 className="w-4 h-4" /> Revenue & Analytics
+                    </button>
+                  )}
+
+                  {hasPermission('analytics') && (
+                    <button
+                      onClick={() => { setActiveTab('traffic'); setIsMobileNavOpen(false); }}
+                      className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                        activeTab === 'traffic' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-blue-500" /> Passenger Reach & Traffic
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                        activeTab === 'traffic' ? 'bg-white/20 text-white' : 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300'
+                      }`}>
+                        NEW
+                      </span>
                     </button>
                   )}
 
@@ -921,6 +938,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
                       }`}
                     >
                       <BarChart2 className="w-4 h-4" /> Revenue & Analytics
+                    </button>
+                  )}
+
+                  {hasPermission('analytics') && (
+                    <button
+                      onClick={() => setActiveTab('traffic')}
+                      className={`w-full px-4 py-3 rounded-xl transition-all flex items-center justify-between text-sm font-bold text-left cursor-pointer ${
+                        activeTab === 'traffic' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-blue-500" /> Passenger Reach & Traffic
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                        activeTab === 'traffic' ? 'bg-white/20 text-white' : 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300'
+                      }`}>
+                        NEW
+                      </span>
                     </button>
                   )}
 
@@ -1633,35 +1668,49 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ mode }) => {
           {/* Sub Navigation Bar */}
           <div className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-fit border border-slate-200/80 dark:border-slate-700/60">
             <button
-              onClick={() => setAnalyticsSubTab('revenue')}
-              className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-                analyticsSubTab === 'revenue'
-                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
+              onClick={() => setActiveTab('analytics')}
+              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm cursor-pointer"
             >
               <span>💰 Revenue & Bookings</span>
             </button>
             <button
-              onClick={() => setAnalyticsSubTab('traffic')}
-              className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-                analyticsSubTab === 'traffic'
-                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
+              onClick={() => setActiveTab('traffic')}
+              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
             >
-              <span>🌐 Website Traffic & Passenger Reach</span>
+              <span>📈 Passenger Reach & Traffic</span>
               <span className="px-2 py-0.5 text-[10px] font-extrabold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded-full">
                 NEW
               </span>
             </button>
           </div>
 
-          {analyticsSubTab === 'revenue' ? (
-            <FinancialAnalyticsSection onSwitchToTraffic={() => setAnalyticsSubTab('traffic')} />
-          ) : (
-            <WebsiteTrafficAnalyticsSection onSwitchToRevenue={() => setAnalyticsSubTab('revenue')} />
-          )}
+          <FinancialAnalyticsSection onSwitchToTraffic={() => setActiveTab('traffic')} />
+        </div>
+      )}
+
+      {/* ─── TAB 2.5: PASSENGER REACH & TRAFFIC ANALYTICS ─── */}
+      {activeTab === 'traffic' && (
+        <div className="space-y-6">
+          {/* Sub Navigation Bar */}
+          <div className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-fit border border-slate-200/80 dark:border-slate-700/60">
+            <button
+              onClick={() => setActiveTab('analytics')}
+              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+            >
+              <span>💰 Revenue & Bookings</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('traffic')}
+              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm cursor-pointer"
+            >
+              <span>📈 Passenger Reach & Traffic</span>
+              <span className="px-2 py-0.5 text-[10px] font-extrabold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded-full">
+                NEW
+              </span>
+            </button>
+          </div>
+
+          <WebsiteTrafficAnalyticsSection onSwitchToRevenue={() => setActiveTab('analytics')} />
         </div>
       )}
 
