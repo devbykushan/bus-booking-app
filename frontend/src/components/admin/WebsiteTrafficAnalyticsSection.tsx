@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   Globe, Users, Eye, Smartphone, Laptop, RefreshCw,
-  TrendingUp, Compass, Share2, ShieldCheck, ArrowUpRight, Clock
+  TrendingUp, Compass, Share2, ShieldCheck, ArrowUpRight, Clock, Bus
 } from 'lucide-react';
 import { analyticsApi, type AnalyticsStatsResponse } from '../../services/api';
 
-interface WebsiteTrafficAnalyticsSectionProps {
-  onSwitchToRevenue?: () => void;
-}
+interface WebsiteTrafficAnalyticsSectionProps {}
 
-export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSectionProps> = ({ onSwitchToRevenue }) => {
+export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSectionProps> = () => {
   const [stats, setStats] = useState<AnalyticsStatsResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,42 +59,47 @@ export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSec
             </span>
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                Website Traffic & Passenger Analytics
+                Passenger Reach & Platform Traffic
                 <span className="px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400 rounded-full border border-emerald-200 dark:border-emerald-800/60">
                   LIVE TRACKER
                 </span>
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                Real-time traffic monitor for Dewmina Timetable Web App & Expressway Passenger Reach
+                Real-time passenger visits across Dewmina Booking Web (dewminatravels.vercel.app) & Timetable App
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          {onSwitchToRevenue && (
-            <button
-              onClick={onSwitchToRevenue}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded-xl transition-colors border border-indigo-200/60 dark:border-indigo-800/60"
-            >
-              <span>💰 Revenue & Bookings</span>
-            </button>
-          )}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <a
+            href="https://dewminatravels.vercel.app/#home"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl transition-all shadow-xs hover:shadow-md cursor-pointer"
+            title="Open Main Online Booking Web Platform"
+          >
+            <Bus className="w-3.5 h-3.5" />
+            <span>Booking Web</span>
+            <ArrowUpRight className="w-3.5 h-3.5 opacity-80" />
+          </a>
 
           <a
             href="https://dewminatravels-schedule.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-950/60 hover:bg-cyan-100 dark:hover:bg-cyan-900/60 active:scale-95 rounded-xl transition-all border border-cyan-200/60 dark:border-cyan-800/60 cursor-pointer"
+            title="Open Timetable Schedule Web App"
           >
-            <span>Open Timetable</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
+            <Clock className="w-3.5 h-3.5" />
+            <span>Timetable Web</span>
+            <ArrowUpRight className="w-3.5 h-3.5 opacity-80" />
           </a>
 
           <button
             onClick={loadStats}
             disabled={isLoading}
-            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-all disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-xl transition-all disabled:opacity-50 cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-blue-600' : ''}`} />
             <span>{isLoading ? 'Updating...' : 'Refresh'}</span>
@@ -206,9 +209,15 @@ export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSec
                 let colorClass = 'bg-blue-600';
                 let badgeClass = 'text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-800';
                 
-                if (item.source.toLowerCase().includes('facebook')) {
+                if (item.source.toLowerCase().includes('booking')) {
                   colorClass = 'bg-blue-600';
-                  badgeClass = 'text-blue-700 bg-blue-50 border-blue-200';
+                  badgeClass = 'text-blue-700 bg-blue-50 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800';
+                } else if (item.source.toLowerCase().includes('timetable')) {
+                  colorClass = 'bg-cyan-600';
+                  badgeClass = 'text-cyan-700 bg-cyan-50 border-cyan-200 dark:bg-cyan-950/60 dark:text-cyan-300 dark:border-cyan-800';
+                } else if (item.source.toLowerCase().includes('facebook')) {
+                  colorClass = 'bg-indigo-600';
+                  badgeClass = 'text-indigo-700 bg-indigo-50 border-indigo-200';
                 } else if (item.source.toLowerCase().includes('whatsapp')) {
                   colorClass = 'bg-emerald-500';
                   badgeClass = 'text-emerald-700 bg-emerald-50 border-emerald-200';
@@ -216,8 +225,8 @@ export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSec
                   colorClass = 'bg-pink-600';
                   badgeClass = 'text-pink-700 bg-pink-50 border-pink-200';
                 } else if (item.source.toLowerCase().includes('tiktok')) {
-                  colorClass = 'bg-cyan-600';
-                  badgeClass = 'text-cyan-700 bg-cyan-50 border-cyan-200';
+                  colorClass = 'bg-rose-600';
+                  badgeClass = 'text-rose-700 bg-rose-50 border-rose-200';
                 } else if (item.source.toLowerCase().includes('google')) {
                   colorClass = 'bg-amber-500';
                   badgeClass = 'text-amber-700 bg-amber-50 border-amber-200';

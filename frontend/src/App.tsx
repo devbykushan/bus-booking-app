@@ -25,7 +25,7 @@ import { PwaInstallPrompt } from './components/common/PwaInstallPrompt';
 import { SessionTimeoutWarningModal } from './components/common/SessionTimeoutWarningModal';
 import { LoginSuccessToast } from './components/common/LoginSuccessToast';
 import { Bus, AlertCircle, Wifi, RefreshCw, ShieldAlert, Lock } from 'lucide-react';
-import { BASE_URL } from './services/api';
+import { analyticsApi, BASE_URL } from './services/api';
 
 export function App() {
   const {
@@ -58,6 +58,46 @@ export function App() {
   useEffect(() => {
     checkSessionExpiry();
   }, [checkSessionExpiry]);
+
+  // Track visitor traffic for Main Booking Platform (dewminatravels.vercel.app)
+  useEffect(() => {
+    // Avoid recording admin/staff sessions as passenger traffic
+    if (isAdmin) return;
+
+    try {
+      const hasTracked = sessionStorage.getItem('dtr_visited');
+      if (!hasTracked) {
+        sessionStorage.setItem('dtr_visited', '1');
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        let source = 'Booking Platform (Direct)';
+        const ref = (document.referrer || '').toLowerCase();
+        if (ref.includes('facebook') || ref.includes('fb.me')) {
+          source = 'Booking Platform (Facebook)';
+        } else if (ref.includes('whatsapp') || window.location.search.includes('wa')) {
+          source = 'Booking Platform (WhatsApp)';
+        } else if (ref.includes('instagram')) {
+          source = 'Booking Platform (Instagram)';
+        } else if (ref.includes('google')) {
+          source = 'Booking Platform (Google)';
+        } else if (ref.includes('dewminatravels-schedule')) {
+          source = 'Booking Platform (via Timetable)';
+        } else if (ref) {
+          source = 'Booking Platform (Referral)';
+        }
+
+        analyticsApi.recordVisit({
+          source,
+          referrer: document.referrer || 'Direct Entry',
+          isMobile,
+          screenWidth: window.innerWidth,
+          path: window.location.hash || window.location.pathname || '/#home',
+        }).catch(() => {});
+      }
+    } catch {
+      // Gracefully handle storage errors
+    }
+  }, [isAdmin]);
 
   // Track admin activity and periodic inactivity check (fast 1s live countdown when warning modal is open)
   useEffect(() => {

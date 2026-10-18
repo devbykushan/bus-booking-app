@@ -456,6 +456,16 @@ export interface AnalyticsStatsResponse {
 
 export const analyticsApi = {
   getStats: (): Promise<AnalyticsStatsResponse> => apiFetch<AnalyticsStatsResponse>('/analytics/stats'),
+  recordVisit: (data: {
+    source?: string;
+    referrer?: string;
+    isMobile?: boolean;
+    screenWidth?: number;
+    path?: string;
+  }): Promise<{ success: boolean }> => apiFetch<{ success: boolean }>('/analytics/visit', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
 };
 
 
