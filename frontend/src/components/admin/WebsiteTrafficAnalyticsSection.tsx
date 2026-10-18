@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Globe, Users, Eye, Smartphone, Laptop, RefreshCw,
   TrendingUp, Compass, Share2, ShieldCheck, ArrowUpRight, Clock, Bus
@@ -11,6 +11,7 @@ export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSec
   const [stats, setStats] = useState<AnalyticsStatsResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [platformFilter, setPlatformFilter] = useState<'all' | 'booking' | 'timetable'>('all');
 
   const loadStats = async () => {
     setIsLoading(true);
@@ -32,6 +33,48 @@ export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSec
     const interval = setInterval(loadStats, 45000);
     return () => clearInterval(interval);
   }, []);
+
+  const isBookingVisit = (source: string, path?: string) => {
+    const s = (source || '').toLowerCase();
+    const p = (path || '').toLowerCase();
+    return s.includes('booking') || p.includes('#home') || p.includes('dewminatravels.vercel.app');
+  };
+
+  const bookingVisitsCount = useMemo(() => {
+    if (!stats?.sources) return 0;
+    return stats.sources
+      .filter(s => isBookingVisit(s.source))
+      .reduce((sum, s) => sum + s.count, 0);
+  }, [stats]);
+
+  const timetableVisitsCount = useMemo(() => {
+    if (!stats?.sources) return 0;
+    return stats.sources
+      .filter(s => !isBookingVisit(s.source))
+      .reduce((sum, s) => sum + s.count, 0);
+  }, [stats]);
+
+  const filteredSources = useMemo(() => {
+    if (!stats?.sources) return [];
+    if (platformFilter === 'booking') {
+      return stats.sources.filter(s => isBookingVisit(s.source));
+    }
+    if (platformFilter === 'timetable') {
+      return stats.sources.filter(s => !isBookingVisit(s.source));
+    }
+    return stats.sources;
+  }, [stats, platformFilter]);
+
+  const filteredRecent = useMemo(() => {
+    if (!stats?.recent) return [];
+    if (platformFilter === 'booking') {
+      return stats.recent.filter(r => isBookingVisit(r.source, r.path));
+    }
+    if (platformFilter === 'timetable') {
+      return stats.recent.filter(r => !isBookingVisit(r.source, r.path));
+    }
+    return stats.recent;
+  }, [stats, platformFilter]);
 
   const totalToday = stats?.summary.totalToday ?? 0;
   const uniqueToday = stats?.summary.uniqueToday ?? 0;
@@ -162,7 +205,7 @@ export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSec
             {totalAllTime.toLocaleString()}
           </div>
           <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            {uniqueAllTime > 0 ? `${uniqueAllTime.toLocaleString()} unique passengers` : 'Total lifetime timetable sessions'}
+            {uniqueAllTime > 0 ? `${uniqueAllTime.toLocaleString()} unique passengers` : 'Total lifetime passenger sessions'}
           </div>
         </div>
 
@@ -184,6 +227,103 @@ export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSec
 
       </div>
 
+      {/* ─── Platform Traffic Comparison Banner & Filter ─── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Platform 1: Main Booking Platform */}
+        <div 
+          onClick={() => setPlatformFilter(platformFilter === 'booking' ? 'all' : 'booking')}
+          className={`p-5 rounded-3xl border transition-all cursor-pointer select-none ${
+            platformFilter === 'booking'
+              ? 'bg-gradient-to-r from-blue-700 to-indigo-700 text-white border-blue-500 shadow-lg ring-2 ring-blue-400/50 scale-[1.01]'
+              : 'bg-white dark:bg-slate-900 border-slate-200/90 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500/50 shadow-xs'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3.5">
+              <span className={`p-3 rounded-2xl ${platformFilter === 'booking' ? 'bg-white/20 text-white' : 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400'}`}>
+                <Bus className="w-6 h-6" />
+              </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className={`text-sm sm:text-base font-black ${platformFilter === 'booking' ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
+                    Main Booking Platform
+                  </h4>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-black tracking-wide ${
+                    platformFilter === 'booking' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
+                  }`}>
+                    dewminatravels.vercel.app
+                  </span>
+                </div>
+                <p className={`text-xs mt-0.5 ${platformFilter === 'booking' ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'}`}>
+                  Online seat booking, search & passenger reservations
+                </p>
+              </div>
+            </div>
+            <div className="text-right pl-2">
+              <div className={`text-2xl sm:text-3xl font-black ${platformFilter === 'booking' ? 'text-white' : 'text-blue-600 dark:text-blue-400'}`}>
+                {bookingVisitsCount}
+              </div>
+              <span className={`text-[10px] font-bold ${platformFilter === 'booking' ? 'text-blue-100' : 'text-slate-400'}`}>
+                {totalAllTime > 0 ? `${Math.round((bookingVisitsCount / totalAllTime) * 100)}% of traffic` : 'Visits'}
+              </span>
+            </div>
+          </div>
+          {platformFilter === 'booking' && (
+            <div className="mt-3 pt-2.5 border-t border-white/20 text-[11px] font-bold flex items-center justify-between text-blue-100">
+              <span>Filtering for Booking Web visits</span>
+              <span className="underline">Click to view all</span>
+            </div>
+          )}
+        </div>
+
+        {/* Platform 2: Timetable Schedule Web */}
+        <div 
+          onClick={() => setPlatformFilter(platformFilter === 'timetable' ? 'all' : 'timetable')}
+          className={`p-5 rounded-3xl border transition-all cursor-pointer select-none ${
+            platformFilter === 'timetable'
+              ? 'bg-gradient-to-r from-cyan-700 to-teal-700 text-white border-cyan-500 shadow-lg ring-2 ring-cyan-400/50 scale-[1.01]'
+              : 'bg-white dark:bg-slate-900 border-slate-200/90 dark:border-slate-800 hover:border-cyan-400 dark:hover:border-cyan-500/50 shadow-xs'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3.5">
+              <span className={`p-3 rounded-2xl ${platformFilter === 'timetable' ? 'bg-white/20 text-white' : 'bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400'}`}>
+                <Clock className="w-6 h-6" />
+              </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className={`text-sm sm:text-base font-black ${platformFilter === 'timetable' ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
+                    Timetable Schedule Web
+                  </h4>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-black tracking-wide ${
+                    platformFilter === 'timetable' ? 'bg-white/20 text-white' : 'bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300'
+                  }`}>
+                    dewminatravels-schedule
+                  </span>
+                </div>
+                <p className={`text-xs mt-0.5 ${platformFilter === 'timetable' ? 'text-cyan-100' : 'text-slate-500 dark:text-slate-400'}`}>
+                  Expressway bus timetable and schedule lookup app
+                </p>
+              </div>
+            </div>
+            <div className="text-right pl-2">
+              <div className={`text-2xl sm:text-3xl font-black ${platformFilter === 'timetable' ? 'text-white' : 'text-cyan-600 dark:text-cyan-400'}`}>
+                {timetableVisitsCount}
+              </div>
+              <span className={`text-[10px] font-bold ${platformFilter === 'timetable' ? 'text-cyan-100' : 'text-slate-400'}`}>
+                {totalAllTime > 0 ? `${Math.round((timetableVisitsCount / totalAllTime) * 100)}% of traffic` : 'Visits'}
+              </span>
+            </div>
+          </div>
+          {platformFilter === 'timetable' && (
+            <div className="mt-3 pt-2.5 border-t border-white/20 text-[11px] font-bold flex items-center justify-between text-cyan-100">
+              <span>Filtering for Timetable Web visits</span>
+              <span className="underline">Click to view all</span>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* ─── Traffic Sources & Device Breakdown (Two Column Layout) ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -199,10 +339,10 @@ export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSec
             <span className="text-xs text-slate-400">Where are passengers discovering us?</span>
           </div>
 
-          {stats?.sources && stats.sources.length > 0 ? (
+          {filteredSources && filteredSources.length > 0 ? (
             <div className="space-y-4">
-              {stats.sources.map((item, idx) => {
-                const totalSrcVisits = stats.sources.reduce((acc, curr) => acc + curr.count, 0);
+              {filteredSources.map((item, idx) => {
+                const totalSrcVisits = filteredSources.reduce((acc, curr) => acc + curr.count, 0);
                 const percent = totalSrcVisits > 0 ? Math.round((item.count / totalSrcVisits) * 100) : 0;
                 
                 // Colors by channel
@@ -266,7 +406,7 @@ export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSec
             <Compass className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
             <div>
               <span className="font-semibold text-slate-900 dark:text-white">Pro Tip: </span>
-              Whenever you share the timetable link on WhatsApp status or Facebook pinned posts, visits automatically register under that channel with real-time attribution.
+              Whenever you share your Booking Platform link or Timetable link on WhatsApp status or Facebook pinned posts, visits automatically register under that channel with real-time attribution.
             </div>
           </div>
         </div>
@@ -364,7 +504,7 @@ export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSec
           </div>
         ) : (
           <div className="text-center py-10 text-slate-400 text-sm">
-            Daily historical trend will build up automatically as passengers view your timetable.
+            Daily historical trend will build up automatically as passengers view your booking web and timetable.
           </div>
         )}
       </div>
@@ -378,32 +518,48 @@ export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSec
               Real-Time Traffic Log
             </h3>
           </div>
-          <span className="text-xs text-slate-400">Latest passenger sessions</span>
+          <span className="text-xs text-slate-400">
+            {platformFilter === 'all' 
+              ? 'Latest passenger sessions across all platforms'
+              : platformFilter === 'booking'
+                ? 'Latest sessions on Booking Web'
+                : 'Latest sessions on Timetable Web'}
+          </span>
         </div>
 
-        {stats?.recent && stats.recent.length > 0 ? (
+        {filteredRecent && filteredRecent.length > 0 ? (
           <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
-            {stats.recent.map((visit) => {
+            {filteredRecent.map((visit) => {
               const date = new Date(visit.createdAt);
               const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+              const isBooking = isBookingVisit(visit.source, visit.path);
 
               return (
                 <div key={visit.id} className="py-3 flex items-center justify-between gap-4 text-xs">
                   <div className="flex items-center gap-3">
-                    <span className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg">
+                    <span className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg shrink-0">
                       {visit.isMobile ? <Smartphone className="w-3.5 h-3.5" /> : <Laptop className="w-3.5 h-3.5" />}
                     </span>
-                    <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {isBooking ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shrink-0">
+                          <Bus className="w-3 h-3" /> Booking Web
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-cyan-100 dark:bg-cyan-950/70 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800 shrink-0">
+                          <Clock className="w-3 h-3" /> Timetable Web
+                        </span>
+                      )}
                       <span className="font-semibold text-slate-800 dark:text-slate-200">
                         {visit.source}
                       </span>
-                      <span className="text-slate-400 ml-2">
+                      <span className="text-slate-400 font-mono text-[11px]">
                         {visit.path || '/'}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-slate-400">
+                  <div className="flex items-center gap-4 text-slate-400 shrink-0">
                     <span className="hidden sm:inline-block">{visit.city || 'Sri Lanka'}</span>
                     <span className="font-mono text-slate-500">{timeStr}</span>
                   </div>
@@ -413,7 +569,7 @@ export const WebsiteTrafficAnalyticsSection: React.FC<WebsiteTrafficAnalyticsSec
           </div>
         ) : (
           <div className="text-center py-6 text-slate-400 text-xs">
-            No visits recorded yet. Open your timetable app to see your first live log!
+            No visits recorded yet for this platform. Open your web app to see live logs!
           </div>
         )}
       </div>
