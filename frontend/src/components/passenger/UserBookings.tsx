@@ -1,9 +1,11 @@
 import React from 'react';
 import { useBookingStore } from '../../store/bookingStore';
-import { Ticket, MapPin, XCircle, Bus, Clock, Download } from 'lucide-react';
+import { Ticket, MapPin, XCircle, Bus, Clock, Download, Star } from 'lucide-react';
+import { RatingModal } from './RatingModal';
 
 export const UserBookings: React.FC = () => {
   const { bookings, cancelBooking, setCurrentView, goToSearchSchedules, setTrackingRouteId, currentUser, setShowAuthModal, setLatestConfirmedBooking, language } = useBookingStore();
+  const [ratingBooking, setRatingBooking] = React.useState<any | null>(null);
 
   const handleTrack = (routeId: string) => {
     setTrackingRouteId(routeId);
@@ -283,6 +285,14 @@ export const UserBookings: React.FC = () => {
                         <Download className="w-3.5 h-3.5 text-white" />
                         <span>Download</span>
                       </button>
+
+                      <button
+                        onClick={() => setRatingBooking(b)}
+                        className="px-3.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-colors flex items-center gap-1.5 font-bold shadow-xs cursor-pointer active:scale-95"
+                      >
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                        <span>Rate Trip</span>
+                      </button>
                     </>
                   )}
 
@@ -324,6 +334,14 @@ export const UserBookings: React.FC = () => {
         </div>
       )}
 
+      {/* Rating & Review Modal */}
+      <RatingModal
+        isOpen={!!ratingBooking}
+        onClose={() => setRatingBooking(null)}
+        defaultPnr={ratingBooking?.pnr || ''}
+        defaultBusNumber={ratingBooking?.busNumber || ''}
+        defaultRouteId={ratingBooking?.routeId || ''}
+      />
     </div>
   );
 };

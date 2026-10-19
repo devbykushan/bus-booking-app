@@ -14,6 +14,7 @@ import { promoCodesRouter } from './routes/promoCodesRouter';
 import { botRouter } from './routes/botRouter';
 import { analyticsRouter } from './routes/analyticsRouter';
 import { pushRouter } from './routes/pushRouter';
+import { reviewsRouter } from './routes/reviewsRouter';
 import { initWhatsApp } from './services/whatsappService';
 
 const app = express();
@@ -52,6 +53,7 @@ app.use('/api/promo-codes', promoCodesRouter);
 app.use('/api/bot', botRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/push', pushRouter);
+app.use('/api/reviews', reviewsRouter);
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

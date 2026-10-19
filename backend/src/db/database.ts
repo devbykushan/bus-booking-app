@@ -77,6 +77,7 @@ export async function initDb(): Promise<void> {
   await initializeSchema(p);
   await seedData(p);
   await seedUsers(p);
+  await seedReviews(p);
   try {
     await p.query(`UPDATE bookings SET "qrCodeData" = CONCAT('PNR:', "pnr") WHERE "qrCodeData" LIKE '%dewminasuperline.lk%'`);
     await p.query(`
@@ -292,6 +293,23 @@ export async function initializeSchema(p: Pool): Promise<void> {
 
     CREATE INDEX IF NOT EXISTS idx_push_sub_user ON push_subscriptions("userId");
     CREATE INDEX IF NOT EXISTS idx_push_sub_endpoint ON push_subscriptions("endpoint");
+
+    CREATE TABLE IF NOT EXISTS reviews (
+      "id" TEXT PRIMARY KEY,
+      "userId" TEXT,
+      "passengerName" TEXT NOT NULL,
+      "routeId" TEXT,
+      "pnr" TEXT,
+      "rating" INTEGER NOT NULL CHECK ("rating" >= 1 AND "rating" <= 5),
+      "comment" TEXT,
+      "tags" TEXT NOT NULL DEFAULT '[]',
+      "busNumber" TEXT,
+      "status" TEXT NOT NULL DEFAULT 'approved',
+      "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews("status");
+    CREATE INDEX IF NOT EXISTS idx_reviews_created ON reviews("createdAt" DESC);
 
     UPDATE routes 
     SET "busType" = 'Normal Service', "priceStarting" = 1157 
@@ -821,3 +839,61 @@ export async function seedUsers(p: Pool): Promise<void> {
   console.log('✅ Initial demo users seeded successfully.');
 }
 
+export async function seedReviews(p: Pool): Promise<void> {
+  const countRes = await p.query('SELECT COUNT(*) as c FROM reviews');
+  const count = parseInt(countRes.rows[0].c, 10);
+  if (count > 0) return;
+
+  console.log('⭐ Seeding initial verified passenger reviews...');
+  const initialReviews = [
+    {
+      id: 'rev-1',
+      passengerName: 'Nimal Jayasuriya',
+      routeId: 'route-ND-2903-OUT',
+      busNumber: 'ND-2903',
+      rating: 5,
+      comment: 'Super luxury experience! Monaragala idan Colombo walata time ekata aawa. Seats godak comfortable, bus eka clean eke thibba. Highly recommended!',
+      tags: JSON.stringify(['On Time ⏰', 'Clean & Hygienic 🧹', 'Comfortable Seats 💺']),
+      pnr: 'DW-782194',
+    },
+    {
+      id: 'rev-2',
+      passengerName: 'Chathurika Madushani',
+      routeId: 'route-ND-3223-IN',
+      busNumber: 'ND-3223',
+      rating: 5,
+      comment: 'Girl kenek widihata travel karanna safe ma bus ekak. Driver and crew godak polite. Online booking eka and QR code scan eka godak lesi una.',
+      tags: JSON.stringify(['Safe & Secure 🛡️', 'Polite Staff 😊', 'Smooth Booking 📱']),
+      pnr: 'DW-654921',
+    },
+    {
+      id: 'rev-3',
+      passengerName: 'Dhanushka Bandara',
+      routeId: 'route-ND-2903-OUT',
+      busNumber: 'ND-2903',
+      rating: 5,
+      comment: 'Night ride eka superb. AC temperature eka hariyatama manage karala thibba. Smooth driving, kisima dhawillak na. Dewmina Super Line is the best on Route 98.',
+      tags: JSON.stringify(['Smooth AC ❄️', 'Careful Driving 🚌', 'On Time ⏰']),
+      pnr: 'DW-918234',
+    },
+    {
+      id: 'rev-4',
+      passengerName: 'Kavindu Senarath',
+      routeId: 'route-ND-3223-OUT',
+      busNumber: 'ND-3223',
+      rating: 4,
+      comment: 'Godak hodai service eka. Website eken seat eka select karala book karapu nisa standing nathiwa hodata yanna puluwan una. Next trip ekath mekenma thamai.',
+      tags: JSON.stringify(['Seat Choice 💺', 'Quick E-Ticket ⚡']),
+      pnr: 'DW-338192',
+    },
+  ];
+
+  for (const r of initialReviews) {
+    await p.query(`
+      INSERT INTO reviews ("id", "passengerName", "routeId", "busNumber", "rating", "comment", "tags", "pnr", "status")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'approved')
+      ON CONFLICT ("id") DO NOTHING
+    `, [r.id, r.passengerName, r.routeId, r.busNumber, r.rating, r.comment, r.tags, r.pnr]);
+  }
+  console.log('✅ Initial verified reviews seeded successfully.');
+}

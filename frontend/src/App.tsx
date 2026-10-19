@@ -9,6 +9,7 @@ import { ServicesSection } from './components/passenger/ServicesSection';
 import { BookingGuideSection } from './components/passenger/BookingGuideSection';
 import { AboutPlatformSection } from './components/passenger/AboutPlatformSection';
 import { BusBookingFAQSection } from './components/passenger/BusBookingFAQSection';
+import { CustomerReviewsSection } from './components/passenger/CustomerReviewsSection';
 import { SeatMap } from './components/passenger/SeatMap';
 import { FareBreakdown } from './components/passenger/FareBreakdown';
 import { TicketModal } from './components/passenger/TicketModal';
@@ -443,6 +444,7 @@ export function App() {
                 <ServicesSection />
                 <BookingGuideSection />
                 <AboutPlatformSection />
+                <CustomerReviewsSection />
                 <BusBookingFAQSection />
               </div>
             )}

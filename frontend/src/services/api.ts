@@ -468,4 +468,52 @@ export const analyticsApi = {
   }),
 };
 
+// ─── Reviews & Ratings API ────────────────────────────────────────────────────
+
+export interface PassengerReview {
+  id: string;
+  userId?: string;
+  passengerName: string;
+  routeId?: string;
+  pnr?: string;
+  verified: boolean;
+  rating: number;
+  comment: string;
+  tags: string[];
+  busNumber?: string;
+  createdAt: string;
+}
+
+export interface ReviewsResponse {
+  reviews: PassengerReview[];
+  stats: {
+    totalCount: number;
+    averageRating: number;
+    ratingBreakdown: Record<number, number>;
+    popularTags: string[];
+  };
+}
+
+export const reviewsApi = {
+  getReviews: (routeId?: string): Promise<ReviewsResponse> =>
+    apiFetch<ReviewsResponse>(routeId ? `/reviews?routeId=${encodeURIComponent(routeId)}` : '/reviews'),
+  submitReview: (data: {
+    passengerName: string;
+    rating: number;
+    comment?: string;
+    tags?: string[];
+    pnr?: string;
+    routeId?: string;
+    busNumber?: string;
+    userId?: string;
+  }): Promise<{ success: boolean; message: string; reviewId: string }> =>
+    apiFetch<{ success: boolean; message: string; reviewId: string }>('/reviews', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  deleteReview: (id: string): Promise<{ success: boolean }> =>
+    apiFetch<{ success: boolean }>(`/reviews/${id}`, { method: 'DELETE' }),
+};
+
+
 
