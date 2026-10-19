@@ -281,6 +281,18 @@ export async function initializeSchema(p: Pool): Promise<void> {
 
     CREATE INDEX IF NOT EXISTS idx_website_analytics_created ON website_analytics("createdAt");
 
+    CREATE TABLE IF NOT EXISTS push_subscriptions (
+      "id" SERIAL PRIMARY KEY,
+      "userId" TEXT,
+      "endpoint" TEXT UNIQUE NOT NULL,
+      "p256dh" TEXT NOT NULL,
+      "auth" TEXT NOT NULL,
+      "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_push_sub_user ON push_subscriptions("userId");
+    CREATE INDEX IF NOT EXISTS idx_push_sub_endpoint ON push_subscriptions("endpoint");
+
     UPDATE routes 
     SET "busType" = 'Normal Service', "priceStarting" = 1157 
     WHERE "busType" LIKE '%Normal Service%' OR "busType" LIKE '%58 Seats%' OR "busType" LIKE '%54 Seats%' OR "busNumber" LIKE '%Route 98%' OR "busNumber" LIKE '%ND-3223%';

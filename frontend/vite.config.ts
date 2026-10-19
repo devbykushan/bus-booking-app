@@ -14,7 +14,8 @@ export default defineConfig({
       workbox: {
         clientsClaim: true,
         skipWaiting: true,
-        cleanupOutdatedCaches: true
+        cleanupOutdatedCaches: true,
+        importScripts: ['sw-push.js'],
       },
       includeAssets: ['favicon.svg', 'dewmina-logo.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {

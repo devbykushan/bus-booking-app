@@ -31,6 +31,7 @@ import {
   Trash2,
   Link as LinkIcon,
 } from 'lucide-react';
+import { PushNotificationToggle } from '../common/PushNotificationToggle';
 
 export const PassengerSettings: React.FC = () => {
   const {
@@ -831,7 +832,8 @@ export const PassengerSettings: React.FC = () => {
                 </label>
               </div>
 
-
+              {/* Web Push Notifications Toggle */}
+              <PushNotificationToggle />
             </div>
           </div>
 
