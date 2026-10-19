@@ -9,8 +9,11 @@ import crypto from 'crypto';
 // 
 // Generate keys by running: npx web-push generate-vapid-keys
 
-const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
-const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+const DEFAULT_VAPID_PUBLIC_KEY = 'BHhCc0-UWPpI-uJ7SviOuimM4Drkdtsg1ZPnI7KUY8dJUR9cmsT7JsBNHZd2Sx9wYUgaac-0yQvAbjo5JUtsCaU';
+const DEFAULT_VAPID_PRIVATE_KEY = 'nGuD6fgMiE2kmOqinxWxfb3t76sXkPP8TAn5ls3sfx8';
+
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || DEFAULT_VAPID_PUBLIC_KEY;
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || DEFAULT_VAPID_PRIVATE_KEY;
 const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:dewminasuperline@gmail.com';
 
 // ─── Save Subscription ──────────────────────────────────────────────────────
