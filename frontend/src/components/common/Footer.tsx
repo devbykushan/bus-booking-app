@@ -4,7 +4,6 @@ import {
   Heart, PhoneCall, Bus, Mail, 
   ChevronRight, Navigation, CheckCircle2
 } from 'lucide-react';
-import { RealisticBusAnimation } from './RealisticBusAnimation';
 import { AnimatedLogoBadge } from './AnimatedLogoBadge';
 
 export const Footer: React.FC = () => {
@@ -46,23 +45,6 @@ export const Footer: React.FC = () => {
 
       {/* ── Top Radiant Glowing Shimmer Bar ── */}
       <div className="relative h-[2px] w-full bg-gradient-to-r from-blue-500 via-indigo-500 via-pink-400 to-emerald-400 bg-[length:300%_100%] animate-gradient-flow" />
-
-      {/* ── Subtle Highway Bus Streak Lane Animation ── */}
-      <div className="relative w-full h-8 overflow-hidden border-b border-slate-200/60 dark:border-slate-800/80 bg-blue-50/30 dark:bg-slate-900/40 backdrop-blur-xs">
-        <div className="absolute inset-0 flex items-center">
-          {/* Moving Dashed Road Center Line */}
-          <div className="w-full flex gap-6 animate-road opacity-30">
-            {Array.from({ length: 40 }).map((_, i) => (
-              <div key={i} className="h-0.5 w-8 bg-blue-400 rounded-full flex-shrink-0" />
-            ))}
-          </div>
-        </div>
-
-        {/* Gliding Real Luxury Coach Streak */}
-        <div className="absolute top-1 left-0 flex items-center animate-bus-streak pointer-events-none opacity-90">
-          <RealisticBusAnimation />
-        </div>
-      </div>
 
       {/* ── Main Footer Grid Container ── */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 pt-14 pb-12">

@@ -5,7 +5,6 @@ import {
   MapPin, Calendar, ArrowRightLeft, Search,
   Shield, Filter, Clock, Star, ChevronDown, ChevronRight
 } from 'lucide-react';
-import { RealisticBusAnimation } from '../common/RealisticBusAnimation';
 
 const CITIES = [
   'Monaragala', 'Colombo',
@@ -198,25 +197,6 @@ export const HeroSearch: React.FC = () => {
             }}
           />
         ))}
-      </div>
-
-      {/* ── Animated Real Luxury Coach Streak at bottom ──────────────── */}
-      <div className="absolute bottom-[68px] left-0 z-[3] pointer-events-none w-full overflow-hidden">
-        <div
-          className="animate-bus-streak flex items-center"
-          style={{ animationDelay: '0.2s', animationDuration: '14s' }}
-        >
-          <RealisticBusAnimation />
-        </div>
-      </div>
-
-      {/* ── Animated Road Lines ────────────────────────────────────────── */}
-      <div className="absolute bottom-16 left-0 right-0 z-[2] pointer-events-none overflow-hidden h-1 opacity-20">
-        <div className="flex gap-8 animate-road" style={{ width: '200%' }}>
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div key={i} className="h-full w-16 bg-white/60 rounded-full flex-shrink-0" />
-          ))}
-        </div>
       </div>
 
       {/* ── Hero Content ───────────────────────────────────────────────── */}
