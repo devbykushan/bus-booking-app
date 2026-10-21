@@ -5,8 +5,8 @@ import type { BusRoute, DeckType, Seat } from '../../types/booking';
 import { 
   ArrowLeft, Clock, Check, Armchair, ChevronRight, 
   ChevronUp, ChevronDown, Lock, CheckCircle2, Info,
-  ArrowRight, Crown, X, User, Users, MessageSquare, KeyRound,
-  RotateCcw, Loader2, Edit2
+  ArrowRight, Crown, X, User, Users, MessageSquare,
+  Edit2
 } from 'lucide-react';
 import { authApi, BASE_URL } from '../../services/api';
 
@@ -99,12 +99,6 @@ export const SeatMap: React.FC = () => {
   const [phoneInput, setPhoneInput] = useState('');
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
-  const [isOtpSent, setIsOtpSent] = useState(false);
-  const [otpInput, setOtpInput] = useState('');
-  const [otpError, setOtpError] = useState<string | null>(null);
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-  const [resendTimer, setResendTimer] = useState(0);
 
   // Phone format validation (Sri Lanka +94 requires exactly 9 digits starting with 70, 71, 72, 74, 75, 76, 77, 78)
   const isPhoneValid = useMemo(() => {
@@ -178,9 +172,6 @@ export const SeatMap: React.FC = () => {
     }
     setPhoneInput(clean);
     setIsPhoneVerified(false);
-    setIsOtpSent(false);
-    setOtpInput('');
-    setOtpError(null);
     if (countryCode === '+94') {
       if (clean.length > 0 && clean.length < 9) {
         setPhoneError(`Sri Lankan mobile numbers must be 9 digits without leading 0 (${clean.length}/9)`);
@@ -197,17 +188,6 @@ export const SeatMap: React.FC = () => {
       }
     }
   };
-
-  // Resend OTP Countdown Timer
-  useEffect(() => {
-    let timer: any = null;
-    if (resendTimer > 0) {
-      timer = setInterval(() => setResendTimer(prev => prev - 1), 1000);
-    }
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [resendTimer]);
 
   // Concurrency Seat Hold Timer
   useEffect(() => {
@@ -449,8 +429,8 @@ export const SeatMap: React.FC = () => {
     setPendingGenderSeat(null);
   };
 
-  // ─── WhatsApp OTP Handlers ────────────────────────────────────────────────
-  const handleSendOtp = async () => {
+  // ─── WhatsApp / Contact Verification Handlers ─────────────────────────────
+  const handleVerifyPhone = () => {
     let clean = phoneInput.replace(/\D/g, '');
     if (countryCode === '+94' && clean.startsWith('0')) {
       clean = clean.slice(1);
@@ -467,55 +447,22 @@ export const SeatMap: React.FC = () => {
 
     setPhoneInput(clean);
     setPhoneError(null);
-    setOtpError(null);
-    setIsSendingOtp(true);
+    setIsPhoneVerified(true);
+    setOpenSection2(true);
+    setPassengerInfo({ 
+      phone: `${countryCode}${clean}`,
+      fullName: currentUser?.name || 'Guest',
+      email: currentUser?.email || 'passenger@dewminasuperline.lk'
+    });
 
-    const fullPhone = `${countryCode}${clean}`;
-    try {
-      await authApi.sendWhatsAppOtp(fullPhone);
-      setIsOtpSent(true);
-      setResendTimer(60);
-    } catch (err: any) {
-      setPhoneError(err.message || 'Failed to send WhatsApp verification code. Please check your number.');
-    } finally {
-      setIsSendingOtp(false);
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (!otpInput || otpInput.trim().length < 4) {
-      setOtpError('Please enter the 6-digit verification code.');
-      return;
-    }
-    setOtpError(null);
-    setIsVerifyingOtp(true);
-
-    const clean = phoneInput.replace(/\D/g, '');
-    const fullPhone = `${countryCode}${clean}`;
-    try {
-      await authApi.verifyWhatsAppOtp({ phone: fullPhone, otp: otpInput.trim() });
-      setIsPhoneVerified(true);
-      setIsOtpSent(false);
-      setPassengerInfo({ 
-        phone: fullPhone,
-        fullName: currentUser?.name || 'Passenger',
-        email: currentUser?.email || 'passenger@dewminasuperline.lk'
-      });
-      setOpenSection2(false);
-      setIsSeatDrawerOpen(true);
-    } catch (err: any) {
-      setOtpError(err.message || 'Invalid or expired OTP code. Please check your WhatsApp.');
-    } finally {
-      setIsVerifyingOtp(false);
-    }
+    // Send background notification asynchronously without blocking UI transition
+    authApi.sendWhatsAppOtp(`${countryCode}${clean}`).catch(() => {});
   };
 
   const handleResetPhoneVerification = () => {
     setIsPhoneVerified(false);
-    setIsOtpSent(false);
-    setOtpInput('');
-    setOtpError(null);
     setPhoneError(null);
+    setOpenSection2(true);
   };
 
   const handleApplyPromo = (e: React.FormEvent) => {
@@ -1086,9 +1033,9 @@ export const SeatMap: React.FC = () => {
               >
                 <div className="flex items-center gap-3.5">
                   <div className={`w-9 h-9 rounded-full text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-sm transition-all ${
-                    isPhoneVerified ? 'bg-emerald-600 shadow-emerald-600/30' : 'bg-blue-600 shadow-blue-600/30 portal-badge-pulse'
+                    isPhoneVerified ? 'bg-blue-600 shadow-blue-600/30' : 'bg-blue-600 shadow-blue-600/30 portal-badge-pulse'
                   }`}>
-                    {isPhoneVerified ? <Check className="w-4 h-4 text-white" /> : '2'}
+                    2
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors flex items-center gap-2">
@@ -1099,12 +1046,16 @@ export const SeatMap: React.FC = () => {
                         </span>
                       )}
                     </h3>
-                    <p className="text-xs text-slate-500 font-normal">Enter your WhatsApp number to verify and receive instant e-ticket updates.</p>
+                    <p className="text-xs text-slate-500 font-normal">
+                      {isPhoneVerified 
+                        ? 'Fill out the form below and verify your identity.' 
+                        : 'Enter your WhatsApp number to verify and receive instant e-ticket updates.'}
+                    </p>
                   </div>
                 </div>
-                <div className="p-1.5 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
+                <div className="p-1 rounded-lg border border-blue-500 bg-white text-blue-600 group-hover:bg-blue-50 transition-all shadow-2xs">
                   <div className={`transition-transform duration-300 ${openSection2 ? 'rotate-0' : '-rotate-180'}`}>
-                    <ChevronUp className="w-4 h-4" />
+                    <ChevronDown className="w-4 h-4" />
                   </div>
                 </div>
               </button>
@@ -1121,9 +1072,6 @@ export const SeatMap: React.FC = () => {
                             onChange={(e) => {
                               setCountryCode(e.target.value);
                               setIsPhoneVerified(false);
-                              setIsOtpSent(false);
-                              setOtpInput('');
-                              setOtpError(null);
                             }}
                             className="px-4 py-3 rounded-xl border border-slate-400 bg-white text-slate-800 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer flex-shrink-0 hover:border-slate-500 transition-colors pr-8 appearance-none shadow-2xs"
                           >
@@ -1143,12 +1091,9 @@ export const SeatMap: React.FC = () => {
                             value={phoneInput}
                             onChange={(e) => handlePhoneChange(e.target.value)}
                             maxLength={countryCode === '+94' ? 9 : 12}
-                            disabled={isOtpSent}
                             className={`w-full px-4 py-3 rounded-xl border-2 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 transition-all shadow-2xs ${
                               phoneError 
                                 ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:ring-rose-400 focus:border-rose-500' 
-                                : isOtpSent
-                                ? 'border-emerald-300 bg-emerald-50/20 text-slate-700 cursor-not-allowed'
                                 : 'border-blue-600 bg-white text-slate-800 focus:ring-blue-400 focus:border-blue-600 placeholder:text-slate-400'
                             }`}
                           />
@@ -1156,32 +1101,16 @@ export const SeatMap: React.FC = () => {
 
                         <button
                           type="button"
-                          onClick={handleSendOtp}
-                          disabled={isSendingOtp || !isPhoneValid}
+                          onClick={handleVerifyPhone}
+                          disabled={!isPhoneValid}
                           className={`px-6 py-3 rounded-xl font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-1.5 flex-shrink-0 active:scale-95 ${
                             !isPhoneValid
-                              ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-                              : isOtpSent
-                              ? 'bg-emerald-700 hover:bg-emerald-800 text-white shadow-emerald-500/20 cursor-pointer'
-                              : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20 cursor-pointer'
+                              ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none border border-slate-200/60'
+                              : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20 cursor-pointer'
                           }`}
                         >
-                          {isSendingOtp ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              <span>Sending OTP...</span>
-                            </>
-                          ) : isOtpSent ? (
-                            <>
-                              <RotateCcw className="w-4 h-4" />
-                              <span>Resend Code</span>
-                            </>
-                          ) : (
-                            <>
-                              <MessageSquare className="w-4 h-4" />
-                              <span>Verify</span>
-                            </>
-                          )}
+                          <MessageSquare className="w-4 h-4" />
+                          <span>Verify</span>
                         </button>
                       </div>
 
@@ -1191,151 +1120,53 @@ export const SeatMap: React.FC = () => {
                           <span>⚠️</span> {phoneError}
                         </p>
                       )}
-
-                      {/* Interactive WhatsApp OTP Verification Box */}
-                      {isOtpSent && (
-                        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-emerald-50/90 via-teal-50/50 to-white border border-emerald-300/90 shadow-sm space-y-3.5 animate-fade-in">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs flex-shrink-0">
-                                <KeyRound className="w-4 h-4" />
-                              </div>
-                              <div>
-                                <h4 className="text-xs sm:text-sm font-extrabold text-emerald-950 flex items-center gap-1.5">
-                                  <span>WhatsApp Verification Code</span>
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                                    {countryCode} {phoneInput}
-                                  </span>
-                                </h4>
-                                <p className="text-[11px] text-emerald-800/80">
-                                  We just sent a 6-digit OTP to your WhatsApp. Enter it below to verify.
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setIsOtpSent(false);
-                                  setOtpInput('');
-                                  setOtpError(null);
-                                }}
-                                className="text-[11px] font-bold text-slate-500 hover:text-slate-800 underline flex-shrink-0 cursor-pointer flex items-center gap-1"
-                              >
-                                <Edit2 className="w-3 h-3" />
-                                <span>Change</span>
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* OTP Input and Submit Row */}
-                          <div className="flex flex-col sm:flex-row gap-2.5">
-                            <div className="flex-1 relative">
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                maxLength={6}
-                                autoFocus
-                                placeholder="• • • • • •"
-                                value={otpInput}
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/\D/g, '').slice(0, 6);
-                                  setOtpInput(val);
-                                  if (otpError) setOtpError(null);
-                                }}
-                                className="w-full px-4 py-3 rounded-xl border-2 border-emerald-500 bg-white text-emerald-950 font-mono text-center tracking-[0.4em] text-base font-extrabold focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-2xs placeholder:tracking-widest placeholder:text-slate-300"
-                              />
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={handleVerifyOtp}
-                              disabled={isVerifyingOtp || otpInput.length < 4}
-                              className={`px-7 py-3 rounded-xl font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-1.5 flex-shrink-0 cursor-pointer active:scale-95 ${
-                                otpInput.length >= 4
-                                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20'
-                                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                              }`}
-                            >
-                              {isVerifyingOtp ? (
-                                <>
-                                  <Loader2 className="w-4 h-4 animate-spin" />
-                                  <span>Checking...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Check className="w-4 h-4" />
-                                  <span>Confirm OTP</span>
-                                </>
-                              )}
-                            </button>
-                          </div>
-
-                          {/* OTP Error message */}
-                          {otpError && (
-                            <p className="text-[11px] font-semibold text-rose-600 pl-1 flex items-center gap-1 animate-fade-in">
-                              <span>⚠️</span> {otpError}
-                            </p>
-                          )}
-
-                          {/* Resend Options */}
-                          <div className="flex items-center justify-end gap-2 pt-2 border-t border-emerald-200/60 text-[11px]">
-                            <div className="flex items-center gap-3">
-                              {resendTimer > 0 ? (
-                                <span className="text-slate-500 font-medium">
-                                  Resend in <strong className="font-mono text-slate-700">{resendTimer}s</strong>
-                                </span>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={handleSendOtp}
-                                  disabled={isSendingOtp}
-                                  className="text-emerald-700 hover:text-emerald-800 font-bold hover:underline cursor-pointer flex items-center gap-1"
-                                >
-                                  <RotateCcw className="w-3 h-3" />
-                                  <span>Resend OTP</span>
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </>
                   ) : (
-                    /* Verified State */
-                    <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/90 border border-emerald-200/90 space-y-3.5 animate-fade-in">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs flex-shrink-0">
-                            <CheckCircle2 className="w-5 h-5 text-white" />
+                    /* Verified State: Exact Match to Screenshot 2 */
+                    <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4 animate-fade-in">
+                      <div className="flex items-center gap-5 sm:gap-7">
+                        {/* Avatar Placeholder Silhouette */}
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center flex-shrink-0 shadow-2xs">
+                          <User className="w-8 h-8 sm:w-10 sm:h-10 text-slate-700" />
+                        </div>
+
+                        {/* Passenger Details */}
+                        <div className="space-y-1.5 text-xs sm:text-sm">
+                          <div className="flex items-center">
+                            <span className="w-20 text-slate-700 font-medium">Name</span>
+                            <span className="text-slate-400 mr-2">:</span>
+                            <span className="font-extrabold text-slate-900">{currentUser?.name || 'Guest'}</span>
                           </div>
-                          <div>
-                            <h4 className="text-sm font-bold text-emerald-950 flex items-center gap-2">
-                              <span>WhatsApp Verified:</span>
-                              <span className="font-mono font-extrabold text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-md">
-                                {countryCode} {phoneInput}
-                              </span>
-                            </h4>
-                            <p className="text-[11px] text-emerald-800/80 mt-0.5">
-                              Your e-ticket, live bus tracking link, and journey notifications will be sent directly to this WhatsApp number.
-                            </p>
+                          <div className="flex items-center">
+                            <span className="w-20 text-slate-700 font-medium">Gender</span>
+                            <span className="text-slate-400 mr-2">:</span>
+                            <span className="font-extrabold text-slate-900">Not Provided</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="w-20 text-slate-700 font-medium">Contact</span>
+                            <span className="text-slate-400 mr-2">:</span>
+                            <span className="font-extrabold text-slate-900 font-mono">
+                              {countryCode}{phoneInput}
+                            </span>
                           </div>
                         </div>
+                      </div>
+
+                      {/* Bottom action row with Change and Proceed button */}
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                         <button
                           type="button"
                           onClick={handleResetPhoneVerification}
-                          className="text-[11px] font-bold text-emerald-700 hover:text-emerald-900 underline flex-shrink-0 cursor-pointer"
+                          className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer flex items-center gap-1"
                         >
-                          Change Number
+                          <Edit2 className="w-3.5 h-3.5" />
+                          <span>Change Number</span>
                         </button>
-                      </div>
 
-                      <div className="pt-2 flex justify-end">
                         <button
                           type="button"
                           onClick={handleStep2Proceed}
-                          className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                          className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
                         >
                           <span>Proceed to Step 3: Choose Seat</span>
                           <ArrowRight className="w-4 h-4" />
