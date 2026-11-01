@@ -203,7 +203,9 @@ export const FloatingWhatsApp: React.FC = () => {
   };
 
   const handleActionClick = (action: any) => {
-    if (action.type === 'VIEW_SCHEDULES' || action.type === 'BOOK_SEAT') {
+    if (action.type === 'VIEW_SCHEDULES') {
+      window.open('https://dewminatravels-schedule.vercel.app', '_blank', 'noopener,noreferrer');
+    } else if (action.type === 'BOOK_SEAT') {
       setCurrentView('schedules-dashboard');
       setIsOpen(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });

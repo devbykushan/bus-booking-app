@@ -187,8 +187,8 @@ async function generateClientFallback(incomingText: string, lang: 'si' | 'en' = 
       }
 
       textOut += isEn
-        ? `\n💡 *You can select and book your seat online right now.*`
-        : `\n💡 *දැන්ම ආසන තෝරා Online වෙන්කරවා ගත හැක.*`;
+        ? `\n💡 *View live schedules & book seats online:*\n🌐 https://dewminatravels-schedule.vercel.app`
+        : `\n💡 *සජීවී කාලසටහන සහ ආසන වෙන්කිරීම සඳහා පිවිසෙන්න:*\n🌐 https://dewminatravels-schedule.vercel.app`;
     } else {
       textOut = isEn
         ? `🚌 **Dewmina Super Line Daily Bus Timetable**\n\n` +
@@ -198,7 +198,7 @@ async function generateClientFallback(incomingText: string, lang: 'si' | 'en' = 
           `📍 **Colombo ➔ Monaragala**\n` +
           `• Afternoon: 01:40 PM / 02:20 PM / 04:10 PM\n` +
           `• Evening: 06:00 PM / 06:50 PM\n\n` +
-          `💡 *View live schedules below to select seats.*`
+          `💡 *View live schedules & book seats online:*\n🌐 https://dewminatravels-schedule.vercel.app`
         : `🚌 **Dewmina Super Line දෛනික බස් කාලසටහන**\n\n` +
           `📍 **මොනරාගල ➔ කොළඹ**\n` +
           `• උදෑසන 05:00 AM / 07:10 AM / 11:40 AM\n` +
@@ -206,7 +206,7 @@ async function generateClientFallback(incomingText: string, lang: 'si' | 'en' = 
           `📍 **කොළඹ ➔ මොනරාගල**\n` +
           `• දහවල් 01:40 PM / 02:20 PM / 04:10 PM\n` +
           `• සවස 06:00 PM / 06:50 PM\n\n` +
-          `💡 *සජීවී ආසන ඇබෑර්තු සහ වෙන්කිරීම් සඳහා පහතින් කාලසටහන බලන්න.*`;
+          `💡 *සජීවී කාලසටහන සහ ආසන වෙන්කිරීම සඳහා පිවිසෙන්න:*\n🌐 https://dewminatravels-schedule.vercel.app`;
     }
 
     return {

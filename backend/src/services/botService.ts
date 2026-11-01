@@ -168,8 +168,8 @@ async function buildRealtimeTimetableReply(isEnglish = false): Promise<string> {
     }
 
     reply += isEnglish
-      ? `\n💡 _You can select and book your seats online instantly on our website:_\n🌐 https://dewminasuperline.lk`
-      : `\n💡 _වෙබ් අඩවිය හරහා ඔබට ක්ෂණිකව ආසන තෝරා වෙන්කරගත හැක._\n🌐 https://dewminasuperline.lk`;
+      ? `\n💡 _You can select and book your seats online instantly on our website:_\n🌐 https://dewminatravels-schedule.vercel.app\n🌐 https://dewminasuperline.lk`
+      : `\n💡 _වෙබ් අඩවිය හරහා ඔබට ක්ෂණිකව ආසන තෝරා වෙන්කරගත හැක._\n🌐 https://dewminatravels-schedule.vercel.app\n🌐 https://dewminasuperline.lk`;
     return reply;
   }
 
@@ -184,8 +184,8 @@ async function buildRealtimeTimetableReply(isEnglish = false): Promise<string> {
         reply += `🚍 *${tt.busNumber} (${tt.busType || 'Normal Service'})* — LKR ${Number(tt.price || 1157).toLocaleString()}\n`;
       }
       reply += isEnglish
-        ? `\n📍 *Main Daily Departure Times:*\n• Monaragala: 05:00 AM, 06:00 AM, 07:10 AM, 11:40 AM, 02:20 PM, 10:55 PM, 11:35 PM\n• Colombo: 12:40 AM, 01:40 PM, 02:20 PM, 04:10 PM, 05:10 PM, 06:00 PM, 06:50 PM\n\n💡 _Book your seat online on our website:_\n🌐 https://dewminasuperline.lk`
-        : `\n📍 *දෛනික ප්‍රධාන ගමන් වාර වේලාවන්:*\n• මොනරාගලින් පිටත්වීම: 05:00 AM, 06:00 AM, 07:10 AM, 11:40 AM, 02:20 PM, 10:55 PM, 11:35 PM\n• කොළඹින් පිටත්වීම: 12:40 AM, 01:40 PM, 02:20 PM, 04:10 PM, 05:10 PM, 06:00 PM, 06:50 PM\n\n💡 _වෙබ් අඩවිය හරහා අද සහ ඉදිරි දින සඳහා ආසන වෙන්කරවා ගත හැක._\n🌐 https://dewminasuperline.lk`;
+        ? `\n📍 *Main Daily Departure Times:*\n• Monaragala: 05:00 AM, 06:00 AM, 07:10 AM, 11:40 AM, 02:20 PM, 10:55 PM, 11:35 PM\n• Colombo: 12:40 AM, 01:40 PM, 02:20 PM, 04:10 PM, 05:10 PM, 06:00 PM, 06:50 PM\n\n💡 _Book your seat online on our website:_\n🌐 https://dewminatravels-schedule.vercel.app\n🌐 https://dewminasuperline.lk`
+        : `\n📍 *දෛනික ප්‍රධාන ගමන් වාර වේලාවන්:*\n• මොනරාගලින් පිටත්වීම: 05:00 AM, 06:00 AM, 07:10 AM, 11:40 AM, 02:20 PM, 10:55 PM, 11:35 PM\n• කොළඹින් පිටත්වීම: 12:40 AM, 01:40 PM, 02:20 PM, 04:10 PM, 05:10 PM, 06:00 PM, 06:50 PM\n\n💡 _වෙබ් අඩවිය හරහා අද සහ ඉදිරි දින සඳහා ආසන වෙන්කරවා ගත හැක._\n🌐 https://dewminatravels-schedule.vercel.app\n🌐 https://dewminasuperline.lk`;
       return reply;
     }
   } catch (ttErr) {
@@ -200,7 +200,7 @@ async function buildRealtimeTimetableReply(isEnglish = false): Promise<string> {
       `📍 *Colombo ➔ Monaragala*\n` +
       `• Afternoon: 01:40 PM / 02:20 PM / 04:10 PM\n` +
       `• Evening: 06:00 PM / 06:50 PM\n\n` +
-      `💡 _Visit our website for live seat booking:_\n🌐 https://dewminasuperline.lk`
+      `💡 _Visit our website for live seat booking:_\n🌐 https://dewminatravels-schedule.vercel.app\n🌐 https://dewminasuperline.lk`
     : `🚌 *Dewmina Super Line දෛනික බස් කාලසටහන*\n\n` +
       `📍 *මොනරාගල ➔ කොළඹ*\n` +
       `• උදෑසන 05:00 AM / 07:10 AM / 11:40 AM\n` +
@@ -208,7 +208,7 @@ async function buildRealtimeTimetableReply(isEnglish = false): Promise<string> {
       `📍 *කොළඹ ➔ මොනරාගල*\n` +
       `• දහවල් 01:40 PM / 02:20 PM / 04:10 PM\n` +
       `• සවස 06:00 PM / 06:50 PM\n\n` +
-      `💡 _සජීවී ආසන ඇබෑර්තු සහ වෙන්කිරීම් සඳහා අපගේ වෙබ් අඩවියට පිවිසෙන්න._\n🌐 https://dewminasuperline.lk`;
+      `💡 _සජීවී ආසන ඇබෑර්තු සහ වෙන්කිරීම් සඳහා අපගේ වෙබ් අඩවියට පිවිසෙන්න._\n🌐 https://dewminatravels-schedule.vercel.app\n🌐 https://dewminasuperline.lk`;
 }
 
 /**
