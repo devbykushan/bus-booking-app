@@ -221,6 +221,54 @@ export const FloatingWhatsApp: React.FC = () => {
     }
   };
 
+  const renderMessageContent = (text: string) => {
+    // Regex to split by URLs (http/https) and bold markdown (**word**)
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const lines = text.split('\n');
+
+    return lines.map((line, lineIdx) => {
+      const parts = line.split(urlRegex);
+      return (
+        <span key={lineIdx} className="block">
+          {parts.map((part, partIdx) => {
+            if (part.match(urlRegex)) {
+              return (
+                <a
+                  key={partIdx}
+                  href={part}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 underline font-bold hover:text-blue-700 dark:hover:text-blue-300 break-all transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  <span>{part}</span>
+                </a>
+              );
+            }
+
+            // Bold markdown: **text**
+            const boldParts = part.split(/(\*\*[^*]+\*\*)/g);
+            return boldParts.map((bp, bIdx) => {
+              if (bp.startsWith('**') && bp.endsWith('**')) {
+                return <strong key={bIdx} className="font-extrabold">{bp.slice(2, -2)}</strong>;
+              }
+              // Italic markdown: _text_
+              const italicParts = bp.split(/(_[^_]+_)/g);
+              return italicParts.map((ip, iIdx) => {
+                if (ip.startsWith('_') && ip.endsWith('_')) {
+                  return <em key={iIdx} className="italic">{ip.slice(1, -1)}</em>;
+                }
+                return <React.Fragment key={iIdx}>{ip}</React.Fragment>;
+              });
+            });
+          })}
+        </span>
+      );
+    });
+  };
+
   if (isModalOpen || isPwaPromptOpen) return null;
 
   // Active quick options depending on current state
@@ -355,7 +403,7 @@ export const FloatingWhatsApp: React.FC = () => {
                             : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200/80 dark:border-slate-700/80 rounded-bl-xs'
                         }`}
                       >
-                        {msg.text}
+                        {renderMessageContent(msg.text)}
 
                         {/* Interactive Language Selector Buttons inside initial bubble */}
                         {isLangSelectPrompt && msg.options && (
