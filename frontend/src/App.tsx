@@ -142,13 +142,26 @@ export function App() {
     return () => clearTimeout(splashTimer);
   }, []);
 
-  // Initialize theme
+  // Initialize theme and listen for OS dark mode changes
   useEffect(() => {
     const theme = useBookingStore.getState().theme;
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
+    }
+
+    // Media query listener for device system dark mode preference
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleSystemThemeChange = (e: MediaQueryListEvent) => {
+        const saved = localStorage.getItem('dewmina_theme');
+        if (!saved) {
+          useBookingStore.getState().setTheme(e.matches ? 'dark' : 'light');
+        }
+      };
+      mediaQuery.addEventListener('change', handleSystemThemeChange);
+      return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
     }
   }, []);
 
@@ -381,13 +394,13 @@ export function App() {
               <AdminDashboard />
             </div>
           ) : (
-            <div key="admin-restricted" className="max-w-xl mx-auto my-12 px-6 py-10 bg-white rounded-3xl border border-red-200 shadow-xl text-center space-y-5 animate-fade-in-up">
-              <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center mx-auto text-red-600 shadow-sm">
+            <div key="admin-restricted" className="max-w-xl mx-auto my-12 px-6 py-10 bg-white dark:bg-slate-900 rounded-3xl border border-red-200 dark:border-red-900/50 shadow-xl text-center space-y-5 animate-fade-in-up">
+              <div className="w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/50 flex items-center justify-center mx-auto text-red-600 shadow-sm">
                 <ShieldAlert className="w-8 h-8 text-red-600" />
               </div>
               <div className="space-y-2">
-                <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">Operator Portal Access Restricted</h2>
-                <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                <h2 className="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight">Operator Portal Access Restricted</h2>
+                <p className="text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto leading-relaxed">
                   The Operator & Admin Portal is restricted to authorized fleet administrators. Passenger accounts cannot access fleet management.
                 </p>
               </div>

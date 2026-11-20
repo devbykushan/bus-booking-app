@@ -376,7 +376,14 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   setLoginToast: (val) => set({ loginToast: val }),
 
 
-  theme: (localStorage.getItem('dewmina_theme') as 'light' | 'dark') || 'light',
+  theme: (() => {
+    const saved = typeof window !== 'undefined' ? (localStorage.getItem('dewmina_theme') as 'light' | 'dark') : null;
+    if (saved === 'dark' || saved === 'light') return saved;
+    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    return 'light';
+  })(),
   setTheme: (theme) => {
     localStorage.setItem('dewmina_theme', theme);
     if (theme === 'dark') {

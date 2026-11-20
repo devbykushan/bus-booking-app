@@ -23,6 +23,17 @@
       });
       (function() {
         try {
+          var saved = localStorage.getItem('dewmina_theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+      (function() {
+        try {
           var hostname = window.location.hostname.toLowerCase();
           var isSuperAdmin = hostname.indexOf('dewmina-super-admin') !== -1 ||
                              hostname.indexOf('super-admin') !== -1 ||
