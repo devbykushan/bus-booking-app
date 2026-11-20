@@ -1302,9 +1302,28 @@ export const SeatMap: React.FC = () => {
                     /* Verified State: Exact Match to Screenshot 2 */
                     <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4 animate-fade-in">
                       <div className="flex items-center gap-5 sm:gap-7">
-                        {/* Avatar Placeholder Silhouette */}
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center flex-shrink-0 shadow-2xs">
-                          <User className="w-8 h-8 sm:w-10 sm:h-10 text-slate-700" />
+                        {/* Avatar / Profile Photo */}
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden relative">
+                          {currentUser?.avatarUrl || currentUser?.email ? (
+                            <img 
+                              src={currentUser?.avatarUrl || `https://unavatar.io/${encodeURIComponent(currentUser.email)}`} 
+                              alt={currentUser?.name || 'Passenger'} 
+                              referrerPolicy="no-referrer"
+                              className="w-full h-full object-cover rounded-full"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLElement).style.display = 'none';
+                                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                if (fallback) fallback.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div className={`w-full h-full rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 items-center justify-center text-white font-black text-xl sm:text-2xl shadow-inner ${currentUser?.avatarUrl || currentUser?.email ? 'hidden' : 'flex'}`}>
+                            {currentUser?.name ? (
+                              currentUser.name.charAt(0).toUpperCase()
+                            ) : (
+                              <User className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                            )}
+                          </div>
                         </div>
 
                         {/* Passenger Details */}
