@@ -124,8 +124,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
   const handleBookNextTrip = (targetRoute: BusRoute) => {
     const targetDate = targetRoute.departureDate || tomorrowStr;
     setSearchCriteria(targetRoute.origin, targetRoute.destination, targetDate);
-    setSelectedRoute(targetRoute);
-    setCurrentView('seat-selection');
+    setCurrentView('schedules-dashboard');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
