@@ -19,6 +19,7 @@ export const SeatMap: React.FC = () => {
     selectedDropPoint,
     setSelectedBoardingPoint,
     setSelectedDropPoint,
+    passengerInfo,
     setPassengerInfo,
     discountRate,
     applyPromoCode,
@@ -98,6 +99,7 @@ export const SeatMap: React.FC = () => {
   const [countryCode, setCountryCode] = useState('+94');
   const [phoneInput, setPhoneInput] = useState('');
   const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [guestName, setGuestName] = useState('');
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otpInput, setOtpInput] = useState('');
@@ -503,7 +505,7 @@ export const SeatMap: React.FC = () => {
       setOpenSection2(true);
       setPassengerInfo({ 
         phone: fullPhone,
-        fullName: currentUser?.name || 'Guest',
+        fullName: currentUser?.name || guestName || 'Guest',
         email: currentUser?.email || 'passenger@dewminasuperline.lk'
       });
     } catch (err: any) {
@@ -573,8 +575,8 @@ export const SeatMap: React.FC = () => {
     }
 
     setPassengerInfo({
-      fullName: currentUser?.name || 'Passenger',
-      email: currentUser?.email || 'passenger@dewminasuperline.lk',
+      fullName: currentUser?.name || guestName || seatPassengerNames[selectedSeatIds[0]] || passengerInfo.fullName || 'Passenger',
+      email: currentUser?.email || passengerInfo.email || 'passenger@dewminasuperline.lk',
       phone: `${countryCode}${cleanPhone}`,
       gender: 'female',
     });
@@ -1320,6 +1322,8 @@ export const SeatMap: React.FC = () => {
                           <div className={`w-full h-full rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 items-center justify-center text-white font-black text-xl sm:text-2xl shadow-inner ${currentUser?.avatarUrl || currentUser?.email ? 'hidden' : 'flex'}`}>
                             {currentUser?.name ? (
                               currentUser.name.charAt(0).toUpperCase()
+                            ) : guestName ? (
+                              guestName.charAt(0).toUpperCase()
                             ) : (
                               <User className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                             )}
@@ -1331,7 +1335,20 @@ export const SeatMap: React.FC = () => {
                           <div className="flex items-center">
                             <span className="w-20 text-slate-700 font-medium">Name</span>
                             <span className="text-slate-400 mr-2">:</span>
-                            <span className="font-extrabold text-slate-900">{currentUser?.name || 'Guest'}</span>
+                            {currentUser?.name ? (
+                              <span className="font-extrabold text-slate-900">{currentUser.name}</span>
+                            ) : (
+                              <input
+                                type="text"
+                                placeholder="Enter name (optional)"
+                                value={guestName}
+                                onChange={(e) => {
+                                  setGuestName(e.target.value);
+                                  setPassengerInfo({ fullName: e.target.value || 'Guest' });
+                                }}
+                                className="px-2.5 py-0.5 rounded-lg border border-slate-300 text-xs sm:text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50 hover:bg-white transition-colors max-w-[190px]"
+                              />
+                            )}
                           </div>
                           <div className="flex items-center">
                             <span className="w-20 text-slate-700 font-medium">Gender</span>

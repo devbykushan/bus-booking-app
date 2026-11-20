@@ -86,7 +86,6 @@ export const Navbar: React.FC = () => {
 
   const navItems: NavItem[] = isAdmin
     ? [
-        { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
         { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
         { 
           key: 'admin-payment-slips', 
@@ -128,7 +127,6 @@ export const Navbar: React.FC = () => {
 
   const mobileNavItems = isAdmin
     ? [
-        { key: 'passenger-search', translationKey: 'findBuses', icon: Bus, activeOn: ['passenger-search'] },
         { key: 'schedules-dashboard', translationKey: 'journeys', icon: Route, activeOn: ['schedules-dashboard', 'seat-selection', 'checkout', 'ticket-confirmation'] },
         { 
           key: 'admin-payment-slips', 

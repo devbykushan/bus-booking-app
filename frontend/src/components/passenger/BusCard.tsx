@@ -32,7 +32,7 @@ const parseTimeToMinutes = (timeStr: string): number => {
 export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRoute }) => {
   const { 
     setSelectedRoute, setCurrentView, searchDate, setSearchCriteria,
-    routes, userRole, currentUser, setShowAuthModal, language, t 
+    routes, userRole, currentUser, language, t 
   } = useBookingStore();
   const isAdmin = userRole === 'admin' || userRole === 'super_admin' || currentUser?.role === 'admin' || currentUser?.role === 'super_admin';
 
@@ -117,10 +117,6 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
 
   const handleSelectSeats = () => {
     setSelectedRoute(route);
-    if (!currentUser) {
-      setShowAuthModal(true);
-      return;
-    }
     setCurrentView('seat-selection');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -129,10 +125,6 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
     const targetDate = targetRoute.departureDate || tomorrowStr;
     setSearchCriteria(targetRoute.origin, targetRoute.destination, targetDate);
     setSelectedRoute(targetRoute);
-    if (!currentUser) {
-      setShowAuthModal(true);
-      return;
-    }
     setCurrentView('seat-selection');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
