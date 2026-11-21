@@ -1685,6 +1685,54 @@ html {
   }
 }
 
+/* Elegant Route Arrow Fly-Out & Fly-In */
+@keyframes routeArrowFlyOut {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  40% {
+    transform: translateX(12px) scaleX(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(36px) scaleX(0.7) scaleY(0.7);
+    opacity: 0;
+    filter: blur(3px);
+  }
+}
+
+@keyframes routeArrowFlyIn {
+  0% {
+    transform: translateX(-32px) scaleX(0.7) scaleY(0.7);
+    opacity: 0;
+    filter: blur(3px);
+  }
+  65% {
+    transform: translateX(3px) scale(1.06);
+    opacity: 0.95;
+    filter: blur(0px);
+  }
+  85% {
+    transform: translateX(-1px) scale(0.98);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+.animate-route-fly-out {
+  animation: routeArrowFlyOut 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+}
+
+.animate-route-fly-in {
+  animation: routeArrowFlyIn 0.44s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
 @keyframes swapSpin {
   0% {
     transform: rotate(0deg) scale(1);

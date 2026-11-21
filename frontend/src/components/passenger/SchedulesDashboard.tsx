@@ -249,16 +249,25 @@ export const SchedulesDashboard: React.FC = () => {
     setModDestination(temp);
   };
 
-  // Swap origin and destination directly by clicking the route arrow
-  const [isSwappingRoute, setIsSwappingRoute] = useState(false);
+  // Swap origin and destination directly with elegant fly-out & fly-in animation
+  const [swapAnimPhase, setSwapAnimPhase] = useState<'idle' | 'fly-out' | 'fly-in'>('idle');
   const handleSwapRoute = () => {
-    setIsSwappingRoute(true);
-    const newOrigin = searchDestination;
-    const newDest = searchOrigin;
-    setSearchCriteria(newOrigin, newDest, searchDate);
-    setModOrigin(newOrigin);
-    setModDestination(newDest);
-    setTimeout(() => setIsSwappingRoute(false), 350);
+    if (swapAnimPhase !== 'idle') return;
+    setSwapAnimPhase('fly-out');
+
+    setTimeout(() => {
+      const newOrigin = searchDestination;
+      const newDest = searchOrigin;
+      setSearchCriteria(newOrigin, newDest, searchDate);
+      setModOrigin(newOrigin);
+      setModDestination(newDest);
+
+      setSwapAnimPhase('fly-in');
+
+      setTimeout(() => {
+        setSwapAnimPhase('idle');
+      }, 440);
+    }, 340);
   };
 
   // Submit search modification
@@ -380,7 +389,7 @@ export const SchedulesDashboard: React.FC = () => {
     : 'Today';
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 dark:text-slate-100 pb-20 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 pb-20 transition-colors duration-300">
       {/* ── Top Hero Banner for Dashboard ── */}
       <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white pt-24 pb-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden shadow-lg">
         {/* Ambient glow effects */}
@@ -474,7 +483,9 @@ export const SchedulesDashboard: React.FC = () => {
 
               <div className="flex flex-col gap-2.5">
                 <h1 className="text-base sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-white flex items-center gap-2 sm:gap-3 tracking-tight flex-nowrap overflow-x-auto no-scrollbar py-0.5">
-                  <span className="inline-flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                  <span className={`inline-flex items-center gap-1.5 sm:gap-2 flex-shrink-0 transition-all duration-300 ${
+                    swapAnimPhase === 'fly-out' ? 'opacity-30 scale-95 blur-[1px]' : 'opacity-100 scale-100 blur-0'
+                  }`}>
                     <span className="relative flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-blue-500/20 border border-blue-400/40 text-blue-300">
                       <span className="absolute -inset-0.5 rounded-lg bg-blue-400/30 animate-from-beacon pointer-events-none" />
                       <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-from-icon relative z-10 text-blue-400" />
@@ -485,14 +496,22 @@ export const SchedulesDashboard: React.FC = () => {
                     type="button"
                     onClick={handleSwapRoute}
                     title="Click to swap route (දෙපැත්ත මාරු කරන්න)"
-                    className={`group text-blue-400 font-light flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-1 rounded-xl hover:bg-blue-500/20 active:scale-90 transition-all duration-300 cursor-pointer flex-shrink-0 ${
-                      isSwappingRoute ? 'rotate-180 scale-90' : ''
-                    }`}
+                    className="group text-blue-400 font-light flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-1 rounded-xl hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex-shrink-0"
                   >
-                    <span className="w-4 sm:w-10 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full animate-route-flow group-hover:from-cyan-400 group-hover:to-blue-400" />
-                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-300 animate-bounce-horizontal -ml-1.5 sm:-ml-2 group-hover:text-cyan-300" />
+                    <span className={`flex items-center gap-0.5 sm:gap-1 ${
+                      swapAnimPhase === 'fly-out'
+                        ? 'animate-route-fly-out'
+                        : swapAnimPhase === 'fly-in'
+                        ? 'animate-route-fly-in'
+                        : ''
+                    }`}>
+                      <span className="w-4 sm:w-10 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full animate-route-flow group-hover:from-cyan-400 group-hover:to-blue-400" />
+                      <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-300 animate-bounce-horizontal -ml-1.5 sm:-ml-2 group-hover:text-cyan-300" />
+                    </span>
                   </button>
-                  <span className="inline-flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                  <span className={`inline-flex items-center gap-1.5 sm:gap-2 flex-shrink-0 transition-all duration-300 ${
+                    swapAnimPhase === 'fly-out' ? 'opacity-30 scale-95 blur-[1px]' : 'opacity-100 scale-100 blur-0'
+                  }`}>
                     <span className="relative flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-indigo-500/20 border border-indigo-400/40 text-indigo-300">
                       <span className="absolute -inset-0.5 rounded-lg bg-indigo-400/30 animate-to-beacon pointer-events-none" />
                       <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-to-icon relative z-10 text-indigo-400" />
@@ -754,25 +773,25 @@ export const SchedulesDashboard: React.FC = () => {
                     setTimeOpen(false);
                     setSortOpen(false);
                   }}
-                  className={`filter-btn-animate flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold cursor-pointer select-none ${
+                  className={`filter-btn-animate flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold cursor-pointer select-none transition-all ${
                     operatorOpen || busTypeFilter !== 'all'
-                      ? 'bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-300 text-indigo-700 shadow-sm ring-2 ring-indigo-500/20'
-                      : 'bg-white dark:bg-slate-800 hover:bg-indigo-50/60 border-slate-200 text-indigo-600 hover:border-indigo-200 shadow-xs'
+                      ? 'bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/70 dark:to-purple-950/70 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 shadow-sm ring-2 ring-indigo-500/20 dark:ring-indigo-500/30'
+                      : 'bg-white dark:bg-slate-800 hover:bg-indigo-50/60 dark:hover:bg-indigo-950/40 border-slate-200 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-700 shadow-xs'
                   }`}
                 >
                   {busTypeFilter !== 'all' && (
-                    <span className="w-2 h-2 rounded-full bg-indigo-600 animate-ping inline-block shadow-sm shadow-indigo-500/50" />
+                    <span className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-ping inline-block shadow-sm shadow-indigo-500/50" />
                   )}
                   <span>{busTypeFilter === 'all' ? 'Operator' : busTypeFilter}</span>
-                  <ChevronDown className={`w-4 h-4 text-indigo-600 transition-transform duration-300 ease-out ${operatorOpen ? 'rotate-180 scale-110' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-indigo-600 dark:text-indigo-400 transition-transform duration-300 ease-out ${operatorOpen ? 'rotate-180 scale-110' : ''}`} />
                 </button>
 
                 {operatorOpen && (
-                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 dark:bg-slate-800/95 rounded-2xl border border-slate-200/90 shadow-2xl p-1.5 z-50 animate-popover-in">
-                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100/80 flex items-center justify-between">
+                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 dark:bg-slate-800/95 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-2xl p-1.5 z-50 animate-popover-in">
+                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider border-b border-slate-100/80 dark:border-slate-700 flex items-center justify-between">
                       <span>Select Operator / Class</span>
                       {busTypeFilter !== 'all' && (
-                        <span className="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-1.5 py-0.5 rounded-md">Active</span>
+                        <span className="text-[10px] text-indigo-600 dark:text-indigo-300 font-bold bg-indigo-50 dark:bg-indigo-900/60 px-1.5 py-0.5 rounded-md">Active</span>
                       )}
                     </div>
                     <div className="py-1 space-y-0.5 max-h-60 overflow-y-auto">
@@ -788,12 +807,12 @@ export const SchedulesDashboard: React.FC = () => {
                             }}
                             className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all duration-150 cursor-pointer ${
                               isSelected
-                                ? 'bg-indigo-50 text-indigo-700 font-bold translate-x-0.5 shadow-xs'
-                                : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'
+                                ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold translate-x-0.5 shadow-xs'
+                                : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 hover:text-slate-900 dark:hover:text-white hover:translate-x-1'
                             }`}
                           >
                             <span>{opt.label}</span>
-                            {isSelected && <Check className="w-3.5 h-3.5 text-indigo-600 animate-pop-check" />}
+                            {isSelected && <Check className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 animate-pop-check" />}
                           </button>
                         );
                       })}
@@ -811,15 +830,15 @@ export const SchedulesDashboard: React.FC = () => {
                     setOperatorOpen(false);
                     setSortOpen(false);
                   }}
-                  className={`filter-btn-animate animate-clock-pulse group flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold cursor-pointer select-none ${
+                  className={`filter-btn-animate animate-clock-pulse group flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold cursor-pointer select-none transition-all ${
                     timeOpen || timeFilter !== 'all'
-                      ? 'bg-gradient-to-r from-sky-50 to-blue-50 border-blue-300 text-blue-700 shadow-sm ring-2 ring-blue-500/20'
-                      : 'bg-white dark:bg-slate-800 hover:bg-sky-50/60 border-slate-200 text-slate-700 dark:text-slate-200 hover:border-sky-200 shadow-xs'
+                      ? 'bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-950/70 dark:to-blue-950/70 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 shadow-sm ring-2 ring-blue-500/20 dark:ring-blue-500/30'
+                      : 'bg-white dark:bg-slate-800 hover:bg-sky-50/60 dark:hover:bg-sky-950/40 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-sky-200 dark:hover:border-sky-700 shadow-xs'
                   }`}
                 >
-                  <Clock className={`clock-icon w-3.5 h-3.5 transition-colors duration-200 ${timeFilter !== 'all' ? 'text-blue-600' : 'text-slate-400 group-hover:text-blue-500'}`} />
+                  <Clock className={`clock-icon w-3.5 h-3.5 transition-colors duration-200 ${timeFilter !== 'all' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 group-hover:text-blue-500 dark:group-hover:text-blue-400'}`} />
                   {timeFilter !== 'all' && (
-                    <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping inline-block shadow-sm shadow-blue-500/50" />
+                    <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-ping inline-block shadow-sm shadow-blue-500/50" />
                   )}
                   <span>
                     {timeFilter === 'all'
@@ -830,15 +849,15 @@ export const SchedulesDashboard: React.FC = () => {
                       ? 'Afternoon'
                       : 'Night'}
                   </span>
-                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ease-out group-hover:text-slate-600 ${timeOpen ? 'rotate-180 scale-110 text-blue-600' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ease-out group-hover:text-slate-600 dark:group-hover:text-slate-300 ${timeOpen ? 'rotate-180 scale-110 text-blue-600 dark:text-blue-400' : ''}`} />
                 </button>
 
                 {timeOpen && (
-                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 dark:bg-slate-800/95 rounded-2xl border border-slate-200/90 shadow-2xl p-1.5 z-50 animate-popover-in">
-                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100/80 flex items-center justify-between">
+                  <div className="absolute right-0 sm:left-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 dark:bg-slate-800/95 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-2xl p-1.5 z-50 animate-popover-in">
+                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider border-b border-slate-100/80 dark:border-slate-700 flex items-center justify-between">
                       <span>Departure Window</span>
                       {timeFilter !== 'all' && (
-                        <span className="text-[10px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded-md">Active</span>
+                        <span className="text-[10px] text-blue-600 dark:text-blue-300 font-bold bg-blue-50 dark:bg-blue-900/60 px-1.5 py-0.5 rounded-md">Active</span>
                       )}
                     </div>
                     <div className="py-1 space-y-0.5">
@@ -859,12 +878,12 @@ export const SchedulesDashboard: React.FC = () => {
                             }}
                             className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all duration-150 cursor-pointer ${
                               isSelected
-                                ? 'bg-blue-50 text-blue-700 font-bold translate-x-0.5 shadow-xs'
-                                : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'
+                                ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold translate-x-0.5 shadow-xs'
+                                : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 hover:text-slate-900 dark:hover:text-white hover:translate-x-1'
                             }`}
                           >
                             <span>{tItem.label}</span>
-                            {isSelected && <Check className="w-3.5 h-3.5 text-blue-600 animate-pop-check" />}
+                            {isSelected && <Check className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 animate-pop-check" />}
                           </button>
                         );
                       })}
@@ -882,10 +901,10 @@ export const SchedulesDashboard: React.FC = () => {
                     setOperatorOpen(false);
                     setTimeOpen(false);
                   }}
-                  className={`filter-btn-animate flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold cursor-pointer select-none ${
+                  className={`filter-btn-animate flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-semibold cursor-pointer select-none transition-all ${
                     sortOpen || sortBy !== 'departure-asc'
-                      ? 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-300 text-amber-900 shadow-sm ring-2 ring-amber-500/20'
-                      : 'bg-white dark:bg-slate-800 hover:bg-amber-50/50 border-slate-200 text-slate-700 dark:text-slate-200 hover:border-amber-200 shadow-xs'
+                      ? 'bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/70 dark:to-orange-950/70 border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 shadow-sm ring-2 ring-amber-500/20 dark:ring-amber-500/30'
+                      : 'bg-white dark:bg-slate-800 hover:bg-amber-50/50 dark:hover:bg-amber-950/40 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-amber-200 dark:hover:border-amber-700 shadow-xs'
                   }`}
                 >
                   <span className="text-slate-400 font-normal">Sort:</span>
@@ -902,12 +921,12 @@ export const SchedulesDashboard: React.FC = () => {
                       ? 'Seats Left'
                       : 'Top Rated'}
                   </span>
-                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ease-out ${sortOpen ? 'rotate-180 scale-110 text-amber-700' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ease-out group-hover:text-slate-600 dark:group-hover:text-slate-300 ${sortOpen ? 'rotate-180 scale-110 text-amber-700 dark:text-amber-400' : ''}`} />
                 </button>
 
                 {sortOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 dark:bg-slate-800/95 rounded-2xl border border-slate-200/90 shadow-2xl p-1.5 z-50 animate-popover-in">
-                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100/80">
+                  <div className="absolute right-0 top-full mt-2 w-56 backdrop-blur-xl bg-white/95 dark:bg-slate-800/95 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-2xl p-1.5 z-50 animate-popover-in">
+                    <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider border-b border-slate-100/80 dark:border-slate-700">
                       Sort Schedules
                     </div>
                     <div className="py-1 space-y-0.5">
@@ -930,12 +949,12 @@ export const SchedulesDashboard: React.FC = () => {
                             }}
                             className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all duration-150 cursor-pointer ${
                               isSelected
-                                ? 'bg-amber-50 text-amber-900 font-bold translate-x-0.5 shadow-xs'
-                                : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'
+                                ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 font-bold translate-x-0.5 shadow-xs'
+                                : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 hover:text-slate-900 dark:hover:text-white hover:translate-x-1'
                             }`}
                           >
                             <span>{sItem.label}</span>
-                            {isSelected && <Check className="w-3.5 h-3.5 text-amber-600 animate-pop-check" />}
+                            {isSelected && <Check className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 animate-pop-check" />}
                           </button>
                         );
                       })}
@@ -949,7 +968,7 @@ export const SchedulesDashboard: React.FC = () => {
                 <button
                   onClick={handleResetFilters}
                   title="Reset all filters"
-                  className="filter-btn-animate flex items-center gap-1 px-3 py-2 rounded-2xl bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 text-rose-600 border border-rose-200 shadow-xs cursor-pointer select-none text-xs font-bold"
+                  className="filter-btn-animate flex items-center gap-1 px-3 py-2 rounded-2xl bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/60 dark:to-pink-950/60 hover:from-rose-100 hover:to-pink-100 dark:hover:from-rose-900/70 dark:hover:to-pink-900/70 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 shadow-xs cursor-pointer select-none text-xs font-bold transition-all"
                 >
                   <RotateCcw className="w-3.5 h-3.5 transition-transform duration-300 hover:rotate-180" />
                   <span className="hidden sm:inline">Reset</span>
@@ -1051,7 +1070,7 @@ export const SchedulesDashboard: React.FC = () => {
               )}
 
               {/* Quick Contact & Reassurance Box */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-3xl p-5 space-y-3">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800/90 border border-blue-100 dark:border-slate-700 rounded-3xl p-5 space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md">
                     <PhoneCall className="w-5 h-5" />
@@ -1061,7 +1080,7 @@ export const SchedulesDashboard: React.FC = () => {
                     <p className="text-xs text-slate-500 dark:text-slate-400">Call Dewmina Dispatch: +94 (0) 55 227 6890</p>
                   </div>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                   All coaches are GPS-monitored with speed regulation, verified drivers, and real-time seat lock sync.
                 </p>
               </div>
@@ -1076,32 +1095,32 @@ export const SchedulesDashboard: React.FC = () => {
               title: '100% Real-Time Hold',
               desc: 'Live 8-minute seat lock concurrency engine prevents double bookings.',
               icon: ShieldCheck,
-              color: 'text-blue-600 bg-blue-50 border-blue-200',
+              color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-800',
             },
             {
               title: 'Live GPS Tracking (Coming Soon)',
               desc: 'Track coach location on the road with real-time waypoint estimates.',
               icon: MapPin,
-              color: 'text-indigo-600 bg-indigo-50 border-indigo-200',
+              color: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-800',
             },
             {
               title: 'Instant Boarding Pass',
               desc: 'Download PDF ticket and receive immediate SMS/WhatsApp confirmation.',
               icon: CheckCircle2,
-              color: 'text-emerald-600 bg-emerald-50 border-emerald-200',
+              color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800',
             },
             {
               title: 'Free Rescheduling',
               desc: 'Easily cancel or adjust your booking up to 2 hours before departure.',
               icon: Clock,
-              color: 'text-amber-600 bg-amber-50 border-amber-200',
+              color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800',
             },
           ].map((feat, i) => {
             const Icon = feat.icon;
             return (
               <div
                 key={i}
-                className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 shadow-sm flex items-start gap-3.5 hover:border-slate-300 transition-all"
+                className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-3.5 hover:border-slate-300 dark:hover:border-slate-600 transition-all"
               >
                 <div className={`p-2.5 rounded-2xl border ${feat.color} flex-shrink-0`}>
                   <Icon className="w-5 h-5" />
