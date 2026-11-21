@@ -170,15 +170,15 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
       )}
 
       {/* Confirmation Banner */}
-      <div className="no-print p-6 rounded-3xl border border-emerald-200 bg-emerald-50 text-center space-y-3 shadow-sm">
-        <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+      <div className="no-print p-6 rounded-3xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/30 text-center space-y-3 shadow-sm">
+        <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
           <CheckCircle2 className="w-8 h-8" />
         </div>
-        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">{t('bookingSuccessful')}</h2>
-        <p className="text-slate-600 text-sm max-w-xl mx-auto">
-          Your bus seat reservation is locked and confirmed. We’ve sent your E-Ticket to <strong className="text-slate-800">{booking.passenger.email}</strong>.
+        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">{t('bookingSuccessful')}</h2>
+        <p className="text-slate-600 dark:text-slate-300 text-sm max-w-xl mx-auto">
+          Your bus seat reservation is locked and confirmed. We’ve sent your E-Ticket to <strong className="text-slate-800 dark:text-white">{booking.passenger.email}</strong>.
         </p>
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-emerald-200 text-emerald-700 font-mono font-bold text-sm">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 font-mono font-bold text-sm">
           <span>{t('pnrCode')} {booking.pnr}</span>
         </div>
       </div>
@@ -225,89 +225,89 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
       )}
 
       {/* Printable Boarding Pass Card */}
-      <div id="printable-ticket" className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm relative overflow-hidden space-y-6">
+      <div id="printable-ticket" className="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden space-y-6">
         
         {/* Top Ticket Header */}
-        <div className="ticket-header flex flex-col md:flex-row items-center justify-between border-b border-slate-200 pb-6 gap-4">
+        <div className="ticket-header flex flex-col md:flex-row items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-6 gap-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-extrabold text-xl shadow-sm">
               <Bus className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-slate-800 tracking-tight">{booking.operatorName}</h3>
-              <p className="text-xs text-slate-500 font-mono">{booking.busType} • {booking.busNumber}</p>
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">{booking.operatorName}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">{booking.busType} • {booking.busNumber}</p>
             </div>
           </div>
 
           <div className="text-right">
             <span className="text-xs text-slate-400 uppercase tracking-widest block">{t('status')}</span>
-            <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs font-bold uppercase">
+            <span className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-xs font-bold uppercase">
               {booking.bookingStatus} & Paid
             </span>
           </div>
         </div>
 
         {/* Journey Details Grid */}
-        <div className="journey-grid grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200 text-xs">
+        <div className="journey-grid grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 dark:bg-slate-800/60 p-6 rounded-2xl border border-slate-200 dark:border-slate-700/80 text-xs">
           
           <div className="space-y-1">
-            <span className="text-blue-600 uppercase tracking-wider text-[10px] font-bold flex items-center gap-1.5">
-              <span className="relative flex items-center justify-center w-4 h-4 rounded bg-blue-100 text-blue-600">
+            <span className="text-blue-600 dark:text-blue-400 uppercase tracking-wider text-[10px] font-bold flex items-center gap-1.5">
+              <span className="relative flex items-center justify-center w-4 h-4 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-400">
                 <MapPin className="w-2.5 h-2.5 animate-from-icon" />
               </span>
               {t('from')} & {t('selectBoardingPoint')}
             </span>
-            <p className="text-base font-bold text-slate-800">{t(booking.origin.split(',')[0])}</p>
-            <p className="text-blue-600 font-medium">{booking.boardingPoint.name}</p>
-            <p className="text-slate-500 text-[11px]">{booking.boardingPoint.landmark} ({booking.boardingPoint.time})</p>
+            <p className="text-base font-bold text-slate-800 dark:text-white">{t(booking.origin.split(',')[0])}</p>
+            <p className="text-blue-600 dark:text-blue-400 font-medium">{booking.boardingPoint.name}</p>
+            <p className="text-slate-500 dark:text-slate-400 text-[11px]">{booking.boardingPoint.landmark} ({booking.boardingPoint.time})</p>
           </div>
 
-          <div className="space-y-1 text-center md:border-x border-slate-200 md:px-4">
+          <div className="space-y-1 text-center md:border-x border-slate-200 dark:border-slate-700 md:px-4">
             <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">{t('departureDate')}</span>
-            <p className="text-base font-bold text-slate-800 flex items-center justify-center gap-1">
+            <p className="text-base font-bold text-slate-800 dark:text-white flex items-center justify-center gap-1">
               <Calendar className="w-4 h-4 text-amber-500 animate-date-icon" /> {booking.departureDate}
             </p>
-            <p className="text-amber-600 font-mono text-sm font-bold flex items-center justify-center gap-1">
+            <p className="text-amber-600 dark:text-amber-400 font-mono text-sm font-bold flex items-center justify-center gap-1">
               <Clock className="w-4 h-4 text-amber-500" /> {booking.departureTime}
             </p>
           </div>
 
           <div className="space-y-1 md:text-right">
-            <span className="text-indigo-600 uppercase tracking-wider text-[10px] font-bold flex items-center md:justify-end gap-1.5">
-              <span className="relative flex items-center justify-center w-4 h-4 rounded bg-indigo-100 text-indigo-600">
+            <span className="text-indigo-600 dark:text-indigo-400 uppercase tracking-wider text-[10px] font-bold flex items-center md:justify-end gap-1.5">
+              <span className="relative flex items-center justify-center w-4 h-4 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400">
                 <MapPin className="w-2.5 h-2.5 animate-to-icon" />
               </span>
               {t('destinationDrop')}
             </span>
-            <p className="text-base font-bold text-slate-800">{t(booking.destination.split(',')[0])}</p>
-            <p className="text-indigo-600 font-medium">{booking.dropPoint.name}</p>
+            <p className="text-base font-bold text-slate-800 dark:text-white">{t(booking.destination.split(',')[0])}</p>
+            <p className="text-indigo-600 dark:text-indigo-400 font-medium">{booking.dropPoint.name}</p>
           </div>
 
         </div>
 
         {/* Seats, Passenger Info & Dynamic QR Code */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center border-t border-slate-200 pt-6">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center border-t border-slate-200 dark:border-slate-800 pt-6">
           
           {/* Left Passenger Specs */}
           <div className="md:col-span-8 space-y-4 text-xs">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div>
                 <span className="text-slate-400 block font-medium">{t('passengerName')}</span>
-                <span className="text-sm font-bold text-slate-800">{booking.passenger.fullName}</span>
+                <span className="text-sm font-bold text-slate-800 dark:text-white">{booking.passenger.fullName}</span>
               </div>
               <div>
                 <span className="text-slate-400 block font-medium">{t('selectedSeats')}</span>
-                <span className="text-sm font-extrabold text-blue-600 font-mono">
+                <span className="text-sm font-extrabold text-blue-600 dark:text-blue-400 font-mono">
                   {booking.seats.map(s => s.number).join(', ')}
                 </span>
               </div>
               <div>
                 <span className="text-slate-400 block font-medium">{t('totalPaid')}</span>
-                <span className="text-sm font-extrabold text-slate-800 font-mono">LKR {booking.totalFare.toLocaleString()}</span>
+                <span className="text-sm font-extrabold text-slate-800 dark:text-white font-mono">LKR {booking.totalFare.toLocaleString()}</span>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-[11px] leading-relaxed">
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
               💡 <strong>{t('boardingInstructions')}</strong> Please present this E-Ticket or PNR code with a valid photo ID at the boarding gate. Conductor will scan the QR code before boarding.
             </div>
           </div>
@@ -315,10 +315,10 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
           {/* Right Dynamic Interactive QR Code */}
           <div
             onClick={handleScanValidateQR}
-            className="qr-container md:col-span-4 flex flex-col items-center justify-center p-4 bg-white rounded-2xl border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/20 shadow-2xs text-slate-950 space-y-2 cursor-pointer transition-all group relative"
+            className="qr-container md:col-span-4 flex flex-col items-center justify-center p-4 bg-white dark:bg-slate-800 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-emerald-500 hover:bg-emerald-50/20 shadow-2xs text-slate-950 space-y-2 cursor-pointer transition-all group relative"
             title="Click to validate QR Code PNR status"
           >
-            <div className="relative flex items-center justify-center">
+            <div className="relative flex items-center justify-center p-2 bg-white rounded-xl">
               <QRCodeSVG value={qrCodeValue} size={135} level="H" includeMargin={true} />
               {isValidatingQr && (
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-xs flex items-center justify-center rounded-lg">
@@ -326,7 +326,7 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
                 </div>
               )}
             </div>
-            <span className="font-mono text-[10px] font-bold tracking-widest text-slate-500 group-hover:text-emerald-600 uppercase flex items-center gap-1 transition-colors no-print">
+            <span className="font-mono text-[10px] font-bold tracking-widest text-slate-500 dark:text-slate-400 group-hover:text-emerald-600 uppercase flex items-center gap-1 transition-colors no-print">
               <CheckCircle2 className="w-3 h-3 text-emerald-500" /> SCAN / CLICK TO VALIDATE
             </span>
           </div>
@@ -340,16 +340,16 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
         
         <button
           onClick={handlePrint}
-          className="px-6 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm border border-slate-200 flex items-center gap-2 transition-all shadow-sm cursor-pointer"
+          className="px-6 py-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm border border-slate-200 dark:border-slate-700 flex items-center gap-2 transition-all shadow-sm cursor-pointer"
         >
-          <Printer className="w-4 h-4 text-slate-500" /> {t('printTicket')}
+          <Printer className="w-4 h-4 text-slate-500 dark:text-slate-400" /> {t('printTicket')}
         </button>
 
         <button
           onClick={handleDownloadImage}
-          className="px-6 py-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-sm border border-blue-200 flex items-center gap-2 transition-all shadow-sm cursor-pointer"
+          className="px-6 py-3 rounded-xl bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-bold text-sm border border-blue-200 dark:border-blue-800 flex items-center gap-2 transition-all shadow-sm cursor-pointer"
         >
-          <Download className="w-4 h-4 text-blue-600" /> Download as Image
+          <Download className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Download as Image
         </button>
 
         {/* 1-Click WhatsApp Direct Auto Send Button */}
@@ -392,27 +392,27 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
       {/* Live QR Validation Status Result Modal */}
       {qrValidationResult && (
         <div className="no-print fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white p-6 rounded-3xl max-w-md w-full border border-slate-200 space-y-4 shadow-2xl text-center animate-pop-in">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl max-w-md w-full border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl text-center animate-pop-in">
             <div className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto ${
-              qrValidationResult.success ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'
+              qrValidationResult.success ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400'
             }`}>
               {qrValidationResult.success ? <CheckCircle2 className="w-8 h-8" /> : <X className="w-8 h-8" />}
             </div>
-            <h3 className="text-xl font-extrabold text-slate-900">
+            <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">
               {qrValidationResult.success ? 'Ticket Verified & Validated! ✅' : 'Validation Failed ❌'}
             </h3>
-            <p className="text-xs text-slate-600 font-semibold">{qrValidationResult.message}</p>
+            <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold">{qrValidationResult.message}</p>
             
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-left space-y-1.5 font-mono">
-              <div className="flex justify-between"><span className="text-slate-400">PNR Code:</span> <strong className="text-slate-800">{booking.pnr}</strong></div>
-              <div className="flex justify-between"><span className="text-slate-400">Passenger:</span> <strong className="text-slate-800">{booking.passenger.fullName}</strong></div>
-              <div className="flex justify-between"><span className="text-slate-400">Route:</span> <strong className="text-slate-800">{booking.origin} ➔ {booking.destination}</strong></div>
-              <div className="flex justify-between"><span className="text-slate-400">Seats:</span> <strong className="text-blue-600">{booking.seats.map(s => s.number).join(', ')}</strong></div>
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs text-left space-y-1.5 font-mono">
+              <div className="flex justify-between"><span className="text-slate-400">PNR Code:</span> <strong className="text-slate-800 dark:text-white">{booking.pnr}</strong></div>
+              <div className="flex justify-between"><span className="text-slate-400">Passenger:</span> <strong className="text-slate-800 dark:text-white">{booking.passenger.fullName}</strong></div>
+              <div className="flex justify-between"><span className="text-slate-400">Route:</span> <strong className="text-slate-800 dark:text-white">{booking.origin} ➔ {booking.destination}</strong></div>
+              <div className="flex justify-between"><span className="text-slate-400">Seats:</span> <strong className="text-blue-600 dark:text-blue-400">{booking.seats.map(s => s.number).join(', ')}</strong></div>
             </div>
 
             <button
               onClick={() => setQrValidationResult(null)}
-              className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
+              className="w-full py-3 bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
             >
               Close Validation Report
             </button>
@@ -423,24 +423,24 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
       {/* WhatsApp Dispatcher Modal (For custom number or message preview) */}
       {showWhatsAppModal && (
         <div className="no-print fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white p-6 rounded-3xl max-w-lg w-full border border-slate-200 space-y-5 shadow-2xl animate-pop-in">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl max-w-lg w-full border border-slate-200 dark:border-slate-800 space-y-5 shadow-2xl animate-pop-in">
             
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/20">
                   <MessageSquare className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900 leading-tight">
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white leading-tight">
                     {t('smsAlertTitle')}
                   </h3>
-                  <p className="text-xs text-slate-500">Dispatch ticket confirmation directly via WhatsApp</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Dispatch ticket confirmation directly via WhatsApp</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowWhatsAppModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -448,11 +448,11 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
 
             {/* Recipient Phone Input Field */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <Smartphone className="w-3.5 h-3.5 text-emerald-600" /> WhatsApp Mobile Number
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Smartphone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> WhatsApp Mobile Number
               </label>
               <div className="relative flex items-center">
-                <div className="absolute left-3 px-2 py-1 rounded bg-slate-100 text-[11px] font-bold text-slate-600 border border-slate-200 flex items-center gap-1">
+                <div className="absolute left-3 px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center gap-1">
                   <span>🇱🇰</span> +94
                 </div>
                 <input
@@ -460,31 +460,31 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
                   value={phoneInput}
                   onChange={(e) => setPhoneInput(e.target.value)}
                   placeholder="077 123 4567"
-                  className="w-full pl-20 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
+                  className="w-full pl-20 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold font-mono text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
-              <p className="text-[11px] text-slate-400">Pre-filled from booking contact information.</p>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500">Pre-filled from booking contact information.</p>
             </div>
 
             {/* WhatsApp Text Message Preview Card */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-700 font-sans">Formatted Ticket Message</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300 font-sans">Formatted Ticket Message</span>
                 <button
                   type="button"
                   onClick={handleCopyWhatsAppText}
-                  className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 cursor-pointer"
+                  className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 flex items-center gap-1 cursor-pointer"
                 >
                   {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
                   <span>{copied ? 'Copied!' : 'Copy Text'}</span>
                 </button>
               </div>
 
-              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-xs text-slate-800 space-y-2 font-sans max-h-48 overflow-y-auto leading-relaxed shadow-inner">
-                <div className="font-bold text-emerald-800 text-[11px] uppercase tracking-wider flex items-center gap-1">
+              <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 text-xs text-slate-800 dark:text-slate-200 space-y-2 font-sans max-h-48 overflow-y-auto leading-relaxed shadow-inner">
+                <div className="font-bold text-emerald-800 dark:text-emerald-400 text-[11px] uppercase tracking-wider flex items-center gap-1">
                   <span>📲 WhatsApp Preview</span>
                 </div>
-                <pre className="whitespace-pre-wrap font-sans text-xs text-slate-700">
+                <pre className="whitespace-pre-wrap font-sans text-xs text-slate-700 dark:text-slate-300">
                   {getWhatsAppMessageText()}
                 </pre>
               </div>
@@ -508,7 +508,7 @@ Thank you for booking with Dewmina Super Line! Have a safe journey! 🌟`;
               <button
                 type="button"
                 onClick={() => setShowWhatsAppModal(false)}
-                className="w-full sm:w-auto py-3 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer"
+                className="w-full sm:w-auto py-3 px-5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition-colors cursor-pointer"
               >
                 Cancel
               </button>

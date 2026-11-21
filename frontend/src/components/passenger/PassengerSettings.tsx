@@ -30,6 +30,8 @@ import {
   Upload,
   Trash2,
   Link as LinkIcon,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { PushNotificationToggle } from '../common/PushNotificationToggle';
 
@@ -47,6 +49,8 @@ export const PassengerSettings: React.FC = () => {
     bookings,
     language,
     t,
+    theme,
+    setTheme,
   } = useBookingStore();
 
   // Active tab: 'profile' | 'security' | 'support'
@@ -270,19 +274,19 @@ export const PassengerSettings: React.FC = () => {
   if (!currentUser) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <div className="bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-10 shadow-xl max-w-md mx-auto space-y-6">
-          <div className="w-16 h-16 bg-blue-100 border border-blue-200 rounded-2xl flex items-center justify-center mx-auto text-blue-600">
+        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 rounded-3xl p-10 shadow-xl max-w-md mx-auto space-y-6">
+          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/80 rounded-2xl flex items-center justify-center mx-auto text-blue-600 dark:text-blue-400">
             <Lock className="w-8 h-8" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-black text-slate-800">Authentication Required</h2>
-            <p className="text-slate-500 text-sm">
+            <h2 className="text-2xl font-black text-slate-800 dark:text-white">Authentication Required</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
               Please sign in to your passenger account to manage your profile and security settings.
             </p>
           </div>
           <button
             onClick={() => setShowAuthModal(true)}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-2xl shadow-lg shadow-blue-500/30 transition-all cursor-pointer"
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-2xl shadow-lg shadow-blue-500/30 transition-all cursor-pointer active:scale-95"
           >
             {t('signIn')}
           </button>
@@ -834,6 +838,69 @@ export const PassengerSettings: React.FC = () => {
 
               {/* Web Push Notifications Toggle */}
               <PushNotificationToggle />
+            </div>
+          </div>
+
+          {/* Appearance & Dark Mode Card */}
+          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4">
+            <div>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <Sun className="w-5 h-5 text-amber-500" />
+                <span>{language === 'sinhala' ? 'පෙනුම සහ තේමාව (Appearance & Theme)' : 'Appearance & Theme'}</span>
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                {language === 'sinhala' 
+                  ? 'ඔබගේ දුරකථනයේ / පරිගණකයේ සැකසුම් (System Settings) අනුව Dark Mode ස්වයංක්‍රීයව වෙනස් වීමට "Auto" තෝරන්න.' 
+                  : 'Choose Light, Dark, or automatically match your device system settings (Auto).'}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem('dewmina_theme_manual');
+                  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  setTheme(prefersDark ? 'dark' : 'light', false);
+                }}
+                className={`p-3 sm:p-4 rounded-2xl border text-xs sm:text-sm font-bold flex flex-col items-center justify-center gap-2 transition-all cursor-pointer ${
+                  localStorage.getItem('dewmina_theme_manual') !== 'true'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500/20 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <Sun className="w-4 h-4 text-amber-500" />
+                  <Moon className="w-4 h-4 text-indigo-400" />
+                </div>
+                <span>Auto (Device)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTheme('light', true)}
+                className={`p-3 sm:p-4 rounded-2xl border text-xs sm:text-sm font-bold flex flex-col items-center justify-center gap-2 transition-all cursor-pointer ${
+                  localStorage.getItem('dewmina_theme_manual') === 'true' && theme === 'light'
+                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 ring-2 ring-amber-500/20 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+                }`}
+              >
+                <Sun className="w-4 h-4 text-amber-500" />
+                <span>Light</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTheme('dark', true)}
+                className={`p-3 sm:p-4 rounded-2xl border text-xs sm:text-sm font-bold flex flex-col items-center justify-center gap-2 transition-all cursor-pointer ${
+                  localStorage.getItem('dewmina_theme_manual') === 'true' && theme === 'dark'
+                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+                }`}
+              >
+                <Moon className="w-4 h-4 text-indigo-500 dark:text-cyan-300" />
+                <span>Dark</span>
+              </button>
             </div>
           </div>
 

@@ -254,30 +254,30 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
               {isMonaragalaColomboRoute && (
                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold flex items-center gap-1 ${
                   selectedServiceType === 'normal'
-                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                    : 'bg-indigo-100 text-indigo-700 border border-indigo-200'
+                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700'
+                    : 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700'
                 }`}>
-                  <Sparkles className="w-3 h-3 text-emerald-600" />
+                  <Sparkles className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                   {selectedServiceType === 'normal' ? 'Route 98 (Normal)' : 'Expressway (E01)'}
                 </span>
               )}
             </h4>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5 truncate font-medium">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate font-medium">
             {route.origin} → {route.destination} ({route.busNumber})
           </p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
           {isMonaragalaColomboRoute && (
-            <div className="flex items-center bg-slate-200/80 p-0.5 rounded-xl text-[10px] font-extrabold flex-shrink-0">
+            <div className="flex items-center bg-slate-200/80 dark:bg-slate-700 p-0.5 rounded-xl text-[10px] font-extrabold flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setSelectedServiceType('normal')}
                 className={`px-2 py-0.5 rounded-lg transition-all cursor-pointer ${
                   selectedServiceType === 'normal'
                     ? 'bg-emerald-600 text-white shadow-xs font-black'
-                    : 'text-slate-600 hover:text-slate-900'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 Route 98
@@ -288,14 +288,14 @@ export const InteractiveRouteMap: React.FC<InteractiveRouteMapProps> = ({ route 
                 className={`px-2 py-0.5 rounded-lg transition-all cursor-pointer ${
                   selectedServiceType === 'expressway'
                     ? 'bg-blue-600 text-white shadow-xs font-black'
-                    : 'text-slate-600 hover:text-slate-900'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 Expressway
               </button>
             </div>
           )}
-          <div className="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-[11px] font-extrabold font-mono whitespace-nowrap flex-shrink-0 flex items-center gap-1 border border-blue-200">
+          <div className="px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-[11px] font-extrabold font-mono whitespace-nowrap flex-shrink-0 flex items-center gap-1 border border-blue-200 dark:border-blue-700">
             <span>⏱️</span>
             <span>{selectedServiceType === 'normal' && isMonaragalaColomboRoute ? '7h 45m' : route.duration}</span>
           </div>

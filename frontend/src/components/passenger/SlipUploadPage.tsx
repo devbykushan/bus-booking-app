@@ -100,25 +100,25 @@ export const SlipUploadPage: React.FC = () => {
 
   if (uploaded) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-100 p-8 text-center space-y-6 animate-fade-in-up">
-          <div className="w-20 h-20 rounded-full bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center mx-auto">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700 p-8 text-center space-y-6 animate-fade-in-up">
+          <div className="w-20 h-20 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border-2 border-emerald-200 dark:border-emerald-800 flex items-center justify-center mx-auto">
             <CheckCircle2 className="w-10 h-10 text-emerald-500" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-extrabold text-slate-800">Slip Submitted!</h2>
-            <p className="text-sm text-slate-500">
+            <h2 className="text-2xl font-extrabold text-slate-800 dark:text-white">Slip Submitted!</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Your payment slip has been submitted successfully. Our admin will review it within <strong>2–4 hours</strong>.
             </p>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               You will receive a <strong>WhatsApp notification</strong> once your booking is confirmed.
             </p>
           </div>
-          <div className="bg-slate-50 rounded-2xl border border-slate-200 p-4 text-left space-y-2">
-            <p className="text-xs text-slate-500">Booking Reference</p>
-            <p className="text-lg font-extrabold text-blue-600 font-mono">{booking.pnr}</p>
-            <p className="text-xs text-slate-600">{booking.origin} ➔ {booking.destination}</p>
-            <p className="text-xs text-slate-600">Total: <strong>LKR {booking.totalFare.toLocaleString()}</strong></p>
+          <div className="bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 text-left space-y-2">
+            <p className="text-xs text-slate-500 dark:text-slate-400">Booking Reference</p>
+            <p className="text-lg font-extrabold text-blue-600 dark:text-blue-400 font-mono">{booking.pnr}</p>
+            <p className="text-xs text-slate-600 dark:text-slate-300">{booking.origin} ➔ {booking.destination}</p>
+            <p className="text-xs text-slate-600 dark:text-slate-300">Total: <strong>LKR {booking.totalFare.toLocaleString()}</strong></p>
           </div>
           <button
             onClick={() => setCurrentView('my-bookings')}
@@ -128,7 +128,7 @@ export const SlipUploadPage: React.FC = () => {
           </button>
           <button
             onClick={() => setCurrentView('passenger-search')}
-            className="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition-colors"
+            className="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold text-sm transition-colors"
           >
             Back to Home
           </button>
@@ -140,93 +140,93 @@ export const SlipUploadPage: React.FC = () => {
   const isSelectedPdf = selectedFile?.type === 'application/pdf' || selectedFile?.name.toLowerCase().endsWith('.pdf');
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8 px-4">
       <div className="max-w-lg mx-auto space-y-6 animate-fade-in-up">
         {/* Header */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setCurrentView('passenger-search')}
-            className="p-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
+            className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 text-slate-600" />
+            <ArrowLeft className="w-4 h-4 text-slate-600 dark:text-slate-300" />
           </button>
           <div>
-            <h1 className="text-xl font-extrabold text-slate-800">Upload Payment Slip</h1>
-            <p className="text-xs text-slate-500">PNR: <span className="font-mono font-bold text-blue-600">{booking.pnr}</span></p>
+            <h1 className="text-xl font-extrabold text-slate-800 dark:text-white">Upload Payment Slip</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">PNR: <span className="font-mono font-bold text-blue-600 dark:text-blue-400">{booking.pnr}</span></p>
           </div>
         </div>
 
         {/* Booking Summary */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-          <h3 className="text-sm font-bold text-slate-700 mb-3">Booking Summary</h3>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5">
+          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3">Booking Summary</h3>
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
               <p className="text-slate-400">Route</p>
-              <p className="font-semibold text-slate-800">{booking.origin} ➔ {booking.destination}</p>
+              <p className="font-semibold text-slate-800 dark:text-white">{booking.origin} ➔ {booking.destination}</p>
             </div>
             <div>
               <p className="text-slate-400">Date</p>
-              <p className="font-semibold text-slate-800">{booking.departureDate}</p>
+              <p className="font-semibold text-slate-800 dark:text-white">{booking.departureDate}</p>
             </div>
             <div>
               <p className="text-slate-400">Passenger</p>
-              <p className="font-semibold text-slate-800">{booking.passenger?.fullName}</p>
+              <p className="font-semibold text-slate-800 dark:text-white">{booking.passenger?.fullName}</p>
             </div>
             <div>
               <p className="text-slate-400">Amount to Transfer</p>
-              <p className="text-lg font-extrabold text-emerald-600">LKR {booking.totalFare.toLocaleString()}</p>
+              <p className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">LKR {booking.totalFare.toLocaleString()}</p>
             </div>
           </div>
         </div>
 
         {/* Bank Details Reminder */}
-        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 space-y-2">
-          <p className="text-sm font-bold text-emerald-800">🏦 Transfer to this account:</p>
+        <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 rounded-2xl p-5 space-y-2">
+          <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">🏦 Transfer to this account:</p>
           <div className="grid grid-cols-2 gap-2 text-xs">
-            <div><p className="text-slate-400">Bank</p><p className="font-bold text-slate-800">Bank of Ceylon</p></div>
-            <div><p className="text-slate-400">Account No</p><p className="font-bold font-mono text-slate-800">8001234567</p></div>
-            <div><p className="text-slate-400">Account Name</p><p className="font-bold text-slate-800">Dewmina Super Line</p></div>
-            <div><p className="text-slate-400">Branch</p><p className="font-bold text-slate-800">Monaragala</p></div>
+            <div><p className="text-slate-400">Bank</p><p className="font-bold text-slate-800 dark:text-white">Bank of Ceylon</p></div>
+            <div><p className="text-slate-400">Account No</p><p className="font-bold font-mono text-slate-800 dark:text-white">8001234567</p></div>
+            <div><p className="text-slate-400">Account Name</p><p className="font-bold text-slate-800 dark:text-white">Dewmina Super Line</p></div>
+            <div><p className="text-slate-400">Branch</p><p className="font-bold text-slate-800 dark:text-white">Monaragala</p></div>
           </div>
-          <p className="text-[11px] text-emerald-700 mt-1">⚠️ Please transfer exactly <strong>LKR {booking.totalFare.toLocaleString()}</strong> and use your name as the reference.</p>
+          <p className="text-[11px] text-emerald-700 dark:text-emerald-300 mt-1">⚠️ Please transfer exactly <strong>LKR {booking.totalFare.toLocaleString()}</strong> and use your name as the reference.</p>
         </div>
 
         {/* File Upload */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
-          <h3 className="text-sm font-bold text-slate-700">Upload Transfer Slip</h3>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 space-y-4">
+          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">Upload Transfer Slip</h3>
           
           {!previewUrl ? (
             <div
               onDrop={handleDrop}
               onDragOver={(e) => e.preventDefault()}
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all"
+              className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 dark:hover:bg-slate-700/50 transition-all"
             >
               <div className="flex items-center justify-center gap-2 mb-3">
                 <FileImage className="w-8 h-8 text-blue-500" />
-                <span className="text-slate-300 font-bold">/</span>
+                <span className="text-slate-300 dark:text-slate-600 font-bold">/</span>
                 <FileText className="w-8 h-8 text-red-500" />
               </div>
-              <p className="text-sm font-semibold text-slate-700">Click or drag & drop your slip</p>
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Click or drag & drop your slip</p>
               <p className="text-xs text-slate-400 mt-1">Image (JPG, PNG) or PDF Document — Max 20MB</p>
             </div>
           ) : isSelectedPdf ? (
-            <div className="relative p-5 rounded-2xl bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center text-red-600 flex-shrink-0 shadow-sm">
+            <div className="relative p-5 rounded-2xl bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30 border border-red-200 dark:border-red-800/50 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 dark:text-red-400 flex-shrink-0 shadow-sm">
                 <FileText className="w-6 h-6" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-slate-800 truncate">{selectedFile?.name}</p>
-                <p className="text-xs text-slate-500">
+                <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{selectedFile?.name}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   PDF Document • {((selectedFile?.size || 0) / (1024 * 1024)).toFixed(2)} MB
                 </p>
-                <span className="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-700">
+                <span className="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300">
                   Ready to submit
                 </span>
               </div>
               <button
                 onClick={() => { setSelectedFile(null); setPreviewUrl(null); }}
-                className="p-1.5 rounded-full bg-white border border-slate-200 shadow-sm hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors"
+                className="p-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-red-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-red-600 transition-colors"
                 title="Remove document"
               >
                 <X className="w-4 h-4" />
@@ -234,10 +234,10 @@ export const SlipUploadPage: React.FC = () => {
             </div>
           ) : (
             <div className="relative">
-              <img src={previewUrl} alt="Slip preview" className="w-full rounded-xl border border-slate-200 max-h-64 object-contain bg-slate-50" />
+              <img src={previewUrl} alt="Slip preview" className="w-full rounded-xl border border-slate-200 dark:border-slate-700 max-h-64 object-contain bg-slate-50 dark:bg-slate-900" />
               <button
                 onClick={() => { setSelectedFile(null); setPreviewUrl(null); }}
-                className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 shadow-md hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors"
+                className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-md hover:bg-red-50 text-slate-600 dark:text-slate-300 hover:text-red-600 transition-colors"
                 title="Remove image"
               >
                 <X className="w-4 h-4" />
@@ -254,16 +254,16 @@ export const SlipUploadPage: React.FC = () => {
           />
 
           {error && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50">
               <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-              <p className="text-xs text-red-600">{error}</p>
+              <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
             </div>
           )}
 
           <button
             onClick={handleSubmit}
             disabled={!selectedFile || uploading}
-            className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-sm transition-all flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-bold text-sm transition-all flex items-center justify-center gap-2"
           >
             {uploading ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</>

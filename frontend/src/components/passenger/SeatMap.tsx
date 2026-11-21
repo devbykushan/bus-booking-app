@@ -626,7 +626,7 @@ export const SeatMap: React.FC = () => {
             Journeys
           </button>
           <span>›</span>
-          <span className="text-slate-800 font-bold truncate">
+          <span className="text-slate-800 dark:text-slate-200 font-bold truncate">
             {selectedRoute.origin} - {selectedRoute.destination} {selectedRoute.departureTime}
           </span>
         </div>
@@ -704,7 +704,7 @@ export const SeatMap: React.FC = () => {
           <span>-</span>
           <span className="text-slate-700 font-medium">{(selectedRoute.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}</span>
           <span>|</span>
-          <span className="font-mono text-slate-800 font-bold">{selectedRoute.busNumber || 'ND-8899'}</span>
+          <span className="font-mono text-slate-800 dark:text-slate-200 font-bold">{selectedRoute.busNumber || 'ND-8899'}</span>
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-bold text-xs border border-emerald-200 shadow-2xs animate-pulse">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Certified
           </span>
@@ -725,32 +725,32 @@ export const SeatMap: React.FC = () => {
 
         {/* Expandable Route Details Drawer */}
         {showMoreDetails && (
-          <div className="mt-4 p-5 rounded-3xl bg-white border border-slate-200 shadow-lg max-w-2xl mx-auto text-left text-xs space-y-3 animate-scale-in">
+          <div className="mt-4 p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg max-w-2xl mx-auto text-left text-xs space-y-3 animate-scale-in">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition-colors">
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-blue-200 transition-colors">
                 <p className="text-[10px] text-slate-400 font-semibold uppercase">Departure</p>
                 <p className="font-bold text-slate-800">{selectedRoute.departureTime}</p>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition-colors">
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-blue-200 transition-colors">
                 <p className="text-[10px] text-slate-400 font-semibold uppercase">Arrival (Est.)</p>
                 <p className="font-bold text-slate-800">{selectedRoute.arrivalTime}</p>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition-colors">
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-blue-200 transition-colors">
                 <p className="text-[10px] text-slate-400 font-semibold uppercase">Est. Duration</p>
                 <p className="font-bold text-slate-800">{selectedRoute.duration || '5h 30m'}</p>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition-colors">
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-blue-200 transition-colors">
                 <p className="text-[10px] text-slate-400 font-semibold uppercase">Coach Class</p>
                 <p className="font-bold text-blue-600">{(selectedRoute.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}</p>
               </div>
             </div>
 
             <div className="pt-2 border-t border-slate-100 flex flex-wrap gap-2 text-[11px] text-slate-600">
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors">❄️ Air Conditioned</span>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors">⚡ USB Charging Ports</span>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors">📡 Live GPS Tracking</span>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors">💺 Reclining Luxury Seats</span>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors">🛡️ Conductor Assistance</span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors">❄️ Air Conditioned</span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors">⚡ USB Charging Ports</span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors">📡 Live GPS Tracking</span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors">💺 Reclining Luxury Seats</span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors">🛡️ Conductor Assistance</span>
             </div>
           </div>
         )}
@@ -772,7 +772,7 @@ export const SeatMap: React.FC = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-xl border border-amber-300 shadow-2xs">
+          <div className="flex items-center gap-2 bg-white dark:bg-slate-800 px-3.5 py-1.5 rounded-xl border border-amber-300 dark:border-amber-700 shadow-2xs">
             <Clock className="w-4 h-4 text-amber-600 animate-spin" />
             <span className="text-xs text-slate-500">Hold Expires:</span>
             <span className="text-sm font-mono font-black text-amber-700">{formatTimer(lockExpirySeconds)}</span>
@@ -781,9 +781,9 @@ export const SeatMap: React.FC = () => {
       )}
 
       {/* ── Visual 5-Step Progress Bar ───────────────────────────────────────── */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 p-4 sm:p-5 shadow-xs animate-fade-in">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 shadow-xs animate-fade-in">
         <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-3 px-1">
-          <span className="text-slate-800 flex items-center gap-2 font-extrabold text-sm sm:text-base">
+          <span className="text-slate-800 dark:text-white flex items-center gap-2 font-extrabold text-sm sm:text-base">
             <span>Booking Progress</span>
             <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-extrabold">
               {isStep5Unlocked 
@@ -901,10 +901,10 @@ export const SeatMap: React.FC = () => {
         <div className="lg:col-span-8 space-y-5">
 
           {/* ── STEP 1: Booking Information ── */}
-          <div className="portal-stagger-1 portal-card-interactive bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
+          <div className="portal-stagger-1 portal-card-interactive bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden">
             <button
               onClick={() => setOpenSection1(!openSection1)}
-              className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50/70 transition-colors cursor-pointer group"
+              className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3.5">
                 <div className={`w-9 h-9 rounded-full text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-sm transition-all ${
@@ -924,7 +924,7 @@ export const SeatMap: React.FC = () => {
                   <p className="text-xs text-slate-500 font-normal">Fill out travel date & locations</p>
                 </div>
               </div>
-              <div className="p-1.5 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
+              <div className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
                 <div className={`transition-transform duration-300 ${openSection1 ? 'rotate-0' : '-rotate-180'}`}>
                   <ChevronUp className="w-4 h-4" />
                 </div>
@@ -932,7 +932,7 @@ export const SeatMap: React.FC = () => {
             </button>
 
             {openSection1 && (
-              <div className="p-5 sm:p-6 pt-1 border-t border-slate-100 space-y-5 animate-fade-in">
+              <div className="p-5 sm:p-6 pt-1 border-t border-slate-100 dark:border-slate-800 space-y-5 animate-fade-in">
                 {/* Confirm Travel Date */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
@@ -955,7 +955,7 @@ export const SeatMap: React.FC = () => {
                         setDateError(validateTravelDate(val));
                       }}
                       className={`flex-1 px-4 py-2.5 rounded-xl border text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-inner ${
-                        dateError ? 'border-rose-400 bg-rose-50/40 text-rose-900' : 'border-slate-200 bg-slate-50/60 text-slate-800 focus:bg-white'
+                        dateError ? 'border-rose-400 bg-rose-50/40 text-rose-900' : 'border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/80 text-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-900'
                       }`}
                     />
                     <button
@@ -1010,7 +1010,7 @@ export const SeatMap: React.FC = () => {
                             ? 'border-rose-400 bg-rose-50/30 text-rose-900 focus:ring-rose-400' 
                             : selectedBoardingPoint 
                             ? 'border-emerald-300 bg-emerald-50/20 text-slate-900 focus:ring-emerald-400' 
-                            : 'border-slate-200 bg-slate-50/60 text-slate-700 focus:ring-blue-500 focus:bg-white group-hover:border-blue-300'
+                            : 'border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 group-hover:border-blue-300'
                         }`}
                       >
                         <option value="">Select Boarding Point / Pickup Location</option>
@@ -1048,7 +1048,7 @@ export const SeatMap: React.FC = () => {
                             ? 'border-rose-400 bg-rose-50/30 text-rose-900 focus:ring-rose-400' 
                             : selectedDropPoint 
                             ? 'border-emerald-300 bg-emerald-50/20 text-slate-900 focus:ring-emerald-400' 
-                            : 'border-blue-500 bg-white text-slate-700 focus:ring-blue-500 focus:bg-white group-hover:border-blue-600'
+                            : 'border-blue-500 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 group-hover:border-blue-600'
                         }`}
                       >
                         <option value="">Select Dropping Point / Drop-off Location</option>
@@ -1085,10 +1085,10 @@ export const SeatMap: React.FC = () => {
 
           {/* ── STEP 2: Passenger Information ── */}
           {isStep2Unlocked && (
-            <div className="portal-stagger-2 portal-card-interactive bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden animate-fade-in">
+            <div className="portal-stagger-2 portal-card-interactive bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden animate-fade-in">
               <button
                 onClick={() => setOpenSection2(!openSection2)}
-                className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50/70 transition-colors cursor-pointer group"
+                className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
               >
                 <div className="flex items-center gap-3.5">
                   <div className={`w-9 h-9 rounded-full text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-sm transition-all ${
@@ -1112,7 +1112,7 @@ export const SeatMap: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                <div className="p-1 rounded-lg border border-blue-500 bg-white text-blue-600 group-hover:bg-blue-50 transition-all shadow-2xs">
+                <div className="p-1 rounded-lg border border-blue-500 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 group-hover:bg-blue-50 dark:group-hover:bg-slate-700 transition-all shadow-2xs">
                   <div className={`transition-transform duration-300 ${openSection2 ? 'rotate-0' : '-rotate-180'}`}>
                     <ChevronDown className="w-4 h-4" />
                   </div>
@@ -1120,7 +1120,7 @@ export const SeatMap: React.FC = () => {
               </button>
 
               {openSection2 && (
-                <div className="p-5 sm:p-6 pt-1 border-t border-slate-100 space-y-4 animate-fade-in">
+                <div className="p-5 sm:p-6 pt-1 border-t border-slate-100 dark:border-slate-800 space-y-4 animate-fade-in">
                   {!isPhoneVerified ? (
                     !isOtpSent ? (
                       <>
@@ -1134,7 +1134,7 @@ export const SeatMap: React.FC = () => {
                                 setIsPhoneVerified(false);
                                 setIsOtpSent(false);
                               }}
-                              className="px-4 py-3 rounded-xl border border-slate-400 bg-white text-slate-800 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer flex-shrink-0 hover:border-slate-500 transition-colors pr-8 appearance-none shadow-2xs"
+                              className="px-4 py-3 rounded-xl border border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer flex-shrink-0 hover:border-slate-500 transition-colors pr-8 appearance-none shadow-2xs"
                             >
                               <option value="+94">Sri Lanka (+94)</option>
                               <option value="+91">India (+91)</option>
@@ -1155,7 +1155,7 @@ export const SeatMap: React.FC = () => {
                               className={`w-full px-4 py-3 rounded-xl border-2 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 transition-all shadow-2xs ${
                                 phoneError 
                                   ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:ring-rose-400 focus:border-rose-500' 
-                                  : 'border-blue-600 bg-white text-slate-800 focus:ring-blue-400 focus:border-blue-600 placeholder:text-slate-400'
+                                  : 'border-blue-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:ring-blue-400 focus:border-blue-600 placeholder:text-slate-400 dark:placeholder:text-slate-500'
                               }`}
                             />
                           </div>
@@ -1240,10 +1240,10 @@ export const SeatMap: React.FC = () => {
                                   handleVerifyOtp();
                                 }
                               }}
-                              className={`w-full px-4 py-3 rounded-xl border-2 font-mono tracking-widest text-base sm:text-lg font-bold focus:outline-none focus:ring-2 transition-all bg-white shadow-2xs ${
+                              className={`w-full px-4 py-3 rounded-xl border-2 font-mono tracking-widest text-base sm:text-lg font-bold focus:outline-none focus:ring-2 transition-all bg-white dark:bg-slate-800 shadow-2xs ${
                                 otpError 
                                   ? 'border-rose-400 bg-rose-50/40 text-rose-900 focus:ring-rose-400' 
-                                  : 'border-blue-600 text-slate-900 focus:ring-blue-400 placeholder:text-slate-400 placeholder:tracking-normal placeholder:font-sans placeholder:text-xs sm:placeholder:text-sm'
+                                  : 'border-blue-600 text-slate-900 dark:text-white focus:ring-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500 placeholder:tracking-normal placeholder:font-sans placeholder:text-xs sm:placeholder:text-sm'
                               }`}
                             />
                           </div>
@@ -1302,7 +1302,7 @@ export const SeatMap: React.FC = () => {
                     )
                   ) : (
                     /* Verified State: Exact Match to Screenshot 2 */
-                    <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4 animate-fade-in">
+                    <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs space-y-4 animate-fade-in">
                       <div className="flex items-center gap-5 sm:gap-7">
                         {/* Avatar / Profile Photo */}
                         <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden relative">
@@ -1346,19 +1346,19 @@ export const SeatMap: React.FC = () => {
                                   setGuestName(e.target.value);
                                   setPassengerInfo({ fullName: e.target.value || 'Guest' });
                                 }}
-                                className="px-2.5 py-0.5 rounded-lg border border-slate-300 text-xs sm:text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50 hover:bg-white transition-colors max-w-[190px]"
+                                className="px-2.5 py-0.5 rounded-lg border border-slate-300 dark:border-slate-700 text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 transition-colors max-w-[190px]"
                               />
                             )}
                           </div>
                           <div className="flex items-center">
-                            <span className="w-20 text-slate-700 font-medium">Gender</span>
+                            <span className="w-20 text-slate-700 dark:text-slate-300 font-medium">Gender</span>
                             <span className="text-slate-400 mr-2">:</span>
-                            <span className="font-extrabold text-slate-900">Not Provided</span>
+                            <span className="font-extrabold text-slate-900 dark:text-white">Not Provided</span>
                           </div>
                           <div className="flex items-center">
-                            <span className="w-20 text-slate-700 font-medium">Contact</span>
+                            <span className="w-20 text-slate-700 dark:text-slate-300 font-medium">Contact</span>
                             <span className="text-slate-400 mr-2">:</span>
-                            <span className="font-extrabold text-slate-900 font-mono">
+                            <span className="font-extrabold text-slate-900 dark:text-white font-mono">
                               {countryCode}{phoneInput}
                             </span>
                           </div>
@@ -1394,7 +1394,7 @@ export const SeatMap: React.FC = () => {
 
           {/* ── STEP 3: Choose Your Seat ── */}
           {isStep3Unlocked && (
-            <div className="portal-stagger-3 portal-card-interactive bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden animate-fade-in">
+            <div className="portal-stagger-3 portal-card-interactive bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden animate-fade-in">
               {/* Step Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 sm:p-6 gap-4">
                 <div className="flex items-center gap-3.5">
@@ -1460,11 +1460,11 @@ export const SeatMap: React.FC = () => {
                           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3.5">
                             <div className="flex items-center gap-2.5 sm:gap-3.5 flex-1 min-w-0">
                               {/* Seat Box (Mockup Exact Style) */}
-                              <div className="w-[58px] sm:w-[64px] h-[64px] sm:h-[70px] rounded-xl border-[1.5px] border-slate-700 bg-white flex flex-col items-center justify-between p-1.5 shadow-2xs flex-shrink-0">
-                                <span className="text-base sm:text-lg font-extrabold text-slate-900 leading-none pt-0.5">
+                              <div className="w-[58px] sm:w-[64px] h-[64px] sm:h-[70px] rounded-xl border-[1.5px] border-slate-700 dark:border-slate-600 bg-white dark:bg-slate-800 flex flex-col items-center justify-between p-1.5 shadow-2xs flex-shrink-0">
+                                <span className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-none pt-0.5">
                                   {s.number}
                                 </span>
-                                <div className="w-5 h-1 rounded-sm border border-slate-700 my-0.5" />
+                                <div className="w-5 h-1 rounded-sm border border-slate-700 dark:border-slate-600 my-0.5" />
                                 <div className={`w-full h-1.5 rounded-b-md ${currentGender === 'female' ? 'bg-pink-500' : 'bg-blue-600'} mt-auto`} />
                               </div>
 
@@ -1475,14 +1475,14 @@ export const SeatMap: React.FC = () => {
                                   placeholder="Add a passenger name or keep it as your name"
                                   value={seatPassengerNames[s.id] || ''}
                                   onChange={(e) => setSeatPassengerNames(prev => ({ ...prev, [s.id]: e.target.value }))}
-                                  className="w-full h-[64px] sm:h-[70px] px-4 sm:px-5 rounded-2xl border border-dashed border-slate-300 bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-xs sm:text-sm font-medium text-slate-800 placeholder:text-slate-400 transition-all outline-none"
+                                  className="w-full h-[64px] sm:h-[70px] px-4 sm:px-5 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-xs sm:text-sm font-medium text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all outline-none"
                                 />
                               </div>
                             </div>
 
                             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                               {/* Price Box */}
-                              <div className="h-[64px] sm:h-[70px] px-4 sm:px-6 rounded-2xl border-2 border-blue-500 bg-white flex items-center justify-center font-extrabold text-blue-600 text-base sm:text-lg flex-shrink-0 tracking-tight shadow-2xs min-w-[100px]">
+                              <div className="h-[64px] sm:h-[70px] px-4 sm:px-6 rounded-2xl border-2 border-blue-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-white flex items-center justify-center font-extrabold text-blue-600 dark:text-blue-400 text-base sm:text-lg flex-shrink-0 tracking-tight shadow-2xs min-w-[100px]">
                                 LKR {s.price || selectedRoute?.priceStarting || 1157}
                               </div>
                             </div>
@@ -1504,27 +1504,27 @@ export const SeatMap: React.FC = () => {
                   <div className="space-y-3 pt-2">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">
+                        <h4 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white leading-tight">
                           Booking Type
                         </h4>
-                        <p className="text-xs text-slate-500 font-normal">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-normal">
                           Choose who the ticket is created for.
                         </p>
                       </div>
-                      <span className="px-3.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold">
+                      <span className="px-3.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-bold">
                         Sri Lanka only
                       </span>
                     </div>
 
                     {/* Switcher Pill Buttons */}
-                    <div className="p-1.5 bg-slate-100/90 rounded-2xl flex items-center gap-1.5 border border-slate-200/50">
+                    <div className="p-1.5 bg-slate-100/90 dark:bg-slate-800 rounded-2xl flex items-center gap-1.5 border border-slate-200/50 dark:border-slate-700">
                       <button
                         type="button"
                         onClick={() => setBookingType('myself')}
                         className={`flex-1 py-3 sm:py-3.5 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
                           bookingType === 'myself'
-                            ? 'bg-white border border-blue-400 text-blue-600 shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900'
+                            ? 'bg-white dark:bg-slate-900 border border-blue-400 dark:border-blue-500 text-blue-600 dark:text-blue-400 shadow-xs'
+                            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
                         <User className="w-4 h-4" />
@@ -1535,8 +1535,8 @@ export const SeatMap: React.FC = () => {
                         onClick={() => setBookingType('others')}
                         className={`flex-1 py-3 sm:py-3.5 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
                           bookingType === 'others'
-                            ? 'bg-white border border-blue-400 text-blue-600 shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900'
+                            ? 'bg-white dark:bg-slate-900 border border-blue-400 dark:border-blue-500 text-blue-600 dark:text-blue-400 shadow-xs'
+                            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
                         <Users className="w-4 h-4" />
@@ -1564,10 +1564,10 @@ export const SeatMap: React.FC = () => {
 
           {/* ── STEP 4: Payment Method & Promo ── */}
           {isStep4Unlocked && (
-            <div className="portal-stagger-4 portal-card-interactive bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden animate-fade-in">
+            <div className="portal-stagger-4 portal-card-interactive bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden animate-fade-in">
               <button
                 onClick={() => setOpenSection4(!openSection4)}
-                className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50/70 transition-colors cursor-pointer group"
+                className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
               >
                 <div className="flex items-center gap-3.5">
                   <div className={`w-9 h-9 rounded-full text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-sm transition-all ${
@@ -1587,7 +1587,7 @@ export const SeatMap: React.FC = () => {
                     <p className="text-xs text-slate-500 font-normal">Select your payment method from below.</p>
                   </div>
                 </div>
-                <div className="p-1.5 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
+                <div className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
                   <div className={`transition-transform duration-300 ${openSection4 ? 'rotate-0' : '-rotate-180'}`}>
                     <ChevronUp className="w-4 h-4" />
                   </div>
@@ -1602,8 +1602,8 @@ export const SeatMap: React.FC = () => {
                     onClick={() => setPaymentMethod('bank_transfer')}
                     className={`p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-start gap-4 hover:-translate-y-0.5 ${
                       paymentMethod === 'bank_transfer'
-                        ? 'border-emerald-500 bg-emerald-50/40 shadow-xs ring-2 ring-emerald-500/20'
-                        : 'border-slate-200 bg-slate-50/40 hover:bg-white hover:border-slate-300'
+                        ? 'border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/40 shadow-xs ring-2 ring-emerald-500/20'
+                        : 'border-slate-200 dark:border-slate-700 bg-slate-50/40 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
                     }`}
                   >
                     <div className="w-5 h-5 mt-0.5 rounded-full border-2 border-slate-300 flex items-center justify-center flex-shrink-0">
@@ -1612,15 +1612,15 @@ export const SeatMap: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="px-2 py-0.5 rounded bg-emerald-600 text-white font-black text-[10px] tracking-wider shadow-2xs">BANK</span>
-                        <span className="text-xs font-bold text-slate-800">Online Bank Transfer & Slip Upload</span>
+                        <span className="text-xs font-bold text-slate-800 dark:text-white">Online Bank Transfer & Slip Upload</span>
                       </div>
-                      <p className="text-[11px] text-slate-500 mb-2">Transfer to our bank account and upload your payment slip. Admin will verify and confirm your booking.</p>
-                      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 space-y-1">
-                        <p className="text-[11px] font-bold text-emerald-800">Bank Account Details:</p>
-                        <p className="text-[11px] text-slate-700">🏦 <span className="font-semibold">Bank:</span> Bank of Ceylon</p>
-                        <p className="text-[11px] text-slate-700">💳 <span className="font-semibold">Account No:</span> 8001234567</p>
-                        <p className="text-[11px] text-slate-700">👤 <span className="font-semibold">Name:</span> Dewmina Super Line</p>
-                        <p className="text-[11px] text-slate-700">📍 <span className="font-semibold">Branch:</span> Monaragala</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">Transfer to our bank account and upload your payment slip. Admin will verify and confirm your booking.</p>
+                      <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl p-3 space-y-1">
+                        <p className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300">Bank Account Details:</p>
+                        <p className="text-[11px] text-slate-700 dark:text-slate-300">🏦 <span className="font-semibold">Bank:</span> Bank of Ceylon</p>
+                        <p className="text-[11px] text-slate-700 dark:text-slate-300">💳 <span className="font-semibold">Account No:</span> 8001234567</p>
+                        <p className="text-[11px] text-slate-700 dark:text-slate-300">👤 <span className="font-semibold">Name:</span> Dewmina Super Line</p>
+                        <p className="text-[11px] text-slate-700 dark:text-slate-300">📍 <span className="font-semibold">Branch:</span> Monaragala</p>
                       </div>
                     </div>
                   </div>
@@ -1630,8 +1630,8 @@ export const SeatMap: React.FC = () => {
                     onClick={() => setPaymentMethod('wallet')}
                     className={`p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-center gap-4 hover:-translate-y-0.5 ${
                       paymentMethod === 'wallet'
-                        ? 'border-blue-600 bg-blue-50/40 shadow-xs ring-2 ring-blue-500/20'
-                        : 'border-slate-200 bg-slate-50/40 hover:bg-white hover:border-slate-300'
+                        ? 'border-blue-600 bg-blue-50/40 dark:bg-blue-950/40 shadow-xs ring-2 ring-blue-500/20'
+                        : 'border-slate-200 dark:border-slate-700 bg-slate-50/40 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
                     }`}
                   >
                     <div className="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center">
@@ -1639,10 +1639,10 @@ export const SeatMap: React.FC = () => {
                     </div>
 
                     <div className="flex-1">
-                      <span className="text-xs font-bold text-slate-800">
+                      <span className="text-xs font-bold text-slate-800 dark:text-white">
                         Pay On Board (Cash to Conductor / At Boarding Point Counter)
                       </span>
-                      <p className="text-[11px] text-slate-500">Pay directly in cash when boarding the bus.</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">Pay directly in cash when boarding the bus.</p>
                     </div>
                   </div>
 
@@ -1698,7 +1698,7 @@ export const SeatMap: React.FC = () => {
 
           {/* ── CARD 5: Your Booking (Proceed To Checkout) ── */}
           {isStep5Unlocked ? (
-            <div className="portal-stagger-5 portal-card-interactive bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden animate-fade-in">
+            <div className="portal-stagger-5 portal-card-interactive bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm overflow-hidden animate-fade-in">
               <div className="p-5 border-b border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-600/30 portal-badge-pulse">
@@ -1711,7 +1711,7 @@ export const SeatMap: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setOpenSection5(!openSection5)}
-                  className="p-1.5 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
+                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 transition-colors"
                 >
                   <div className={`transition-transform duration-300 ${openSection5 ? 'rotate-0' : '-rotate-180'}`}>
                     <ChevronUp className="w-4 h-4" />
@@ -1822,13 +1822,13 @@ export const SeatMap: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="bg-slate-50/80 rounded-3xl border-2 border-dashed border-slate-200 p-6 text-center space-y-3 shadow-2xs">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center mx-auto shadow-2xs">
-                <Lock className="w-6 h-6 text-slate-400" />
+            <div className="bg-slate-50/80 dark:bg-slate-900/80 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 p-6 text-center space-y-3 shadow-2xs">
+              <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 flex items-center justify-center mx-auto shadow-2xs">
+                <Lock className="w-6 h-6 text-slate-400 dark:text-slate-500" />
               </div>
               <div>
-                <h4 className="text-sm font-extrabold text-slate-800">Step 5: Checkout Locked</h4>
-                <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
+                <h4 className="text-sm font-extrabold text-slate-800 dark:text-white">Step 5: Checkout Locked</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">
                   Complete Steps 1 to 4 to unlock your booking summary & checkout.
                 </p>
               </div>
@@ -1836,11 +1836,11 @@ export const SeatMap: React.FC = () => {
           )}
 
           {/* ── Important Notice Card (Mockup Style) ── */}
-          <div className="portal-stagger-6 portal-card-interactive rounded-3xl bg-blue-50/80 border border-blue-200/80 p-5 space-y-2.5 text-xs text-blue-950 shadow-2xs hover:border-blue-300 transition-all">
-            <h4 className="font-extrabold text-blue-900 text-sm flex items-center gap-1.5">
-              <Info className="w-4 h-4 text-blue-700" /> Important Notice
+          <div className="portal-stagger-6 portal-card-interactive rounded-3xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800 p-5 space-y-2.5 text-xs text-blue-950 dark:text-blue-100 shadow-2xs hover:border-blue-300 dark:hover:border-blue-700 transition-all">
+            <h4 className="font-extrabold text-blue-900 dark:text-blue-300 text-sm flex items-center gap-1.5">
+              <Info className="w-4 h-4 text-blue-700 dark:text-blue-400" /> Important Notice
             </h4>
-            <ol className="list-decimal list-outside pl-4 space-y-1.5 text-[11px] text-blue-900/85 leading-relaxed font-normal">
+            <ol className="list-decimal list-outside pl-4 space-y-1.5 text-[11px] text-blue-900/85 dark:text-blue-200/85 leading-relaxed font-normal">
               <li>
                 This notice absolves us of responsibility for luggage damage due to inadequate protection or fragile items.
               </li>
@@ -1854,9 +1854,9 @@ export const SeatMap: React.FC = () => {
                 Passengers must report to boarding point 15 minutes before departure.
               </li>
             </ol>
-            <div className="pt-2 border-t border-blue-200/60 text-[10px] text-blue-800 font-medium flex items-center justify-between">
+            <div className="pt-2 border-t border-blue-200/60 dark:border-blue-800/60 text-[10px] text-blue-800 dark:text-blue-300 font-medium flex items-center justify-between">
               <span>📞 24/7 Conductor Helpline:</span>
-              <strong className="font-mono text-blue-900">071 143 3520</strong>
+              <strong className="font-mono text-blue-900 dark:text-blue-200">071 143 3520</strong>
             </div>
           </div>
 
@@ -1876,26 +1876,26 @@ export const SeatMap: React.FC = () => {
             className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-300" 
           />
 
-          <div className="fixed inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl z-[70] flex flex-col justify-between overflow-hidden animate-slide-in-right">
+          <div className="fixed inset-y-0 right-0 max-w-md w-full bg-white dark:bg-slate-900 shadow-2xl z-[70] dark:border-l dark:border-slate-800 flex flex-col justify-between overflow-hidden animate-slide-in-right">
             
             {/* Drawer Top Header (Mockup Style: Blue Badge 6 / 3 + Close ✕) */}
-            <div className="p-4 sm:p-5 pr-5 sm:pr-6 border-b border-slate-200 flex items-center justify-between bg-white sticky top-0 z-20">
+            <div className="p-4 sm:p-5 pr-5 sm:pr-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 sticky top-0 z-20">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-black text-base flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-600/30">
                   3
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
+                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight">
                     Choose Your Seat
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium">Click on an available seat to select.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Click on an available seat to select.</p>
                 </div>
               </div>
 
               <button
                 type="button"
                 onClick={() => setIsSeatDrawerOpen(false)}
-                className="w-9 h-9 rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors cursor-pointer flex-shrink-0 mr-1"
+                className="w-9 h-9 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer flex-shrink-0 mr-1"
                 aria-label="Close Seat Map"
               >
                 <X className="w-5 h-5" />
@@ -1906,18 +1906,18 @@ export const SeatMap: React.FC = () => {
             <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 pb-36 sm:pb-44 space-y-6 scroll-smooth">
               
               {/* ── Top Economy Class Floating Pill with Live Coach Stats ── */}
-              <div className="flex items-center justify-between gap-3 pt-1 pb-2 border-b border-slate-100">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+              <div className="flex items-center justify-between gap-3 pt-1 pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span>{selectedRoute.busNumber || 'ND-9999'} • {(selectedRoute.busType || 'Super Luxury').replace(/\s*\(\d+\s*Seats.*?\)/gi, '').replace(/\s*\(Route\s*\d+\)/gi, '').trim()}</span>
                 </div>
-                <div className="border border-blue-500/80 rounded-xl px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50/50 flex items-center gap-2 shadow-2xs">
-                  <Crown className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                <div className="border border-blue-500/80 rounded-xl px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50/50 dark:from-blue-950/60 dark:to-indigo-950/60 flex items-center gap-2 shadow-2xs">
+                  <Crown className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                   <div className="text-left leading-tight">
-                    <div className="text-[10px] font-black text-blue-600 tracking-wider uppercase">
+                    <div className="text-[10px] font-black text-blue-600 dark:text-blue-400 tracking-wider uppercase">
                       {selectedRoute.busType?.includes('Normal') || selectedRoute.busType?.includes('3*2') || selectedRoute.busType?.includes('Leyland') ? 'Normal Service' : 'Super Luxury'}
                     </div>
-                    <div className="text-xs font-black text-slate-900 font-mono">
+                    <div className="text-xs font-black text-slate-900 dark:text-white font-mono">
                       LKR {validatedSeatPrice.toLocaleString()}
                     </div>
                   </div>
@@ -1925,18 +1925,18 @@ export const SeatMap: React.FC = () => {
               </div>
 
               {/* ════ CLEAN MINIMALIST BUS COACH CONTAINER ════ */}
-              <div className="relative rounded-3xl border border-slate-200 bg-slate-50/70 p-3 sm:p-5 shadow-sm">
+              <div className="relative rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/80 p-3 sm:p-5 shadow-sm">
                 
                 {/* ── Minimalist Front Cockpit / Driver Bar ── */}
-                <div className="flex items-center justify-between px-4 py-2.5 bg-white border border-slate-200/90 rounded-2xl mb-4 shadow-2xs">
-                  <div className="flex items-center gap-2 text-xs font-extrabold text-amber-600">
+                <div className="flex items-center justify-between px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 rounded-2xl mb-4 shadow-2xs">
+                  <div className="flex items-center gap-2 text-xs font-extrabold text-amber-600 dark:text-amber-400">
                     <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                     <span>Exit Door</span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-xs font-extrabold text-sky-600 bg-sky-50/70 px-2.5 py-1 rounded-xl border border-sky-200/80">
+                  <div className="flex items-center gap-1.5 text-xs font-extrabold text-sky-600 dark:text-sky-400 bg-sky-50/70 dark:bg-sky-950/60 px-2.5 py-1 rounded-xl border border-sky-200/80 dark:border-sky-800">
                     <span>Driver</span>
-                    <div className="w-4 h-4 rounded-full border-2 border-sky-400 flex items-center justify-center bg-white shadow-2xs">
+                    <div className="w-4 h-4 rounded-full border-2 border-sky-400 flex items-center justify-center bg-white dark:bg-slate-800 shadow-2xs">
                       <div className="w-1.5 h-1.5 rounded-full bg-sky-500" />
                     </div>
                   </div>
@@ -1946,7 +1946,7 @@ export const SeatMap: React.FC = () => {
                 <div className="relative space-y-3 sm:space-y-3.5 py-1 flex flex-col items-center">
                   
                   {/* Center Clean Aisle Runner */}
-                  <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-10 sm:w-12 pointer-events-none rounded-xl bg-slate-200/40 border-x border-slate-200/60 z-0" />
+                  <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-10 sm:w-12 pointer-events-none rounded-xl bg-slate-200/40 dark:bg-slate-800/40 border-x border-slate-200/60 dark:border-slate-700/60 z-0" />
 
                   {([
                     { rowNum: 0, left: ['1'], right: [] },
@@ -2003,7 +2003,7 @@ export const SeatMap: React.FC = () => {
                                 {/* Floating Light Tooltip */}
                                 {hoveredSeatNum === seatNumStr && (
                                   <div className="absolute -top-11 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-scale-in flex flex-col items-center">
-                                    <div className="border border-slate-300 rounded-lg px-2.5 py-1 bg-white text-slate-900 shadow-md whitespace-nowrap text-left leading-tight">
+                                    <div className="border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md whitespace-nowrap text-left leading-tight">
                                       <div className={`text-[10px] font-bold ${isSeat1 ? 'text-rose-600' : 'text-blue-600'}`}>
                                         SEAT #{seatNumStr} • {sIdx === 2 ? 'REAR CENTER' : sIdx === 0 || sIdx === 4 ? 'WINDOW' : 'AISLE'}
                                       </div>
@@ -2011,7 +2011,7 @@ export const SeatMap: React.FC = () => {
                                         LKR {validatedSeatPrice.toLocaleString()}
                                       </div>
                                     </div>
-                                    <div className="w-2 h-2 bg-white border-b border-r border-slate-300 rotate-45 -mt-1 shadow-2xs" />
+                                    <div className="w-2 h-2 bg-white dark:bg-slate-800 border-b border-r border-slate-300 dark:border-slate-700 rotate-45 -mt-1 shadow-2xs" />
                                   </div>
                                 )}
 
@@ -2022,7 +2022,7 @@ export const SeatMap: React.FC = () => {
                                   style={{ animationDelay: `${(rIdx * 4 + sIdx) * 12}ms` }}
                                   className={`w-[48px] sm:w-[54px] h-[48px] sm:h-[54px] rounded-2xl flex flex-col items-center justify-between p-1 transition-all duration-200 cursor-pointer relative shadow-2xs hover:z-30 overflow-hidden ${
                                     isSelected
-                                      ? 'bg-white border-2 border-[#00a86b] text-slate-900 scale-105 active:scale-95 shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/20'
+                                      ? 'bg-white dark:bg-slate-800 border-2 border-[#00a86b] text-slate-900 dark:text-white scale-105 active:scale-95 shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/20'
                                       : isBookedFemale
                                       ? 'bg-[#ec4899] border-2 border-pink-600 text-white cursor-not-allowed opacity-90'
                                       : isBookedMale
@@ -2031,12 +2031,12 @@ export const SeatMap: React.FC = () => {
                                       ? 'bg-[#4f46e5] border-2 border-indigo-600 text-white cursor-not-allowed opacity-90'
                                       : isUnavailable
                                       ? 'bg-[#e11d48] border-2 border-rose-600 text-white cursor-not-allowed opacity-80'
-                                      : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-emerald-500 hover:-translate-y-0.5 hover:shadow-md active:scale-95'
+                                      : 'bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-100 hover:border-emerald-500 dark:hover:border-emerald-400 hover:-translate-y-0.5 hover:shadow-md active:scale-95'
                                   }`}
                                 >
                                   {/* Large Bold Seat Number */}
                                   <span className={`text-base sm:text-lg font-extrabold tracking-tight my-auto ${
-                                    isBookedFemale || isBookedMale || isReserved || isUnavailable ? 'text-white' : 'text-slate-800'
+                                    isBookedFemale || isBookedMale || isReserved || isUnavailable ? 'text-white' : 'text-slate-800 dark:text-slate-100'
                                   }`}>
                                     {seatNumStr}
                                   </span>
@@ -2112,7 +2112,7 @@ export const SeatMap: React.FC = () => {
                                   <div className={`absolute -top-12 z-50 pointer-events-none animate-scale-in flex flex-col ${
                                     sIdx === 0 ? 'left-0 translate-x-0 items-start' : 'left-1/2 -translate-x-1/2 items-center'
                                   }`}>
-                                    <div className="border border-slate-300 rounded-lg px-2.5 py-1 bg-white text-slate-900 shadow-md whitespace-nowrap text-left leading-tight">
+                                    <div className="border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md whitespace-nowrap text-left leading-tight">
                                       <div className={`text-[10px] font-bold ${isSeat1 ? 'text-rose-600' : 'text-blue-600'}`}>
                                         SEAT #{seatNumStr} • {isSeat1 ? 'CREW / CONDUCTOR SEAT' : sIdx === 0 ? 'LEFT WINDOW' : 'LEFT AISLE'}
                                       </div>
@@ -2120,7 +2120,7 @@ export const SeatMap: React.FC = () => {
                                         {isSeat1 ? 'NOT FOR BOOKING' : `LKR ${validatedSeatPrice.toLocaleString()}`}
                                       </div>
                                     </div>
-                                    <div className={`w-2 h-2 bg-white border-b border-r border-slate-300 rotate-45 -mt-1 shadow-2xs ${
+                                    <div className={`w-2 h-2 bg-white dark:bg-slate-800 border-b border-r border-slate-300 dark:border-slate-700 rotate-45 -mt-1 shadow-2xs ${
                                       sIdx === 0 ? 'ml-4' : ''
                                     }`} />
                                   </div>
@@ -2133,7 +2133,7 @@ export const SeatMap: React.FC = () => {
                                   style={{ animationDelay: `${(rIdx * 4 + sIdx) * 12}ms` }}
                                   className={`w-[50px] sm:w-[56px] h-[50px] sm:h-[56px] rounded-2xl flex flex-col items-center justify-between p-1 transition-all duration-200 cursor-pointer relative shadow-2xs hover:z-30 overflow-hidden ${
                                     isSelected
-                                      ? 'bg-white border-2 border-[#00a86b] text-slate-900 scale-105 active:scale-95 shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/20'
+                                      ? 'bg-white dark:bg-slate-800 border-2 border-[#00a86b] text-slate-900 dark:text-white scale-105 active:scale-95 shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/20'
                                       : isBookedFemale
                                       ? 'bg-[#ec4899] border-2 border-pink-600 text-white cursor-not-allowed opacity-90'
                                       : isBookedMale
@@ -2142,12 +2142,12 @@ export const SeatMap: React.FC = () => {
                                       ? 'bg-[#4f46e5] border-2 border-indigo-600 text-white cursor-not-allowed opacity-90'
                                       : isUnavailable
                                       ? 'bg-[#e11d48] border-2 border-rose-600 text-white cursor-not-allowed opacity-80'
-                                      : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-emerald-500 hover:-translate-y-0.5 hover:shadow-md active:scale-95'
+                                      : 'bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-100 hover:border-emerald-500 dark:hover:border-emerald-400 hover:-translate-y-0.5 hover:shadow-md active:scale-95'
                                   }`}
                                 >
                                   {/* Large Bold Seat Number */}
                                   <span className={`text-base sm:text-lg font-extrabold tracking-tight my-auto ${
-                                    isBookedFemale || isBookedMale || isReserved || isUnavailable ? 'text-white' : 'text-slate-800'
+                                    isBookedFemale || isBookedMale || isReserved || isUnavailable ? 'text-white' : 'text-slate-800 dark:text-slate-100'
                                   }`}>
                                     {seatNumStr}
                                   </span>
@@ -2204,7 +2204,7 @@ export const SeatMap: React.FC = () => {
                                   <div className={`absolute -top-12 z-50 pointer-events-none animate-scale-in flex flex-col ${
                                     sIdx === rightSeats.length - 1 ? 'right-0 left-auto translate-x-0 items-end' : 'left-1/2 -translate-x-1/2 items-center'
                                   }`}>
-                                    <div className="border border-slate-300 rounded-lg px-2.5 py-1 bg-white text-slate-900 shadow-md whitespace-nowrap text-left leading-tight">
+                                    <div className="border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md whitespace-nowrap text-left leading-tight">
                                       <div className={`text-[10px] font-bold ${isSeat1 ? 'text-rose-600' : 'text-blue-600'}`}>
                                         SEAT #{seatNumStr} • {sIdx === 0 ? 'RIGHT AISLE' : sIdx === 1 ? 'RIGHT MIDDLE' : 'RIGHT WINDOW'}
                                       </div>
@@ -2212,7 +2212,7 @@ export const SeatMap: React.FC = () => {
                                         LKR {validatedSeatPrice.toLocaleString()}
                                       </div>
                                     </div>
-                                    <div className={`w-2 h-2 bg-white border-b border-r border-slate-300 rotate-45 -mt-1 shadow-2xs ${
+                                    <div className={`w-2 h-2 bg-white dark:bg-slate-800 border-b border-r border-slate-300 dark:border-slate-700 rotate-45 -mt-1 shadow-2xs ${
                                       sIdx === rightSeats.length - 1 ? 'mr-4' : ''
                                     }`} />
                                   </div>
@@ -2225,7 +2225,7 @@ export const SeatMap: React.FC = () => {
                                   style={{ animationDelay: `${(rIdx * 4 + sIdx + 2) * 12}ms` }}
                                   className={`w-[50px] sm:w-[56px] h-[50px] sm:h-[56px] rounded-2xl flex flex-col items-center justify-between p-1 transition-all duration-200 cursor-pointer relative shadow-2xs hover:z-30 overflow-hidden ${
                                     isSelected
-                                      ? 'bg-white border-2 border-[#00a86b] text-slate-900 scale-105 active:scale-95 shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/20'
+                                      ? 'bg-white dark:bg-slate-800 border-2 border-[#00a86b] text-slate-900 dark:text-white scale-105 active:scale-95 shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/20'
                                       : isBookedFemale
                                       ? 'bg-[#ec4899] border-2 border-pink-600 text-white cursor-not-allowed opacity-90'
                                       : isBookedMale
@@ -2234,12 +2234,12 @@ export const SeatMap: React.FC = () => {
                                       ? 'bg-[#4f46e5] border-2 border-indigo-600 text-white cursor-not-allowed opacity-90'
                                       : isUnavailable
                                       ? 'bg-[#e11d48] border-2 border-rose-600 text-white cursor-not-allowed opacity-80'
-                                      : 'bg-white border-2 border-slate-300 text-slate-800 hover:border-emerald-500 hover:-translate-y-0.5 hover:shadow-md active:scale-95'
+                                      : 'bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-100 hover:border-emerald-500 dark:hover:border-emerald-400 hover:-translate-y-0.5 hover:shadow-md active:scale-95'
                                   }`}
                                 >
                                   {/* Large Bold Seat Number */}
                                   <span className={`text-base sm:text-lg font-extrabold tracking-tight my-auto ${
-                                    isBookedFemale || isBookedMale || isReserved || isUnavailable ? 'text-white' : 'text-slate-800'
+                                    isBookedFemale || isBookedMale || isReserved || isUnavailable ? 'text-white' : 'text-slate-800 dark:text-slate-100'
                                   }`}>
                                     {seatNumStr}
                                   </span>
@@ -2270,61 +2270,61 @@ export const SeatMap: React.FC = () => {
 
               {/* ── Legend (Solid Status Fill for Booked/Unavailable, White Body for Available/Selected) ── */}
               <div className="space-y-3 pt-4 border-t border-slate-200">
-                <h4 className="text-sm font-extrabold text-slate-900">
+                <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
                   Seating Plan for {selectedRoute.busNumber || 'NG 9933'}
                 </h4>
 
                 <div className="grid grid-cols-2 gap-3.5 text-xs">
                   {/* Available Seats */}
                   <div className="flex items-center gap-2.5">
-                    <div className="w-6 h-6 rounded-md border-2 border-slate-300 bg-white flex flex-col justify-between shadow-2xs overflow-hidden">
-                      <div className="w-full flex-1 bg-white" />
+                    <div className="w-6 h-6 rounded-md border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 flex flex-col justify-between shadow-2xs overflow-hidden">
+                      <div className="w-full flex-1 bg-white dark:bg-slate-800" />
                       <div className="w-full h-1.5 bg-[#60a5fa] rounded-b-xs" />
                     </div>
-                    <span className="text-slate-800 font-bold">Available Seats</span>
+                    <span className="text-slate-800 dark:text-slate-200 font-bold">Available Seats</span>
                   </div>
 
                   {/* Selected by You */}
                   <div className="flex items-center gap-2.5">
-                    <div className="w-6 h-6 rounded-md border-2 border-[#00a86b] bg-white flex flex-col justify-between shadow-2xs overflow-hidden">
-                      <div className="w-full flex-1 bg-white" />
+                    <div className="w-6 h-6 rounded-md border-2 border-[#00a86b] bg-white dark:bg-slate-800 flex flex-col justify-between shadow-2xs overflow-hidden">
+                      <div className="w-full flex-1 bg-white dark:bg-slate-800" />
                       <div className="w-full h-1.5 bg-[#00a86b] rounded-b-xs" />
                     </div>
-                    <span className="text-slate-800 font-bold">Selected by You</span>
+                    <span className="text-slate-800 dark:text-slate-200 font-bold">Selected by You</span>
                   </div>
 
                   {/* Booked by Gents */}
                   <div className="flex items-center gap-2.5">
                     <div className="w-6 h-6 rounded-md bg-[#3b82f6] border border-blue-600 shadow-2xs overflow-hidden" />
-                    <span className="text-slate-800 font-bold">Booked by Gents</span>
+                    <span className="text-slate-800 dark:text-slate-200 font-bold">Booked by Gents</span>
                   </div>
 
                   {/* Booked by Ladies */}
                   <div className="flex items-center gap-2.5">
                     <div className="w-6 h-6 rounded-md bg-[#ec4899] border border-pink-600 shadow-2xs overflow-hidden" />
-                    <span className="text-slate-800 font-bold">Booked by Ladies</span>
+                    <span className="text-slate-800 dark:text-slate-200 font-bold">Booked by Ladies</span>
                   </div>
 
                   {/* Reserved Seats */}
                   <div className="flex items-center gap-2.5">
                     <div className="w-6 h-6 rounded-md bg-[#4f46e5] border border-indigo-600 shadow-2xs overflow-hidden" />
-                    <span className="text-slate-800 font-bold">Reserved Seats</span>
+                    <span className="text-slate-800 dark:text-slate-200 font-bold">Reserved Seats</span>
                   </div>
 
                   {/* Unavailable Seats */}
                   <div className="flex items-center gap-2.5">
                     <div className="w-6 h-6 rounded-md bg-[#e11d48] border border-rose-600 shadow-2xs overflow-hidden" />
-                    <span className="text-slate-800 font-bold">Unavailable Seats</span>
+                    <span className="text-slate-800 dark:text-slate-200 font-bold">Unavailable Seats</span>
                   </div>
                 </div>
               </div>
 
               {/* ── Drawer Bottom Action Flow ── */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 shadow-xs">
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-3 shadow-xs">
                 
                 {/* Selected Seats summary chips */}
                 <div className="space-y-1">
-                  <span className="text-xs font-bold text-slate-900 block">Selected Seats.</span>
+                  <span className="text-xs font-bold text-slate-900 dark:text-white block">Selected Seats.</span>
                   {selectedSeatIds.length === 0 ? (
                     <p className="text-[11px] text-slate-500">No seats selected yet. Click any seat above.</p>
                   ) : (
@@ -2390,11 +2390,11 @@ export const SeatMap: React.FC = () => {
       {/* ── Gender Selection Modal Popup (Compact & Sleek Top Level Portal z-[99999]) ────────────────── */}
       {pendingGenderSeat && createPortal(
         <div className="fixed inset-0 z-[99999] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-3 animate-fade-in">
-          <div className="bg-white rounded-3xl p-4 sm:p-5 max-w-[260px] sm:max-w-[280px] w-full space-y-3 shadow-2xl border border-slate-200 animate-scale-in text-center relative z-[100000]">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 sm:p-5 max-w-[260px] sm:max-w-[280px] w-full space-y-3 shadow-2xl border border-slate-200 dark:border-slate-700 animate-scale-in text-center relative z-[100000]">
             <button
               type="button"
               onClick={() => setPendingGenderSeat(null)}
-              className="absolute top-3.5 right-3.5 p-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors cursor-pointer"
+              className="absolute top-3.5 right-3.5 p-1 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-500 dark:text-slate-300 transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -2404,11 +2404,11 @@ export const SeatMap: React.FC = () => {
             </div>
 
             <div className="space-y-0.5">
-              <h3 className="text-base font-extrabold text-slate-900 leading-tight">
+              <h3 className="text-base font-extrabold text-slate-900 dark:text-white leading-tight">
                 Select Gender
               </h3>
               <p className="text-[11px] text-slate-500">
-                Seat <strong className="text-slate-800 font-bold">#{pendingGenderSeat.number}</strong>
+                Seat <strong className="text-slate-800 dark:text-slate-200 font-bold">#{pendingGenderSeat.number}</strong>
               </p>
             </div>
 

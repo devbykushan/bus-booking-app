@@ -7,6 +7,33 @@ html {
   background-color: #090d16;
 }
 
+html.dark {
+  color-scheme: dark;
+  background-color: #090d16;
+}
+
+html:not(.dark) {
+  color-scheme: light;
+  background-color: #f8fafc;
+}
+
+/* ─── Leaflet Popups in Dark Mode ─────────────────────────────────────────────── */
+html.dark .leaflet-popup-content-wrapper,
+html.dark .leaflet-popup-tip {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .leaflet-popup-close-button {
+  color: #94a3b8 !important;
+}
+
+html.dark .leaflet-container {
+  background-color: #0f172a !important;
+}
+
 /* ─── Mobile Safe Area Insets (iOS Dynamic Island/Notch & Android Edge-to-Edge) ─── */
 :root {
   --sat: env(safe-area-inset-top, 0px);

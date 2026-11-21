@@ -44,6 +44,7 @@ export function App() {
     sessionWarningOpen,
     loginToast,
     setLoginToast,
+    theme,
   } = useBookingStore();
 
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || userRole === 'admin' || userRole === 'super_admin';
@@ -142,22 +143,23 @@ export function App() {
     return () => clearTimeout(splashTimer);
   }, []);
 
-  // Initialize theme and listen for OS dark mode changes
+  // Reactive theme sync
   useEffect(() => {
-    const theme = useBookingStore.getState().theme;
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
+  }, [theme]);
 
-    // Media query listener for device system dark mode preference
+  // Media query listener for device system dark mode preference
+  useEffect(() => {
     if (typeof window !== 'undefined' && window.matchMedia) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleSystemThemeChange = (e: MediaQueryListEvent) => {
-        const saved = localStorage.getItem('dewmina_theme');
-        if (!saved) {
-          useBookingStore.getState().setTheme(e.matches ? 'dark' : 'light');
+        const isManual = localStorage.getItem('dewmina_theme_manual') === 'true';
+        if (!isManual) {
+          useBookingStore.getState().setTheme(e.matches ? 'dark' : 'light', false);
         }
       };
       mediaQuery.addEventListener('change', handleSystemThemeChange);

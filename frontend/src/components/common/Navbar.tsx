@@ -378,18 +378,19 @@ export const Navbar: React.FC = () => {
 
                 {/* Theme Toggle (iOS Glass Pill) */}
                 <button
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark', true)}
                   className={`flex items-center justify-center w-9 h-9 rounded-2xl transition-all duration-200 cursor-pointer shadow-xs font-extrabold active:scale-95 ${
                     scrolled
                       ? 'bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200/90 dark:border-slate-700 text-slate-700 dark:text-slate-200'
                       : 'bg-white/15 hover:bg-white/25 text-white border border-white/20 backdrop-blur-md'
                   }`}
                   title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                  aria-label="Toggle Theme"
                 >
                   {theme === 'dark' ? (
-                    <Sun className="w-4 h-4" />
+                    <Sun className="w-4 h-4 text-amber-400 fill-amber-400/20" />
                   ) : (
-                    <Moon className="w-4 h-4" />
+                    <Moon className="w-4 h-4 text-indigo-500 dark:text-cyan-300" />
                   )}
                 </button>
 

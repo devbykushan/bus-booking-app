@@ -24,11 +24,20 @@
       (function() {
         try {
           var saved = localStorage.getItem('dewmina_theme');
+          var isManual = localStorage.getItem('dewmina_theme_manual') === 'true';
           var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          if (saved === 'dark' || (!saved && prefersDark)) {
-            document.documentElement.classList.add('dark');
+          if (isManual && (saved === 'dark' || saved === 'light')) {
+            if (saved === 'dark') {
+              document.documentElement.classList.add('dark');
+            } else {
+              document.documentElement.classList.remove('dark');
+            }
           } else {
-            document.documentElement.classList.remove('dark');
+            if (prefersDark) {
+              document.documentElement.classList.add('dark');
+            } else {
+              document.documentElement.classList.remove('dark');
+            }
           }
         } catch (e) {}
       })();

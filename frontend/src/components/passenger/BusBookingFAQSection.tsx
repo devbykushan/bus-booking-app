@@ -91,16 +91,16 @@ export const BusBookingFAQSection: React.FC = () => {
 
       {/* Section Header (Left-aligned) */}
       <div className="relative z-10 text-left space-y-2.5 max-w-3xl">
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-blue-50/90 border border-blue-200 text-blue-700 text-xs font-bold shadow-xs hover:scale-105 transition-transform cursor-default">
-          <HelpCircle className="w-4 h-4 text-blue-600 animate-pulse" />
+        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-300 text-xs font-bold shadow-xs hover:scale-105 transition-transform cursor-default">
+          <HelpCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 animate-pulse" />
           <span>Frequently Asked Questions</span>
         </div>
 
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
-          Common Questions About <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Bus Booking in Sri Lanka</span>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+          Common Questions About <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">Bus Booking in Sri Lanka</span>
         </h2>
 
-        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
           Find fast answers to common questions about ticket reservations, passenger policies, boarding points, and payment security.
         </p>
       </div>
@@ -117,7 +117,7 @@ export const BusBookingFAQSection: React.FC = () => {
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer ${
               activeCategory === cat.key
                 ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 ring-2 ring-blue-400/30'
-                : 'bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 shadow-xs hover:border-blue-300'
+                : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-xs hover:border-blue-300'
             }`}
           >
             {cat.label}
@@ -136,8 +136,8 @@ export const BusBookingFAQSection: React.FC = () => {
               key={idx}
               className={`rounded-2xl border backdrop-blur-md transition-all duration-300 overflow-hidden shadow-xs group ${
                 isOpen 
-                  ? 'bg-white/95 border-blue-300 shadow-md shadow-blue-900/5 ring-2 ring-blue-100' 
-                  : 'bg-white/80 hover:bg-white border-slate-200 hover:border-blue-300 hover:shadow-md hover:-translate-y-0.5'
+                  ? 'bg-white/95 dark:bg-slate-800/95 border-blue-300 dark:border-blue-500/50 shadow-md shadow-blue-900/5 ring-2 ring-blue-100 dark:ring-blue-900/30' 
+                  : 'bg-white/80 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md hover:-translate-y-0.5'
               }`}
             >
               <button
@@ -149,12 +149,12 @@ export const BusBookingFAQSection: React.FC = () => {
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 shadow-xs ${
                     isOpen 
                       ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white scale-105 shadow-blue-600/20' 
-                      : 'bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white group-hover:scale-105'
+                      : 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white group-hover:scale-105'
                   }`}>
                     <Icon className="w-4 h-4" />
                   </div>
                   <h3 className={`text-sm sm:text-base font-bold tracking-tight transition-colors duration-200 ${
-                    isOpen ? 'text-blue-700' : 'text-slate-800 group-hover:text-blue-600'
+                    isOpen ? 'text-blue-700 dark:text-blue-400' : 'text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400'
                   }`}>
                     {faq.question}
                   </h3>
@@ -162,16 +162,16 @@ export const BusBookingFAQSection: React.FC = () => {
 
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 flex-shrink-0 ${
                   isOpen 
-                    ? 'rotate-180 bg-blue-100 text-blue-700 shadow-xs' 
-                    : 'bg-slate-100 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600'
+                    ? 'rotate-180 bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 shadow-xs' 
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-slate-600 group-hover:text-blue-600'
                 }`}>
                   <ChevronDown className="w-4 h-4" />
                 </div>
               </button>
 
               {isOpen && (
-                <div className="px-5 pb-5 pt-0 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 mt-1 pt-3.5 animate-fade-in-up">
-                  <p className="bg-slate-50/80 p-4 rounded-xl border border-slate-100 font-normal">
+                <div className="px-5 pb-5 pt-0 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-700/60 mt-1 pt-3.5 animate-fade-in-up">
+                  <p className="bg-slate-50/80 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-100 dark:border-slate-700 font-normal">
                     {faq.answer}
                   </p>
                 </div>
@@ -182,7 +182,7 @@ export const BusBookingFAQSection: React.FC = () => {
       </div>
 
       {/* Support Helpline Glass Box with Smooth Hover Lift & Pulse */}
-      <div className="relative z-10 p-6 sm:p-7 rounded-2xl backdrop-blur-xl bg-gradient-to-r from-blue-50/90 via-white/90 to-indigo-50/90 border border-white shadow-lg shadow-blue-900/5 hover:shadow-xl hover:border-blue-200 flex flex-col sm:flex-row items-center justify-between gap-5 transition-all duration-300">
+      <div className="relative z-10 p-6 sm:p-7 rounded-2xl backdrop-blur-xl bg-gradient-to-r from-blue-50/90 via-white/90 to-indigo-50/90 dark:from-slate-800/90 dark:via-slate-800 dark:to-indigo-950/40 border border-white dark:border-slate-700 shadow-lg shadow-blue-900/5 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-500/50 flex flex-col sm:flex-row items-center justify-between gap-5 transition-all duration-300">
         
         {/* Animated Top Flowing Accent */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent animate-gradient-flow" />
@@ -192,16 +192,16 @@ export const BusBookingFAQSection: React.FC = () => {
             <PhoneCall className="w-6 h-6 animate-pulse" />
           </div>
           <div>
-            <h4 className="text-sm sm:text-base font-bold text-slate-900">Need personal assistance with your booking?</h4>
-            <p className="text-xs text-slate-600 font-normal">Our customer care and dispatch team is active 24 hours a day, 7 days a week.</p>
+            <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Need personal assistance with your booking?</h4>
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-normal">Our customer care and dispatch team is active 24 hours a day, 7 days a week.</p>
           </div>
         </div>
 
         <a
           href="tel:0711433520"
-          className="px-6 py-3 rounded-xl bg-white hover:bg-emerald-50 text-emerald-700 font-extrabold text-xs border border-emerald-200 hover:border-emerald-300 shadow-sm hover:shadow-md flex items-center gap-2 transition-all duration-300 transform hover:scale-105 active:scale-95 flex-shrink-0 font-mono group"
+          className="px-6 py-3 rounded-xl bg-white dark:bg-slate-900 hover:bg-emerald-50 dark:hover:bg-slate-800 text-emerald-700 dark:text-emerald-400 font-extrabold text-xs border border-emerald-200 dark:border-emerald-800 hover:border-emerald-300 shadow-sm hover:shadow-md flex items-center gap-2 transition-all duration-300 transform hover:scale-105 active:scale-95 flex-shrink-0 font-mono group"
         >
-          <PhoneCall className="w-4 h-4 text-emerald-600 group-hover:animate-bounce" />
+          <PhoneCall className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:animate-bounce" />
           <span>+94 71 143 3520</span>
         </a>
       </div>

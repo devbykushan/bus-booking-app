@@ -403,7 +403,7 @@ export const BusCard: React.FC<BusCardProps> = ({ route, isSelected, onFocusRout
                   e.stopPropagation();
                   handleSelectSeats();
                 }}
-                className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-slate-900 hover:bg-blue-600 text-white font-extrabold text-[11px] sm:text-xs flex items-center gap-1 shadow-md transition-all transform hover:scale-105 active:scale-95"
+                className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-slate-900 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-500 text-white font-extrabold text-[11px] sm:text-xs flex items-center gap-1 shadow-md transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <span>{t('bookNow')}</span>
                 <ChevronRight className="w-3.5 h-3.5" />

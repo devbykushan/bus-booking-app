@@ -46,15 +46,15 @@ export const OperatorDashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Bus Operator Dashboard</h2>
-            <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200 text-xs font-semibold">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Bus Operator Dashboard</h2>
+            <span className="px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 text-xs font-semibold">
               Fleet Admin
             </span>
           </div>
-          <p className="text-xs text-slate-500">Manage bus schedules, customize 57-seat Leyland grid layouts, and scan passenger QR tickets.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Manage bus schedules, customize 57-seat Leyland grid layouts, and scan passenger QR tickets.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -67,9 +67,9 @@ export const OperatorDashboard: React.FC = () => {
 
           <button
             onClick={() => setShowSeatBuilder(!showSeatBuilder)}
-            className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-sm flex items-center gap-2"
+            className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-2"
           >
-            <Plus className="w-4 h-4 text-blue-600" /> Deploy New Bus / Route
+            <Plus className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Deploy New Bus / Route
           </button>
         </div>
       </div>
@@ -80,7 +80,7 @@ export const OperatorDashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-5 space-y-4">
-          <h3 className="text-base font-bold text-slate-800 flex items-center justify-between">
+          <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center justify-between">
             <span>Active Bus Fleet ({routes.length})</span>
             <span className="text-xs text-slate-400">Click route to manage layout</span>
           </h3>
@@ -91,20 +91,20 @@ export const OperatorDashboard: React.FC = () => {
                 key={r.id}
                 onClick={() => setSelectedRouteId(r.id)}
                 className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                  selectedRouteId === r.id ? 'border-blue-500 bg-blue-50' : 'bg-white border-slate-200 hover:border-slate-300'
+                  selectedRouteId === r.id ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 dark:border-blue-500' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                 }`}
               >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h4 className="font-bold text-slate-800 text-sm">{r.busNumber}</h4>
-                        <p className="text-xs text-blue-600 font-semibold">{r.origin} → {r.destination}</p>
-                        <p className="text-[11px] text-slate-500 font-mono mt-0.5">{r.busType}</p>
-                        <p className="text-[11px] text-slate-600 mt-1 flex items-center gap-1">
+                        <h4 className="font-bold text-slate-800 dark:text-white text-sm">{r.busNumber}</h4>
+                        <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold">{r.origin} → {r.destination}</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">{r.busType}</p>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 flex items-center gap-1">
                           <Clock className="w-3 h-3 text-indigo-500" /> {r.departureTime} - {r.arrivalTime}
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-1.5 shrink-0">
-                        <span className="px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs font-mono font-bold">
+                        <span className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-mono font-bold">
                           {r.availableSeatsCount} / {r.totalSeatsCount || r.seats?.length} Seats
                         </span>
                         <div className="flex items-center gap-1.5 flex-wrap justify-end">
@@ -123,7 +123,7 @@ export const OperatorDashboard: React.FC = () => {
                               e.stopPropagation();
                               setCustomizeRouteModal(r);
                             }}
-                            className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-[11px] font-bold flex items-center gap-1 shadow-sm transition-all hover:scale-105"
+                            className="px-2.5 py-1.5 rounded-lg bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white text-[11px] font-bold flex items-center gap-1 shadow-sm transition-all hover:scale-105"
                           >
                             <SlidersHorizontal className="w-3 h-3" /> Layout
                           </button>
@@ -135,7 +135,7 @@ export const OperatorDashboard: React.FC = () => {
                             className={`p-1.5 rounded-lg text-[11px] font-bold flex items-center gap-1 border transition-all ${
                               confirmDeleteRouteId === r.id
                                 ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-700 shadow-md ring-2 ring-rose-300 animate-pulse px-2'
-                                : 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200 hover:border-rose-300'
+                                : 'bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50'
                             }`}
                           >
                             {deletingRouteId === r.id ? (
@@ -153,31 +153,31 @@ export const OperatorDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="lg:col-span-7 bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
             <div>
-              <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                <Users className="w-5 h-5 text-blue-600" /> Passenger Trip Manifest
+              <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" /> Passenger Trip Manifest
               </h3>
-              <p className="text-xs text-slate-500">{selectedRoute?.busNumber} • {selectedRoute?.origin} → {selectedRoute?.destination}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{selectedRoute?.busNumber} • {selectedRoute?.origin} → {selectedRoute?.destination}</p>
             </div>
             <button
               onClick={() => alert('Downloading Passenger Manifest CSV...')}
-              className="px-3 py-1.5 rounded-xl bg-slate-50 text-blue-600 border border-slate-200 text-xs font-bold flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 border border-slate-200 dark:border-slate-600 text-xs font-bold flex items-center gap-1.5"
             >
               <Download className="w-3.5 h-3.5" /> CSV Export
             </button>
           </div>
 
           {manifestBookings.length === 0 ? (
-            <div className="text-center py-8 text-slate-400 text-xs">
+            <div className="text-center py-8 text-slate-400 dark:text-slate-500 text-xs">
               No confirmed passengers booked for this route yet.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 text-slate-400">
+                  <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400">
                     <th className="py-2.5 px-3">PNR</th>
                     <th className="py-2.5 px-3">Passenger</th>
                     <th className="py-2.5 px-3">Seats</th>
@@ -185,21 +185,21 @@ export const OperatorDashboard: React.FC = () => {
                     <th className="py-2.5 px-3">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
                   {manifestBookings.map(b => (
-                    <tr key={b.id} className="hover:bg-slate-50">
-                      <td className="py-2.5 px-3 font-mono font-bold text-blue-600">{b.pnr}</td>
+                    <tr key={b.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                      <td className="py-2.5 px-3 font-mono font-bold text-blue-600 dark:text-blue-400">{b.pnr}</td>
                       <td className="py-2.5 px-3">
-                        <div className="font-semibold text-slate-800">{b.passenger.fullName}</div>
+                        <div className="font-semibold text-slate-800 dark:text-white">{b.passenger.fullName}</div>
                         <div className="text-[10px] text-slate-400">{b.passenger.phone}</div>
                       </td>
-                      <td className="py-2.5 px-3 font-bold font-mono text-indigo-600">
+                      <td className="py-2.5 px-3 font-bold font-mono text-indigo-600 dark:text-indigo-400">
                         {b.seats.map(s => s.number).join(', ')}
                       </td>
                       <td className="py-2.5 px-3">{b.boardingPoint.name}</td>
                       <td className="py-2.5 px-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                          b.bookingStatus === 'boarded' ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'
+                          b.bookingStatus === 'boarded' ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400' : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400'
                         }`}>
                           {b.bookingStatus}
                         </span>

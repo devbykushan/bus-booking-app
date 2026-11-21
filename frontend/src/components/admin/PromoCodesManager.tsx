@@ -87,15 +87,15 @@ export const PromoCodesManager: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header & Stats Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xs">
         <div>
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
               <Ticket className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-slate-900">Promo Codes & Discounts</h2>
-              <p className="text-xs text-slate-500">Create promotional vouchers and percentage discounts for passengers</p>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white">Promo Codes & Discounts</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Create promotional vouchers and percentage discounts for passengers</p>
             </div>
           </div>
         </div>
@@ -103,7 +103,7 @@ export const PromoCodesManager: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => fetchPromos()}
-            className="p-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
+            className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
             title="Refresh promo codes"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -120,33 +120,33 @@ export const PromoCodesManager: React.FC = () => {
 
       {/* Quick Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex items-center gap-3">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
             <Ticket className="w-5 h-5" />
           </div>
           <div>
             <span className="text-[11px] font-bold text-slate-400 uppercase">Active Campaigns</span>
-            <p className="text-lg font-black text-slate-900">{activeCount} / {promos.length} Active</p>
+            <p className="text-lg font-black text-slate-900 dark:text-white">{activeCount} / {promos.length} Active</p>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex items-center gap-3">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
             <span className="text-[11px] font-bold text-slate-400 uppercase">Total Redemptions</span>
-            <p className="text-lg font-black text-slate-900">{totalUses} Bookings</p>
+            <p className="text-lg font-black text-slate-900 dark:text-white">{totalUses} Bookings</p>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex items-center gap-3">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
             <Percent className="w-5 h-5" />
           </div>
           <div>
             <span className="text-[11px] font-bold text-slate-400 uppercase">Discount Type</span>
-            <p className="text-lg font-black text-slate-900">Instant % Checkout</p>
+            <p className="text-lg font-black text-slate-900 dark:text-white">Instant % Checkout</p>
           </div>
         </div>
       </div>
@@ -167,25 +167,25 @@ export const PromoCodesManager: React.FC = () => {
 
       {/* Create New Promo Code Accordion/Card */}
       {showCreateForm && (
-        <div className="bg-white p-6 rounded-3xl border border-purple-200 shadow-md animate-fade-in-up">
-          <h3 className="font-extrabold text-slate-900 text-base mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-purple-200 dark:border-purple-800 shadow-md animate-fade-in-up">
+          <h3 className="font-extrabold text-slate-900 dark:text-white text-base mb-4 flex items-center gap-2">
             <Plus className="w-4 h-4 text-purple-600" /> Create New Discount Promo Code
           </h3>
           <form onSubmit={handleCreate} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 text-xs font-bold">
             <div>
-              <label className="block text-slate-600 mb-1.5 uppercase tracking-wider text-[10px]">Coupon Code</label>
+              <label className="block text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider text-[10px]">Coupon Code</label>
               <input
                 type="text"
                 required
                 placeholder="e.g. AVURUDU20"
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
-                className="w-full p-2.5 rounded-xl border border-slate-300 font-mono uppercase font-black text-slate-800 focus:ring-2 focus:ring-purple-500 outline-hidden"
+                className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-mono uppercase font-black text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 outline-hidden"
               />
             </div>
 
             <div>
-              <label className="block text-slate-600 mb-1.5 uppercase tracking-wider text-[10px]">Discount (%)</label>
+              <label className="block text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider text-[10px]">Discount (%)</label>
               <input
                 type="number"
                 min="1"
@@ -193,12 +193,12 @@ export const PromoCodesManager: React.FC = () => {
                 required
                 value={discountPercent}
                 onChange={(e) => setDiscountPercent(Number(e.target.value))}
-                className="w-full p-2.5 rounded-xl border border-slate-300 font-bold text-slate-800 focus:ring-2 focus:ring-purple-500 outline-hidden"
+                className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 outline-hidden"
               />
             </div>
 
             <div>
-              <label className="block text-slate-600 mb-1.5 uppercase tracking-wider text-[10px]">Max Discount (LKR)</label>
+              <label className="block text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider text-[10px]">Max Discount (LKR)</label>
               <input
                 type="number"
                 min="50"
@@ -206,30 +206,30 @@ export const PromoCodesManager: React.FC = () => {
                 required
                 value={maxDiscount}
                 onChange={(e) => setMaxDiscount(Number(e.target.value))}
-                className="w-full p-2.5 rounded-xl border border-slate-300 font-bold text-slate-800 focus:ring-2 focus:ring-purple-500 outline-hidden"
+                className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 outline-hidden"
               />
             </div>
 
             <div>
-              <label className="block text-slate-600 mb-1.5 uppercase tracking-wider text-[10px]">Valid Until</label>
+              <label className="block text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider text-[10px]">Valid Until</label>
               <input
                 type="date"
                 required
                 value={validUntil}
                 onChange={(e) => setValidUntil(e.target.value)}
-                className="w-full p-2.5 rounded-xl border border-slate-300 font-bold text-slate-800 focus:ring-2 focus:ring-purple-500 outline-hidden"
+                className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 outline-hidden"
               />
             </div>
 
             <div>
-              <label className="block text-slate-600 mb-1.5 uppercase tracking-wider text-[10px]">Max Total Uses</label>
+              <label className="block text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider text-[10px]">Max Total Uses</label>
               <input
                 type="number"
                 min="1"
                 required
                 value={maxUsage}
                 onChange={(e) => setMaxUsage(Number(e.target.value))}
-                className="w-full p-2.5 rounded-xl border border-slate-300 font-bold text-slate-800 focus:ring-2 focus:ring-purple-500 outline-hidden"
+                className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 outline-hidden"
               />
             </div>
 
@@ -237,7 +237,7 @@ export const PromoCodesManager: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowCreateForm(false)}
-                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 font-bold hover:bg-slate-100 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -254,7 +254,7 @@ export const PromoCodesManager: React.FC = () => {
       )}
 
       {/* Promos Table */}
-      <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+      <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-xs">
         {loading ? (
           <div className="py-16 text-center text-slate-400">
             <RefreshCw className="w-8 h-8 mx-auto animate-spin mb-2" />
@@ -270,7 +270,7 @@ export const PromoCodesManager: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-extrabold uppercase text-[10px] tracking-wider">
+                <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-extrabold uppercase text-[10px] tracking-wider">
                   <th className="p-4">Coupon Code</th>
                   <th className="p-4">Discount</th>
                   <th className="p-4">Max Cap</th>
@@ -280,13 +280,13 @@ export const PromoCodesManager: React.FC = () => {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700 font-medium text-slate-700 dark:text-slate-200">
                 {promos.map((p) => {
                   const isExpired = p.validUntil && new Date(p.validUntil) < new Date();
                   const isLimitReached = p.usageCount >= p.maxUsage;
 
                   return (
-                    <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr key={p.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors">
                       <td className="p-4">
                         <div className="flex items-center gap-2">
                           <span className="font-mono font-black text-sm px-3 py-1 rounded-xl bg-purple-50 text-purple-700 border border-purple-200">
@@ -294,7 +294,7 @@ export const PromoCodesManager: React.FC = () => {
                           </span>
                         </div>
                       </td>
-                      <td className="p-4 font-black text-slate-900 text-sm">
+                      <td className="p-4 font-black text-slate-900 dark:text-white text-sm">
                         {p.discountPercent}% OFF
                       </td>
                       <td className="p-4 font-mono text-slate-600">

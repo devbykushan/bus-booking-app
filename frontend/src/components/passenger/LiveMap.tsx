@@ -122,15 +122,15 @@ export const LiveMap: React.FC = () => {
       <div className="flex items-center justify-between">
         <button
           onClick={goToSearchSchedules}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-blue-600 hover:border-blue-200 transition-all font-bold text-xs shadow-xs cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-500/50 transition-all font-bold text-xs shadow-xs cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" /> {currentLangContent.backBtn}
         </button>
 
         {activeRoute && (
           <div className="text-right">
-            <span className="text-xs text-slate-500 font-semibold">{activeRoute.origin} ➔ {activeRoute.destination}</span>
-            <p className="text-xs font-bold text-blue-600">{activeRoute.operatorName} ({activeRoute.busNumber})</p>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">{activeRoute.origin} ➔ {activeRoute.destination}</span>
+            <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{activeRoute.operatorName} ({activeRoute.busNumber})</p>
           </div>
         )}
       </div>
@@ -190,7 +190,7 @@ export const LiveMap: React.FC = () => {
 
       {/* Feature Highlights Grid */}
       <div className="space-y-4">
-        <h3 className="text-lg font-extrabold text-slate-800 tracking-tight text-center">
+        <h3 className="text-lg font-extrabold text-slate-800 dark:text-white tracking-tight text-center">
           {currentLangContent.featuresHeading}
         </h3>
 
@@ -200,14 +200,14 @@ export const LiveMap: React.FC = () => {
             return (
               <div
                 key={idx}
-                className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex items-start gap-4"
+                className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-xs hover:shadow-md transition-all flex items-start gap-4"
               >
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.color} border flex items-center justify-center flex-shrink-0 shadow-xs`}>
                   <Icon className="w-6 h-6" />
                 </div>
                 <div className="space-y-1 text-left">
-                  <h4 className="font-extrabold text-slate-800 text-sm">{f.title}</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed font-normal">{f.desc}</p>
+                  <h4 className="font-extrabold text-slate-800 dark:text-white text-sm">{f.title}</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-normal">{f.desc}</p>
                 </div>
               </div>
             );

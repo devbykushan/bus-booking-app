@@ -144,15 +144,15 @@ export const TimetableManager: React.FC = () => {
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
             <Calendar className="w-6 h-6 text-blue-600" /> Master Timetables
           </h2>
-          <p className="text-sm text-slate-500 mt-1">Manage global bus schedules and 21-day rotations.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage global bus schedules and 21-day rotations.</p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 flex items-center gap-2 shadow-sm transition-all"
+            className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2 shadow-sm transition-all"
           >
             {showAddForm ? <Trash2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
             {showAddForm ? 'Cancel' : 'Add Timetable'}
@@ -177,45 +177,45 @@ export const TimetableManager: React.FC = () => {
 
       {/* Add Form */}
       {showAddForm && (
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl border border-blue-200 shadow-sm space-y-6 animate-pop-in">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-blue-200 dark:border-blue-800 shadow-sm space-y-6 animate-pop-in">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Bus Number</label>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Bus Number</label>
               <input
                 type="text"
                 required
                 placeholder="e.g. ND-2903"
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 value={formData.busNumber}
                 onChange={e => setFormData({ ...formData, busNumber: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Bus Type</label>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Bus Type</label>
               <input
                 type="text"
                 required
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 value={formData.busType}
                 onChange={e => setFormData({ ...formData, busType: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Base Price (LKR)</label>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Base Price (LKR)</label>
               <input
                 type="number"
                 required
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 value={formData.price}
                 onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Anchor Date (Start of Rotation)</label>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Anchor Date (Start of Rotation)</label>
               <input
                 type="date"
                 required
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 value={formData.anchorDate?.split('T')[0]}
                 onChange={e => setFormData({ ...formData, anchorDate: new Date(e.target.value).toISOString() })}
               />
@@ -278,7 +278,7 @@ export const TimetableManager: React.FC = () => {
           });
 
           return (
-            <div key={tt.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group">
+            <div key={tt.id} className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -mr-10 -mt-10 opacity-60 pointer-events-none group-hover:bg-blue-100 transition-colors"></div>
               
               <div className="flex justify-between items-start mb-4 relative z-10">
@@ -287,7 +287,7 @@ export const TimetableManager: React.FC = () => {
                     <Bus className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-800 text-lg">{tt.busNumber}</h3>
+                    <h3 className="font-bold text-slate-800 dark:text-white text-lg">{tt.busNumber}</h3>
                     <p className="text-xs text-slate-500">{tt.busType}</p>
                   </div>
                 </div>
@@ -301,21 +301,21 @@ export const TimetableManager: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-4 relative z-10">
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <div className="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
                   <div className="text-[10px] uppercase font-bold tracking-wider text-slate-500 mb-1">Rotation Trips</div>
-                  <div className="font-semibold text-slate-800 text-sm">
+                  <div className="font-semibold text-slate-800 dark:text-slate-200 text-sm">
                     {outCount} Out, {inCount} In
                   </div>
                 </div>
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <div className="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
                   <div className="text-[10px] uppercase font-bold tracking-wider text-slate-500 mb-1">Anchor Date</div>
-                  <div className="font-semibold text-slate-800 text-sm">
+                  <div className="font-semibold text-slate-800 dark:text-slate-200 text-sm">
                     {tt.anchorDate.split('T')[0]}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center relative z-10">
+              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center relative z-10">
                 <span className="text-xs font-bold text-slate-400 uppercase">21-Day Master Plan</span>
                 <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-200">
                   Active

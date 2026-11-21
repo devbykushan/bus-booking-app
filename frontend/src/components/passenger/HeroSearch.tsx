@@ -318,7 +318,7 @@ export const HeroSearch: React.FC = () => {
                   onChange={(e) => setOrigin(e.target.value)}
                   className="w-full bg-transparent text-slate-900 dark:text-slate-100 font-extrabold text-sm md:text-base focus:outline-none cursor-pointer py-0.5"
                 >
-                  {CITIES.map(c => <option key={c} value={c}>{t(c)}</option>)}
+                  {CITIES.map(c => <option key={c} value={c} className="text-slate-900 dark:bg-slate-900 dark:text-white">{t(c)}</option>)}
                 </select>
               </div>
 
@@ -328,11 +328,11 @@ export const HeroSearch: React.FC = () => {
                   type="button"
                   onClick={handleSwap}
                   title="Swap Departure & Destination"
-                  className="group/swap p-1.5 sm:p-2 md:p-3 rounded-xl md:rounded-2xl bg-white/95 hover:bg-blue-50 border border-white/60
-                             text-slate-600 hover:text-blue-600 shadow-xs md:shadow-sm
+                  className="group/swap p-1.5 sm:p-2 md:p-3 rounded-xl md:rounded-2xl bg-white/95 dark:bg-slate-800/95 hover:bg-blue-50 dark:hover:bg-slate-700 border border-white/60 dark:border-slate-700
+                             text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 shadow-xs md:shadow-sm
                              transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer relative"
                 >
-                  <ArrowRightLeft className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform duration-500 group-hover/swap:rotate-180 text-blue-600" />
+                  <ArrowRightLeft className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform duration-500 group-hover/swap:rotate-180 text-blue-600 dark:text-blue-400" />
                 </button>
               </div>
 
@@ -358,17 +358,17 @@ export const HeroSearch: React.FC = () => {
                   onChange={(e) => setDestination(e.target.value)}
                   className="w-full bg-transparent text-slate-900 dark:text-slate-100 font-extrabold text-sm md:text-base focus:outline-none cursor-pointer py-0.5"
                 >
-                  {CITIES.map(c => <option key={c} value={c}>{t(c)}</option>)}
+                  {CITIES.map(c => <option key={c} value={c} className="text-slate-900 dark:bg-slate-900 dark:text-white">{t(c)}</option>)}
                 </select>
               </div>
 
               {/* Departure Date */}
-              <div className={`${localTripType === 'round-trip' ? 'md:col-span-2 lg:col-span-2' : 'md:col-span-3'} relative bg-white/95 backdrop-blur rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4
-                              border border-white/60 focus-within:border-amber-400 focus-within:ring-4
+              <div className={`${localTripType === 'round-trip' ? 'md:col-span-2 lg:col-span-2' : 'md:col-span-3'} relative bg-white/95 dark:bg-slate-900/95 backdrop-blur rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4
+                              border border-white/60 dark:border-slate-700 focus-within:border-amber-400 focus-within:ring-4
                               focus-within:ring-amber-400/20 transition-all duration-300 shadow-xs md:shadow-sm
-                              hover:shadow-amber-200/40 hover:shadow-md group/date`}>
-                <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1 mb-0.5 md:mb-1.5">
-                  <span className="relative flex items-center justify-center w-4.5 h-4.5 md:w-5 md:h-5 rounded-md bg-amber-50 border border-amber-200/80 text-amber-600 shadow-2xs transition-transform duration-300 group-hover/date:scale-110 group-hover/date:rotate-6">
+                              hover:shadow-amber-200/40 dark:hover:shadow-black/40 hover:shadow-md group/date`}>
+                <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1 mb-0.5 md:mb-1.5">
+                  <span className="relative flex items-center justify-center w-4.5 h-4.5 md:w-5 md:h-5 rounded-md bg-amber-50 dark:bg-amber-950/60 border border-amber-200/80 dark:border-amber-800/80 text-amber-600 dark:text-amber-400 shadow-2xs transition-transform duration-300 group-hover/date:scale-110 group-hover/date:rotate-6">
                     <Calendar className="w-3 h-3 md:w-3.5 md:h-3.5 animate-date-icon relative z-10" />
                   </span>
                   <span className="font-extrabold">{localTripType === 'round-trip' ? t('departureDay') : t('journeyDate')}</span>
@@ -379,24 +379,24 @@ export const HeroSearch: React.FC = () => {
                   min={todayStr}
                   max={maxDateStr}
                   onChange={handleDateChange}
-                  className="w-full bg-transparent text-slate-900 font-extrabold text-xs md:text-sm focus:outline-none cursor-pointer py-0.5"
+                  className="w-full bg-transparent text-slate-900 dark:text-slate-100 font-extrabold text-xs md:text-sm focus:outline-none cursor-pointer py-0.5"
                 />
               </div>
 
               {/* Return Date (Round Trip Only) */}
               {localTripType === 'round-trip' && (
-                <div className="md:col-span-3 lg:col-span-3 relative bg-white/95 backdrop-blur rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4
-                                border border-white/60 focus-within:border-emerald-400 focus-within:ring-4
+                <div className="md:col-span-3 lg:col-span-3 relative bg-white/95 dark:bg-slate-900/95 backdrop-blur rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4
+                                border border-white/60 dark:border-slate-700 focus-within:border-emerald-400 focus-within:ring-4
                                 focus-within:ring-emerald-400/20 transition-all duration-300 shadow-xs md:shadow-sm
-                                hover:shadow-emerald-200/40 hover:shadow-md group/retdate animate-fade-in">
-                  <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-emerald-600 flex items-center justify-between gap-1 mb-0.5 md:mb-1.5">
+                                hover:shadow-emerald-200/40 dark:hover:shadow-black/40 hover:shadow-md group/retdate animate-fade-in">
+                  <label className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center justify-between gap-1 mb-0.5 md:mb-1.5">
                     <span className="flex items-center gap-1">
-                      <span className="relative flex items-center justify-center w-4.5 h-4.5 md:w-5 md:h-5 rounded-md bg-emerald-50 border border-emerald-200/80 text-emerald-600 shadow-2xs transition-transform duration-300 group-hover/retdate:scale-110 group-hover/retdate:rotate-6">
+                      <span className="relative flex items-center justify-center w-4.5 h-4.5 md:w-5 md:h-5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/80 dark:border-emerald-800/80 text-emerald-600 dark:text-emerald-400 shadow-2xs transition-transform duration-300 group-hover/retdate:scale-110 group-hover/retdate:rotate-6">
                         <Calendar className="w-3 h-3 md:w-3.5 md:h-3.5 relative z-10" />
                       </span>
                       <span className="font-extrabold">{t('returnDay')}</span>
                     </span>
-                    <span className="text-[8px] md:text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 font-semibold normal-case">
+                    <span className="text-[8px] md:text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-900/70 text-emerald-800 dark:text-emerald-300 font-semibold normal-case">
                       Step 2
                     </span>
                   </label>
@@ -406,7 +406,7 @@ export const HeroSearch: React.FC = () => {
                     min={date}
                     max={maxDateStr}
                     onChange={handleReturnDateChange}
-                    className="w-full bg-transparent text-slate-900 font-extrabold text-xs md:text-sm focus:outline-none cursor-pointer py-0.5"
+                    className="w-full bg-transparent text-slate-900 dark:text-slate-100 font-extrabold text-xs md:text-sm focus:outline-none cursor-pointer py-0.5"
                   />
                 </div>
               )}
@@ -416,23 +416,23 @@ export const HeroSearch: React.FC = () => {
             <div className="relative flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-4 pt-2.5 sm:pt-4 border-t border-white/20">
 
               {/* Animated Bus Class Pill Filter */}
-              <div className="group/filter relative inline-flex items-center justify-between sm:justify-start gap-2 text-xs bg-white/95 backdrop-blur-md
-                              border border-white/80 hover:border-blue-400 px-3.5 py-2 md:px-4 md:py-2.5 rounded-xl md:rounded-2xl text-slate-800
-                              shadow-sm md:shadow-lg shadow-black/10 hover:bg-white hover:shadow-xl hover:shadow-blue-500/20
+              <div className="group/filter relative inline-flex items-center justify-between sm:justify-start gap-2 text-xs bg-white/95 dark:bg-slate-900/95 backdrop-blur-md
+                              border border-white/80 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 px-3.5 py-2 md:px-4 md:py-2.5 rounded-xl md:rounded-2xl text-slate-800 dark:text-slate-100
+                              shadow-sm md:shadow-lg shadow-black/10 hover:bg-white dark:hover:bg-slate-900 hover:shadow-xl hover:shadow-blue-500/20
                               transition-all duration-300 transform hover:scale-[1.02] active:scale-95 cursor-pointer overflow-hidden">
                 {/* Ambient glow sweep on hover */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-100/50 to-transparent -translate-x-full group-hover/filter:translate-x-full transition-transform duration-700 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-100/50 dark:via-blue-900/30 to-transparent -translate-x-full group-hover/filter:translate-x-full transition-transform duration-700 pointer-events-none" />
 
                 <div className="flex items-center gap-2">
                   {/* Animated Filter Icon */}
-                  <span className="relative flex items-center justify-center w-5 h-5 md:w-6 md:h-6 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-600 transition-transform duration-300 group-hover/filter:scale-110 group-hover/filter:rotate-[-8deg] flex-shrink-0 shadow-2xs">
-                    <Filter className="w-3 h-3 md:w-3.5 md:h-3.5 animate-filter-tilt relative z-10 text-blue-600" />
+                  <span className="relative flex items-center justify-center w-5 h-5 md:w-6 md:h-6 rounded-lg bg-blue-50 dark:bg-blue-900/50 border border-blue-200/80 dark:border-blue-700 text-blue-600 dark:text-blue-400 transition-transform duration-300 group-hover/filter:scale-110 group-hover/filter:rotate-[-8deg] flex-shrink-0 shadow-2xs">
+                    <Filter className="w-3 h-3 md:w-3.5 md:h-3.5 animate-filter-tilt relative z-10 text-blue-600 dark:text-blue-400" />
                   </span>
 
                   {/* Label & Active Option */}
-                  <span className="text-slate-600 font-semibold tracking-wide flex items-center gap-1.5 whitespace-nowrap text-[11px] md:text-xs">
-                    <span className="text-slate-500 font-bold">{t('busClass')}:</span>
-                    <span className="font-extrabold text-slate-900 text-xs md:text-sm tracking-tight">
+                  <span className="text-slate-600 dark:text-slate-300 font-semibold tracking-wide flex items-center gap-1.5 whitespace-nowrap text-[11px] md:text-xs">
+                    <span className="text-slate-500 dark:text-slate-400 font-bold">{t('busClass')}:</span>
+                    <span className="font-extrabold text-slate-900 dark:text-white text-xs md:text-sm tracking-tight">
                       {busTypeFilter === 'all'
                         ? t('allClasses')
                         : busTypeFilter === 'Normal Service' || busTypeFilter === 'Ashok Leyland'
@@ -445,18 +445,18 @@ export const HeroSearch: React.FC = () => {
                 </div>
 
                 {/* Animated Chevron Down */}
-                <ChevronDown className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-600 transition-transform duration-300 group-hover/filter:translate-y-0.5 group-hover/filter:text-blue-700 animate-chevron-bob flex-shrink-0 ml-0.5" />
+                <ChevronDown className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-600 dark:text-blue-400 transition-transform duration-300 group-hover/filter:translate-y-0.5 group-hover/filter:text-blue-700 animate-chevron-bob flex-shrink-0 ml-0.5" />
 
                 {/* Hidden Overlay Select for native click & accessibility */}
                 <select
                   value={busTypeFilter}
                   onChange={(e) => setBusTypeFilter(e.target.value)}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-slate-900"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-slate-900 dark:text-white"
                   title="Select Bus Class"
                 >
-                  <option value="all" className="text-slate-900">{t('allClasses')}</option>
-                  <option value="Normal Service" className="text-slate-900">{t('normalService')}</option>
-                  <option value="Super Luxury" className="text-slate-900">{t('superLuxury')}</option>
+                  <option value="all" className="text-slate-900 dark:bg-slate-900 dark:text-white">{t('allClasses')}</option>
+                  <option value="Normal Service" className="text-slate-900 dark:bg-slate-900 dark:text-white">{t('normalService')}</option>
+                  <option value="Super Luxury" className="text-slate-900 dark:bg-slate-900 dark:text-white">{t('superLuxury')}</option>
                 </select>
               </div>
 

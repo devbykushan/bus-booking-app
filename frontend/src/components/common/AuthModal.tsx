@@ -196,45 +196,45 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const inputRingClass = (touched: boolean, valid: boolean, shakeThis: boolean) =>
     `relative flex items-center rounded-xl border py-2.5 px-3 transition-all ${
       !touched
-        ? 'modern-focus-ring border-slate-200 bg-slate-50'
+        ? 'modern-focus-ring border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80'
         : valid
-          ? 'success-focus-ring border-emerald-300 bg-emerald-50/20'
-          : 'error-focus-ring border-rose-300 bg-rose-50/30'
+          ? 'success-focus-ring border-emerald-300 dark:border-emerald-600 bg-emerald-50/20 dark:bg-emerald-950/20'
+          : 'error-focus-ring border-rose-300 dark:border-rose-600 bg-rose-50/30 dark:bg-rose-950/20'
     } ${shakeThis ? 'animate-shake-float' : ''}`;
 
   const iconColor = (touched: boolean, valid: boolean) =>
-    !touched ? 'text-slate-400' : valid ? 'text-emerald-500' : 'text-rose-500';
+    !touched ? 'text-slate-400 dark:text-slate-500' : valid ? 'text-emerald-500' : 'text-rose-500';
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/45 backdrop-blur-md flex items-center justify-center p-4 transition-opacity animate-fade-in-up">
+    <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 transition-opacity animate-fade-in-up">
       {/* Anti-Gravity Floating Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[10%] -left-[10%] w-[45%] h-[45%] rounded-full bg-blue-400/20 blur-[100px] animate-blob-1" />
-        <div className="absolute -bottom-[15%] -right-[15%] w-[50%] h-[50%] rounded-full bg-indigo-500/15 blur-[120px] animate-blob-2" />
+        <div className="absolute -top-[10%] -left-[10%] w-[45%] h-[45%] rounded-full bg-blue-400/20 dark:bg-blue-600/10 blur-[100px] animate-blob-1" />
+        <div className="absolute -bottom-[15%] -right-[15%] w-[50%] h-[50%] rounded-full bg-indigo-500/15 dark:bg-indigo-600/10 blur-[120px] animate-blob-2" />
         <div className="absolute top-[40%] right-[10%] w-[30%] h-[30%] rounded-full bg-cyan-400/10 blur-[90px] animate-blob-1" />
       </div>
 
       {/* Entrance wrapper (bottom-up float) */}
       <div className="max-w-md w-full animate-pop-in">
         {/* Floating modal card */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full border border-slate-200/80 shadow-2xl p-6 space-y-5 animate-antigravity-float">
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-3xl w-full border border-slate-200/80 dark:border-slate-800 shadow-2xl p-6 space-y-5 animate-antigravity-float">
 
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl shadow-sm animate-pulse-glow bg-blue-50 text-blue-600">
+              <div className="p-2 rounded-xl shadow-sm animate-pulse-glow bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400">
                 <LogIn className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-800">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-white">
                   {mode === 'login' ? 'Passenger Sign In' : 'Create Passenger Account'}
                 </h3>
-                <p className="text-xs text-slate-400 font-medium">
+                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
                   Dewmina Super Line Sri Lanka
                 </p>
               </div>
             </div>
-            <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+            <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -242,12 +242,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
 
           {googleLoginSuccess ? (
             <div className="text-center py-10 animate-fade-in-up space-y-4 px-6">
-              <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center shadow-md">
+              <div className="mx-auto w-20 h-20 bg-emerald-100 dark:bg-emerald-950/50 rounded-full flex items-center justify-center shadow-md">
                 <span className="text-emerald-500 text-4xl">✓</span>
               </div>
               <div className="space-y-1">
-                <h3 className="text-xl font-black text-slate-800">Welcome back, {googleLoginSuccess.name}!</h3>
-                <p className="text-sm text-slate-500">You've signed in successfully with Google.</p>
+                <h3 className="text-xl font-black text-slate-800 dark:text-white">Welcome back, {googleLoginSuccess.name}!</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">You've signed in successfully with Google.</p>
               </div>
               <div className="flex justify-center pt-1">
                 <div className="w-8 h-1 rounded-full bg-emerald-400 animate-pulse" />
@@ -255,11 +255,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             </div>
           ) : registrationSuccess ? (
             <div className="text-center py-6 animate-fade-in-up space-y-4">
-              <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4 shadow-sm">
+              <div className="mx-auto w-16 h-16 bg-emerald-100 dark:bg-emerald-950/50 rounded-full flex items-center justify-center mb-4 shadow-sm">
                 <span className="text-emerald-500 text-3xl font-bold">✓</span>
               </div>
-              <h3 className="text-xl font-bold text-slate-800">Your account created successfully</h3>
-              <p className="text-sm text-slate-500 max-w-xs mx-auto">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">Your account created successfully</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
                 A confirmation email has been sent to your email address. Please log in to continue.
               </p>
               <div className="pt-4">
@@ -281,24 +281,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             <>
               {/* Booking or My Tickets Auth Notice */}
               {selectedRoute ? (
-                <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold shadow-xs animate-fade-in-up">
-                  <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-amber-900 dark:text-amber-300 text-xs font-semibold shadow-xs animate-fade-in-up">
+                  <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
                   <span>
-                    Please <strong className="font-extrabold text-amber-950">sign in</strong> or <strong className="font-extrabold text-amber-950">register an account</strong> to book seats for <strong className="text-blue-700">{selectedRoute.origin} → {selectedRoute.destination}</strong> ({selectedRoute.busNumber}).
+                    Please <strong className="font-extrabold text-amber-950 dark:text-amber-200">sign in</strong> or <strong className="font-extrabold text-amber-950 dark:text-amber-200">register an account</strong> to book seats for <strong className="text-blue-700 dark:text-blue-400">{selectedRoute.origin} → {selectedRoute.destination}</strong> ({selectedRoute.busNumber}).
                   </span>
                 </div>
               ) : currentView === 'my-bookings' ? (
-                <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-semibold shadow-xs animate-fade-in-up">
-                  <Lock className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/40 text-blue-900 dark:text-blue-300 text-xs font-semibold shadow-xs animate-fade-in-up">
+                  <Lock className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                   <span>
-                    Please <strong className="font-extrabold text-blue-950">sign in</strong> or <strong className="font-extrabold text-blue-950">register an account</strong> to view your active bus tickets and booking history.
+                    Please <strong className="font-extrabold text-blue-950 dark:text-blue-200">sign in</strong> or <strong className="font-extrabold text-blue-950 dark:text-blue-200">register an account</strong> to view your active bus tickets and booking history.
                   </span>
                 </div>
               ) : null}
 
               {/* Registration Step Indicator */}
               {mode === 'register' && (
-                <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-1 px-1">
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 px-1">
                   <span>Step {regStep} of 2</span>
                   <span>{regStep === 1 ? 'Enter Details' : 'Verify OTP'}</span>
                 </div>
@@ -306,7 +306,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
 
               {/* Error Message (floats in) */}
               {errorMsg && (
-                <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-semibold shadow-sm animate-fade-in-up">
+                <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 text-xs font-semibold shadow-sm animate-fade-in-up">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-500" />
                   <span>{errorMsg}</span>
                 </div>
@@ -328,8 +328,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                   </div>
 
                   <div className="relative flex items-center justify-center my-2">
-                    <div className="border-t border-slate-200 w-full" />
-                    <span className="bg-white px-3 text-[10px] text-slate-400 font-bold uppercase tracking-wider absolute">
+                    <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
+                    <span className="bg-white dark:bg-slate-900 px-3 text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider absolute">
                       or continue with email
                     </span>
                   </div>
@@ -342,18 +342,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 {/* Step 2: OTP Input */}
                 {mode === 'register' && regStep === 2 && (
                   <div className="animate-fade-in-up space-y-3" style={{ animationDelay: '80ms' }}>
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-2xl text-blue-900 text-xs">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 rounded-2xl text-blue-900 dark:text-blue-300 text-xs">
                       <p className="font-bold flex items-center gap-1.5">
-                        <Mail className="w-4 h-4 text-blue-600" /> Verification Code Sent!
+                        <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Verification Code Sent!
                       </p>
-                      <p className="text-[11px] text-blue-700 mt-1">
+                      <p className="text-[11px] text-blue-700 dark:text-blue-300 mt-1">
                         We sent a 6-digit OTP to <strong>{email}</strong>. Check your inbox and spam folder.
                       </p>
                     </div>
 
                     <div>
-                      <label className="block text-slate-600 mb-1.5 font-semibold">Enter 6-Digit OTP</label>
-                      <div className="relative flex items-center rounded-xl border py-2.5 px-3 transition-all border-blue-300 bg-blue-50/30">
+                      <label className="block text-slate-600 dark:text-slate-300 mb-1.5 font-semibold">Enter 6-Digit OTP</label>
+                      <div className="relative flex items-center rounded-xl border py-2.5 px-3 transition-all border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-950/20">
                         <Lock className="w-4 h-4 mr-2.5 transition-colors text-blue-500" />
                         <input
                           ref={otpRef}
@@ -362,7 +362,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                           value={otp}
                           maxLength={6}
                           onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                          className="w-full bg-transparent text-slate-800 text-sm font-mono tracking-widest focus:outline-none placeholder-slate-400"
+                          className="w-full bg-transparent text-slate-800 dark:text-white text-sm font-mono tracking-widest focus:outline-none placeholder-slate-400 dark:placeholder-slate-500"
                           required
                           autoFocus
                         />
@@ -374,7 +374,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 {/* Step 1: Full Name (register only) */}
                 {mode === 'register' && regStep === 1 && (
                   <div className="animate-fade-in-up" style={{ animationDelay: '80ms' }}>
-                    <label className="block text-slate-600 mb-1.5 font-semibold">Full Name</label>
+                    <label className="block text-slate-600 dark:text-slate-300 mb-1.5 font-semibold">Full Name</label>
                     <div className={inputRingClass(nameTouched, isNameValid(name), shakeError && !isNameValid(name))}>
                       <User className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(nameTouched, isNameValid(name))}`} />
                       <input
@@ -384,7 +384,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                         value={name}
                         onBlur={() => setNameTouched(true)}
                         onChange={(e) => { setName(e.target.value); if (!nameTouched) setNameTouched(true); }}
-                        className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400"
+                        className="w-full bg-transparent text-slate-800 dark:text-white text-xs focus:outline-none placeholder-slate-400 dark:placeholder-slate-500"
                         required
                       />
                       {nameTouched && (
@@ -404,7 +404,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 {/* Step 1: Mobile Number (passenger registration only) */}
                 {mode === 'register' && role === 'passenger' && regStep === 1 && (
                   <div className="animate-fade-in-up" style={{ animationDelay: '140ms' }}>
-                    <label className="block text-slate-600 mb-1.5 font-semibold">Mobile Number</label>
+                    <label className="block text-slate-600 dark:text-slate-300 mb-1.5 font-semibold">Mobile Number</label>
                     <div className={inputRingClass(phoneTouched, isPhoneValid(phone), shakeError && !isPhoneValid(phone))}>
                       <Phone className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(phoneTouched, isPhoneValid(phone))}`} />
                       <input
@@ -416,7 +416,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                         maxLength={phone.startsWith('+') ? 12 : 10}
                         onBlur={() => setPhoneTouched(true)}
                         onChange={(e) => handlePhoneInputChange(e.target.value)}
-                        className="w-full bg-transparent text-slate-800 text-xs font-mono tracking-wide focus:outline-none placeholder-slate-400"
+                        className="w-full bg-transparent text-slate-800 dark:text-white text-xs font-mono tracking-wide focus:outline-none placeholder-slate-400 dark:placeholder-slate-500"
                         required
                       />
                       {phoneTouched && (
@@ -438,7 +438,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 {/* Email */}
                 {(mode === 'login' || (mode === 'register' && regStep === 1)) && (
                   <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '200ms' : '80ms' }}>
-                    <label className="block text-slate-600 mb-1.5 font-semibold">Email Address</label>
+                    <label className="block text-slate-600 dark:text-slate-300 mb-1.5 font-semibold">Email Address</label>
                     <div className={inputRingClass(emailTouched, isEmailValid(email), shakeError && !isEmailValid(email))}>
                       <Mail className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(emailTouched, isEmailValid(email))}`} />
                       <input
@@ -448,7 +448,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                         value={email}
                         onBlur={() => setEmailTouched(true)}
                         onChange={(e) => { setEmail(e.target.value); if (!emailTouched) setEmailTouched(true); }}
-                        className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400"
+                        className="w-full bg-transparent text-slate-800 dark:text-white text-xs focus:outline-none placeholder-slate-400 dark:placeholder-slate-500"
                         required
                       />
                       {emailTouched && (
@@ -468,7 +468,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                 {/* Password */}
                 {(mode === 'login' || (mode === 'register' && regStep === 1)) && (
                   <div className="animate-fade-in-up" style={{ animationDelay: mode === 'register' ? '260ms' : '140ms' }}>
-                    <label className="block text-slate-600 mb-1.5 font-semibold">Password</label>
+                    <label className="block text-slate-600 dark:text-slate-300 mb-1.5 font-semibold">Password</label>
                     <div className={inputRingClass(passwordTouched, isPasswordValid(password), shakeError && !isPasswordValid(password))}>
                       <Lock className={`w-4 h-4 mr-2.5 transition-colors ${iconColor(passwordTouched, isPasswordValid(password))}`} />
                       <input
@@ -478,13 +478,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                         value={password}
                         onBlur={() => setPasswordTouched(true)}
                         onChange={(e) => { setPassword(e.target.value); if (!passwordTouched) setPasswordTouched(true); }}
-                        className="w-full bg-transparent text-slate-800 text-xs focus:outline-none placeholder-slate-400 pr-8"
+                        className="w-full bg-transparent text-slate-800 dark:text-white text-xs focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 pr-8"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors"
+                        className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                         tabIndex={-1}
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -524,7 +524,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
               </form>
 
               {/* Mode Switcher */}
-              <div className="text-center pt-1 border-t border-slate-100/60">
+              <div className="text-center pt-1 border-t border-slate-100/60 dark:border-slate-800">
                   {regStep === 2 ? (
                     <button
                       type="button"
@@ -532,7 +532,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                         setRegStep(1);
                         setOtp('');
                       }}
-                      className="text-xs text-slate-500 hover:text-slate-800 transition-colors font-semibold"
+                      className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 transition-colors font-semibold"
                     >
                       Entered wrong email? <span className="underline decoration-slate-400 decoration-2 underline-offset-2">Change Email</span>
                     </button>
@@ -549,7 +549,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
                         setRegStep(1);
                         setOtp('');
                       }}
-                      className="text-xs text-blue-600 hover:text-blue-800 transition-colors font-semibold"
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors font-semibold"
                     >
                       {mode === 'login'
                         ? <>Don't have an account? <span className="underline decoration-blue-400 decoration-2 underline-offset-2">Register here</span></>

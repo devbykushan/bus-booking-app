@@ -111,14 +111,14 @@ export const ServicesSection: React.FC = () => {
           transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
         }}
       >
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50/80 border border-blue-200/80 text-blue-700 text-xs font-semibold shadow-xs">
-          <Sparkles className="w-3.5 h-3.5 text-blue-600 animate-pulse" />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/50 text-blue-700 dark:text-blue-300 text-xs font-semibold shadow-xs">
+          <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 animate-pulse" />
           <span>FIRST-CLASS EXPERIENCE</span>
         </div>
-        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">
-          Why Travel With <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Dewmina Super Line</span>?
+        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">
+          Why Travel With <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">Dewmina Super Line</span>?
         </h2>
-        <p className="text-slate-500 text-xs md:text-sm leading-relaxed">
+        <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm leading-relaxed">
           We combine cutting-edge technology with Sri Lanka’s finest hospitality to make every bus journey smooth, safe, and comfortable.
         </p>
       </div>
@@ -142,7 +142,7 @@ export const ServicesSection: React.FC = () => {
 
             {/* Main Card */}
             <div
-              className={`relative h-full bg-white p-6 rounded-2xl border border-slate-200/90 ${service.accentBorder} transition-all duration-300 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-xl overflow-hidden`}
+              className={`relative h-full bg-white dark:bg-slate-800/90 p-6 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 ${service.accentBorder} transition-all duration-300 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-xl overflow-hidden`}
             >
               {/* Shine beam sweep effect */}
               <div className="service-card-shine" />
@@ -151,7 +151,7 @@ export const ServicesSection: React.FC = () => {
                 {/* Icon and Badge Header */}
                 <div className="flex items-center justify-between">
                   <div
-                    className={`p-3 rounded-xl border transition-all duration-300 ${service.iconBg} group-hover:scale-110 group-hover:shadow-sm`}
+                    className={`p-3 rounded-xl border transition-all duration-300 ${service.iconBg} dark:bg-slate-700/60 dark:border-slate-600 group-hover:scale-110 group-hover:shadow-sm`}
                   >
                     <div className={service.iconAnimClass}>
                       {service.icon}
@@ -160,7 +160,7 @@ export const ServicesSection: React.FC = () => {
 
                   {/* Pulsing Status Badge */}
                   <span
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${service.badgeColor} transition-transform duration-300 group-hover:scale-105`}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${service.badgeColor} dark:border-slate-600 transition-transform duration-300 group-hover:scale-105`}
                   >
                     <span className="relative flex h-1.5 w-1.5">
                       <span className={`service-badge-beacon absolute inline-flex h-full w-full rounded-full ${service.beaconColor} opacity-75`} />
@@ -171,20 +171,20 @@ export const ServicesSection: React.FC = () => {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-base font-bold text-slate-800 tracking-tight group-hover:text-blue-600 transition-colors duration-200">
+                <h3 className="text-base font-bold text-slate-800 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
                   {service.title}
                 </h3>
 
                 {/* Description */}
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                   {service.description}
                 </p>
               </div>
 
               {/* Bottom Micro Highlight Bar */}
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-medium text-slate-400 group-hover:text-slate-600 transition-colors">
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-[11px] font-medium text-slate-400 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors">
                 <span className="inline-block">{service.highlightText}</span>
-                <span className="text-blue-500 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-1 group-hover:translate-x-0">
+                <span className="text-blue-500 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-1 group-hover:translate-x-0">
                   →
                 </span>
               </div>

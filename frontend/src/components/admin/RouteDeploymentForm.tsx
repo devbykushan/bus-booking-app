@@ -289,9 +289,9 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-3xl border border-blue-200 shadow-sm space-y-4 animate-pop-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-3 gap-2">
-        <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+    <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-blue-200 dark:border-slate-700 shadow-sm space-y-4 animate-pop-in">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3 gap-2">
+        <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
           <LayoutGrid className="w-5 h-5 text-blue-600" /> Route & Visual Seat Layout Designer
         </h3>
         <div className="flex items-center gap-2">
@@ -330,7 +330,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
       {/* Bus Class Selection & Preset Config */}
       <div className="space-y-2 p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100 text-xs">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+          <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
             <Zap className="w-3.5 h-3.5 text-amber-500" /> Bus Class & Service Profile
           </label>
           <span className="text-[11px] font-semibold text-blue-600">Auto-syncs price, layout & amenities</span>
@@ -338,7 +338,7 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
         <select
           value={busType}
           onChange={(e) => handleBusTypeChange(e.target.value as BusCategory)}
-          className="w-full rounded-xl p-2.5 font-bold text-slate-900 bg-white border border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 shadow-xs"
+          className="w-full rounded-xl p-2.5 font-bold text-slate-900 dark:text-white bg-white dark:bg-slate-900 border border-blue-200 dark:border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 shadow-xs"
         >
           {BUS_CLASSES.map((bc) => (
             <option key={bc.id} value={bc.id}>
@@ -356,15 +356,15 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
 
         {BUS_CLASS_PRESETS[busType] && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-            <div className="p-2 rounded-xl bg-white border border-slate-200">
+            <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
               <span className="text-[10px] text-slate-400 font-medium block">Capacity</span>
               <span className="text-xs font-bold text-slate-800 font-mono">{capacity || BUS_CLASS_PRESETS[busType]?.seatsCount || 49} Seats</span>
             </div>
-            <div className="p-2 rounded-xl bg-white border border-slate-200">
+            <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
               <span className="text-[10px] text-slate-400 font-medium block">Default Fare</span>
               <span className="text-xs font-bold text-blue-600 font-mono">LKR {BUS_CLASS_PRESETS[busType].defaultPrice}</span>
             </div>
-            <div className="p-2 rounded-xl bg-white border border-slate-200">
+            <div className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
               <span className="text-[10px] text-slate-400 font-medium block">Duration</span>
               <span className="text-xs font-bold text-slate-800 font-mono">{BUS_CLASS_PRESETS[busType].defaultDuration}</span>
             </div>
@@ -704,45 +704,45 @@ export const RouteDeploymentForm: React.FC<RouteDeploymentFormProps> = ({ onClos
         </div>
 
         {showAdvancedStops && (
-          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs animate-fade-in">
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs animate-fade-in">
             <div>
-              <label className="block text-slate-600 font-bold mb-1">Pickup Stop 1 (Origin)</label>
+              <label className="block text-slate-600 dark:text-slate-300 font-bold mb-1">Pickup Stop 1 (Origin)</label>
               <input
                 type="text"
                 value={pickupStop1}
                 onChange={e => setPickupStop1(e.target.value)}
                 placeholder={`${origin || 'Origin'} Main Bus Stand`}
-                className="w-full rounded-xl p-2 bg-white border border-slate-200 text-slate-800 text-xs"
+                className="w-full rounded-xl p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-xs"
               />
             </div>
             <div>
-              <label className="block text-slate-600 font-bold mb-1">Pickup Stop 2 (Intermediate)</label>
+              <label className="block text-slate-600 dark:text-slate-300 font-bold mb-1">Pickup Stop 2 (Intermediate)</label>
               <input
                 type="text"
                 value={pickupStop2}
                 onChange={e => setPickupStop2(e.target.value)}
                 placeholder="Wellawaya Clock Tower Junction"
-                className="w-full rounded-xl p-2 bg-white border border-slate-200 text-slate-800 text-xs"
+                className="w-full rounded-xl p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-xs"
               />
             </div>
             <div>
-              <label className="block text-slate-600 font-bold mb-1">Drop Stop 1 (Highway Exit)</label>
+              <label className="block text-slate-600 dark:text-slate-300 font-bold mb-1">Drop Stop 1 (Highway Exit)</label>
               <input
                 type="text"
                 value={dropStop1}
                 onChange={e => setDropStop1(e.target.value)}
                 placeholder="Kottawa Highway Exit Hub"
-                className="w-full rounded-xl p-2 bg-white border border-slate-200 text-slate-800 text-xs"
+                className="w-full rounded-xl p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-xs"
               />
             </div>
             <div>
-              <label className="block text-slate-600 font-bold mb-1">Drop Stop 2 (Destination)</label>
+              <label className="block text-slate-600 dark:text-slate-300 font-bold mb-1">Drop Stop 2 (Destination)</label>
               <input
                 type="text"
                 value={dropStop2}
                 onChange={e => setDropStop2(e.target.value)}
                 placeholder={`${destination || 'Destination'} Fort Bus Station`}
-                className="w-full rounded-xl p-2 bg-white border border-slate-200 text-slate-800 text-xs"
+                className="w-full rounded-xl p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-xs"
               />
             </div>
           </div>

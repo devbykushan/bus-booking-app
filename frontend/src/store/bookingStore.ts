@@ -165,7 +165,7 @@ interface BookingStore {
 
   // Theme
   theme: 'light' | 'dark';
-  setTheme: (theme: 'light' | 'dark') => void;
+  setTheme: (theme: 'light' | 'dark', isManual?: boolean) => void;
 
   // Role switching
   userRole: 'passenger' | 'admin' | 'super_admin';
@@ -377,15 +377,29 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
 
 
   theme: (() => {
-    const saved = typeof window !== 'undefined' ? (localStorage.getItem('dewmina_theme') as 'light' | 'dark') : null;
-    if (saved === 'dark' || saved === 'light') return saved;
-    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('dewmina_theme') as 'light' | 'dark' | null;
+      const isManual = localStorage.getItem('dewmina_theme_manual') === 'true';
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (isManual && (saved === 'dark' || saved === 'light')) {
+        if (saved === 'dark') document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+        return saved;
+      }
+      if (prefersDark) {
+        document.documentElement.classList.add('dark');
+        return 'dark';
+      }
+      document.documentElement.classList.remove('dark');
+      return 'light';
     }
     return 'light';
   })(),
-  setTheme: (theme) => {
+  setTheme: (theme, isManual = true) => {
     localStorage.setItem('dewmina_theme', theme);
+    if (isManual) {
+      localStorage.setItem('dewmina_theme_manual', 'true');
+    }
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
