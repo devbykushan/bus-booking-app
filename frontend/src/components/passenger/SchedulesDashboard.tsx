@@ -249,6 +249,18 @@ export const SchedulesDashboard: React.FC = () => {
     setModDestination(temp);
   };
 
+  // Swap origin and destination directly by clicking the route arrow
+  const [isSwappingRoute, setIsSwappingRoute] = useState(false);
+  const handleSwapRoute = () => {
+    setIsSwappingRoute(true);
+    const newOrigin = searchDestination;
+    const newDest = searchOrigin;
+    setSearchCriteria(newOrigin, newDest, searchDate);
+    setModOrigin(newOrigin);
+    setModDestination(newDest);
+    setTimeout(() => setIsSwappingRoute(false), 350);
+  };
+
   // Submit search modification
   const handleApplyModifiedSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -469,10 +481,17 @@ export const SchedulesDashboard: React.FC = () => {
                     </span>
                     <span>{t(searchOrigin)}</span>
                   </span>
-                  <span className="text-blue-400 font-light flex items-center gap-0.5 sm:gap-1 px-0.5 sm:px-1 flex-shrink-0">
-                    <span className="w-4 sm:w-10 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full animate-route-flow" />
-                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-300 animate-bounce-horizontal -ml-1.5 sm:-ml-2" />
-                  </span>
+                  <button
+                    type="button"
+                    onClick={handleSwapRoute}
+                    title="Click to swap route (දෙපැත්ත මාරු කරන්න)"
+                    className={`group text-blue-400 font-light flex items-center gap-0.5 sm:gap-1 px-1 sm:px-1.5 py-1 rounded-xl hover:bg-blue-500/20 active:scale-90 transition-all duration-300 cursor-pointer flex-shrink-0 ${
+                      isSwappingRoute ? 'rotate-180 scale-90' : ''
+                    }`}
+                  >
+                    <span className="w-4 sm:w-10 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full animate-route-flow group-hover:from-cyan-400 group-hover:to-blue-400" />
+                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-300 animate-bounce-horizontal -ml-1.5 sm:-ml-2 group-hover:text-cyan-300" />
+                  </button>
                   <span className="inline-flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                     <span className="relative flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-indigo-500/20 border border-indigo-400/40 text-indigo-300">
                       <span className="absolute -inset-0.5 rounded-lg bg-indigo-400/30 animate-to-beacon pointer-events-none" />
