@@ -460,35 +460,37 @@ export const SchedulesDashboard: React.FC = () => {
                 <span>{t('availableSchedules')}</span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white flex flex-wrap items-center gap-3 tracking-tight">
-                  <span className="inline-flex items-center gap-2">
-                    <span className="relative flex items-center justify-center w-6 h-6 rounded-lg bg-blue-500/20 border border-blue-400/40 text-blue-300">
+              <div className="flex flex-col gap-2.5">
+                <h1 className="text-base sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-white flex items-center gap-2 sm:gap-3 tracking-tight flex-nowrap overflow-x-auto no-scrollbar py-0.5">
+                  <span className="inline-flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                    <span className="relative flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-blue-500/20 border border-blue-400/40 text-blue-300">
                       <span className="absolute -inset-0.5 rounded-lg bg-blue-400/30 animate-from-beacon pointer-events-none" />
-                      <MapPin className="w-3.5 h-3.5 animate-from-icon relative z-10 text-blue-400" />
+                      <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-from-icon relative z-10 text-blue-400" />
                     </span>
                     <span>{t(searchOrigin)}</span>
                   </span>
-                  <span className="text-blue-400 font-light flex items-center gap-1 px-1">
-                    <span className="w-6 sm:w-10 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full animate-route-flow" />
-                    <ChevronRight className="w-5 h-5 text-indigo-300 animate-bounce-horizontal -ml-2" />
+                  <span className="text-blue-400 font-light flex items-center gap-0.5 sm:gap-1 px-0.5 sm:px-1 flex-shrink-0">
+                    <span className="w-4 sm:w-10 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full animate-route-flow" />
+                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-300 animate-bounce-horizontal -ml-1.5 sm:-ml-2" />
                   </span>
-                  <span className="inline-flex items-center gap-2">
-                    <span className="relative flex items-center justify-center w-6 h-6 rounded-lg bg-indigo-500/20 border border-indigo-400/40 text-indigo-300">
+                  <span className="inline-flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                    <span className="relative flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-indigo-500/20 border border-indigo-400/40 text-indigo-300">
                       <span className="absolute -inset-0.5 rounded-lg bg-indigo-400/30 animate-to-beacon pointer-events-none" />
-                      <MapPin className="w-3.5 h-3.5 animate-to-icon relative z-10 text-indigo-400" />
+                      <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-to-icon relative z-10 text-indigo-400" />
                     </span>
                     <span>{t(searchDestination)}</span>
                   </span>
                 </h1>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-bold">
-                  <Calendar className="w-3.5 h-3.5 text-blue-300 animate-date-icon" />
-                  {formattedDate}
-                </span>
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  {filteredAndSortedRoutes.length} {filteredAndSortedRoutes.length === 1 ? t('busFound') : t('busesFound')}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-bold">
+                    <Calendar className="w-3.5 h-3.5 text-blue-300 animate-date-icon" />
+                    {formattedDate}
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {filteredAndSortedRoutes.length} {filteredAndSortedRoutes.length === 1 ? t('busFound') : t('busesFound')}
+                  </span>
+                </div>
               </div>
             </div>
 
