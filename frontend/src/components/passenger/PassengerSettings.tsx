@@ -522,43 +522,57 @@ export const PassengerSettings: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Navigation Tabs ── */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto no-scrollbar">
-        <button
-          onClick={() => setActiveTab('profile')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer shrink-0 ${
-            activeTab === 'profile'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 scale-[1.02]'
-              : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10'
-          }`}
-        >
-          <User className="w-4 h-4" />
-          <span>{t('profileInformation')}</span>
-        </button>
+      {/* ── Navigation Tabs (Floating Capsule Bar) ── */}
+      <div className="flex justify-center">
+        <div className="inline-flex items-center p-1.5 rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/90 dark:border-slate-700/80 shadow-lg shadow-slate-200/50 dark:shadow-black/40 w-full sm:w-auto max-w-md sm:max-w-none gap-1">
+          <button
+            type="button"
+            onClick={() => setActiveTab('profile')}
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer whitespace-nowrap ${
+              activeTab === 'profile'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/35 ring-1 ring-blue-400/30'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
+            }`}
+          >
+            <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span className="sm:hidden">
+              {language === 'sinhala' ? 'ගිණුම' : language === 'tamil' ? 'சுயவிவரம்' : 'Profile'}
+            </span>
+            <span className="hidden sm:inline">{t('profileInformation')}</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('security')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer shrink-0 ${
-            activeTab === 'security'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 scale-[1.02]'
-              : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10'
-          }`}
-        >
-          <KeyRound className="w-4 h-4" />
-          <span>{t('changePasswordTitle')}</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('security')}
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer whitespace-nowrap ${
+              activeTab === 'security'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/35 ring-1 ring-blue-400/30'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
+            }`}
+          >
+            <KeyRound className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span className="sm:hidden">
+              {language === 'sinhala' ? 'ආරක්ෂාව' : language === 'tamil' ? 'பாதுகாப்பு' : 'Security'}
+            </span>
+            <span className="hidden sm:inline">{t('changePasswordTitle')}</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('support')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer shrink-0 ${
-            activeTab === 'support'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 scale-[1.02]'
-              : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10'
-          }`}
-        >
-          <HelpCircle className="w-4 h-4" />
-          <span>{t('helpSupport')}</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('support')}
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer whitespace-nowrap ${
+              activeTab === 'support'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/35 ring-1 ring-blue-400/30'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
+            }`}
+          >
+            <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span className="sm:hidden">
+              {language === 'sinhala' ? 'උදව්' : language === 'tamil' ? 'உதவி' : 'Help'}
+            </span>
+            <span className="hidden sm:inline">{t('helpSupport')}</span>
+          </button>
+        </div>
       </div>
 
       {/* ── TAB 1: Profile & Emergency Contact ── */}
